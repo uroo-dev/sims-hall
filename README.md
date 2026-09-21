@@ -1,59 +1,127 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# sims-hall — Sistem Informasi Sarana Prasarana SMK N 2 Kra
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Sistem Informasi Manajemen Sarana Prasarana (SIMS) untuk **SMK N 2 Kra** yang mencakup **website profil sekolah**, **sistem peminjaman aula** dengan persetujuan dua tahap, pemantauan pemakaian gedung, serta manajemen data sekolah (kesiswaan, PPDB, PKL & BKK, produk unggulan) oleh masing-masing peran pengguna.
 
-## About Laravel
+## Fitur Utama
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+### Halaman Publik (Landing Page)
+- **Profil Sekolah** — sejarah sekolah, kepala sekolah, identitas, visi & misi
+- **Peminjaman Aula** — informasi peminjaman, katalog jenis peminjaman, login/registrasi akun
+- **PPDB** — informasi PPDB
+- **PKL & Carier Center (BKK)** — kerja sama industri, jurusan, lowongan pekerjaan untuk alumni
+- **Kesiswaan** — prestasi, ekstrakurikuler, peraturan / tata tertib
+- **Produk Unggulan** — katalog produk unggulan sekolah
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### Dashboard per Peran
+| Peran | Fitur Akses |
+| --- | --- |
+| **Super Admin** | Data kepala sekolah, Data Master Sekolah (data sekolah, manajemen users), Data PKL & BKK (Dudi, Lowongan Kerja, PKL, Jurusan), Data PPDB (Informasi PPDB), Data Kesiswaan (Prestasi, Ekstrakurikuler, Tata Tertib), Data Produk Unggulan, Data Peminjaman Sarpras |
+| **Admin Sarpras** | Data Peminjaman Sarpras, CRUD Fasilitas, CRUD Paket Peminjaman, Persetujuan Tahap 1 & Pembayaran, Persetujuan Tahap 2, Laporan Operasional |
+| **Guru / Staff Sekolah** | Melihat kalender aula, mengajukan peminjaman aula, melihat riwayat & status peminjaman, download bukti peminjaman, profile |
+| **Organisasi Sekolah** | Melihat kalender aula, mengajukan peminjaman aula, melihat riwayat & status peminjaman, download bukti peminjaman, profile |
+| **Instansi Luar / Umum** | Kalender aula, ajukan peminjaman + upload surat permohonan, lihat biaya & lakukan pembayaran, riwayat & status, download bukti, profile |
+| **Instansi Luar Terhubung** | Kalender aula, ajukan peminjaman + upload surat permohonan, riwayat & status, download bukti, profile |
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### Alur Peminjaman Aula
+1. Pengguna mengajukan peminjaman aula (kalender + katalog paket peminjaman)
+2. **Persetujuan Tahap 1** oleh Admin Sarpras
+3. **Pembayaran** berdasarkan paket peminjaman terpilih (gratis / transfer / cash)
+4. **Persetujuan Tahap 2** oleh pihak terkait
+5. Download **bukti peminjaman**
 
-## Learning Laravel
+## Teknologi
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+- **Backend** — Laravel 13 (PHP 8.x)
+- **Frontend** — Blade + Tailwind CSS 4 (Vite)
+- **Database** — MySQL
+- **Autentikasi** — Laravel Breeze (Blade)
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Struktur Folder
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
-
-```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+```
+app/
+├── Http/Controllers/
+│   ├── Admin/          # Controller area admin
+│   └── Public/         # Controller halaman publik
+├── Http/Requests/      # Validasi form per area
+└── Models/             # Model Eloquent
+resources/views/
+├── Admin/              # Panel admin (layout, bkk, dll.)
+├── Public/             # Halaman publik (layout, bkk, dll.)
+└── Auth/               # Halaman autentikasi
+routes/
+├── web.php             # Route utama
+├── admin.php           # Route area admin
+└── public.php          # Route publik
+database/
+├── migrations/         # Migrasi tabel
+└── seeders/            # Data awal
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+## Database
 
-## Contributing
+### Skema Utama
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+| Tabel | Deskripsi |
+| --- | --- |
+| `users` | Pengguna (role: organisasi, guru, kepala sekolah, instansi luar terikat, instansi luar) |
+| `sekolah` | Profil sekolah (judul, deskripsi, dokumentasi, identitas, yel-yel, visi-misi) |
+| `aula` | Data aula (judul, deskripsi, dokumentasi) |
+| `fasilitas` | Fasilitas aula (judul, deskripsi) |
+| `paket_peminjaman` | Paket sewa aula (harga, kategori: unggulan, terjangkau, standar 1-3, fasilitas) |
+| `peminjaman` | Pengajuan peminjaman (nama, email instansi, tanggal, catatan, surat pengantar) |
+| `persetujuan_1` | Persetujuan Tahap 1 (status: verifikasi, tolak, terverifikasi, tertolak) |
+| `persetujuan_2` | Persetujuan Tahap 2 (status: verifikasi, tolak, terverifikasi, tertolak) |
+| `pembayaran` | Pembayaran sewa (tahap_1, tahap_2, status: gratis, terverifikasi, pending, tertolak) |
+| `pembayaran_pending` | Pembayaran menunggu konfirmasi (metode: transfer, cash) |
+| `laporan_operasional` | Laporan operasional peminjaman |
+| `kesiswaan` | Data kesiswaan |
+| `prestasi` | Prestasi (kategori: akademik, non akademik) |
+| `ektrakulikuler` | Ekstrakurikuler sekolah |
+| `tata_tertib` | Peraturan / tata tertib |
+| `produk_unggulan` | Produk unggulan sekolah |
+| `produk` | Detail produk (per jurusan) |
+| `PKL_BKK` | Informasi PKL & Career Center |
+| `dudi` | Dunia Usaha / Dunia Industri (kerjasama) |
+| `lowongan_kerja` | Lowongan pekerjaan untuk alumni |
+| `siswa_pkl` | Data siswa PKL |
+| `jurusan` | Data jurusan |
+| `ppdb` | Info PPDB |
+| `informasi_ppdb` | Agenda & persyaratan PPDB |
 
-## Code of Conduct
+### Relasi Utama
+- `paket_peminjaman` → `fasilitas` (setiap paket memiliki fasilitas)
+- `peminjaman` → `paket_peminjaman`
+- `peminjaman` → `pembayaran_pending` dan `laporan_operasional`
+- `produk`, `dudi`, `lowongan_kerja`, `siswa_pkl` → `jurusan`
+- `siswa_pkl` → `dudi`
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## Instalasi
 
-## Security Vulnerabilities
+```bash
+# 1. Install dependency
+composer install
+npm install
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+# 2. Konfigurasi environment
+cp .env.example .env
+php artisan key:generate
+# atur koneksi database MySQL di .env (DB_DATABASE, DB_USERNAME, DB_PASSWORD)
 
-## License
+# 3. Migrasi & seed database
+php artisan migrate --seed
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
-# sims-hall
+# 4. Build asset frontend
+npm run build
+
+# 5. Jalankan server
+php artisan serve
+```
+
+## Akun Default
+
+> *(segera ditambahkan setelah seeder dibuat)*
+
+## Lisensi
+
+MIT License
