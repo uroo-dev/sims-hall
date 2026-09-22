@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('fiturs', function (Blueprint $table) {
             $table->id();
             $table->enum('nama_fitur', ['produk_unggulan', 'master', 'pklbkk', 'aula', 'kesiswaan']);
-            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('user_id')->unique()->constrained('users')->cascadeOnDelete();
             $table->timestamps();
         });
     }
