@@ -14,3 +14,8 @@ Route::get('/', function () {
 // Route::middleware(['auth', 'role:admin,super_admin'])->group(function () {
 //     Route::get('/admin', [namacontroller::class, 'index'])->name('admin.index');
 // });
+
+// contoh route dengan middleware adminFitur
+// Route::middleware(['auth', 'adminFitur:ppdb'])->group(function () {
+//     Route::get('/ppdb', [namacontroller::class, 'index'])->name('ppdb.index');
+// });
