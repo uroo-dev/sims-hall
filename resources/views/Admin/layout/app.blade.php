@@ -20,7 +20,11 @@
 <body class="min-h-screen text-slate-800 flex flex-col bg-[#f3f5f8]">
 
     <div class="flex min-h-screen w-full relative overflow-x-hidden">
-        @include('Admin.layout.sidebar')
+        @hasSection('sidebar')
+            @yield('sidebar')
+        @else
+            @include('Admin.layout.sidebar')
+        @endif
 
         @yield('content')
     </div>

@@ -2,10 +2,11 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\PklBkkDashboardController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('Public.landing');
 });
 
 Route::middleware('guest')->group(function () {
@@ -19,6 +20,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])
         ->middleware('role:admin,super_admin,super_duper_admin')
         ->name('dashboard');
+
+    Route::get('/dashboard/pkl-bkk', [PklBkkDashboardController::class, 'index'])
+        ->middleware('role:admin,super_admin,super_duper_admin')
+        ->name('dashboard.pkl');
 });
 
 // contoh route

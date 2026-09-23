@@ -44,7 +44,11 @@ class AuthController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard'));
+        $dashboard = $request->user()->fitur?->nama_fitur === 'pklbkk'
+            ? route('dashboard.pkl')
+            : route('dashboard');
+
+        return redirect()->intended($dashboard);
     }
 
     /**

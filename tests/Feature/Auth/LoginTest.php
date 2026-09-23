@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Auth;
 
+use App\Models\Fitur;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -42,6 +43,40 @@ class LoginTest extends TestCase
         $response->assertRedirect('/login');
         $response->assertSessionHasErrors('username');
         $this->assertGuest();
+    }
+
+    public function test_users_with_fitur_pklbkk_are_redirected_to_pkl_bkk_dashboard(): void
+    {
+        $user = User::factory()->create(['role' => 'admin']);
+        Fitur::create(['user_id' => $user->id, 'nama_fitur' => 'pklbkk']);
+
+        $this->post('/login', [
+            'username' => $user->username,
+            'password' => 'password',
+        ])->assertRedirect('/dashboard/pkl-bkk');
+    }
+
+    public function test_admin_role_can_access_pkl_bkk_dashboard(): void
+    {
+        $user = User::factory()->create(['role' => 'admin']);
+
+        $this->actingAs($user)
+            ->get('/dashboard/pkl-bkk')
+            ->assertOk()
+            ->assertSee('BKK');
+    }
+
+    public function test_guests_cannot_access_pkl_bkk_dashboard(): void
+    {
+        $this->get('/dashboard/pkl-bkk')->assertRedirect('/login');
+    }
+
+    public function test_landing_page_is_served_at_root(): void
+    {
+        $this->get('/')
+            ->assertOk()
+            ->assertSee('SMKN 2')
+            ->assertSee('Peminjaman Aula');
     }
 
     public function test_login_requires_username_and_password(): void
