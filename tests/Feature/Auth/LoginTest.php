@@ -66,6 +66,36 @@ class LoginTest extends TestCase
             ->assertSee('BKK');
     }
 
+    public function test_admin_can_access_all_pkl_bkk_pages(): void
+    {
+        $user = User::factory()->create(['role' => 'admin']);
+
+        $pages = [
+            '/dashboard/pkl-bkk/lowongan' => 'Lowongan Kerja',
+            '/dashboard/pkl-bkk/lowongan/tambah' => 'Form Lowongan Kerja',
+            '/dashboard/pkl-bkk/pelamar' => 'Data Pelamar',
+            '/dashboard/pkl-bkk/tempat-pkl' => 'Tempat PKL',
+            '/dashboard/pkl-bkk/jurnal' => 'Jurnal & Absensi',
+            '/dashboard/pkl-bkk/nilai' => 'Rekap Nilai PKL',
+        ];
+
+        foreach ($pages as $url => $label) {
+            $this->actingAs($user)
+                ->get($url)
+                ->assertOk()
+                ->assertSee($label);
+        }
+    }
+
+    public function test_non_admin_cannot_access_pkl_bkk_pages(): void
+    {
+        $user = User::factory()->create(['role' => 'guru']);
+
+        $this->actingAs($user)
+            ->get('/dashboard/pkl-bkk/nilai')
+            ->assertForbidden();
+    }
+
     public function test_guests_cannot_access_pkl_bkk_dashboard(): void
     {
         $this->get('/dashboard/pkl-bkk')->assertRedirect('/login');

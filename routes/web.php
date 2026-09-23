@@ -24,6 +24,34 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard/pkl-bkk', [PklBkkDashboardController::class, 'index'])
         ->middleware('role:admin,super_admin,super_duper_admin')
         ->name('dashboard.pkl');
+
+    Route::get('/dashboard/pkl-bkk/lowongan', [PklBkkDashboardController::class, 'loker'])
+        ->middleware('role:admin,super_admin,super_duper_admin')
+        ->name('pklbkk.loker');
+
+    Route::get('/dashboard/pkl-bkk/lowongan/tambah', [PklBkkDashboardController::class, 'lokerForm'])
+        ->middleware('role:admin,super_admin,super_duper_admin')
+        ->name('pklbkk.loker.create');
+
+    Route::get('/dashboard/pkl-bkk/lowongan/edit', [PklBkkDashboardController::class, 'lokerForm'])
+        ->middleware('role:admin,super_admin,super_duper_admin')
+        ->name('pklbkk.loker.edit');
+
+    Route::get('/dashboard/pkl-bkk/pelamar', [PklBkkDashboardController::class, 'pelamar'])
+        ->middleware('role:admin,super_admin,super_duper_admin')
+        ->name('pklbkk.pelamar');
+
+    Route::get('/dashboard/pkl-bkk/tempat-pkl', [PklBkkDashboardController::class, 'tempat'])
+        ->middleware('role:admin,super_admin,super_duper_admin')
+        ->name('pklbkk.tempat');
+
+    Route::get('/dashboard/pkl-bkk/jurnal', [PklBkkDashboardController::class, 'jurnal'])
+        ->middleware('role:admin,super_admin,super_duper_admin')
+        ->name('pklbkk.jurnal');
+
+    Route::get('/dashboard/pkl-bkk/nilai', [PklBkkDashboardController::class, 'nilai'])
+        ->middleware('role:admin,super_admin,super_duper_admin')
+        ->name('pklbkk.nilai');
 });
 
 // contoh route

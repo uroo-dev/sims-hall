@@ -1,4 +1,4 @@
-<aside class="w-72 min-h-screen flex flex-col relative z-20 shrink-0 transition-all duration-300">
+<aside class="w-72 h-full flex flex-col relative z-20 shrink-0 overflow-y-auto transition-all duration-300">
 
     <!-- Top School Branding Box (White Background) -->
     <div class="bg-white px-5 py-4 flex items-center space-x-3 h-20 border-b border-slate-100">
