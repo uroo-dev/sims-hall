@@ -18,13 +18,13 @@ class AdminFiturMiddleware
     {
         $user = $request->user();
 
-        if ($user->role !== 'admin') {
+        if (! $user || $user->role !== 'admin') {
             abort(403);
         }
 
-        $adminFitur = Fitur::where('user_id', $user->id);
+        $adminFitur = Fitur::where('user_id', $user->id)->first();
 
-        if (! $adminFitur || ! in_array($adminFitur->nama_fitur, $allowedFitur)) {
+        if (! $adminFitur || ! in_array($adminFitur->nama_fitur, $allowedFitur, true)) {
             abort(403);
         }
 

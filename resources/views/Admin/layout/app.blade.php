@@ -1,26 +1,28 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="id">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Admin | SIM Sarpras SMK N 2 Kra')</title>
+    <title>@yield('title', 'Dashboard Admin - SMK Negeri 2 Karanganyar')</title>
+
+    <!-- Font Awesome 6 Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Google Fonts: Poppins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
     @vite(['resources/css/app.css'])
     @stack('styles')
 </head>
-<body>
-    <div class="admin-layout">
+<body class="min-h-screen text-slate-800 flex flex-col bg-[#f3f5f8]">
+
+    <div class="flex min-h-screen w-full relative overflow-x-hidden">
         @include('Admin.layout.sidebar')
 
-        <div class="admin-main">
-            @include('Admin.layout.header')
-
-            <main>
-                @yield('content')
-            </main>
-
-            @include('Admin.layout.footer')
-        </div>
+        @yield('content')
     </div>
 
     @vite(['resources/js/app.js'])

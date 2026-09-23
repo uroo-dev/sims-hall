@@ -4,6 +4,29 @@
 @source '../../storage/framework/views/*.php';
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+    --font-sans: 'Poppins', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
+
+    --color-brand-50: #f0f7ff;
+    --color-brand-100: #e0effe;
+    --color-brand-500: #0284c7;
+    --color-brand-600: #006cb8;
+    --color-brand-700: #005596;
+    --color-brand-800: #004377;
+    --color-brand-900: #003159;
+}
+
+/* Subtle Card Shadows from Figma */
+.figma-card-shadow {
+    box-shadow: 0px 4px 20px 0px rgba(0, 0, 0, 0.06);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+}
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
 }

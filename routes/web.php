@@ -1,9 +1,24 @@
 <?php
 
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
+});
+
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [AuthController::class, 'create'])->name('login');
+    Route::post('/login', [AuthController::class, 'store'])->middleware('throttle:6,1');
+});
+
+Route::middleware('auth')->group(function () {
+    Route::post('/logout', [AuthController::class, 'destroy'])->name('logout');
+
+    Route::get('/dashboard', [DashboardController::class, 'index'])
+        ->middleware('role:admin,super_admin,super_duper_admin')
+        ->name('dashboard');
 });
 
 // contoh route

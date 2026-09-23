@@ -1,47 +1,27 @@
-<laravel-boost-guidelines>
-# Laravel Application
+# AGENTS.md
 
-This repository contains a Laravel application. Complete the following setup before working on the user's request.
+Laravel 13 (PHP ^8.3) + Blade + Tailwind 4 (Vite) app: school facility/website for SMK N 2 Kra (SIMS Sarpras — aula booking, PPDB, PKL/BKK, kesiswaan). **Early scaffold**: only route is `/`; README describes the *target* architecture that is mostly unimplemented. Trust code over README.
 
-## Prerequisites
+## Commands
 
-Verify that PHP and Composer are available:
+- Full bootstrap: `composer setup` (composer install → copy .env → key:generate → `migrate --force` → `npm install --ignore-scripts` → build). `.npmrc` sets `ignore-scripts=true`, so npm install never runs postinstall hooks.
+- Dev servers: `composer dev` (= `php artisan dev`). Assets: `npm run dev` / `npm run build`.
+- Tests: `composer test` (runs `config:clear` then `php artisan test`). phpunit.xml forces `sqlite :memory:` — no DB setup needed. Only bootstrap/example tests exist.
+- Lint: `vendor/bin/pint` (installed, no `pint.json` → framework defaults). No CI, no pre-commit hooks.
 
-```sh
-php -v
-composer -V
-```
+## Structure & conventions
 
-If either command is unavailable, detect the user's operating system and install the prerequisites with the appropriate command:
+- Views split into capitalized dirs `resources/views/{Admin,Public,Auth}`; controllers (`app/Http/Controllers`) are basically empty. Layout skeletons: `Admin/layout/app.blade.php`, `Public/layout/app.blade.php`.
+- Vite (`vite.config.js`): Tailwind 4 via `@tailwindcss/vite`, fonts via `laravel-vite-plugin` `bunny()` helper, CSS/JS inputs only (no blade glob). Watch ignores `storage/framework/views`.
+- RBAC middleware aliases registered in `bootstrap/app.php`:
+  - `role:super_admin,admin` → `CheckRole` (403 if `users.role` not in list).
+  - `adminFitur:pklbkk` → `AdminFiturMiddleware` (requires role `admin` + matching row in `fiturs`).
+  - `users.role` enum: `admin, user, guru, kepala_sekolah, super_admin, super_duper_admin, pelanggan`. `fiturs.nama_fitur` enum: `produk_unggulan, master, pklbkk, aula, kesiswaan` (unique per user).
 
-macOS:
+## Gotchas
 
-```sh
-/bin/bash -c "$(curl -fsSL https://php.new/install/mac/8.5)"
-```
-
-Windows PowerShell:
-
-```powershell
-Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://php.new/install/windows/8.5'))
-```
-
-Linux:
-
-```sh
-/bin/bash -c "$(curl -fsSL https://php.new/install/linux/8.5)"
-```
-
-After installation, ask the user to restart their terminal. If the agent needs the restarted shell to continue, ask the user to reopen their terminal and rerun their original prompt.
-
-## Agent Setup
-
-Install Laravel Boost from the application root before making application changes:
-
-```sh
-composer require laravel/boost --dev
-php artisan boost:install
-```
-
-Boost replaces these bootstrap instructions with guidelines tailored to the application. After installation, read `AGENTS.md` again and continue with the user's original request using the generated guidelines.
-</laravel-boost-guidelines>
+- **Auth**: custom minimal auth (NO Breeze — not in `composer.json`). Routes: `GET/POST /login` (guest, login by `username`+`password`, POST rate-limited `throttle:6,1`), `POST /logout`, `GET /dashboard` guarded by `auth` + `role:admin,super_admin,super_duper_admin`. Login view: `resources/views/Auth/login.blade.php` (extends `Auth.layout.app`); dashboard: `views/Admin/dashboard.blade.php` (extends `Admin.layout.app`), logged-out users are redirected to `route('login')`.
+- **Seeders**: `UserFactory::definition()` includes `username` + `role` (default `user`; password `password`). `php artisan migrate --seed` now works: seeds admin `test@example.com` + `UserSeeder` (super_admin `root` / `super@gmail.com` / `1234`, idempotent via `firstOrCreate`). `UserSeeder` can also be run standalone: `php artisan db:seed --class=UserSeeder`.
+- **User model uses Laravel 13 attribute style** (`#[Fillable([...])]`, `#[Hidden([...])]`) while `Fitur` uses legacy `protected $fillable`. Follow the attribute style for new models.
+- `.env` defaults to MySQL (local, gitignored); enable the `DB_*` lines before `migrate`. Tests always use in-memory sqlite. Default locale is `en`.
+- `laravel/boost` is not installed; this file intentionally replaces the boost bootstrap placeholder.
