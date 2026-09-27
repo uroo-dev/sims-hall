@@ -1,40 +1,53 @@
-<header class="w-full bg-white rounded-2xl p-4 md:px-6 md:py-4 figma-card-shadow flex flex-col md:flex-row items-center justify-between gap-4 border border-slate-100">
-
-    <!-- Breadcrumb Title -->
-    <div class="flex items-center space-x-2 text-slate-800 text-sm md:text-base font-bold tracking-tight">
-        <span id="breadcrumb-role" class="uppercase text-slate-900 font-extrabold">{{ strtoupper(str_replace('_', ' ', auth()->user()->role)) }}</span>
-        <span class="text-slate-400 font-normal"><i class="fa-solid fa-chevron-right text-xs"></i></span>
-        <span id="breadcrumb-page" class="text-slate-500 font-medium">Dashboard</span>
+<!-- TOP NAVBAR / HEADER CONTAINER -->
+<header class="bg-white rounded-2xl px-5 py-3 shadow-sm border border-gray-100 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+        <button type="button" onclick="toggleSidebar()" class="lg:hidden text-gray-600 hover:text-brand-600 focus:outline-none p-1" aria-label="Toggle Menu">
+            <i class="fa-solid fa-bars text-lg"></i>
+        </button>
+        <!-- BREADCRUMB -->
+        <div class="text-xs md:text-sm font-semibold tracking-wide text-gray-700">
+            <span id="breadcrumb-role" class="text-gray-900 font-bold uppercase">{{ auth()->user() ? strtoupper(str_replace('_', ' ', auth()->user()->role)) : 'ADMIN' }}</span>
+            <span class="mx-1 text-gray-400">&gt;</span>
+            <span id="breadcrumb-page" class="text-gray-600">@yield('page_title', 'Dashboard')</span>
+        </div>
     </div>
 
-    <!-- Right Action Icons & User Info -->
-    <div class="flex items-center space-x-4">
-
-        <!-- Quick Role Switcher (Added for Lomba Demo versatility) -->
+    <!-- USER PROFILE RIGHT -->
+    <div class="flex items-center gap-3">
+        <!-- Quick Role Switcher (untuk Demo Lomba) -->
         <div class="relative">
-            <select id="role-selector" onchange="switchRole(this.value)" aria-label="Pilih mode demo" class="bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 text-xs font-semibold rounded-xl px-3 py-2 outline-none cursor-pointer">
+            <select id="role-selector" onchange="if(typeof switchRole === 'function') switchRole(this.value)" aria-label="Pilih mode demo" class="bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-700 text-xs font-semibold rounded-xl px-3 py-1.5 outline-none cursor-pointer">
                 <option value="sapras" selected>Mode: Admin Sapras</option>
                 <option value="pkl_bkk">Mode: Admin PKL &amp; BKK</option>
             </select>
         </div>
 
-        <!-- Gear Icon Button -->
-        <button title="Pengaturan" class="w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 text-brand-600 flex items-center justify-center transition-colors">
-            <i class="fa-solid fa-gear text-lg"></i>
+        <button type="button" class="w-8 h-8 rounded-lg bg-blue-50 text-brand-600 flex items-center justify-center hover:bg-blue-100 transition" title="Pengaturan">
+            <i class="fa-solid fa-gear text-sm"></i>
         </button>
+        
+        <div class="relative group">
+            <button type="button" class="flex items-center gap-2.5 bg-gray-50 border border-gray-200 rounded-full py-1 px-3 hover:bg-gray-100 transition">
+                <div class="w-6 h-6 rounded-full bg-blue-100 text-brand-600 flex items-center justify-center text-xs font-bold">
+                    <i class="fa-regular fa-user"></i>
+                </div>
+                <div class="text-left text-xs leading-none">
+                    <div id="header-user-name" class="font-bold text-gray-800">{{ auth()->user()->name ?? 'Admin' }}</div>
+                    <div id="header-user-role" class="text-[10px] text-gray-500 mt-0.5">{{ auth()->user() ? ucwords(str_replace('_', ' ', auth()->user()->role)) : 'admin' }}</div>
+                </div>
+                <i class="fa-solid fa-chevron-down text-[10px] text-gray-400 ml-1"></i>
+            </button>
 
-        <!-- User Profile Badge Pill -->
-        <div class="flex items-center space-x-3 bg-slate-100 hover:bg-slate-200/80 border border-slate-200/80 px-3.5 py-1.5 rounded-full cursor-pointer transition-colors">
-            <!-- User Circle Icon -->
-            <div class="w-7 h-7 rounded-full bg-white text-brand-600 border border-slate-300 flex items-center justify-center">
-                <i class="fa-solid fa-user text-xs"></i>
+            <!-- DROPDOWN MENU -->
+            <div class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 hidden group-hover:block z-20 py-1">
+                <a href="#" class="block px-4 py-2 text-xs text-gray-700 hover:bg-gray-50"><i class="fa-regular fa-user mr-2"></i> Profil Saya</a>
+                <a href="#" class="block px-4 py-2 text-xs text-gray-700 hover:bg-gray-50"><i class="fa-solid fa-sliders mr-2"></i> Pengaturan</a>
+                <hr class="my-1 border-gray-100">
+                <form action="{{ route('logout') }}" method="POST">
+                    @csrf
+                    <button type="submit" onclick="return confirm('Apakah Anda yakin ingin keluar dari sistem admin?')" class="w-full text-left block px-4 py-2 text-xs text-red-600 hover:bg-red-50"><i class="fa-solid fa-arrow-right-from-bracket mr-2"></i> Keluar</button>
+                </form>
             </div>
-            <div class="text-left">
-                <p id="header-user-name" class="text-xs font-bold text-slate-800 leading-tight">{{ auth()->user()->name }}</p>
-                <p id="header-user-role" class="text-[10px] text-slate-500 leading-tight">{{ ucwords(str_replace('_', ' ', auth()->user()->role)) }}</p>
-            </div>
-            <i class="fa-solid fa-chevron-down text-xs text-slate-500 ml-1"></i>
         </div>
-
     </div>
 </header>

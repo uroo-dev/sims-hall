@@ -1,77 +1,193 @@
-<aside class="w-72 min-h-screen flex flex-col relative z-20 shrink-0 transition-all duration-300">
-
-    <!-- Top School Branding Box (White Background) -->
-    <div class="bg-white px-5 py-4 flex items-center space-x-3 h-20 border-b border-slate-100">
-        <div class="w-10 h-10 rounded-full bg-brand-600 flex items-center justify-center text-white shadow-md shrink-0">
-            <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
-                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-        </div>
-        <div>
-            <p class="text-xs font-black text-slate-800 tracking-wider uppercase leading-snug">SMK NEGERI 2</p>
-            <p class="text-[11px] font-bold text-slate-600 tracking-wider uppercase leading-tight">KARANGANYAR</p>
-        </div>
-    </div>
-
-    <!-- Blue Sidebar Body with Rounded Top-Right Curved Shoulder -->
-    <div class="bg-brand-600 flex-1 flex flex-col justify-between p-5 pt-6 rounded-tr-[50px] shadow-xl">
-        <div>
-            <!-- Navigation Items -->
-            <div class="space-y-2">
-
-                <!-- Active Capsule Item: Dashboard -->
-                <a href="{{ route('dashboard') }}" id="menu-dashboard" onclick="setActiveMenu('dashboard')" class="menu-item flex items-center space-x-3.5 px-5 py-3 rounded-full bg-white text-brand-600 font-semibold shadow-md transition-all duration-200">
-                    <i class="fa-solid fa-table-cells-large text-lg"></i>
-                    <span class="text-sm">Dashboard</span>
-                </a>
-
-                <!-- Subheader Category Divider -->
-                <div class="pt-4 pb-2 px-2 flex items-center justify-between text-white/70">
-                    <span id="role-category-label" class="text-xs font-medium tracking-wide">Admin Sapras</span>
-                    <div class="h-[1px] w-16 bg-white/30 rounded-full"></div>
-                </div>
-
-                <!-- Dynamic Menu Items List -->
-                <div id="sidebar-dynamic-menus" class="space-y-1.5">
-
-                    <a href="#" onclick="setActiveMenu('fasilitas')" class="menu-item flex items-center space-x-3.5 px-5 py-2.5 rounded-xl text-white/90 hover:bg-white/10 font-normal transition-all duration-200">
-                        <i class="fa-solid fa-building text-base w-5 text-center"></i>
-                        <span class="text-sm">Fasilitas</span>
-                    </a>
-
-                    <a href="#" onclick="setActiveMenu('paket')" class="menu-item flex items-center space-x-3.5 px-5 py-2.5 rounded-xl text-white/90 hover:bg-white/10 font-normal transition-all duration-200">
-                        <i class="fa-solid fa-box text-base w-5 text-center"></i>
-                        <span class="text-sm">Paket Peminjaman</span>
-                    </a>
-
-                    <a href="#" onclick="setActiveMenu('persetujuan')" class="menu-item flex items-center space-x-3.5 px-5 py-2.5 rounded-xl text-white/90 hover:bg-white/10 font-normal transition-all duration-200">
-                        <i class="fa-solid fa-cart-shopping text-base w-5 text-center"></i>
-                        <span class="text-sm">Persetujuan 1</span>
-                    </a>
-
-                    <a href="#" onclick="setActiveMenu('laporan')" class="menu-item flex items-center space-x-3.5 px-5 py-2.5 rounded-xl text-white/90 hover:bg-white/10 font-normal transition-all duration-200">
-                        <i class="fa-solid fa-chart-column text-base w-5 text-center"></i>
-                        <span class="text-sm">Laporan Operasional</span>
-                    </a>
-
-                    <a href="#" onclick="setActiveMenu('profil')" class="menu-item flex items-center space-x-3.5 px-5 py-2.5 rounded-xl text-white/90 hover:bg-white/10 font-normal transition-all duration-200">
-                        <i class="fa-solid fa-user-group text-base w-5 text-center"></i>
-                        <span class="text-sm">Profil</span>
-                    </a>
-
-                </div>
+<!-- SIDEBAR CONTAINER -->
+<aside id="sidebar" class="fixed top-0 bottom-0 left-0 z-50 w-[270px] bg-white lg:bg-transparent flex flex-col p-3 transition-transform duration-300 -translate-x-full lg:translate-x-0">
+    
+    <div class="bg-brand-600 h-full rounded-[24px] flex flex-col overflow-hidden shadow-xl text-white">
+        
+        <!-- BRAND / LOGO HEADER -->
+        <div class="p-4 bg-white border-b border-gray-100 flex items-center gap-3">
+            <img src="{{ asset('assets/logosmkk.png') }}" 
+                 alt="Logo SMKN 2 Karanganyar" 
+                 class="w-10 h-10 object-contain">
+            <div>
+                <h1 class="font-bold text-gray-900 leading-tight text-xs tracking-wider">SMK NEGERI 2</h1>
+                <p class="font-semibold text-brand-600 text-[11px] tracking-tight">KARANGANYAR</p>
             </div>
         </div>
 
-        <!-- Bottom Logout Pill Button -->
-        <div class="pt-5">
-            <form action="{{ route('logout') }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin keluar dari portal admin?')">
+        <!-- MENU NAVIGATION SCROLLABLE AREA -->
+        <div class="flex-1 overflow-y-auto sidebar-scroll px-3 py-4 space-y-4">
+            
+            <!-- ACTIVE DASHBOARD ITEM -->
+            <a href="{{ route('dashboard') }}" id="menu-dashboard" onclick="if(typeof setActiveMenu === 'function') setActiveMenu('dashboard')" class="flex items-center gap-3 px-4 py-2.5 bg-white text-brand-600 rounded-full font-semibold text-xs shadow-md transition transform active:scale-95">
+                <i class="fa-solid font-bold fa-table-cells-large text-sm"></i>
+                <span>Dashboard</span>
+            </a>
+
+            <!-- CATEGORY: DATA MASTER SEKOLAH -->
+            <div class="space-y-1">
+                <div class="flex items-center gap-2 px-3 text-[11px] font-medium text-blue-100/80 uppercase tracking-wider">
+                    <span>Data Master Sekolah</span>
+                    <span class="flex-1 h-[1px] bg-white/20"></span>
+                </div>
+                <a href="#" class="flex items-center gap-3 px-3 py-1.5 text-blue-50 hover:bg-white/10 rounded-lg text-xs transition">
+                    <i class="fa-solid fa-graduation-cap w-4 text-center"></i>
+                    <span>Dashboard Sekolah</span>
+                </a>
+                <a href="#" class="flex items-center gap-3 px-3 py-1.5 text-blue-50 hover:bg-white/10 rounded-lg text-xs transition">
+                    <i class="fa-regular fa-comment-dots w-4 text-center"></i>
+                    <span>Data Sekolah</span>
+                </a>
+                <a href="#" class="flex items-center gap-3 px-3 py-1.5 text-blue-50 hover:bg-white/10 rounded-lg text-xs transition">
+                    <i class="fa-solid fa-users-gear w-4 text-center"></i>
+                    <span>Users</span>
+                </a>
+            </div>
+
+            <!-- CATEGORY: PEMINJAMAN AULA -->
+            <div class="space-y-1">
+                <div class="flex items-center gap-2 px-3 text-[11px] font-medium text-blue-100/80 uppercase tracking-wider">
+                    <span id="role-category-label">Peminjaman Aula</span>
+                    <span class="flex-1 h-[1px] bg-white/20"></span>
+                </div>
+                <div id="sidebar-dynamic-menus" class="space-y-1">
+                    <a href="#" onclick="if(typeof setActiveMenu === 'function') setActiveMenu('aula')" class="flex items-center gap-3 px-3 py-1.5 text-blue-50 hover:bg-white/10 rounded-lg text-xs transition">
+                        <i class="fa-solid fa-building-columns w-4 text-center"></i>
+                        <span>Dashboard Aula</span>
+                    </a>
+                    <a href="#" onclick="if(typeof setActiveMenu === 'function') setActiveMenu('fasilitas')" class="flex items-center gap-3 px-3 py-1.5 text-blue-50 hover:bg-white/10 rounded-lg text-xs transition">
+                        <i class="fa-solid fa-box w-4 text-center"></i>
+                        <span>Fasilitas</span>
+                    </a>
+                    <a href="#" onclick="if(typeof setActiveMenu === 'function') setActiveMenu('paket')" class="flex items-center gap-3 px-3 py-1.5 text-blue-50 hover:bg-white/10 rounded-lg text-xs transition">
+                        <i class="fa-solid fa-boxes-packing w-4 text-center"></i>
+                        <span>Paket Peminjaman</span>
+                    </a>
+                    <a href="#" onclick="if(typeof setActiveMenu === 'function') setActiveMenu('persetujuan')" class="flex items-center gap-3 px-3 py-1.5 text-blue-50 hover:bg-white/10 rounded-lg text-xs transition">
+                        <i class="fa-solid fa-cart-shopping w-4 text-center"></i>
+                        <span>Persetujuan 1</span>
+                    </a>
+                    <a href="#" onclick="if(typeof setActiveMenu === 'function') setActiveMenu('laporan')" class="flex items-center gap-3 px-3 py-1.5 text-blue-50 hover:bg-white/10 rounded-lg text-xs transition">
+                        <i class="fa-solid fa-chart-simple w-4 text-center"></i>
+                        <span>Laporan Operasional</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- CATEGORY: KEPALA SEKOLAH -->
+            <div class="space-y-1">
+                <div class="flex items-center gap-2 px-3 text-[11px] font-medium text-blue-100/80 uppercase tracking-wider">
+                    <span>Kepala Sekolah</span>
+                    <span class="flex-1 h-[1px] bg-white/20"></span>
+                </div>
+                <a href="#" class="flex items-center gap-3 px-3 py-1.5 text-blue-50 hover:bg-white/10 rounded-lg text-xs transition">
+                    <i class="fa-solid fa-user-tie w-4 text-center"></i>
+                    <span>Dashboard KS</span>
+                </a>
+                <a href="#" class="flex items-center gap-3 px-3 py-1.5 text-blue-50 hover:bg-white/10 rounded-lg text-xs transition">
+                    <i class="fa-solid fa-cart-shopping w-4 text-center"></i>
+                    <span>Persetujuan 2</span>
+                </a>
+                <a href="#" class="flex items-center gap-3 px-3 py-1.5 text-blue-50 hover:bg-white/10 rounded-lg text-xs transition">
+                    <i class="fa-solid fa-chart-simple w-4 text-center"></i>
+                    <span>Laporan Operasional</span>
+                </a>
+            </div>
+
+            <!-- CATEGORY: KESISWAAN -->
+            <div class="space-y-1">
+                <div class="flex items-center gap-2 px-3 text-[11px] font-medium text-blue-100/80 uppercase tracking-wider">
+                    <span>Kesiswaan</span>
+                    <span class="flex-1 h-[1px] bg-white/20"></span>
+                </div>
+                <a href="#" class="flex items-center gap-3 px-3 py-1.5 text-blue-50 hover:bg-white/10 rounded-lg text-xs transition">
+                    <i class="fa-solid fa-users w-4 text-center"></i>
+                    <span>Dashboard K</span>
+                </a>
+                <a href="#" class="flex items-center gap-3 px-3 py-1.5 text-blue-50 hover:bg-white/10 rounded-lg text-xs transition">
+                    <i class="fa-solid fa-trophy w-4 text-center"></i>
+                    <span>Data Prestasi</span>
+                </a>
+                <a href="#" class="flex items-center gap-3 px-3 py-1.5 text-blue-50 hover:bg-white/10 rounded-lg text-xs transition">
+                    <i class="fa-solid fa-icons w-4 text-center"></i>
+                    <span>Data Ekstrakulikuler</span>
+                </a>
+                <a href="#" class="flex items-center gap-3 px-3 py-1.5 text-blue-50 hover:bg-white/10 rounded-lg text-xs transition">
+                    <i class="fa-solid fa-book-bookmark w-4 text-center"></i>
+                    <span>Data Tata Tertib</span>
+                </a>
+            </div>
+
+            <!-- CATEGORY: PRODUK UNGGULAN -->
+            <div class="space-y-1">
+                <div class="flex items-center gap-2 px-3 text-[11px] font-medium text-blue-100/80 uppercase tracking-wider">
+                    <span>Produk Unggulan</span>
+                    <span class="flex-1 h-[1px] bg-white/20"></span>
+                </div>
+                <a href="#" class="flex items-center gap-3 px-3 py-1.5 text-blue-50 hover:bg-white/10 rounded-lg text-xs transition">
+                    <i class="fa-solid fa-store w-4 text-center"></i>
+                    <span>Dashboard PU</span>
+                </a>
+                <a href="#" class="flex items-center gap-3 px-3 py-1.5 text-blue-50 hover:bg-white/10 rounded-lg text-xs transition">
+                    <i class="fa-solid fa-basket-shopping w-4 text-center"></i>
+                    <span>Data Produk</span>
+                </a>
+            </div>
+
+            <!-- CATEGORY: PKL & BKK -->
+            <div class="space-y-1">
+                <div class="flex items-center gap-2 px-3 text-[11px] font-medium text-blue-100/80 uppercase tracking-wider">
+                    <span>PKL & BKK</span>
+                    <span class="flex-1 h-[1px] bg-white/20"></span>
+                </div>
+                <a href="#" class="flex items-center gap-3 px-3 py-1.5 text-blue-50 hover:bg-white/10 rounded-lg text-xs transition">
+                    <i class="fa-solid fa-briefcase w-4 text-center"></i>
+                    <span>Dashboard PB</span>
+                </a>
+                <a href="#" class="flex items-center gap-3 px-3 py-1.5 text-blue-50 hover:bg-white/10 rounded-lg text-xs transition">
+                    <i class="fa-solid fa-bars-staggered w-4 text-center"></i>
+                    <span>Data Dudi</span>
+                </a>
+                <a href="#" class="flex items-center gap-3 px-3 py-1.5 text-blue-50 hover:bg-white/10 rounded-lg text-xs transition">
+                    <i class="fa-solid fa-laptop-code w-4 text-center"></i>
+                    <span>Lowongan Kerja</span>
+                </a>
+                <a href="#" class="flex items-center gap-3 px-3 py-1.5 text-blue-50 hover:bg-white/10 rounded-lg text-xs transition">
+                    <i class="fa-solid fa-address-card w-4 text-center"></i>
+                    <span>Data PKL</span>
+                </a>
+                <a href="#" class="flex items-center gap-3 px-3 py-1.5 text-blue-50 hover:bg-white/10 rounded-lg text-xs transition">
+                    <i class="fa-solid fa-comments w-4 text-center"></i>
+                    <span>Data Jurusan</span>
+                </a>
+            </div>
+
+            <!-- CATEGORY: PPDB -->
+            <div class="space-y-1">
+                <div class="flex items-center gap-2 px-3 text-[11px] font-medium text-blue-100/80 uppercase tracking-wider">
+                    <span>PPDB</span>
+                    <span class="flex-1 h-[1px] bg-white/20"></span>
+                </div>
+                <a href="#" class="flex items-center gap-3 px-3 py-1.5 text-blue-50 hover:bg-white/10 rounded-lg text-xs transition">
+                    <i class="fa-solid fa-user-plus w-4 text-center"></i>
+                    <span>Dashboard PPDB</span>
+                </a>
+                <a href="#" class="flex items-center gap-3 px-3 py-1.5 text-blue-50 hover:bg-white/10 rounded-lg text-xs transition">
+                    <i class="fa-solid fa-file-lines w-4 text-center"></i>
+                    <span>Informasi & Persyaratan</span>
+                </a>
+            </div>
+
+        </div>
+
+        <!-- LOGOUT BUTTON -->
+        <div class="p-4 border-t border-white/10 bg-brand-700/50">
+            <form action="{{ route('logout') }}" method="POST">
                 @csrf
-                <button type="submit" class="w-full py-2.5 px-6 bg-white hover:bg-slate-100 text-brand-600 font-bold rounded-full shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center space-x-2 text-sm">
+                <button type="submit" onclick="return confirm('Apakah Anda yakin ingin keluar dari sistem admin?')" class="w-full bg-white text-brand-600 hover:bg-red-50 hover:text-red-600 transition font-bold py-2 px-4 rounded-full text-xs shadow flex items-center justify-center gap-2">
                     <span>Logout</span>
                 </button>
             </form>
         </div>
-    </div>
 
+    </div>
 </aside>
