@@ -1,0 +1,31 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('paket_peminjamans', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('facility_id')->constrained('facilities')->cascadeOnDelete();
+            $table->enum('kategori', ['unggulan', 'terjangkau', 'standar 1', 'standar 2', 'standar 3']);
+            $table->decimal('harga', 12, 2); // Diubah dari varchar ke decimal untuk kemudahan kalkulasi
+            $table->text('deskripsi')->nullable();
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('paket_peminjamans');
+    }
+};
