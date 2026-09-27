@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'ADMIN - Dashboard SMKN 2 Karanganyar')</title>
+    <link rel="icon" type="image/x-icon" href="{{ asset('assets/logosmkk.png') }}">
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -32,7 +33,7 @@
                             50: '#f0f7ff',
                             100: '#e0effe',
                             500: '#0284c7',
-                            600: '#0060ac', // primary dark blue from template
+                            600: '#0060ac',
                             700: '#004f8f',
                             800: '#003e73',
                         }
@@ -79,12 +80,15 @@
         <!-- SIDEBAR CONTAINER -->
         @include('Admin.layout.sidebar')
 
-        <!-- MAIN CONTENT WRAPPER -->
-        <div class="flex-1 lg:ml-[270px] min-w-0 flex flex-col min-h-screen">
-            @yield('content')
+        <!-- MAIN CONTENT AREA -->
+        <main class="flex-1 lg:ml-[270px] p-3 md:p-6 space-y-5 max-w-[1600px] min-h-screen flex flex-col justify-between">
+            <div class="space-y-5">
+                @include('Admin.layout.header')
+                @yield('content')
+            </div>
 
             @include('Admin.layout.footer')
-        </div>
+        </main>
 
     </div>
 
