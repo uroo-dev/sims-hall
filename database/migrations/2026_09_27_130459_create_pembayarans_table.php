@@ -18,8 +18,8 @@ return new class extends Migration
             $table->enum('metode', ['transfer', 'cash'])->nullable();
             $table->string('norek_tujuan', 100)->nullable(); // Contoh: Rekening SMKN 2 Karanganyar
             $table->string('bukti_pembayaran', 255)->nullable();
-            $table->dateTime('tanggal_bayar')->nullable();
-            $table->enum('status_pembayaran', ['free', 'pending', 'verified', 'rejected'])->default('pending');
+            $table->dateTime('tanggal_bayar')->nullable()->index();
+            $table->enum('status_pembayaran', ['free', 'pending', 'verified', 'rejected'])->default('pending')->index();
             $table->timestamps();
         });
     }

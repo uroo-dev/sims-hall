@@ -15,11 +15,14 @@ return new class extends Migration
             $table->id();
             $table->foreignId('peminjaman_id')->constrained('peminjamans')->cascadeOnDelete();
             $table->foreignId('approver_id')->constrained('users')->cascadeOnDelete();
-            $table->enum('level', ['admin', 'pimpinan']); // Contoh: 1 untuk verifikasi awal, 2 untuk pimpinan/final
-            $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
+            $table->enum('level', ['admin', 'pimpinan'])->index(); // Contoh: 1 untuk verifikasi awal, 2 untuk pimpinan/final
+            $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending')->index();
             $table->text('catatan_approval')->nullable();
-            $table->timestamp('tanggal_proses')->nullable();
+            $table->timestamp('tanggal_proses')->nullable()->index();
             $table->timestamps();
+
+            // Index filter persetujuan berdasarkan tingkatan & status
+            $table->index(['level', 'status']);
         });
     }
 

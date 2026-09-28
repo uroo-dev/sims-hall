@@ -14,14 +14,19 @@ return new class extends Migration
         Schema::create('peminjamans', function (Blueprint $table) {
             $table->id();
             $table->foreignId('paket_peminjaman_id')->constrained('paket_peminjamans')->restrictOnDelete();
-            $table->string('nama', 150);
-            $table->string('email_instansi', 150);
+            $table->string('nama', 150)->index();
+            $table->string('email_instansi', 150)->index();
             $table->dateTime('tanggal_mulai'); // Menggunakan datetime untuk antisipasi jam pemakaian
             $table->dateTime('tanggal_selesai');
             $table->text('catatan')->nullable();
             $table->string('surat_pengantar', 250)->nullable();
-            $table->enum('status', ['pending', 'approved_1', 'approved_final', 'rejected'])->default('pending');
+            $table->enum('status', ['pending', 'approved_1', 'approved_final', 'rejected'])->default('pending')->index();
             $table->timestamps();
+
+            // Index pencarian & validasi rentang jadwal peminjaman
+            $table->index('tanggal_mulai');
+            $table->index('tanggal_selesai');
+            $table->index(['tanggal_mulai', 'tanggal_selesai']);
         });
     }
 
