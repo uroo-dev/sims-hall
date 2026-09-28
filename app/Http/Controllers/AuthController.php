@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -44,11 +45,20 @@ class AuthController extends Controller
 
         $request->session()->regenerate();
 
-        $dashboard = $request->user()->fitur?->nama_fitur === 'pklbkk'
-            ? route('dashboard.pkl')
-            : route('dashboard');
+        return redirect()->intended($this->dashboardFor($request->user()));
+    }
 
-        return redirect()->intended($dashboard);
+    /**
+     * Tentukan dashboard tujuan sesuai role user.
+     *
+     * User dengan role `bkk` langsung masuk ke modul PKL & BKK, sedangkan
+     * role admin/super admin masuk ke dashboard utama.
+     */
+    private function dashboardFor(User $user): string
+    {
+        return $user->role === 'bkk'
+            ? route('pkl.dashboard')
+            : route('dashboard');
     }
 
     /**

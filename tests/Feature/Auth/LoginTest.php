@@ -2,7 +2,6 @@
 
 namespace Tests\Feature\Auth;
 
-use App\Models\Fitur;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -45,10 +44,9 @@ class LoginTest extends TestCase
         $this->assertGuest();
     }
 
-    public function test_users_with_fitur_pklbkk_are_redirected_to_pkl_bkk_dashboard(): void
+    public function test_users_with_role_bkk_are_redirected_to_pkl_bkk_dashboard(): void
     {
-        $user = User::factory()->create(['role' => 'admin']);
-        Fitur::create(['user_id' => $user->id, 'nama_fitur' => 'pklbkk']);
+        $user = User::factory()->create(['role' => 'bkk']);
 
         $this->post('/login', [
             'username' => $user->username,
@@ -71,12 +69,12 @@ class LoginTest extends TestCase
         $user = User::factory()->create(['role' => 'admin']);
 
         $pages = [
+            '/dashboard/pkl-bkk/dudi' => 'Data DUDI',
             '/dashboard/pkl-bkk/lowongan' => 'Lowongan Kerja',
-            '/dashboard/pkl-bkk/lowongan/tambah' => 'Form Lowongan Kerja',
-            '/dashboard/pkl-bkk/pelamar' => 'Data Pelamar',
-            '/dashboard/pkl-bkk/tempat-pkl' => 'Tempat PKL',
-            '/dashboard/pkl-bkk/jurnal' => 'Jurnal & Absensi',
-            '/dashboard/pkl-bkk/nilai' => 'Rekap Nilai PKL',
+            '/dashboard/pkl-bkk/lowongan/tambah' => 'Tambah Lowongan Kerja',
+            '/dashboard/pkl-bkk/siswa' => 'Data Siswa PKL',
+            '/dashboard/pkl-bkk/penempatan' => 'Penempatan PKL',
+            '/dashboard/pkl-bkk/pengajuan/create' => 'Buat Pengajuan PKL',
         ];
 
         foreach ($pages as $url => $label) {
@@ -92,7 +90,7 @@ class LoginTest extends TestCase
         $user = User::factory()->create(['role' => 'guru']);
 
         $this->actingAs($user)
-            ->get('/dashboard/pkl-bkk/nilai')
+            ->get('/dashboard/pkl-bkk/penempatan')
             ->assertForbidden();
     }
 

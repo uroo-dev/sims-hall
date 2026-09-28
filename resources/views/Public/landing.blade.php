@@ -1,293 +1,802 @@
 @extends('Public.layout.app')
 
 @section('title', 'SMK Negeri 2 Karanganyar - Sekolah Pusat Keunggulan')
+@section('description', 'Sebagai Sekolah Pusat Keunggulan, SMKN 2 Karanganyar menghadirkan siswa berkualitas dengan standar industri melalui kolaborasi dengan dunia industri.')
 
 @section('content')
-    <div class="overflow-x-auto">
-    <div class="w-[1280px] h-[5824px] relative bg-white overflow-hidden">
+    <!-- HERO SECTION (Foto 1) -->
+    <section id="hero" class="relative py-12 md:py-20 overflow-hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
 
-        {{-- ================= HEADER / NAVBAR ================= --}}
-        <img class="w-64 h-20 left-[19px] top-[2px] absolute" src="https://placehold.co/272x88" alt="Logo SMK Negeri 2 Karanganyar" />
-        <div class="w-[905px] h-20 left-[375px] top-0 absolute bg-sky-700 rounded-bl-[80px] shadow-[0px_4px_50px_0px_rgba(0,0,0,0.25)]"></div>
-
-        <div class="left-[1204px] top-[30px] absolute justify-start text-white text-sm font-semibold font-['Public_Sans'] leading-5">PPDB</div>
-        <div class="left-[1056px] top-[30px] absolute justify-start text-white text-sm font-semibold font-['Public_Sans'] leading-5">PKL &amp; BKK</div>
-        <div class="w-2.5 h-[5px] left-[1139px] top-[37px] absolute outline outline-[1.5px] outline-offset-[-0.75px] outline-white"></div>
-        <div class="left-[872px] top-[30px] absolute justify-start text-white text-sm font-semibold font-['Public_Sans'] leading-5">Produk Unggulan</div>
-        <div class="w-2.5 h-[5px] left-[995px] top-[39px] absolute outline outline-[1.5px] outline-offset-[-0.75px] outline-white"></div>
-        <div class="left-[444px] top-[31px] absolute justify-start text-white text-sm font-semibold font-['Public_Sans'] leading-5">Profile</div>
-        <div class="left-[732px] top-[31px] absolute justify-start text-white text-sm font-semibold font-['Public_Sans'] leading-5">Kesiswaan</div>
-        <div class="left-[543px] top-[31px] absolute justify-start text-white text-sm font-semibold font-['Public_Sans'] leading-5">Peminjaman Aula</div>
-        <div class="w-2.5 h-[5px] left-[667px] top-[38px] absolute outline outline-[1.5px] outline-offset-[-0.75px] outline-white"></div>
-        <div class="w-2.5 h-[5px] left-[811px] top-[39px] absolute outline outline-[1.5px] outline-offset-[-0.75px] outline-white"></div>
-
-        {{-- ================= HERO ================= --}}
-        <div class="w-[593px] h-72 left-[79px] top-[224px] absolute inline-flex flex-col justify-start items-start gap-10">
-            <div class="flex flex-col justify-start items-start gap-5">
-                <div class="w-[550px] justify-start text-sky-700 text-xl font-normal font-['Poppins'] leading-7">Sekolah Pusat Keunggulan</div>
-                <div class="w-[550px] justify-start text-slate-700 text-6xl font-semibold font-['Poppins'] leading-[76.8px]">SMKN 2<br/>KARANGANYAR</div>
-                <div class="w-[550px] justify-start text-slate-700 text-base font-normal font-['Poppins'] leading-6">Sebagai Sekolah Pusat Keunggulan, kami berkomitmen menghadirkan siswa berkualitas dengan standar industri. Kolaborasi dengan dunia industri menjadikan siswa lebih siap menghadapi tantangan kerja dan peluang masa depan.</div>
-            </div>
-        </div>
-        <div class="w-11 h-4 left-[88px] top-[161px] absolute"></div>
-        <img class="w-[481px] h-96 left-[734px] top-[193px] absolute" src="https://placehold.co/481x416" alt="Gedung sekolah SMKN 2 Karanganyar" />
-        <div class="w-44 h-11 left-[93.45px] top-[586.67px] absolute bg-sky-700 rounded-2xl shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]"></div>
-        <div class="left-[108.45px] top-[601.67px] absolute text-center justify-start text-white text-xs font-semibold font-['Poppins'] leading-4">Pelajari Selengkapnya</div>
-
-        {{-- ================= SEKSI PEMINJAMAN AULA ================= --}}
-        <div class="w-[1280px] h-[832px] left-0 top-[819px] absolute bg-slate-200/30"></div>
-        <div class="left-[368px] top-[870px] absolute justify-start text-black text-4xl font-medium font-['Poppins'] leading-[56px]">Layanan Peminjaman Aula</div>
-        <div class="w-[690px] left-[296px] top-[939px] absolute text-center justify-start text-gray-600 text-base font-normal font-['Poppins'] leading-5">Fasilitas sekolah dengan kapasitas luas untuk berbagai kebutuhan acara institusi, perusahaan, dan masyarakat umum.</div>
-
-        <div class="w-[775px] h-[576px] left-[427px] top-[1019px] absolute bg-white rounded-2xl"></div>
-        <img class="w-72 h-96 left-[860px] top-[1104px] absolute rounded-[10px] shadow-[0px_4px_50px_0px_rgba(0,0,0,0.25)]" src="https://placehold.co/298x374" alt="Aula SMK Negeri 2 Karanganyar" />
-        <img class="w-56 h-48 left-[815px] top-[1339px] absolute rounded-[10px] shadow-[0px_4px_50px_0px_rgba(0,0,0,0.25)]" src="https://placehold.co/217x187" alt="Detail aula" />
-
-        <div class="size-6 left-[451px] top-[1054px] absolute bg-black"></div>
-        <div class="w-96 h-52 left-[452px] top-[1120px] absolute justify-center">
-            <span class="text-black text-base font-normal font-['Poppins'] leading-5"><br/><br/><br/><br/><br/><br/>Kami menyediakan layanan peminjaman aula sekolah untuk berbagai kebutuhan kegiatan. Mulai dari acara sekolah, organisasi, rapat, seminar, hingga kegiatan instansi luar.<br/><br/>Layanan kami mencakup<br/></span>
-            <span class="text-black text-base font-normal font-['Poppins'] leading-5">Booking Aula Online.<br/>Peminjaman Aula Berkualitas.<br/>Fasilitas Lengkap.<br/>Kebersihan &amp; Kenyamanan.<br/>Parkir &amp; Keamanan.<br/></span>
-            <span class="text-black text-base font-normal font-['Poppins'] leading-5"><br/>Kami siap membantu menciptakan tempat kegiatan yang nyaman dan berkualitas.</span>
-        </div>
-        <div class="w-80 h-72 left-[79px] top-[1018px] absolute bg-white rounded-2xl border-2 border-sky-700"></div>
-        <div class="w-80 h-10 left-[485px] top-[1047px] absolute justify-center text-black text-2xl font-bold font-['Inter'] leading-5">Informasi Peminjaman Aula</div>
-        <div class="w-36 h-8 left-[452px] top-[1474px] absolute bg-sky-700 rounded-2xl shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]"></div>
-        <div class="w-40 h-8 left-[471px] top-[1475px] absolute justify-center text-white text-xs font-semibold font-['Poppins'] leading-5">Mulai Peminjaman</div>
-        <div class="w-80 h-0 left-[451px] top-[1093px] absolute outline outline-[3px] outline-offset-[-1.5px] outline-sky-700"></div>
-
-        {{-- Paket Unggulan --}}
-        <div class="w-32 h-6 left-[172px] top-[1005px] absolute bg-sky-700 rounded-[10px]"></div>
-        <div class="w-24 h-9 left-[204px] top-[999px] absolute justify-center text-white text-sm font-bold font-['Poppins'] leading-5">Unggulan</div>
-        <div class="w-56 h-9 left-[124px] top-[1051px] absolute justify-center">
-            <span class="text-neutral-500 text-sm font-normal font-['Poppins'] leading-5">Rp.</span><span class="text-black text-2xl font-bold font-['Poppins'] leading-5"> </span><span class="text-sky-700 text-2xl font-semibold font-['Poppins'] leading-5">6.000.000</span><span class="text-black text-sm font-bold font-['Poppins'] leading-5"> </span><span class="text-neutral-500 text-sm font-normal font-['Poppins'] leading-5">/ 12 Jam</span>
-        </div>
-        <div class="w-48 h-9 left-[158px] top-[1092px] absolute justify-center text-black text-sm font-normal font-['Poppins'] leading-5">Sound System Medium</div>
-        <div class="w-12 h-9 left-[161px] top-[1121px] absolute justify-center text-black text-sm font-normal font-['Poppins'] leading-5">Mic 4</div>
-        <div class="size-6 left-[124px] top-[1130px] absolute overflow-hidden">
-            <div class="size-4 left-[4px] top-[4px] absolute bg-black"></div>
-            <div class="w-2.5 h-2 left-[7.15px] top-[9.15px] absolute bg-black"></div>
-        </div>
-        <div class="size-6 left-[124px] top-[1100px] absolute overflow-hidden">
-            <div class="size-4 left-[4px] top-[4px] absolute bg-black"></div>
-            <div class="w-2.5 h-2 left-[7.15px] top-[9.15px] absolute bg-black"></div>
-        </div>
-        <div class="w-48 h-9 left-[158px] top-[1151px] absolute justify-center text-black text-sm font-normal font-['Poppins'] leading-5">500 Kursi + Cover</div>
-        <div class="w-20 h-9 left-[161px] top-[1180px] absolute justify-center text-black text-sm font-normal font-['Poppins'] leading-5">Proyektor 2</div>
-        <div class="size-6 left-[124px] top-[1189px] absolute overflow-hidden">
-            <div class="size-4 left-[4px] top-[4px] absolute bg-black"></div>
-            <div class="w-2.5 h-2 left-[7.15px] top-[9.15px] absolute bg-black"></div>
-        </div>
-        <div class="size-6 left-[124px] top-[1159px] absolute overflow-hidden">
-            <div class="size-4 left-[4px] top-[4px] absolute bg-black"></div>
-            <div class="w-2.5 h-2 left-[7.15px] top-[9.15px] absolute bg-black"></div>
-        </div>
-        <div class="w-56 h-9 left-[124px] top-[1230px] absolute bg-sky-700 rounded-lg"></div>
-        <div class="w-20 h-9 left-[206px] top-[1230px] absolute justify-center text-white text-sm font-semibold font-['Poppins'] leading-5">Pilih Paket</div>
-
-        {{-- Paket Terjangkau --}}
-        <div class="w-80 h-72 left-[79px] top-[1326px] absolute bg-white rounded-2xl border-2 border-sky-700"></div>
-        <div class="w-32 h-6 left-[172px] top-[1313px] absolute bg-sky-700 rounded-[10px]"></div>
-        <div class="w-24 h-9 left-[199px] top-[1307px] absolute justify-center text-white text-sm font-bold font-['Poppins'] leading-5">Terjangkau</div>
-        <div class="w-56 h-9 left-[124px] top-[1354px] absolute justify-center">
-            <span class="text-neutral-500 text-sm font-normal font-['Poppins'] leading-5">Rp.</span><span class="text-black text-2xl font-bold font-['Poppins'] leading-5"> </span><span class="text-sky-700 text-2xl font-bold font-['Poppins'] leading-5">1</span><span class="text-sky-700 text-2xl font-semibold font-['Poppins'] leading-5">.500.000</span><span class="text-black text-sm font-bold font-['Poppins'] leading-5"> </span><span class="text-neutral-500 text-sm font-normal font-['Poppins'] leading-5">/ 4 Jam</span>
-        </div>
-        <div class="w-48 h-9 left-[158px] top-[1395px] absolute justify-center text-black text-sm font-normal font-['Poppins'] leading-5">Sound System Standar</div>
-        <div class="w-12 h-9 left-[161px] top-[1424px] absolute justify-center text-black text-sm font-normal font-['Poppins'] leading-5">Mic 2</div>
-        <div class="size-6 left-[124px] top-[1433px] absolute overflow-hidden">
-            <div class="size-4 left-[4px] top-[4px] absolute bg-black"></div>
-            <div class="w-2.5 h-2 left-[7.15px] top-[9.15px] absolute bg-black"></div>
-        </div>
-        <div class="size-6 left-[124px] top-[1403px] absolute overflow-hidden">
-            <div class="size-4 left-[4px] top-[4px] absolute bg-black"></div>
-            <div class="w-2.5 h-2 left-[7.15px] top-[9.15px] absolute bg-black"></div>
-        </div>
-        <div class="w-48 h-9 left-[158px] top-[1454px] absolute justify-center text-black text-sm font-normal font-['Poppins'] leading-5">100 Kursi</div>
-        <div class="w-20 h-9 left-[161px] top-[1483px] absolute justify-center text-black text-sm font-normal font-['Poppins'] leading-5">Proyektor 1</div>
-        <div class="size-6 left-[124px] top-[1492px] absolute overflow-hidden">
-            <div class="size-4 left-[4px] top-[4px] absolute bg-black"></div>
-            <div class="w-2.5 h-2 left-[7.15px] top-[9.15px] absolute bg-black"></div>
-        </div>
-        <div class="size-6 left-[124px] top-[1462px] absolute overflow-hidden">
-            <div class="size-4 left-[4px] top-[4px] absolute bg-black"></div>
-            <div class="w-2.5 h-2 left-[7.15px] top-[9.15px] absolute bg-black"></div>
-        </div>
-        <div class="w-56 h-9 left-[124px] top-[1533px] absolute bg-sky-700 rounded-lg"></div>
-        <div class="w-20 h-9 left-[206px] top-[1533px] absolute justify-center text-white text-sm font-semibold font-['Poppins'] leading-5">Pilih Paket</div>
-
-        <div class="w-[140px] h-[150px] left-[1126px] top-[955px] absolute plus-tex" aria-hidden="true"></div>
-
-        {{-- ================= KOMPETENSI KEAIHLIAN ================= --}}
-        <div class="left-[434px] top-[1691px] absolute justify-start text-black text-4xl font-medium font-['Poppins'] leading-[56px]">Kompetensi Keahlian</div>
-        <div class="w-[690px] left-[293px] top-[1747px] absolute text-center justify-start text-gray-600 text-base font-normal font-['Poppins'] leading-5">Beragam kompetensi keahlian berbasis teknologi dan industri yang membekali siswa dengan keterampilan profesional sesuai kebutuhan dunia kerja.</div>
-        <img class="w-72 h-96 left-[58px] top-[1815px] absolute" src="https://placehold.co/302x435" alt="Kompetensi keahlian 1" />
-        <img class="w-64 h-96 left-[365px] top-[1818px] absolute" src="https://placehold.co/264x432" alt="Kompetensi keahlian 2" />
-        <img class="w-72 h-96 left-[627px] top-[1839px] absolute" src="https://placehold.co/279x411" alt="Kompetensi keahlian 3" />
-        <img class="w-64 h-96 left-[911px] top-[1803px] absolute" src="https://placehold.co/271x447" alt="Kompetensi keahlian 4" />
-
-        {{-- ================= MITRA DUDI ================= --}}
-        <div class="w-[1131px] h-44 left-[83px] top-[2287px] absolute bg-white rounded-2xl shadow-[0px_7px_15px_0px_rgba(0,0,0,0.25)]"></div>
-        <div class="w-96 h-5 left-[110px] top-[2303px] absolute justify-center text-neutral-500 text-xl font-bold font-['Inter'] leading-9">MITRA DUDI &mdash; Kerjasama Industri</div>
-        <img class="size-20 left-[839px] top-[2340px] absolute" src="https://placehold.co/77x77" alt="Logo mitra 1" />
-        <img class="w-44 h-14 left-[374px] top-[2361px] absolute" src="https://placehold.co/178x60" alt="Logo mitra 2" />
-        <img class="w-52 h-16 left-[971px] top-[2340px] absolute" src="https://placehold.co/211x70" alt="Logo mitra 3" />
-        <img class="w-32 h-14 left-[147px] top-[2356px] absolute" src="https://placehold.co/132x60" alt="Logo mitra 4" />
-        <img class="w-32 h-16 left-[620px] top-[2358px] absolute" src="https://placehold.co/130x63" alt="Logo mitra 5" />
-        <div class="w-80 h-0 left-[111px] top-[2333px] absolute outline outline-[3px] outline-offset-[-1.5px] outline-neutral-200"></div>
-        <div class="w-40 h-0 left-[111px] top-[2333px] absolute outline outline-[3px] outline-offset-[-1.5px] outline-blue-500"></div>
-
-        {{-- ================= KEHIDUPAN KESISWAAN ================= --}}
-        <div class="w-[1280px] h-[832px] left-0 top-[2497px] absolute bg-slate-200/30"></div>
-        <div class="left-[171px] top-[2563px] absolute justify-start text-black text-4xl font-medium font-['Poppins'] leading-[56px]">Kehidupan Kesiswaan</div>
-        <div class="w-[690px] left-[171px] top-[2619px] absolute justify-start text-gray-600 text-base font-normal font-['Poppins'] leading-5">Membentuk karakter, kedisiplinan, dan potensi non-akademik.</div>
-
-        <div class="w-[128px] h-[138px] left-[17px] top-[2621px] absolute plus-tex" aria-hidden="true"></div>
-
-        <div class="w-[1156px] h-80 left-[65px] top-[2678px] absolute inline-flex flex-col justify-start items-start">
-            <div class="self-stretch h-80 p-8 bg-white rounded-lg shadow-[0px_4px_20px_0px_rgba(30,58,95,0.08)] border-t-4 border-sky-700 inline-flex flex-col justify-between items-start">
-                <div class="self-stretch flex flex-col justify-start items-start gap-3">
-                    <div class="size-7 bg-sky-700"></div>
-                    <div class="self-stretch pt-1 flex flex-col justify-start items-start">
-                        <div class="self-stretch justify-center text-sky-950 text-2xl font-semibold font-['Montserrat'] leading-8">Ekstrakurikuler</div>
-                    </div>
-                    <div class="self-stretch flex flex-col justify-start items-start">
-                        <div class="w-56 justify-center text-zinc-700 text-base font-normal font-['Inter'] leading-6">pilihan kegiatan mulai<br/>dari kedisiplinan, olahraga, hingga klub teknologi.</div>
+                <!-- Left Text Content -->
+                <div class="lg:col-span-6 space-y-6 z-10">
+                    <span class="inline-block text-brand-blue font-bold tracking-wide text-base sm:text-lg">
+                        Sekolah Pusat Keunggulan
+                    </span>
+                    <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-tight">
+                        SMKN 2<br />
+                        <span class="text-slate-800">KARANGANYAR</span>
+                    </h1>
+                    <p class="text-slate-600 text-base sm:text-lg leading-relaxed max-w-xl">
+                        Sebagai Sekolah Pusat Keunggulan, kami berkomitmen menghadirkan siswa berkualitas dengan standar
+                        industri. Kolaborasi dengan dunia industri menjadikan siswa lebih siap menghadapi tantangan
+                        kerja dan peluang masa depan.
+                    </p>
+                    <div class="pt-2">
+                        <button
+                            onclick="openModal('Tentang SMKN 2 Karanganyar', 'SMKN 2 Karanganyar mencetak lulusan unggul berkarakter, berdaya saing global, serta siap kerja di era transformasi digital.')"
+                            class="bg-brand-blue hover:bg-brand-darkBlue text-white font-semibold px-8 py-3.5 rounded-full shadow-lg shadow-blue-500/25 transition-all transform hover:-translate-y-0.5 active:translate-y-0">
+                            Pelajari Selengkapnya
+                        </button>
                     </div>
                 </div>
-                <div class="self-stretch pt-6 flex flex-col justify-start items-start">
-                    <div class="self-stretch inline-flex justify-start items-center gap-2">
-                        <div class="justify-center text-sky-700 text-base font-normal font-['Inter'] leading-6">Daftar Eskul</div>
-                        <div class="flex flex-col justify-start items-start">
-                            <div class="w-2 h-3 bg-sky-700"></div>
+
+                <!-- Right Visual: Interactive Moving Illustration Container -->
+                <div class="lg:col-span-6 relative flex justify-center items-center group cursor-pointer">
+                    <!-- Inner Container diperluas ke max-w-xl -->
+                    <div class="w-full max-w-xl relative flex items-center justify-center p-2">
+                        <img src="{{ asset('assets/full-jurusan-logo.png') }}" alt="Ilustrasi SMKN 2 Karanganyar"
+                            class="w-full h-auto object-contain filter drop-shadow-2xl group-hover:scale-115 group-hover:-translate-y-3 transition-all duration-300 transform-gpu select-none">
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        </div>
+    </section>
+
+
+
+
+    <!-- KOMPETENSI KEAHLIAN & MITRA DUDI (Foto 2) -->
+    <section id="jurusan" class="py-16 bg-white relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+            <!-- Section Header -->
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 mb-4">
+                    Kompetensi Keahlian
+                </h2>
+                <p class="text-slate-600 text-base sm:text-lg">
+                    Beragam kompetensi keahlian berbasis teknologi dan industri yang membekali siswa dengan keterampilan
+                    profesional sesuai kebutuhan dunia kerja.
+                </p>
+            </div>
+
+            <!-- 4 Vertical Jurusan Cards Grid (Foto 2) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 pt-12 mb-20">
+
+                <!-- Card 1: Teknik Pemesinan (Blue) -->
+                <div class="relative group cursor-pointer pt-16">
+                    <!-- Card Container -->
+                    <div
+                        class="bg-[#5FB0FF] rounded-b-3xl rounded-t-[40px] p-6 text-slate-900 flex flex-col justify-between shadow-xl shadow-blue-500/20 group-hover:-translate-y-3 transition-all duration-300 relative z-10 min-h-[380px]">
+                        <!-- Floating 3D Graphic (Overlapping Out of Card) -->
+                        <div class="absolute -top-16 left-0 right-0 flex justify-center pointer-events-none">
+                            <img src="{{ asset('assets/logo_mesin.png') }}" alt="Teknik Pemesinan"
+                                class="w-52 h-auto object-contain filter drop-shadow-xl group-hover:scale-110 group-hover:-translate-y-2 transition-all duration-300 transform-gpu">
+                        </div>
+
+                        <!-- Content Area -->
+                        <div class="mt-28 space-y-3">
+                            <h3 class="text-2xl font-bold tracking-tight text-slate-900 leading-tight">
+                                Teknik<br />Pemesinan
+                            </h3>
+                            <p class="text-slate-800/90 text-sm font-medium leading-relaxed">
+                                mempelajari tentang cara memproduksi barang teknik dan menggunakan mesin.
+                            </p>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="self-stretch h-80 px-8 pt-8 pb-20 bg-sky-700 rounded-lg shadow-[0px_4px_20px_0px_rgba(30,58,95,0.08)] inline-flex flex-col justify-start items-start gap-3">
-                <div class="size-7 bg-white"></div>
-                <div class="self-stretch pt-1 flex flex-col justify-start items-start">
-                    <div class="self-stretch justify-center text-white text-2xl font-semibold font-['Montserrat'] leading-8">Tata Tertib</div>
+
+                <!-- Card 2: Teknik Pembuatan Kain (Yellow) -->
+                <div class="relative group cursor-pointer pt-16">
+                    <!-- Card Container -->
+                    <div
+                        class="bg-[#FCE055] rounded-b-3xl rounded-t-[40px] p-6 text-slate-900 flex flex-col justify-between shadow-xl shadow-amber-500/20 group-hover:-translate-y-3 transition-all duration-300 relative z-10 min-h-[380px]">
+                        <!-- Floating 3D Graphic -->
+                        <div class="absolute -top-16 left-0 right-0 flex justify-center pointer-events-none">
+                            <img src="{{ asset('assets/logo_tekstil.png') }}" alt="Teknik Pembuatan Kain"
+                                class="w-52 h-auto object-contain filter drop-shadow-xl group-hover:scale-110 group-hover:-translate-y-2 transition-all duration-300 transform-gpu">
+                        </div>
+
+                        <!-- Content Area -->
+                        <div class="mt-28 space-y-3">
+                            <h3 class="text-2xl font-bold tracking-tight text-slate-900 leading-tight">
+                                Teknik<br />Pembuatan Kain
+                            </h3>
+                            <p class="text-slate-800/90 text-sm font-medium leading-relaxed">
+                                mempelajari tentang desain tenun, mesin pembuatan kain, pemeliharaan dan perawatan, dan
+                                pengendalian mutunya.
+                            </p>
+                        </div>
+                    </div>
                 </div>
-                <div class="self-stretch pb-3 flex flex-col justify-start items-start">
-                    <div class="self-stretch justify-center text-white/80 text-base font-normal font-['Inter'] leading-6">Pedoman kedisiplinan siswa<br/>untuk membentuk etos kerja<br/>profesional.</div>
+
+                <!-- Card 3: Teknik Ototronik (Red/Coral) -->
+                <div class="relative group cursor-pointer pt-16">
+                    <!-- Card Container -->
+                    <div
+                        class="bg-[#FF5A5F] rounded-b-3xl rounded-t-[40px] p-6 text-slate-900 flex flex-col justify-between shadow-xl shadow-red-500/20 group-hover:-translate-y-3 transition-all duration-300 relative z-10 min-h-[380px]">
+                        <!-- Floating 3D Graphic -->
+                        <div class="absolute -top-16 left-0 right-0 flex justify-center pointer-events-none">
+                            <img src="{{ asset('assets/logo_oto.png') }}" alt="Teknik Ototronik"
+                                class="w-52 h-auto object-contain filter drop-shadow-xl group-hover:scale-110 group-hover:-translate-y-2 transition-all duration-300 transform-gpu">
+                        </div>
+
+                        <!-- Content Area -->
+                        <div class="mt-28 space-y-3">
+                            <h3 class="text-2xl font-bold tracking-tight text-slate-900 leading-tight">
+                                Teknik<br />Ototronik
+                            </h3>
+                            <p class="text-slate-900/90 text-sm font-medium leading-relaxed">
+                                mempelajari tentang otomotif dalam penguasaan teknologi elektronik dan kontrol pada
+                                kendaraan bermotor.
+                            </p>
+                        </div>
+                    </div>
                 </div>
-                <div class="px-4 py-2 bg-white/10 rounded-sm outline outline-1 outline-offset-[-1px] outline-white/20 inline-flex justify-center items-center">
-                    <div class="text-center justify-center text-white text-sm font-normal font-['Inter'] leading-5">Unduh PDF</div>
+
+                <!-- Card 4: Rekayasa Perangkat Lunak (Green) -->
+                <div class="relative group cursor-pointer pt-16">
+                    <!-- Card Container -->
+                    <div
+                        class="bg-[#10C863] rounded-b-3xl rounded-t-[40px] p-6 text-slate-900 flex flex-col justify-between shadow-xl shadow-emerald-500/20 group-hover:-translate-y-3 transition-all duration-300 relative z-10 min-h-[380px]">
+                        <!-- Floating 3D Graphic -->
+                        <div class="absolute -top-16 left-0 right-0 flex justify-center pointer-events-none">
+                            <img src="{{ asset('assets/logo_rpl.png') }}" alt="Rekayasa Perangkat Lunak"
+                                class="w-52 h-auto object-contain filter drop-shadow-xl group-hover:scale-110 group-hover:-translate-y-2 transition-all duration-300 transform-gpu">
+                        </div>
+
+                        <!-- Content Area -->
+                        <div class="mt-28 space-y-3">
+                            <h3 class="text-2xl font-bold tracking-tight text-slate-900 leading-tight">
+                                Rekayasa<br />Perangkat Lunak
+                            </h3>
+                            <p class="text-slate-900/90 text-sm font-medium leading-relaxed">
+                                mempelajari tentang pengembangan perangkat lunak termasuk, pembuatan, pemeliharaan, dan
+                                manajemen organisasi.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- MITRA DUDI Container (Ukuran Diperbesar) -->
+            <div class="bg-white border border-slate-200/80 rounded-2xl p-8 md:p-10 shadow-md">
+                <div class="mb-8 flex items-center gap-4">
+                    <h4 class="text-base md:text-lg font-extrabold text-slate-800 tracking-wider uppercase">
+                        MITRA DUDI — Kerjasama Industri
+                    </h4>
+                    <div class="h-[3px] bg-slate-200 flex-1 rounded-full"></div>
+                </div>
+
+                <!-- Grid Layout dengan Tinggi Container Minimum h-24 (96px) -->
+                <div
+                    class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6 lg:gap-10 items-center justify-items-center">
+
+                    <!-- Brand 1: EXP -->
+                    <div
+                        class="flex items-center justify-center w-full h-24 group hover:scale-110 transition-transform duration-300">
+                        <div
+                            class="font-black text-3xl md:text-4xl text-blue-800 tracking-tighter border-4 border-blue-800 px-6 py-2 rounded-xl bg-blue-50/50 shadow-sm">
+                            EXP
+                        </div>
+                    </div>
+
+                    <!-- Brand 2: MSM Solo -->
+                    <div
+                        class="flex items-center justify-center w-full h-24 group hover:scale-110 transition-transform duration-300">
+                        <img src="{{ asset('assets/msm.png') }}" alt="Logo MSM Solo"
+                            class="h-16 md:h-20 w-auto object-contain filter drop-shadow-md select-none">
+                    </div>
+
+                    <!-- Brand 3: NASMOCO -->
+                    <div
+                        class="flex items-center justify-center w-full h-24 group hover:scale-110 transition-transform duration-300">
+                        <img src="{{ asset('assets/Nasmoco.png') }}" alt="Logo Nasmoco"
+                            class="h-16 md:h-20 w-auto object-contain filter drop-shadow-md select-none">
+                    </div>
+
+                    <!-- Brand 4: TOYOTA -->
+                    <div
+                        class="flex flex-col items-center justify-center w-full h-24 group hover:scale-110 transition-transform duration-300 cursor-pointer">
+                        <img src="{{ asset('assets/Toyota.png') }}" alt="Logo Nasmoco"
+                            class="h-16 md:h-20 w-auto object-contain filter drop-shadow-md select-none">
+                    </div>
+
+                    <!-- Brand 5: PT YICHAO TEXTILE -->
+                    <div
+                        class="flex flex-col items-center justify-center w-full h-24 text-center group hover:scale-110 transition-transform duration-300">
+                        <img src="{{ asset('assets/textil.png') }}" alt="Logo Nasmoco"
+                            class="h-16 md:h-20 w-auto object-contain filter drop-shadow-md select-none">
+                    </div>
+
                 </div>
             </div>
-            <div class="w-[566px] h-80 bg-white rounded-2xl"></div>
-            <div class="w-[566px] h-80 bg-white rounded-2xl"></div>
-            <div class="w-[473.5px] h-9 text-justify justify-start text-neutral-500 text-xs font-normal font-['Poppins'] leading-4">Selamat dan Sukses bagi peserta didik SMKN 2 KARANGANYAR yang telah Lolos SNBT (Seleksi Nasional Berdasarkan Tes) Tahun 2026.</div>
-            <div class="w-20 h-4 bg-sky-700 rounded-2xl"></div>
-            <div class="w-16 h-2.5 justify-start text-white text-[8px] font-semibold font-['Poppins'] leading-3">AKADEMIK</div>
-            <div class="w-[566px] h-56 bg-white rounded-tl-2xl rounded-tr-2xl"></div>
-            <div class="w-[566px] h-56 bg-white rounded-tl-2xl rounded-tr-2xl"></div>
-            <img class="w-[566px] h-56 rounded-tl-2xl rounded-tr-2xl" src="https://placehold.co/566x221" alt="Prestasi akademik" />
-        </div>
 
-        <div class="w-[1156px] h-64 left-[65px] top-[3036px] absolute bg-white rounded-2xl shadow-[0px_4px_20px_0px_rgba(0,0,0,0.25)] overflow-hidden">
-            <div class="w-8 h-9 left-[1094px] top-[107px] absolute bg-zinc-300 rounded-full"></div>
-            <div class="w-4 h-5 left-[1100px] top-[132.67px] absolute origin-top-left rotate-[-89deg]">
-                <div class="w-5 h-4 left-0 top-0 absolute"></div>
-                <div class="w-1.5 h-2.5 left-[7.14px] top-[3.06px] absolute outline outline-[1.5px] outline-offset-[-0.75px] outline-white"></div>
+        </div>
+    </section>
+
+    <!-- KESISWAAN & PRESTASI TERBARU (Foto 3) -->
+    <section id="kesiswaan" class="py-16 bg-[#F8FAFC] relative">
+        <!-- Decorative Dot Pattern (Top Left) -->
+        <div class="absolute top-8 left-8 w-24 h-24 dot-pattern opacity-40 pointer-events-none"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+
+            <!-- Section Header -->
+            <div class="mb-12">
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 mb-2">
+                    Kesiswaan
+                </h2>
+                <p class="text-slate-600 text-base">
+                    Membentuk karakter, kedisiplinan, dan potensi non-akademik.
+                </p>
             </div>
-            <div class="w-8 h-9 left-[67.48px] top-[138.81px] absolute origin-top-left rotate-[174deg] bg-zinc-300 rounded-full"></div>
-            <div class="w-4 h-6 left-[60.89px] top-[115.7px] absolute origin-top-left rotate-[89.61deg]">
-                <div class="w-6 h-4 left-0 top-0 absolute"></div>
-                <div class="w-1.5 h-2.5 left-[6.92px] top-[3.11px] absolute outline outline-[1.5px] outline-offset-[-0.75px] outline-white"></div>
+
+            <!-- Grid Kesiswaan Cards (Foto 3) -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-16">
+
+                <!-- Left: Card LOLOS SNBT 2026 (Foto 3 Left) -->
+                <div
+                    class="lg:col-span-6 bg-white border border-slate-200 rounded-2xl p-6 card-shadow flex flex-col justify-between">
+                    <div>
+                        <div
+                            class="bg-blue-900 text-white font-bold text-center py-2.5 rounded-lg mb-6 tracking-wide text-sm sm:text-base">
+                            LOLOS SNBT (Seleksi Nasional Berdasarkan Tes) Tahun 2026
+                        </div>
+
+                        <!-- 4 Student Photo Grids -->
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+                            <!-- Student 1 -->
+                            <div class="text-center group">
+                                <div class="bg-slate-100 rounded-lg overflow-hidden mb-2 aspect-[3/4] relative border">
+                                    <img src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=200&auto=format&fit=crop&q=80"
+                                        alt="Nofal Mita"
+                                        class="w-full h-full object-cover group-hover:scale-105 transition-transform">
+                                    <span
+                                        class="absolute top-1 right-1 bg-red-600 text-white text-[9px] font-bold px-1 rounded">12
+                                        MA</span>
+                                </div>
+                                <div class="text-xs font-bold text-slate-800">Nofal Mita Hulhaq</div>
+                                <div class="text-[10px] text-slate-500">UNS: TEKNIK MESIN</div>
+                            </div>
+                            <!-- Student 2 -->
+                            <div class="text-center group">
+                                <div class="bg-slate-100 rounded-lg overflow-hidden mb-2 aspect-[3/4] relative border">
+                                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80"
+                                        alt="Raras Putri"
+                                        class="w-full h-full object-cover group-hover:scale-105 transition-transform">
+                                    <span
+                                        class="absolute top-1 right-1 bg-red-600 text-white text-[9px] font-bold px-1 rounded">12
+                                        RB</span>
+                                </div>
+                                <div class="text-xs font-bold text-slate-800">Raras Putri Febriana</div>
+                                <div class="text-[10px] text-slate-500">UNS: PTIK</div>
+                            </div>
+                            <!-- Student 3 -->
+                            <div class="text-center group">
+                                <div class="bg-slate-100 rounded-lg overflow-hidden mb-2 aspect-[3/4] relative border">
+                                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&auto=format&fit=crop&q=80"
+                                        alt="Davin Wahyu"
+                                        class="w-full h-full object-cover group-hover:scale-105 transition-transform">
+                                    <span
+                                        class="absolute top-1 right-1 bg-red-600 text-white text-[9px] font-bold px-1 rounded">12
+                                        RB</span>
+                                </div>
+                                <div class="text-xs font-bold text-slate-800">Davin Wahyu Amanta</div>
+                                <div class="text-[10px] text-slate-500">UNS: PTIK</div>
+                            </div>
+                            <!-- Student 4 -->
+                            <div class="text-center group">
+                                <div class="bg-slate-100 rounded-lg overflow-hidden mb-2 aspect-[3/4] relative border">
+                                    <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&auto=format&fit=crop&q=80"
+                                        alt="Faiz Bayu"
+                                        class="w-full h-full object-cover group-hover:scale-105 transition-transform">
+                                    <span
+                                        class="absolute top-1 right-1 bg-red-600 text-white text-[9px] font-bold px-1 rounded">12
+                                        RA</span>
+                                </div>
+                                <div class="text-xs font-bold text-slate-800">M. Faiz Bayu Nur A.</div>
+                                <div class="text-[10px] text-slate-500">UNS: MANAJEMEN</div>
+                            </div>
+                        </div>
+
+                        <p class="text-slate-600 text-xs text-center leading-relaxed">
+                            Selamat dan Sukses bagi peserta didik SMKN 2 KARANGANYAR yang telah Lolos SNBT (Seleksi
+                            Nasional Berdasarkan Tes) Tahun 2026.
+                        </p>
+                    </div>
+
+                    <div class="text-right mt-4">
+                        <span
+                            class="inline-block bg-brand-blue text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase">
+                            AKADEMIK
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Middle: Ekstrakurikuler Card -->
+                <div
+                    class="lg:col-span-3 bg-white border border-slate-200 rounded-2xl p-6 card-shadow flex flex-col justify-between hover:border-brand-blue transition-colors">
+                    <div>
+                        <div
+                            class="w-12 h-12 rounded-full bg-blue-50 text-brand-blue flex items-center justify-center text-2xl mb-6">
+                            <i class="fa-solid fa-futbol"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-slate-900 mb-3">Ekstrakurikuler</h3>
+                        <p class="text-slate-600 text-sm leading-relaxed mb-6">
+                            Pilihan kegiatan mulai dari kedisiplinan, olahraga, hingga klub teknologi.
+                        </p>
+                    </div>
+                    <button
+                        onclick="openModal('Pendaftaran Ekstrakurikuler', 'Silahkan pilih ekstrakurikuler yang Anda minati: Paskibra, Pramuka, Futsal, Basket, Coding Club, atau Robotik.')"
+                        class="inline-flex items-center text-brand-blue font-bold text-sm hover:translate-x-1 transition-transform">
+                        Daftar Eskul <i class="fa-solid fa-chevron-right text-xs ml-1"></i>
+                    </button>
+                </div>
+
+                <!-- Right: Tata Tertib Card (Blue Solid) -->
+                <div
+                    class="lg:col-span-3 bg-brand-blue text-white rounded-2xl p-6 card-shadow flex flex-col justify-between">
+                    <div>
+                        <div class="text-2xl mb-6">
+                            <i class="fa-solid fa-scale-balanced"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-3">Tata Tertib</h3>
+                        <p class="text-blue-100 text-sm leading-relaxed mb-6">
+                            Pedoman kedisiplinan siswa untuk membentuk etos kerja profesional.
+                        </p>
+                    </div>
+                    <button
+                        onclick="openModal('Unduh Tata Tertib PDF', 'Mengunduh berkas lengkap Tata Tertib Siswa SMKN 2 Karanganyar Tahun Ajaran 2026/2027...')"
+                        class="bg-white/20 hover:bg-white/30 text-white font-semibold text-xs py-2.5 px-4 rounded-lg w-fit transition-colors">
+                        Unduh PDF
+                    </button>
+                </div>
+
             </div>
-            <div class="w-96 h-5 left-[39px] top-[22px] absolute justify-center text-neutral-500 text-xl font-bold font-['Inter'] leading-9">Prestasi Terbaru</div>
-            <div class="w-40 h-0 left-[40px] top-[52px] absolute outline outline-[3px] outline-offset-[-1.5px] outline-neutral-200"></div>
-            <div class="w-20 h-0 left-[40px] top-[52px] absolute outline outline-[3px] outline-offset-[-1.5px] outline-blue-500"></div>
-            <img class="w-96 h-36 left-[103px] top-[71px] absolute rounded-md" src="https://placehold.co/447x142" alt="Prestasi 1" />
-            <img class="w-[471px] h-36 left-[582px] top-[71px] absolute rounded-md" src="https://placehold.co/471x142" alt="Prestasi 2" />
-        </div>
 
-        <div class="w-[128px] h-[134px] left-[1142px] top-[3184px] absolute plus-tex" aria-hidden="true"></div>
+            <!-- PRESTASI TERBARU SECTION (Foto 3 Bottom) -->
+            <div class="bg-white rounded-2xl p-6 sm:p-8 card-shadow border border-slate-100 relative">
+                <div class="mb-6">
+                    <h4 class="text-lg font-bold text-slate-800 border-b-2 border-brand-blue inline-block pb-1">Prestasi
+                        Terbaru</h4>
+                </div>
 
-        {{-- ================= PRODUK UNGGULAN ================= --}}
-        <div class="left-[445px] top-[3399px] absolute justify-start text-black text-4xl font-medium font-['Poppins'] leading-[56px]">Produk Unggulan</div>
-        <div class="w-[690px] left-[280px] top-[3472px] absolute text-center justify-start text-gray-600 text-base font-normal font-['Poppins'] leading-5">Beragam produk unggulan berbasis teknologi dan industri yang mencerminkan keterampilan siswa sesuai kebutuhan dunia kerja.</div>
+                <!-- Interactive News Slider Carousel -->
+                <div class="relative">
+                    <div id="news-container" class="grid grid-cols-1 md:grid-cols-2 gap-6 transition-all duration-300">
+                        <!-- Card News 1 -->
+                        <div
+                            class="bg-gradient-to-r from-blue-900 to-indigo-900 rounded-xl overflow-hidden p-6 text-white relative group">
+                            <span
+                                class="inline-block bg-blue-600 text-white text-[10px] font-bold px-2.5 py-1 rounded mb-3 uppercase">
+                                BERITA HARI INI
+                            </span>
+                            <h4
+                                class="text-lg sm:text-xl font-bold leading-snug mb-4 group-hover:text-blue-200 transition-colors">
+                                SMKN 2 KARANGANYAR SIAP PERTAHANKAN GELAR JATENG DI LKBB-PB NASIONAL
+                            </h4>
+                        </div>
 
-        <img class="w-[667px] h-60 left-[82px] top-[3874px] absolute rounded-2xl" src="https://placehold.co/667x243" alt="Produk permesinan" />
-        <img class="w-[667px] h-60 left-[82px] top-[3874px] absolute rounded-2xl border border-green-800" src="https://placehold.co/667x243" alt="Produk permesinan 2" />
-        <img class="w-96 h-60 left-[82px] top-[3593px] absolute rounded-2xl border border-blue-700" src="https://placehold.co/427x243" alt="Produk unggulan 1" />
-        <div class="w-52 h-24 left-[116px] top-[3669px] absolute justify-center text-black text-xs font-normal font-['Inter'] uppercase leading-5">Diproses menggunakan mesin modern yang menghasilkan produk dengan kualitas tinggi, presisi, dan hasil yang konsisten.</div>
-        <img class="size-32 left-[351px] top-[3665px] absolute" src="https://placehold.co/128x128" alt="Mesin modern" />
-        <div class="w-72 h-5 left-[116px] top-[3626px] absolute justify-center text-black text-2xl font-semibold font-['Inter'] uppercase leading-5">TEKNIK PERMESINAN</div>
-        <img class="w-80 h-52 left-[384px] top-[3909px] absolute" src="https://placehold.co/312x208" alt="Produk rekayasa perangkat lunak" />
-        <div class="w-32 h-8 left-[111px] top-[4067px] absolute bg-neutral-800 rounded-lg">
-            <div class="w-28 h-4 left-[10px] top-[7px] absolute text-center justify-center text-white text-xs font-medium font-['Inter'] uppercase leading-4">SEMUA PRODUK</div>
-        </div>
-        <div class="w-64 h-14 left-[111px] top-[3909px] absolute justify-center text-black text-2xl font-medium font-['Inter'] uppercase leading-7">Rekayasa Perangkat Lunak</div>
-        <div class="w-56 h-14 left-[112px] top-[3984px] absolute justify-center text-black text-xs font-normal font-['Inter'] uppercase leading-5">Dari Company Profile,<br/>E-Commerce, hingga Aplikasi Online</div>
-        <img class="w-[649px] h-60 left-[537px] top-[3598px] absolute rounded-2xl border border-amber-200" src="https://placehold.co/649x238" alt="Produk pembuatan kain" />
-        <img class="w-96 h-60 left-[779px] top-[3877px] absolute rounded-2xl border border-red-600" src="https://placehold.co/407x238" alt="Produk ototronik" />
-        <div class="w-32 h-8 left-[571px] top-[3777px] absolute bg-neutral-800 rounded-lg">
-            <div class="w-28 h-4 left-[10px] top-[7px] absolute text-center justify-center text-white text-xs font-medium font-['Inter'] uppercase leading-4">SEMUA PRODUK</div>
-        </div>
-        <div class="w-32 h-8 left-[805px] top-[4067px] absolute bg-neutral-800 rounded-lg">
-            <div class="w-28 h-4 left-[10px] top-[7px] absolute text-center justify-center text-white text-xs font-medium font-['Inter'] uppercase leading-4">SEMUA PRODUK</div>
-        </div>
-        <div class="w-32 h-8 left-[116px] top-[3784px] absolute bg-neutral-800 rounded-lg">
-            <div class="w-28 h-4 left-[10px] top-[7px] absolute text-center justify-center text-white text-xs font-medium font-['Inter'] uppercase leading-4">SEMUA PRODUK</div>
-        </div>
-        <div class="w-72 h-14 left-[571px] top-[3700px] absolute justify-center text-black text-xs font-normal font-['Inter'] uppercase leading-5">Dari kain batik, tenun, hingga kain ecoprint semua diproduksi oleh siswa jurusan Tekstil.</div>
-        <div class="w-72 h-14 left-[571px] top-[3626px] absolute justify-center text-black text-2xl font-medium font-['Inter'] uppercase leading-7">TEKNIK PEMBUATAN KAIN</div>
-        <img class="w-28 h-48 left-[943px] top-[3611px] absolute" src="https://placehold.co/116x195" alt="Kain produksi siswa" />
-        <img class="size-52 left-[1002px] top-[3611px] absolute" src="https://placehold.co/202x202" alt="Kain produksi siswa 2" />
-        <div class="w-64 h-5 left-[804px] top-[3914px] absolute justify-center text-black text-2xl font-semibold font-['Inter'] uppercase leading-5">TEKNIK OTOTRONIK</div>
-        <img class="size-36 left-[1086.91px] top-[3909px] absolute origin-top-left rotate-[28.57deg]" src="https://placehold.co/142x142" alt="Produk ototronik 2" />
-        <div class="w-60 h-24 left-[804px] top-[3957px] absolute justify-center text-black text-xs font-normal font-['Inter'] uppercase leading-5">teknologi otoTRONIK modern dalam perawatan dan perbaikan kendaraan untuk menghasilkan performa yang optimal dan berkualitas.</div>
+                        <!-- Card News 2 -->
+                        <div
+                            class="bg-gradient-to-r from-emerald-800 to-teal-900 rounded-xl overflow-hidden p-6 text-white relative group">
+                            <div class="text-xs font-semibold text-emerald-300 mb-1">SMKN 2 KARANGANYAR MENGUCAPKAN
+                            </div>
+                            <h4
+                                class="text-2xl sm:text-3xl font-black italic tracking-wide text-amber-300 group-hover:scale-105 transition-transform">
+                                SELAMAT DAN SUKSES !
+                            </h4>
+                            <p class="text-xs text-emerald-100 mt-2">Juara 1 Lomba Kompetensi Siswa (LKS) Bidang CNC
+                                Milling 2026</p>
+                        </div>
+                    </div>
 
-        {{-- ================= INFORMASI PPDB ================= --}}
-        <div class="w-[1280px] h-[832px] left-0 top-[4187px] absolute bg-slate-200/30"></div>
-        <div class="left-[702px] top-[4256px] absolute justify-start text-black text-4xl font-medium font-['Poppins'] leading-[56px]">INFORMASI PPDB<br/>SMKN 2 KARANGANYAR</div>
-        <img class="w-[604px] h-96 left-[63px] top-[4256px] absolute rounded-[10px] shadow-[0px_4px_50px_0px_rgba(0,0,0,0.25)]" src="https://placehold.co/604x400" alt="Informasi PPDB" />
-        <div class="w-[458px] left-[702px] top-[4377px] absolute justify-start">
-            <span class="text-black text-base font-normal font-['Poppins'] leading-5">Calon Murid Baru yang akan mengikuti PPDB Tahun 2024 diharapkan menyiapkan seluruh dokumen persyaratan sebelum melakukan pengajuan akun. Kelengkapan berkas yang diunggah akan memperlancar proses verifikasi data dan menghindari kendala saat pendaftaran.<br/><br/>Persyaratan ini mengacu pada </span>
-            <span class="text-black text-base font-normal font-['Poppins'] underline leading-5">Petunjuk Operasional Penyelenggaraan SPMB SMA Negeri, SMK Negeri, dan SLB Negeri Provinsi Jawa Tengah Tahun Ajaran 2026/2027</span>
-            <span class="text-black text-base font-normal font-['Poppins'] leading-5">.</span>
+                    <!-- Slider Arrows Controls -->
+                    <button id="prev-news"
+                        class="absolute -left-4 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white shadow-md border border-slate-200 flex items-center justify-center text-slate-700 hover:text-brand-blue transition-colors">
+                        <i class="fa-solid fa-chevron-left text-xs"></i>
+                    </button>
+                    <button id="next-news"
+                        class="absolute -right-4 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white shadow-md border border-slate-200 flex items-center justify-center text-slate-700 hover:text-brand-blue transition-colors">
+                        <i class="fa-solid fa-chevron-right text-xs"></i>
+                    </button>
+                </div>
+            </div>
+
         </div>
-        <div class="w-44 h-10 left-[702px] top-[4610px] absolute bg-sky-700 rounded-2xl shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]"></div>
-        <div class="w-40 h-8 left-[726px] top-[4615px] absolute justify-center text-white text-xs font-semibold font-['Poppins'] leading-5">Lihat Selengkapnya</div>
+    </section>
 
-        <div class="w-[130px] h-[144px] left-[30px] top-[4209px] absolute plus-tex" aria-hidden="true"></div>
-        <div class="w-[128px] h-[134px] left-[1142px] top-[4665px] absolute plus-tex" aria-hidden="true"></div>
+    <!-- PRODUK UNGGULAN (Foto 4) -->
+    <section id="produk" class="py-16 bg-white relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-        {{-- Daya Tampung --}}
-        <div class="w-[1156px] h-64 left-[63px] top-[4732px] absolute bg-white rounded-2xl shadow-[0px_4px_20px_0px_rgba(0,0,0,0.25)] overflow-hidden">
-            <div class="w-64 h-36 left-[28px] top-[74px] absolute bg-blue-600/80 rounded-2xl"></div>
-            <div class="w-64 h-36 left-[312px] top-[74px] absolute bg-orange-500/80 rounded-2xl"></div>
-            <div class="w-64 h-36 left-[595px] top-[74px] absolute bg-red-600/80 rounded-2xl"></div>
-            <div class="w-64 h-36 left-[878px] top-[74px] absolute bg-green-600/80 rounded-2xl"></div>
-            <div class="left-[47px] top-[86px] absolute justify-start text-white text-xl font-semibold font-['Poppins'] leading-7">TEKNIK PERMESINAN</div>
-            <div class="left-[51px] top-[122px] absolute justify-start text-white text-5xl font-semibold font-['Poppins'] leading-[67.2px]">108</div>
-            <div class="left-[56px] top-[178px] absolute justify-start text-white text-base font-normal font-['Poppins'] leading-6">Siswa</div>
-            <div class="left-[337px] top-[90px] absolute justify-start text-white text-base font-semibold font-['Poppins'] leading-6">TEKNIK PEMBUATAN KAIN</div>
-            <div class="left-[337px] top-[122px] absolute justify-start text-white text-5xl font-semibold font-['Poppins'] leading-[67.2px]">108</div>
-            <div class="left-[342px] top-[178px] absolute justify-start text-white text-base font-normal font-['Poppins'] leading-6">Siswa</div>
-            <div class="left-[619px] top-[86px] absolute justify-start text-white text-xl font-semibold font-['Poppins'] leading-7">TEKNIK OTOTRONIK</div>
-            <div class="left-[623px] top-[122px] absolute justify-start text-white text-5xl font-semibold font-['Poppins'] leading-[67.2px]">108</div>
-            <div class="left-[628px] top-[178px] absolute justify-start text-white text-base font-normal font-['Poppins'] leading-6">Siswa</div>
-            <div class="w-52 left-[910px] top-[88px] absolute justify-start text-white text-base font-semibold font-['Poppins'] leading-6">REKAYASA PERANGKAT LUNAK</div>
-            <div class="left-[910px] top-[122px] absolute justify-start text-white text-5xl font-semibold font-['Poppins'] leading-[67.2px]">108</div>
-            <div class="left-[915px] top-[178px] absolute justify-start text-white text-base font-normal font-['Poppins'] leading-6">Siswa</div>
+            <!-- Section Header -->
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 mb-4">
+                    Produk Unggulan
+                </h2>
+                <p class="text-slate-600 text-base sm:text-lg">
+                    Beragam produk unggulan berbasis teknologi dan industri yang mencerminkan keterampilan siswa sesuai
+                    kebutuhan dunia kerja.
+                </p>
+            </div>
+
+            <!-- 4 Products Grid (Foto 4) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+                <!-- Product 1: Teknik Permesinan (Blue Gradient) -->
+                <div
+                    class="bg-gradient-to-r from-blue-300 via-blue-200 to-slate-200 rounded-2xl p-8 flex flex-col justify-between relative overflow-hidden shadow-sm hover:shadow-lg transition-shadow">
+                    <div class="pr-24 z-10">
+                        <h3 class="text-xl sm:text-2xl font-extrabold text-slate-900 mb-3">
+                            TEKNIK PERMESINAN
+                        </h3>
+                        <p
+                            class="text-slate-700 text-xs sm:text-sm uppercase tracking-wide leading-relaxed mb-6 font-semibold">
+                            DIPROSES MENGGUNAKAN MESIN MODERN YANG MENGHASILKAN PRODUK DENGAN KUALITAS TINGGI, PRESISI,
+                            DAN HASIL YANG KONSISTEN.
+                        </p>
+                        <button
+                            onclick="openModal('Katalog Teknik Permesinan', 'Menampilkan daftar produk presisi tinggi, sparepart custom, dan komponen mesin buatan siswa.')"
+                            class="bg-slate-900 text-white text-xs font-bold px-5 py-2.5 rounded-lg uppercase tracking-wider hover:bg-slate-800 transition-colors">
+                            SEMUA PRODUK
+                        </button>
+                    </div>
+                    <!-- Right Mockup Visual (Bolt / Hardware) -->
+                    <div class="absolute right-5 bottom-10 w-32 h-32 opacity-90">
+                        <img src="{{ asset('assets/produk-mesin.png') }}" alt="Bolt / Hardware" class="w-full h-full object-contain">
+                    </div>
+                </div>
+
+                <!-- Product 2: Teknik Pembuatan Kain (Yellow Gradient) -->
+                <div
+                    class="bg-gradient-to-r from-amber-200 via-amber-100 to-yellow-50 rounded-2xl p-8 flex flex-col justify-between relative overflow-hidden shadow-sm hover:shadow-lg transition-shadow">
+                    <div class="pr-28 z-10">
+                        <h3 class="text-xl sm:text-2xl font-extrabold text-slate-900 mb-3">
+                            TEKNIK PEMBUATAN KAIN
+                        </h3>
+                        <p
+                            class="text-slate-700 text-xs sm:text-sm uppercase tracking-wide leading-relaxed mb-6 font-semibold">
+                            DARI KAIN BATIK, TENUN, HINGGA KAIN ECOPRINT SEMUA DIPRODUKSI OLEH SISWA JURUSAN TEKSTIL.
+                        </p>
+                        <button
+                            onclick="openModal('Katalog Teknik Pembuatan Kain', 'Menampilkan koleksi kain Batik tulis, Tenun tradisional, dan Ecoprint ramah lingkungan.')"
+                            class="bg-slate-900 text-white text-xs font-bold px-5 py-2.5 rounded-lg uppercase tracking-wider hover:bg-slate-800 transition-colors">
+                            SEMUA PRODUK
+                        </button>
+                    </div>
+                    <!-- Right Mockup Visual (Fashion Textile) -->
+                    <div class="absolute right-5 bottom-10 w-32 h-36 flex items-center justify-center opacity-90">
+                        <img src="{{ asset('assets/produk-tpk.png') }}" alt="Bolt / Hardware" class="w-full h-full object-contain">
+                    </div>
+                </div>
+
+                <!-- Product 3: RPL (Green Gradient) -->
+                <div
+                    class="bg-gradient-to-r from-emerald-200 via-teal-100 to-emerald-50 rounded-2xl p-8 flex flex-col justify-between relative overflow-hidden shadow-sm hover:shadow-lg transition-shadow">
+                    <div class="pr-32 z-10">
+                        <h3 class="text-xl sm:text-2xl font-extrabold text-slate-900 mb-3">
+                            REKAYASA PERANGKAT LUNAK
+                        </h3>
+                        <p
+                            class="text-slate-700 text-xs sm:text-sm uppercase tracking-wide leading-relaxed mb-6 font-semibold">
+                            DARI COMPANY PROFILE, E-COMMERCE, HINGGA APLIKASI ONLINE
+                        </p>
+                        <button
+                            onclick="openModal('Portofolio Produk RPL', 'Layanan pembuatan Website, Aplikasi Android, Sistem Kasir POS, dan UI/UX Design oleh Teaching Factory RPL.')"
+                            class="bg-slate-900 text-white text-xs font-bold px-5 py-2.5 rounded-lg uppercase tracking-wider hover:bg-slate-800 transition-colors">
+                            SEMUA PRODUK
+                        </button>
+                    </div>
+                    <!-- Right Mockup Visual (Laptop & Smartphone Screen) -->
+                    <div class="absolute right-5 bottom-10 w-32 h-36 flex items-center justify-center opacity-90">
+                        <img src="{{ asset('assets/produk-rpl.png') }}" alt="Bolt / Hardware" class="w-full h-full object-contain">
+                    </div>
+                </div>
+
+                <!-- Product 4: Teknik Ototronik (Red Gradient) -->
+                <div
+                    class="bg-gradient-to-r from-red-300 via-pink-200 to-rose-100 rounded-2xl p-8 flex flex-col justify-between relative overflow-hidden shadow-sm hover:shadow-lg transition-shadow">
+                    <div class="pr-28 z-10">
+                        <h3 class="text-xl sm:text-2xl font-extrabold text-slate-900 mb-3">
+                            TEKNIK OTOTRONIK
+                        </h3>
+                        <p
+                            class="text-slate-700 text-xs sm:text-sm uppercase tracking-wide leading-relaxed mb-6 font-semibold">
+                            TEKNOLOGI OTOTRONIK MODERN DALAM PERAWATAN DAN PERBAIKAN KENDARAAN UNTUK MENGHASILKAN
+                            PERFORMA YANG OPTIMAL DAN BERKUALITAS.
+                        </p>
+                        <button
+                            onclick="openModal('Layanan Teknik Ototronik', 'Jasa tune-up mesin injeksi, diagnosa scanner komputerisasi, dan kelistrikan otomotif.')"
+                            class="bg-slate-900 text-white text-xs font-bold px-5 py-2.5 rounded-lg uppercase tracking-wider hover:bg-slate-800 transition-colors">
+                            SEMUA PRODUK
+                        </button>
+                    </div>
+                    <!-- Right Mockup Visual (Car Parts) -->
+                    <div class="absolute right-5 bottom-10 w-32 h-36 flex items-center justify-center opacity-90">
+                        <img src="{{ asset('assets/produk-oto.png') }}" alt="Bolt / Hardware" class="w-full h-full object-contain">
+                    </div>
+                </div>
+
+            </div>
+
         </div>
-        <div class="w-96 h-5 left-[94px] top-[4749px] absolute justify-center">
-            <span class="text-neutral-500 text-lg font-bold font-['Poppins'] leading-9">Daya Tampung &mdash; </span>
-            <span class="text-neutral-500 text-lg font-semibold font-['Poppins'] leading-9">Kompetensi Keahlian</span>
+    </section>
+
+    <!-- LAYANAN PEMINJAMAN AULA -->
+    <section id="aula" class="py-16 bg-[#FAFCFF] relative overflow-hidden font-sans">
+
+        <!-- Pattern Titik-Titik (Dot Pattern) di Pojok Kanan Atas -->
+        <div class="absolute top-8 right-8 w-28 h-28 dot-pattern opacity-40 pointer-events-none"></div>
+
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+
+            <!-- Header Utama -->
+            <div class="text-center max-w-3xl mx-auto mb-14">
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 mb-3 tracking-tight">
+                    Layanan Peminjaman Aula
+                </h2>
+                <p class="text-slate-500 text-sm sm:text-base leading-relaxed">
+                    Fasilitas sekolah dengan kapasitas luas untuk berbagai kebutuhan acara institusi,<br
+                        class="hidden sm:block"> perusahaan, dan masyarakat umum.
+                </p>
+            </div>
+
+            <!-- Layout Utama: Kiri (Kartu Harga) & Kanan (Detail Informasi) -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+
+                <!-- SISI KIRI: Pricing Cards (Kapasitas 4 Kolom) -->
+                <div class="lg:col-span-4 flex flex-col justify-between gap-6">
+
+                    <!-- 1. Paket Unggulan Card -->
+                    <div class="bg-white border-2 border-[#0066B2] rounded-2xl p-6 relative shadow-sm">
+                        <!-- Pill Badge Kapsul -->
+                        <div
+                            class="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-[#0066B2] text-white text-xs font-semibold px-8 py-1 rounded-full">
+                            Unggulan
+                        </div>
+
+                        <!-- Harga -->
+                        <div class="mt-2 mb-5 flex items-baseline justify-center gap-1">
+                            <span class="text-xs font-medium text-slate-400">Rp.</span>
+                            <span class="text-2xl sm:text-3xl font-bold text-[#0066B2]">6.000.000</span>
+                            <span class="text-xs text-slate-400">/ 12 Jam</span>
+                        </div>
+
+                        <!-- List Fasilitas -->
+                        <ul class="space-y-2.5 mb-6 text-slate-700 text-xs sm:text-sm">
+                            <li class="flex items-center gap-2.5">
+                                <i class="fa-regular fa-circle-check text-[#0066B2] text-base"></i>
+                                <span>Sound System Medium</span>
+                            </li>
+                            <li class="flex items-center gap-2.5">
+                                <i class="fa-regular fa-circle-check text-[#0066B2] text-base"></i>
+                                <span>Mic 4</span>
+                            </li>
+                            <li class="flex items-center gap-2.5">
+                                <i class="fa-regular fa-circle-check text-[#0066B2] text-base"></i>
+                                <span>500 Kursi + Cover</span>
+                            </li>
+                            <li class="flex items-center gap-2.5">
+                                <i class="fa-regular fa-circle-check text-[#0066B2] text-base"></i>
+                                <span>Proyektor 2</span>
+                            </li>
+                        </ul>
+
+                        <!-- Tombol Aksi -->
+                        <button
+                            onclick="openModal('Pemesanan Paket Unggulan', 'Form reservasi Aula 12 Jam (Rp 6.000.000).')"
+                            class="w-full bg-[#0066B2] hover:bg-blue-700 text-white text-xs sm:text-sm font-semibold py-2.5 rounded-full transition-all duration-200">
+                            Pilih Paket
+                        </button>
+                    </div>
+
+                    <!-- 2. Paket Terjangkau Card -->
+                    <div class="bg-white border-2 border-[#0066B2] rounded-2xl p-6 relative shadow-sm">
+                        <!-- Pill Badge Kapsul -->
+                        <div
+                            class="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-[#0066B2] text-white text-xs font-semibold px-8 py-1 rounded-full">
+                            Terjangkau
+                        </div>
+
+                        <!-- Harga -->
+                        <div class="mt-2 mb-5 flex items-baseline justify-center gap-1">
+                            <span class="text-xs font-medium text-slate-400">Rp.</span>
+                            <span class="text-2xl sm:text-3xl font-bold text-[#0066B2]">1.500.000</span>
+                            <span class="text-xs text-slate-400">/ 4 Jam</span>
+                        </div>
+
+                        <!-- List Fasilitas -->
+                        <ul class="space-y-2.5 mb-6 text-slate-700 text-xs sm:text-sm">
+                            <li class="flex items-center gap-2.5">
+                                <i class="fa-regular fa-circle-check text-[#0066B2] text-base"></i>
+                                <span>Sound System Standar</span>
+                            </li>
+                            <li class="flex items-center gap-2.5">
+                                <i class="fa-regular fa-circle-check text-[#0066B2] text-base"></i>
+                                <span>Mic 2</span>
+                            </li>
+                            <li class="flex items-center gap-2.5">
+                                <i class="fa-regular fa-circle-check text-[#0066B2] text-base"></i>
+                                <span>100 Kursi</span>
+                            </li>
+                            <li class="flex items-center gap-2.5">
+                                <i class="fa-regular fa-circle-check text-[#0066B2] text-base"></i>
+                                <span>Proyektor 1</span>
+                            </li>
+                        </ul>
+
+                        <!-- Tombol Aksi -->
+                        <button
+                            onclick="openModal('Pemesanan Paket Terjangkau', 'Form reservasi Aula 4 Jam (Rp 1.500.000).')"
+                            class="w-full bg-[#0066B2] hover:bg-blue-700 text-white text-xs sm:text-sm font-semibold py-2.5 rounded-full transition-all duration-200">
+                            Pilih Paket
+                        </button>
+                    </div>
+
+                </div>
+
+                <!-- SISI KANAN: Informasi Peminjaman & Gambar Visual Side-by-Side (Kapasitas 8 Kolom) -->
+                <div
+                    class="lg:col-span-8 bg-white rounded-3xl p-8 sm:p-10 pb-10 sm:pb-12 border border-slate-100 shadow-xl flex flex-col justify-between">
+
+                    <div>
+                        <!-- Judul Section Informasi dengan Garis Bawah Tegas -->
+                        <div class="flex items-center gap-3 mb-6">
+                            <i class="fa-regular fa-circle-info text-2xl text-slate-900"></i>
+                            <h3
+                                class="text-xl sm:text-2xl font-bold text-slate-900 border-b-2 border-slate-900 pb-1 inline-block">
+                                Informasi Peminjaman Aula
+                            </h3>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+
+                            <!-- Deskripsi & Poin Poin (Sisi Kiri Konten Informasi) -->
+                            <div class="md:col-span-7 space-y-4">
+                                <p class="text-slate-600 text-xs sm:text-sm leading-relaxed">
+                                    Kami menyediakan layanan peminjaman aula sekolah untuk berbagai kebutuhan kegiatan.
+                                    Mulai dari acara sekolah, organisasi, rapat, seminar, hingga kegiatan instansi luar.
+                                </p>
+
+                                <div>
+                                    <p class="text-slate-800 font-semibold text-xs sm:text-sm mb-1.5">Layanan kami
+                                        mencakup:</p>
+                                    <ul class="list-disc list-inside text-slate-600 text-xs sm:text-sm space-y-1 pl-1">
+                                        <li>Booking Aula Online.</li>
+                                        <li>Peminjaman Aula Berkualitas.</li>
+                                        <li>Fasilitas Lengkap.</li>
+                                        <li>Kebersihan & Kenyamanan.</li>
+                                        <li>Parkir & Keamanan.</li>
+                                    </ul>
+                                </div>
+
+                                <p class="text-slate-600 text-xs sm:text-sm pt-1">
+                                    Kami siap membantu menciptakan tempat kegiatan yang nyaman dan berkualitas.
+                                </p>
+
+                                <!-- Tombol Mulai Peminjaman Kapsul -->
+                                <div class="pt-3">
+                                    <button onclick="openModal('Mulai Peminjaman Aula', 'Form jadwal peminjaman aula.')"
+                                        class="bg-[#0066B2] hover:bg-blue-700 text-white font-semibold text-xs sm:text-sm px-6 py-2.5 rounded-full transition-all duration-200 shadow-md">
+                                        Mulai Peminjaman
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Visual Foto Aula & Overlay Laptop (Sisi Kanan Konten Informasi) -->
+                            <div class="md:col-span-5 relative mt-4 md:mt-0 pl-0 sm:pl-2">
+                                <!-- Foto Utama Aula diperpanjang ukurannya (h-80 sm:h-96 / aspect-[3/4]) -->
+                                <div
+                                    class="relative rounded-2xl overflow-hidden shadow-md h-80 sm:h-96 w-full bg-slate-200">
+                                    <img src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=800&auto=format&fit=crop&q=80"
+                                        alt="Gedung Auditorium Aula" class="w-full h-full object-cover">
+                                </div>
+
+                                <!-- Mockup Overlay Laptop yang menyesuaikan posisi baru -->
+                                <div
+                                    class="absolute -bottom-3 -left-3 sm:-left-6 w-44 sm:w-52 rounded-xl overflow-hidden shadow-2xl border-2 border-white bg-white transition-transform duration-300 hover:scale-105 hidden sm:block z-20">
+                                    <img src="https://images.unsplash.com/photo-1531403009284-440f080d1e12?w=500&auto=format&fit=crop&q=80"
+                                        alt="Sistem Reservasi Online Mockup" class="w-full h-auto object-cover">
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
         </div>
-        <div class="w-96 h-0 left-[95px] top-[4779px] absolute outline outline-[3px] outline-offset-[-1.5px] outline-neutral-200"></div>
-        <div class="w-44 h-0 left-[95px] top-[4779px] absolute outline outline-[3px] outline-offset-[-1.5px] outline-blue-500"></div>
+    </section>
 
-        {{-- ================= FOOTER ================= --}}
-        <div class="w-[1284px] h-[549px] left-[-4px] top-[5201px] absolute bg-sky-700 rounded-tl-[80px] rounded-tr-[80px] shadow-[0px_4px_50px_0px_rgba(0,0,0,0.25)]"></div>
-        <img class="w-80 h-52 left-[85px] top-[5304px] absolute" src="https://placehold.co/307x205" alt="Logo SMK Negeri 2 Karanganyar" />
-        <div class="w-96 h-16 left-[85px] top-[5551px] absolute justify-center text-white text-base font-medium font-['Poppins'] leading-5">SMK Negeri 2 Karanganyar adalah salah satu Sekolah Menengah Kejuruan favorit di Kabupaten Karanganyar. Serta merupakan sekolah yang berpendidikan karakter, berwawasan, disiplin, tanggung jawab, dan bermoral baik.</div>
-        <img class="w-[639px] h-80 left-[545px] top-[5304px] absolute rounded-[10px]" src="https://placehold.co/639x347" alt="Lokasi SMK Negeri 2 Karanganyar" />
-        <div class="w-[1284px] h-20 left-[-4px] top-[5747px] absolute bg-stone-900"></div>
-        <div class="left-[456px] top-[5776px] absolute justify-start text-white text-sm font-normal font-['Public_Sans'] leading-5">&copy; 2026 SMKN 2 Karanganyar. All Rights Reserved</div>
+    <!-- INFORMASI PPDB & DAYA TAMPUNG (Foto 6) -->
+    <section id="ppdb" class="py-16 bg-white relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-    </div>
-    </div>
+            <!-- Top Banner & Text Grid (Foto 6 Top) -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center mb-16">
+
+                <!-- Left Banner Graphic Mockup -->
+                <div class="lg:col-span-6">
+                    <div class="rounded-2xl overflow-hidden shadow-xl border border-slate-100 bg-slate-100">
+                        <img src="{{ asset('assets/ppdb.png') }}" alt="Banner SPMB SMKN 2 Karanganyar"
+                            class="w-full h-56 sm:h-64 md:h-80 object-cover">
+                    </div>
+                </div>
+
+                <!-- Right PPDB Info Text -->
+                <div class="lg:col-span-6 space-y-4">
+                    <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 leading-tight">
+                        INFORMASI PPDB<br />
+                        SMKN 2 KARANGANYAR
+                    </h2>
+                    <p class="text-slate-600 text-sm leading-relaxed">
+                        Calon Murid Baru yang akan mengikuti PPDB Tahun 2026 diharapkan menyiapkan seluruh dokumen
+                        persyaratan sebelum melakukan pengajuan akun. Kelengkapan berkas yang diunggah akan memperlancar
+                        proses verifikasi data dan menghindari kendala saat pendaftaran.
+                    </p>
+                    <p class="text-slate-500 text-xs leading-relaxed underline">
+                        Persyaratan ini mengacu pada Petunjuk Operasional Penyelenggaraan SPMB SMA Negeri, SMK Negeri,
+                        dan SLB Negeri Provinsi Jawa Tengah Tahun Ajaran 2026/2027.
+                    </p>
+                    <div class="pt-2">
+                        <button
+                            onclick="openModal('Portal Resmi PPDB 2026', 'Mengarahkan ke portal resmi verifikasi berkas & pendaftaran online SPMB Jawa Tengah.')"
+                            class="bg-brand-blue hover:bg-brand-darkBlue text-white font-semibold px-6 py-2.5 rounded-xl text-sm transition-colors shadow-md">
+                            Lihat Selengkapnya
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Daya Tampung Box (Foto 6 Bottom) -->
+            <div class="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 card-shadow">
+                <div class="mb-6 flex items-center gap-3">
+                    <h4 class="text-base font-bold text-slate-800">Daya Tampung — Kompetensi Keahlian</h4>
+                    <div class="h-[2px] bg-slate-200 flex-1"></div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- Teknik Permesinan -->
+                    <div class="bg-[#2B89FF] text-white rounded-2xl p-5 hover:scale-105 transition-transform">
+                        <div class="text-xs font-extrabold uppercase mb-4 tracking-wider">TEKNIK PERMESINAN</div>
+                        <div class="text-4xl font-black mb-1">108</div>
+                        <div class="text-xs text-blue-100 font-medium">Siswa</div>
+                    </div>
+
+                    <!-- Teknik Pembuatan Kain -->
+                    <div class="bg-[#FF982B] text-white rounded-2xl p-5 hover:scale-105 transition-transform">
+                        <div class="text-xs font-extrabold uppercase mb-4 tracking-wider">TEKNIK PEMBUATAN KAIN</div>
+                        <div class="text-4xl font-black mb-1">108</div>
+                        <div class="text-xs text-amber-100 font-medium">Siswa</div>
+                    </div>
+
+                    <!-- Teknik Ototronik -->
+                    <div class="bg-[#FF3B3B] text-white rounded-2xl p-5 hover:scale-105 transition-transform">
+                        <div class="text-xs font-extrabold uppercase mb-4 tracking-wider">TEKNIK OTOTRONIK</div>
+                        <div class="text-4xl font-black mb-1">108</div>
+                        <div class="text-xs text-red-100 font-medium">Siswa</div>
+                    </div>
+
+                    <!-- Rekayasa Perangkat Lunak -->
+                    <div class="bg-[#28C76F] text-white rounded-2xl p-5 hover:scale-105 transition-transform">
+                        <div class="text-xs font-extrabold uppercase mb-4 tracking-wider">REKAYASA PERANGKAT LUNAK</div>
+                        <div class="text-4xl font-black mb-1">108</div>
+                        <div class="text-xs text-emerald-100 font-medium">Siswa</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
 @endsection

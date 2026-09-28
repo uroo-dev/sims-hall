@@ -1,69 +1,114 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BkkController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\PklBkkDashboardController;
+use App\Http\Controllers\PklController;
 use Illuminate\Support\Facades\Route;
 
+/*
+|--------------------------------------------------------------------------
+| Halaman Publik
+|--------------------------------------------------------------------------
+*/
 Route::get('/', function () {
     return view('Public.landing');
-});
+})->name('landing');
 
+Route::get('/profil', function () {
+    return view('Public.profil');
+})->name('profil');
+
+Route::get('/ppdb', function () {
+    return view('Public.ppdb');
+})->name('ppdb');
+
+Route::get('/kesiswaan', function () {
+    return view('Public.kesiswaan');
+})->name('kesiswaan');
+
+Route::get('/produk-unggulan', function () {
+    return view('Public.produk-unggulan');
+})->name('produk-unggulan');
+
+Route::get('/layanan-peminjaman', function () {
+    return view('Public.layanan-peminjaman');
+})->name('layanan-peminjaman');
+
+Route::get('/pkl-bkk', function () {
+    return view('Public.pkl-bkk');
+})->name('pkl-bkk');
+
+Route::get('/registrasi', function () {
+    return view('Public.registrasi');
+})->name('registrasi');
+
+/*
+|--------------------------------------------------------------------------
+| Auth
+|--------------------------------------------------------------------------
+*/
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'create'])->name('login');
     Route::post('/login', [AuthController::class, 'store'])->middleware('throttle:6,1');
+
+    Route::get('/login/admin', function () {
+        return view('Auth.login-admin');
+    })->name('login.admin');
 });
 
+/*
+|--------------------------------------------------------------------------
+| Admin - Modul PKL & BKK
+|
+| Role yang boleh akses: bkk, admin, super_admin, super_duper_admin
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth', 'role:bkk,admin,super_admin,super_duper_admin'])
+    ->prefix('dashboard/pkl-bkk')
+    ->name('pkl.')
+    ->group(function () {
+
+        // --- BKK: Career Center & Master DUDI ---
+        Route::get('/', [BkkController::class, 'index'])->name('dashboard');
+
+        Route::get('/dudi', [BkkController::class, 'dudi'])->name('dudi.index');
+        Route::patch('/dudi/{dudi}', [BkkController::class, 'updateDudi'])->name('dudi.update');
+
+        Route::get('/lowongan', [BkkController::class, 'lowongan'])->name('lowongan.index');
+        Route::get('/lowongan/tambah', [BkkController::class, 'lowonganForm'])->name('lowongan.create');
+        Route::post('/lowongan', [BkkController::class, 'storeLowongan'])->name('lowongan.store');
+        Route::get('/lowongan/{lowongan}/edit', [BkkController::class, 'lowonganForm'])->name('lowongan.edit');
+        Route::put('/lowongan/{lowongan}', [BkkController::class, 'updateLowongan'])->name('lowongan.update');
+        Route::patch('/lowongan/{lowongan}/toggle', [BkkController::class, 'toggleLowongan'])->name('lowongan.toggle');
+        Route::delete('/lowongan/{lowongan}', [BkkController::class, 'destroyLowongan'])->name('lowongan.destroy');
+
+        Route::get('/siswa', [BkkController::class, 'siswa'])->name('siswa.index');
+
+        // --- PKL: Pengajuan & Penempatan ---
+        Route::get('/penempatan', [PklController::class, 'index'])->name('index');
+        Route::get('/pengajuan/create', [PklController::class, 'create'])->name('create');
+        Route::post('/pengajuan', [PklController::class, 'store'])->name('store');
+
+        Route::get('/surat/{surat}', [PklController::class, 'showSurat'])->name('surat.show');
+        Route::get('/surat/{surat}/download', [PklController::class, 'downloadSurat'])->name('surat.download');
+        Route::post('/surat/{surat}/regenerate', [PklController::class, 'regeneratePdf'])->name('surat.regenerate');
+
+        Route::patch('/penempatan/{penempatan}/status', [PklController::class, 'updateStatus'])->name('penempatan.status');
+        Route::patch('/penempatan/bulk-status', [PklController::class, 'bulkUpdateStatus'])->name('penempatan.bulk-status');
+
+        Route::patch('/dudi/{dudi}/acc-landing', [PklController::class, 'accLanding'])->name('dudi.acc-landing');
+    });
+
+/*
+|--------------------------------------------------------------------------
+| Dashboard utama (role admin & super admin)
+|--------------------------------------------------------------------------
+*/
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'destroy'])->name('logout');
 
     Route::get('/dashboard', [DashboardController::class, 'index'])
         ->middleware('role:admin,super_admin,super_duper_admin')
         ->name('dashboard');
-
-    Route::get('/dashboard/pkl-bkk', [PklBkkDashboardController::class, 'index'])
-        ->middleware('role:admin,super_admin,super_duper_admin')
-        ->name('dashboard.pkl');
-
-    Route::get('/dashboard/pkl-bkk/lowongan', [PklBkkDashboardController::class, 'loker'])
-        ->middleware('role:admin,super_admin,super_duper_admin')
-        ->name('pklbkk.loker');
-
-    Route::get('/dashboard/pkl-bkk/lowongan/tambah', [PklBkkDashboardController::class, 'lokerForm'])
-        ->middleware('role:admin,super_admin,super_duper_admin')
-        ->name('pklbkk.loker.create');
-
-    Route::get('/dashboard/pkl-bkk/lowongan/edit', [PklBkkDashboardController::class, 'lokerForm'])
-        ->middleware('role:admin,super_admin,super_duper_admin')
-        ->name('pklbkk.loker.edit');
-
-    Route::get('/dashboard/pkl-bkk/pelamar', [PklBkkDashboardController::class, 'pelamar'])
-        ->middleware('role:admin,super_admin,super_duper_admin')
-        ->name('pklbkk.pelamar');
-
-    Route::get('/dashboard/pkl-bkk/tempat-pkl', [PklBkkDashboardController::class, 'tempat'])
-        ->middleware('role:admin,super_admin,super_duper_admin')
-        ->name('pklbkk.tempat');
-
-    Route::get('/dashboard/pkl-bkk/jurnal', [PklBkkDashboardController::class, 'jurnal'])
-        ->middleware('role:admin,super_admin,super_duper_admin')
-        ->name('pklbkk.jurnal');
-
-    Route::get('/dashboard/pkl-bkk/nilai', [PklBkkDashboardController::class, 'nilai'])
-        ->middleware('role:admin,super_admin,super_duper_admin')
-        ->name('pklbkk.nilai');
 });
-
-// contoh route
-// Keterangan ROUTE (Route Users)
-// Route::get('/namaroute', [namacontroller::class, 'index'])->name('/namaroute/index');
-
-// contoh route dengan middleware role
-// Route::middleware(['auth', 'role:admin,super_admin'])->group(function () {
-//     Route::get('/admin', [namacontroller::class, 'index'])->name('admin.index');
-// });
-
-// contoh route dengan middleware adminFitur
-// Route::middleware(['auth', 'adminFitur:ppdb'])->group(function () {
-//     Route::get('/ppdb', [namacontroller::class, 'index'])->name('ppdb.index');
-// });
