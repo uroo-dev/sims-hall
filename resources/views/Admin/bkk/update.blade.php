@@ -2,11 +2,9 @@
 
 @section('title', 'Form Lowongan Kerja - BKK & PKL | SMK Negeri 2 Karanganyar')
 
+@section('page_title', 'Form Lowongan Kerja')
+
 @section('content')
-    <main class="flex-1 h-full overflow-y-auto p-6 lg:p-8 space-y-6">
-
-        @include('Admin.PklBkk.partials.header', ['pklPage' => 'Form Lowongan Kerja'])
-
         <section class="max-w-3xl bg-white rounded-2xl p-6 md:p-8 figma-card-shadow border border-slate-100">
             <div class="flex flex-wrap items-center justify-between gap-3 mb-6 pb-4 border-b border-slate-100">
                 <div>
@@ -60,7 +58,6 @@
             </form>
         </section>
 
-    </main>
 @endsection
 
 @push('scripts')

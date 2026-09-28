@@ -3,10 +3,7 @@
 @section('title', 'Dashboard Admin - SMK Negeri 2 Karanganyar')
 
 @section('content')
-    <!-- RIGHT MAIN CONTENT -->
-    <main class="flex-1 p-6 lg:p-8 overflow-y-auto space-y-6">
 
-        @include('Admin.layout.header')
 
         <!-- 3 TOP STAT CARDS GRID -->
         <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -150,7 +147,6 @@
 
         </section>
 
-    </main>
 @endsection
 
 @push('scripts')

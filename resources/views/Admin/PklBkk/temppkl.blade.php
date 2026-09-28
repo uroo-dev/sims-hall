@@ -2,11 +2,9 @@
 
 @section('title', 'Tempat PKL - BKK & PKL | SMK Negeri 2 Karanganyar')
 
+@section('page_title', 'Tempat PKL')
+
 @section('content')
-    <main class="flex-1 h-full overflow-y-auto p-6 lg:p-8 space-y-6">
-
-        @include('Admin.PklBkk.partials.header', ['pklPage' => 'Tempat PKL'])
-
         <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
             <!-- Form Tambah Mitra -->
@@ -80,7 +78,6 @@
             </div>
         </section>
 
-    </main>
 @endsection
 
 @push('scripts')

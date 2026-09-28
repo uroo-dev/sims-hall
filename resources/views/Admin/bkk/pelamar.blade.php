@@ -2,11 +2,9 @@
 
 @section('title', 'Data Pelamar - BKK & PKL | SMK Negeri 2 Karanganyar')
 
+@section('page_title', 'Data Pelamar')
+
 @section('content')
-    <main class="flex-1 h-full overflow-y-auto p-6 lg:p-8 space-y-6">
-
-        @include('Admin.PklBkk.partials.header', ['pklPage' => 'Data Pelamar'])
-
         <section class="bg-white rounded-2xl p-6 figma-card-shadow border border-slate-100">
             <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
                 <div class="flex items-center space-x-2">
@@ -47,7 +45,6 @@
             </div>
         </section>
 
-    </main>
 @endsection
 
 @push('scripts')

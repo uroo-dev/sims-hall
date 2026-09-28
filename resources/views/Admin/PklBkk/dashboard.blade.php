@@ -2,11 +2,9 @@
 
 @section('title', 'Dashboard BKK & PKL - SMK Negeri 2 Karanganyar')
 
+@section('page_title', 'Dashboard BKK & PKL')
+
 @section('content')
-    <main class="flex-1 h-full overflow-y-auto p-6 lg:p-8 space-y-6">
-
-        @include('Admin.PklBkk.partials.header', ['pklPage' => 'Dashboard'])
-
         <!-- 3 TOP STAT CARDS GRID -->
         <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
@@ -63,7 +61,6 @@
             </div>
         </section>
 
-    </main>
 @endsection
 
 @push('scripts')
