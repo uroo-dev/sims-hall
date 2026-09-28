@@ -8,6 +8,6 @@ class Fitur extends Model
 {
     protected $fillable = [
         'user_id',
-        'fitur',
+        'nama_fitur',
     ];
 }
