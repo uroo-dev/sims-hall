@@ -2,7 +2,6 @@
 
 namespace App\Http\Middleware;
 
-use App\Models\Fitur;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -18,11 +17,19 @@ class AdminFiturMiddleware
     {
         $user = $request->user();
 
-        if (! $user || $user->role !== 'admin') {
+        if (! $user) {
             abort(403);
         }
 
-        $adminFitur = Fitur::where('user_id', $user->id)->first();
+        if ($user->isSuperAdmin()) {
+            return $next($request);
+        }
+
+        if ($user->role !== 'admin') {
+            abort(403);
+        }
+
+        $adminFitur = $user->fitur;
 
         if (! $adminFitur || ! in_array($adminFitur->nama_fitur, $allowedFitur, true)) {
             abort(403);

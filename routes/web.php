@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\FasilitasController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -19,6 +20,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])
         ->middleware('role:admin,super_admin,super_duper_admin')
         ->name('dashboard');
+
+    // Admin Aula: CRUD Fasilitas
+    Route::middleware('adminFitur:aula')->prefix('admin')->name('admin.')->group(function () {
+        Route::resource('fasilitas', FasilitasController::class)
+            ->parameters(['fasilitas' => 'facility'])
+            ->except(['create', 'edit', 'show']);
+    });
 });
 
 // contoh route
