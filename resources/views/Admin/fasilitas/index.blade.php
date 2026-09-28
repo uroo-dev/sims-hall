@@ -6,25 +6,6 @@
 @section('content')
 <div class="space-y-6">
 
-    <!-- PAGE HEADER -->
-    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-white rounded-2xl p-5 md:p-6 figma-card-shadow border border-slate-100">
-        <div>
-            <div class="flex items-center gap-2">
-                <span class="w-2.5 h-6 bg-brand-600 rounded-full inline-block"></span>
-                <h1 class="text-xl md:text-2xl font-extrabold text-slate-800 tracking-tight">Manajemen Fasilitas Aula</h1>
-            </div>
-            <p class="text-xs md:text-sm text-slate-500 mt-1 font-medium pl-4.5">
-                Kelola daftar fasilitas dan sarana prasarana penunjang aula SMK Negeri 2 Karanganyar.
-            </p>
-        </div>
-
-        <button type="button" onclick="openCreateModal()"
-            class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-brand-600 hover:bg-brand-700 active:scale-95 text-white text-xs md:text-sm font-bold rounded-xl shadow-sm transition transform">
-            <i class="fa-solid fa-plus text-xs"></i>
-            <span>Tambah Fasilitas</span>
-        </button>
-    </div>
-
     <!-- FLASH MESSAGES -->
     @if (session('success'))
         <div id="alertSuccess" class="bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl p-4 flex items-center justify-between shadow-sm transition-all duration-300">
@@ -63,9 +44,24 @@
         </div>
     @endif
 
-    <!-- SEARCH & CONTROLS -->
-    <div class="bg-white rounded-2xl p-4 md:p-5 figma-card-shadow border border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
-        <form action="{{ route('admin.fasilitas.index') }}" method="GET" class="w-full sm:max-w-md flex items-center gap-2">
+    <!-- ACTION, STAT & SEARCH CONTROLS -->
+    <div class="bg-white rounded-2xl p-4 md:p-5 figma-card-shadow border border-slate-100 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+        <!-- 1. BTN TAMBAH FASILITAS & 2. TOTAL FASILITAS -->
+        <div class="flex flex-wrap items-center gap-3">
+            <button type="button" onclick="openCreateModal()"
+                class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-brand-600 hover:bg-brand-700 active:scale-95 text-white text-xs md:text-sm font-bold rounded-xl shadow-sm transition transform">
+                <i class="fa-solid fa-plus text-xs"></i>
+                <span>Tambah Fasilitas</span>
+            </button>
+
+            <div class="flex items-center gap-2 text-xs md:text-sm text-slate-600 font-medium bg-slate-50 px-3.5 py-2.5 rounded-xl border border-slate-200">
+                <i class="fa-solid fa-box text-brand-600 text-xs"></i>
+                <span>Total Fasilitas: <strong class="text-slate-800 font-bold">{{ $facilities->total() }}</strong></span>
+            </div>
+        </div>
+
+        <!-- 3. SEARCH BAR -->
+        <form action="{{ route('admin.fasilitas.index') }}" method="GET" class="w-full md:max-w-md flex items-center gap-2">
             <div class="relative flex-1">
                 <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400 pointer-events-none">
                     <i class="fa-solid fa-magnifying-glass text-xs"></i>
@@ -75,21 +71,17 @@
                     class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs md:text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-600/20 focus:border-brand-600 transition">
             </div>
             <button type="submit"
-                class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white text-xs md:text-sm font-semibold rounded-xl transition shadow-sm">
+                class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white text-xs md:text-sm font-semibold rounded-xl transition shadow-sm flex-shrink-0">
                 Cari
             </button>
             @if (!empty($search))
                 <a href="{{ route('admin.fasilitas.index') }}"
-                    class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs md:text-sm font-semibold rounded-xl transition"
+                    class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs md:text-sm font-semibold rounded-xl transition flex-shrink-0"
                     title="Reset Pencarian">
                     Reset
                 </a>
             @endif
         </form>
-
-        <div class="text-xs text-slate-500 font-medium">
-            Total Fasilitas: <span class="font-bold text-slate-800">{{ $facilities->total() }}</span> data
-        </div>
     </div>
 
     <!-- DATA TABLE CONTAINER -->

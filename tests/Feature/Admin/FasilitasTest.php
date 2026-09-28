@@ -61,7 +61,8 @@ class FasilitasTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('Sound System 5000W');
-        $response->assertSee('Manajemen Fasilitas Aula');
+        $response->assertSee('Tambah Fasilitas');
+        $response->assertSee('Total Fasilitas');
     }
 
     public function test_admin_aula_can_create_facility(): void
