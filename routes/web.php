@@ -2,68 +2,62 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\PklBkkDashboardController;
+use App\Http\Controllers\DataMasterDashboardController;
+use App\Http\Controllers\PublicController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('Public.landing');
-});
+// Halaman Publik
+Route::get('/', [PublicController::class, 'landing'])->name('landing');
 
+Route::get('/profil', function () {
+    $sekolah = \App\Models\Sekolah::first() ?? new \App\Models\Sekolah();
+    return view('Public.profil', compact('sekolah'));
+})->name('profil');
+
+// Autentikasi (Login)
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'create'])->name('login');
     Route::post('/login', [AuthController::class, 'store'])->middleware('throttle:6,1');
 });
 
+// Area Terproteksi (Harus Login)
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'destroy'])->name('logout');
 
+    // --- DASHBOARD UTAMA ---
     Route::get('/dashboard', [DashboardController::class, 'index'])
         ->middleware('role:admin,super_admin,super_duper_admin')
         ->name('dashboard');
 
-    Route::get('/dashboard/pkl-bkk', [PklBkkDashboardController::class, 'index'])
-        ->middleware('role:admin,super_admin,super_duper_admin')
-        ->name('dashboard.pkl');
+    // --- DASHBOARD DATA MASTER ---
+    Route::prefix('dashboard/data-master')->group(function () {
+        Route::get('/', [DataMasterDashboardController::class, 'index'])
+            ->middleware('role:admin,super_admin,super_duper_admin')
+            ->name('datamaster.index');
 
-    Route::get('/dashboard/pkl-bkk/lowongan', [PklBkkDashboardController::class, 'loker'])
-        ->middleware('role:admin,super_admin,super_duper_admin')
-        ->name('pklbkk.loker');
+        // Data Sekolah (Update)
+        Route::get('/sekolah', [DataMasterDashboardController::class, 'editSekolah'])
+            ->middleware('role:admin,super_admin,super_duper_admin')
+            ->name('datamaster.sekolah.edit');
 
-    Route::get('/dashboard/pkl-bkk/lowongan/tambah', [PklBkkDashboardController::class, 'lokerForm'])
-        ->middleware('role:admin,super_admin,super_duper_admin')
-        ->name('pklbkk.loker.create');
+        Route::put('/sekolah', [DataMasterDashboardController::class, 'updateSekolah'])
+            ->middleware('role:admin,super_admin,super_duper_admin')
+            ->name('datamaster.sekolah.update');
 
-    Route::get('/dashboard/pkl-bkk/lowongan/edit', [PklBkkDashboardController::class, 'lokerForm'])
-        ->middleware('role:admin,super_admin,super_duper_admin')
-        ->name('pklbkk.loker.edit');
+        // Users (CRUD)
+        Route::get('/users', [DataMasterDashboardController::class, 'users'])
+            ->middleware('role:admin,super_admin,super_duper_admin')
+            ->name('datamaster.users');
+        Route::post('/users', [DataMasterDashboardController::class, 'storeUser'])
+            ->middleware('role:admin,super_admin,super_duper_admin')
+            ->name('datamaster.users.store');
+        Route::put('/users/{id}', [DataMasterDashboardController::class, 'updateUser'])
+            ->middleware('role:admin,super_admin,super_duper_admin')
+            ->name('datamaster.users.update');
+        Route::delete('/users/{id}', [DataMasterDashboardController::class, 'destroyUser'])
+            ->middleware('role:admin,super_admin,super_duper_admin')
+            ->name('datamaster.users.destroy');
+    });
 
-    Route::get('/dashboard/pkl-bkk/pelamar', [PklBkkDashboardController::class, 'pelamar'])
-        ->middleware('role:admin,super_admin,super_duper_admin')
-        ->name('pklbkk.pelamar');
 
-    Route::get('/dashboard/pkl-bkk/tempat-pkl', [PklBkkDashboardController::class, 'tempat'])
-        ->middleware('role:admin,super_admin,super_duper_admin')
-        ->name('pklbkk.tempat');
-
-    Route::get('/dashboard/pkl-bkk/jurnal', [PklBkkDashboardController::class, 'jurnal'])
-        ->middleware('role:admin,super_admin,super_duper_admin')
-        ->name('pklbkk.jurnal');
-
-    Route::get('/dashboard/pkl-bkk/nilai', [PklBkkDashboardController::class, 'nilai'])
-        ->middleware('role:admin,super_admin,super_duper_admin')
-        ->name('pklbkk.nilai');
 });
-
-// contoh route
-// Keterangan ROUTE (Route Users)
-// Route::get('/namaroute', [namacontroller::class, 'index'])->name('/namaroute/index');
-
-// contoh route dengan middleware role
-// Route::middleware(['auth', 'role:admin,super_admin'])->group(function () {
-//     Route::get('/admin', [namacontroller::class, 'index'])->name('admin.index');
-// });
-
-// contoh route dengan middleware adminFitur
-// Route::middleware(['auth', 'adminFitur:ppdb'])->group(function () {
-//     Route::get('/ppdb', [namacontroller::class, 'index'])->name('ppdb.index');
-// });

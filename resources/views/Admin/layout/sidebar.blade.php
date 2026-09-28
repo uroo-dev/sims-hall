@@ -1,77 +1,239 @@
-<aside class="w-72 h-full flex flex-col relative z-20 shrink-0 overflow-y-auto transition-all duration-300">
+   <!-- SIDEBAR CONTAINER -->
+   <aside id="sidebar"
+   class="fixed top-0 bottom-0 left-0 z-50 w-[270px] bg-white flex flex-col transition-transform duration-300 -translate-x-full lg:translate-x-0 border-r border-gray-100">
 
-    <!-- Top School Branding Box (White Background) -->
-    <div class="bg-white px-5 py-4 flex items-center space-x-3 h-20 border-b border-slate-100">
-        <div class="w-10 h-10 rounded-full bg-brand-600 flex items-center justify-center text-white shadow-md shrink-0">
-            <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
-                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-        </div>
-        <div>
-            <p class="text-xs font-black text-slate-800 tracking-wider uppercase leading-snug">SMK NEGERI 2</p>
-            <p class="text-[11px] font-bold text-slate-600 tracking-wider uppercase leading-tight">KARANGANYAR</p>
-        </div>
-    </div>
+   <!-- BRAND / LOGO HEADER (Latar Belakang Putih) -->
+   <div class="p-5 bg-white flex items-center gap-3">
+       <img src="assets/logosmkk.png" alt="Logo SMKN 2 Karanganyar" class="w-10 h-10 object-contain">
+       <div>
+           <h1 class="font-bold text-gray-900 leading-tight text-xs tracking-wider uppercase">SMK NEGERI 2</h1>
+           <p class="font-semibold text-gray-500 text-[11px] tracking-tight uppercase">KARANGANYAR</p>
+       </div>
+   </div>
 
-    <!-- Blue Sidebar Body with Rounded Top-Right Curved Shoulder -->
-    <div class="bg-brand-600 flex-1 flex flex-col justify-between p-5 pt-6 rounded-tr-[50px] shadow-xl">
-        <div>
-            <!-- Navigation Items -->
-            <div class="space-y-2">
+   <!-- MAIN BLUE CONTAINER -->
+   <div class="bg-[#0073c6] flex-1 rounded-tr-[40px] flex flex-col overflow-hidden text-white pt-6 pb-6 px-4">
 
-                <!-- Active Capsule Item: Dashboard -->
-                <a href="{{ route('dashboard') }}" id="menu-dashboard" onclick="setActiveMenu('dashboard')" class="menu-item flex items-center space-x-3.5 px-5 py-3 rounded-full bg-white text-brand-600 font-semibold shadow-md transition-all duration-200">
-                    <i class="fa-solid fa-table-cells-large text-lg"></i>
-                    <span class="text-sm">Dashboard</span>
-                </a>
+       <!-- MENU NAVIGATION SCROLLABLE AREA -->
+       <div class="flex-1 overflow-y-auto sidebar-scroll pr-1 space-y-6">
 
-                <!-- Subheader Category Divider -->
-                <div class="pt-4 pb-2 px-2 flex items-center justify-between text-white/70">
-                    <span id="role-category-label" class="text-xs font-medium tracking-wide">Admin Sapras</span>
-                    <div class="h-[1px] w-16 bg-white/30 rounded-full"></div>
-                </div>
+           <!-- ACTIVE DASHBOARD ITEM -->
+           <a href="#"
+               class="flex items-center gap-3 px-5 py-3.5 bg-white text-[#0073c6] rounded-full font-bold text-sm shadow-sm transition transform active:scale-95">
+               <i class="fa-solid fa-table-cells-large text-base"></i>
+               <span>Dashboard</span>
+           </a>
 
-                <!-- Dynamic Menu Items List -->
-                <div id="sidebar-dynamic-menus" class="space-y-1.5">
+           <!-- CATEGORY: DATA MASTER SEKOLAH -->
+           <div class="space-y-3">
+               <div
+                   class="flex items-center justify-between text-[12px] font-medium text-blue-100/90 tracking-wide">
+                   <span>Data Master Sekolah</span>
+                   <span class="w-12 h-[1px] bg-white/30"></span>
+               </div>
+               <div class="space-y-2.5 pl-1">
+                   <a href="#"
+                       class="flex items-center gap-3 py-1.5 text-white hover:text-blue-100 font-medium text-sm transition">
+                       <i class="fa-solid fa-graduation-cap w-5 text-center text-base"></i>
+                       <span>Dashboard Sekolah</span>
+                   </a>
+                   <a href="#"
+                       class="flex items-center gap-3 py-1.5 text-white hover:text-blue-100 font-medium text-sm transition">
+                       <i class="fa-regular fa-comment-dots w-5 text-center text-base"></i>
+                       <span>Data Sekolah</span>
+                   </a>
+                   <a href="#"
+                       class="flex items-center gap-3 py-1.5 text-white hover:text-blue-100 font-medium text-sm transition">
+                       <i class="fa-solid fa-users-gear w-5 text-center text-base"></i>
+                       <span>Users</span>
+                   </a>
+               </div>
+           </div>
 
-                    <a href="#" onclick="setActiveMenu('fasilitas')" class="menu-item flex items-center space-x-3.5 px-5 py-2.5 rounded-xl text-white/90 hover:bg-white/10 font-normal transition-all duration-200">
-                        <i class="fa-solid fa-building text-base w-5 text-center"></i>
-                        <span class="text-sm">Fasilitas</span>
-                    </a>
+           <!-- CATEGORY: PEMINJAMAN AULA -->
+           <div class="space-y-3">
+               <div
+                   class="flex items-center justify-between text-[12px] font-medium text-blue-100/90 tracking-wide">
+                   <span>Peminjaman Aula</span>
+                   <span class="w-12 h-[1px] bg-white/30"></span>
+               </div>
+               <div class="space-y-2.5 pl-1">
+                   <a href="#"
+                       class="flex items-center gap-3 py-1.5 text-white hover:text-blue-100 font-medium text-sm transition">
+                       <i class="fa-solid fa-building-columns w-5 text-center text-base"></i>
+                       <span>Dashboard Aula</span>
+                   </a>
+                   <a href="#"
+                       class="flex items-center gap-3 py-1.5 text-white hover:text-blue-100 font-medium text-sm transition">
+                       <i class="fa-solid fa-box w-5 text-center text-base"></i>
+                       <span>Fasilitas</span>
+                   </a>
+                   <a href="#"
+                       class="flex items-center gap-3 py-1.5 text-white hover:text-blue-100 font-medium text-sm transition">
+                       <i class="fa-solid fa-boxes-packing w-5 text-center text-base"></i>
+                       <span>Paket Peminjaman</span>
+                   </a>
+                   <a href="#"
+                       class="flex items-center gap-3 py-1.5 text-white hover:text-blue-100 font-medium text-sm transition">
+                       <i class="fa-solid fa-cart-shopping w-5 text-center text-base"></i>
+                       <span>Persetujuan 1</span>
+                   </a>
+                   <a href="#"
+                       class="flex items-center gap-3 py-1.5 text-white hover:text-blue-100 font-medium text-sm transition">
+                       <i class="fa-solid fa-chart-simple w-5 text-center text-base"></i>
+                       <span>Laporan Operasional</span>
+                   </a>
+               </div>
+           </div>
 
-                    <a href="#" onclick="setActiveMenu('paket')" class="menu-item flex items-center space-x-3.5 px-5 py-2.5 rounded-xl text-white/90 hover:bg-white/10 font-normal transition-all duration-200">
-                        <i class="fa-solid fa-box text-base w-5 text-center"></i>
-                        <span class="text-sm">Paket Peminjaman</span>
-                    </a>
+           <!-- CATEGORY: KEPALA SEKOLAH -->
+           <div class="space-y-3">
+               <div
+                   class="flex items-center justify-between text-[12px] font-medium text-blue-100/90 tracking-wide">
+                   <span>Kepala Sekolah</span>
+                   <span class="w-12 h-[1px] bg-white/30"></span>
+               </div>
+               <div class="space-y-2.5 pl-1">
+                   <a href="#"
+                       class="flex items-center gap-3 py-1.5 text-white hover:text-blue-100 font-medium text-sm transition">
+                       <i class="fa-solid fa-user-tie w-5 text-center text-base"></i>
+                       <span>Dashboard KS</span>
+                   </a>
+                   <a href="#"
+                       class="flex items-center gap-3 py-1.5 text-white hover:text-blue-100 font-medium text-sm transition">
+                       <i class="fa-solid fa-cart-shopping w-5 text-center text-base"></i>
+                       <span>Persetujuan 2</span>
+                   </a>
+                   <a href="#"
+                       class="flex items-center gap-3 py-1.5 text-white hover:text-blue-100 font-medium text-sm transition">
+                       <i class="fa-solid fa-chart-simple w-5 text-center text-base"></i>
+                       <span>Laporan Operasional</span>
+                   </a>
+               </div>
+           </div>
 
-                    <a href="#" onclick="setActiveMenu('persetujuan')" class="menu-item flex items-center space-x-3.5 px-5 py-2.5 rounded-xl text-white/90 hover:bg-white/10 font-normal transition-all duration-200">
-                        <i class="fa-solid fa-cart-shopping text-base w-5 text-center"></i>
-                        <span class="text-sm">Persetujuan 1</span>
-                    </a>
+           <!-- CATEGORY: KESISWAAN -->
+           <div class="space-y-3">
+               <div
+                   class="flex items-center justify-between text-[12px] font-medium text-blue-100/90 tracking-wide">
+                   <span>Kesiswaan</span>
+                   <span class="w-12 h-[1px] bg-white/30"></span>
+               </div>
+               <div class="space-y-2.5 pl-1">
+                   <a href="#"
+                       class="flex items-center gap-3 py-1.5 text-white hover:text-blue-100 font-medium text-sm transition">
+                       <i class="fa-solid fa-users w-5 text-center text-base"></i>
+                       <span>Dashboard K</span>
+                   </a>
+                   <a href="#"
+                       class="flex items-center gap-3 py-1.5 text-white hover:text-blue-100 font-medium text-sm transition">
+                       <i class="fa-solid fa-trophy w-5 text-center text-base"></i>
+                       <span>Data Prestasi</span>
+                   </a>
+                   <a href="#"
+                       class="flex items-center gap-3 py-1.5 text-white hover:text-blue-100 font-medium text-sm transition">
+                       <i class="fa-solid fa-icons w-5 text-center text-base"></i>
+                       <span>Data Ekstrakulikuler</span>
+                   </a>
+                   <a href="#"
+                       class="flex items-center gap-3 py-1.5 text-white hover:text-blue-100 font-medium text-sm transition">
+                       <i class="fa-solid fa-book-bookmark w-5 text-center text-base"></i>
+                       <span>Data Tata Tertib</span>
+                   </a>
+               </div>
+           </div>
 
-                    <a href="#" onclick="setActiveMenu('laporan')" class="menu-item flex items-center space-x-3.5 px-5 py-2.5 rounded-xl text-white/90 hover:bg-white/10 font-normal transition-all duration-200">
-                        <i class="fa-solid fa-chart-column text-base w-5 text-center"></i>
-                        <span class="text-sm">Laporan Operasional</span>
-                    </a>
+           <!-- CATEGORY: PRODUK UNGGULAN -->
+           <div class="space-y-3">
+               <div
+                   class="flex items-center justify-between text-[12px] font-medium text-blue-100/90 tracking-wide">
+                   <span>Produk Unggulan</span>
+                   <span class="w-12 h-[1px] bg-white/30"></span>
+               </div>
+               <div class="space-y-2.5 pl-1">
+                   <a href="#"
+                       class="flex items-center gap-3 py-1.5 text-white hover:text-blue-100 font-medium text-sm transition">
+                       <i class="fa-solid fa-store w-5 text-center text-base"></i>
+                       <span>Dashboard PU</span>
+                   </a>
+                   <a href="#"
+                       class="flex items-center gap-3 py-1.5 text-white hover:text-blue-100 font-medium text-sm transition">
+                       <i class="fa-solid fa-basket-shopping w-5 text-center text-base"></i>
+                       <span>Data Produk</span>
+                   </a>
+               </div>
+           </div>
 
-                    <a href="#" onclick="setActiveMenu('profil')" class="menu-item flex items-center space-x-3.5 px-5 py-2.5 rounded-xl text-white/90 hover:bg-white/10 font-normal transition-all duration-200">
-                        <i class="fa-solid fa-user-group text-base w-5 text-center"></i>
-                        <span class="text-sm">Profil</span>
-                    </a>
+           <!-- CATEGORY: PKL & BKK -->
+           <div class="space-y-3">
+               <div
+                   class="flex items-center justify-between text-[12px] font-medium text-blue-100/90 tracking-wide">
+                   <span>PKL & BKK</span>
+                   <span class="w-12 h-[1px] bg-white/30"></span>
+               </div>
+               <div class="space-y-2.5 pl-1">
+                   <a href="#"
+                       class="flex items-center gap-3 py-1.5 text-white hover:text-blue-100 font-medium text-sm transition">
+                       <i class="fa-solid fa-briefcase w-5 text-center text-base"></i>
+                       <span>Dashboard PB</span>
+                   </a>
+                   <a href="#"
+                       class="flex items-center gap-3 py-1.5 text-white hover:text-blue-100 font-medium text-sm transition">
+                       <i class="fa-solid fa-bars-staggered w-5 text-center text-base"></i>
+                       <span>Data Dudi</span>
+                   </a>
+                   <a href="#"
+                       class="flex items-center gap-3 py-1.5 text-white hover:text-blue-100 font-medium text-sm transition">
+                       <i class="fa-solid fa-laptop-code w-5 text-center text-base"></i>
+                       <span>Lowongan Kerja</span>
+                   </a>
+                   <a href="#"
+                       class="flex items-center gap-3 py-1.5 text-white hover:text-blue-100 font-medium text-sm transition">
+                       <i class="fa-solid fa-address-card w-5 text-center text-base"></i>
+                       <span>Data PKL</span>
+                   </a>
+                   <a href="#"
+                       class="flex items-center gap-3 py-1.5 text-white hover:text-blue-100 font-medium text-sm transition">
+                       <i class="fa-solid fa-comments w-5 text-center text-base"></i>
+                       <span>Data Jurusan</span>
+                   </a>
+               </div>
+           </div>
 
-                </div>
-            </div>
-        </div>
+           <!-- CATEGORY: PPDB -->
+           <div class="space-y-3">
+               <div
+                   class="flex items-center justify-between text-[12px] font-medium text-blue-100/90 tracking-wide">
+                   <span>PPDB</span>
+                   <span class="w-12 h-[1px] bg-white/30"></span>
+               </div>
+               <div class="space-y-2.5 pl-1">
+                   <a href="#"
+                       class="flex items-center gap-3 py-1.5 text-white hover:text-blue-100 font-medium text-sm transition">
+                       <i class="fa-solid fa-user-plus w-5 text-center text-base"></i>
+                       <span>Dashboard PPDB</span>
+                   </a>
+                   <a href="#"
+                       class="flex items-center gap-3 py-1.5 text-white hover:text-blue-100 font-medium text-sm transition">
+                       <i class="fa-solid fa-file-lines w-5 text-center text-base"></i>
+                       <span>Informasi & Persyaratan</span>
+                   </a>
+               </div>
+           </div>
 
-        <!-- Bottom Logout Pill Button -->
-        <div class="pt-5">
-            <form action="{{ route('logout') }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin keluar dari portal admin?')">
-                @csrf
-                <button type="submit" class="w-full py-2.5 px-6 bg-white hover:bg-slate-100 text-brand-600 font-bold rounded-full shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center space-x-2 text-sm">
-                    <span>Logout</span>
-                </button>
-            </form>
-        </div>
-    </div>
+       </div>
 
+       <!-- LOGOUT BUTTON CONTAINER -->
+       <div class="pt-4 mt-2">
+        <form action="{{ route('logout') }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin keluar dari portal admin?')">
+            @csrf
+           <button name="logout"
+               class="w-full bg-white text-[#0073c6] hover:bg-gray-100 transition font-bold py-3 px-4 rounded-full text-sm shadow-sm flex items-center justify-center">
+               <span>Logout</span>
+           </button>
+        </form>
+       </div>
+
+   </div>
 </aside>
+

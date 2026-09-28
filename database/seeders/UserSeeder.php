@@ -36,6 +36,25 @@ class UserSeeder extends Seeder
         Fitur::firstOrCreate(
             ['user_id' => $pklBkk->id],
             ['nama_fitur' => 'pklbkk']
+
         );
+
+        $datamaster = User::firstOrCreate(
+            ['username' => 'dafin'],
+            [
+                'name' => 'Admin Data Master Sekolah',
+                'email' => 'datamastersekolah@smk2nkra.sch.id',
+                'role' => 'admin',
+                'password' => '1234',
+            ]
+        );
+
+        Fitur::firstOrCreate(
+            ['user_id' => $datamaster->id],
+            ['nama_fitur' => 'master']
+
+        );
+
+        
     }
 }

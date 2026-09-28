@@ -44,9 +44,15 @@ class AuthController extends Controller
 
         $request->session()->regenerate();
 
-        $dashboard = $request->user()->fitur?->nama_fitur === 'pklbkk'
-            ? route('dashboard.pkl')
-            : route('dashboard');
+        // Ambil nama fitur dari relasi (asumsi hasOne, jika hasMany gunakan ->first()->nama_fitur)
+        $fiturName = $request->user()->fitur?->nama_fitur;
+
+        // Tentukan tujuan redirect berdasarkan fitur
+        $dashboard = match ($fiturName) {
+            'master' => route('datamaster.index'),
+            'pklbkk' => route('dashboard.pkl'),
+            default  => route('dashboard'),
+        };
 
         return redirect()->intended($dashboard);
     }
