@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('paket_peminjamans', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('facility_id')->constrained('facilities')->cascadeOnDelete();
+            $table->string('nama_paket', 150)->nullable();
             $table->enum('kategori', ['unggulan', 'terjangkau', 'standar 1', 'standar 2', 'standar 3'])->index();
             $table->decimal('harga', 12, 2); // Diubah dari varchar ke decimal untuk kemudahan kalkulasi
             $table->text('deskripsi')->nullable();

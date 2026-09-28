@@ -32,8 +32,8 @@
             </a>
 
             <!-- 3. PAKET PEMINJAMAN -->
-            <a href="#"
-                class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('admin.paket-peminjaman.*') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
+            <a href="{{ route('admin.paket.index') }}"
+                class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('admin.paket.*') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
                 <i class="fa-solid fa-boxes-packing text-base w-5 text-center"></i>
                 <span>Paket Peminjaman</span>
             </a>

@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FasilitasController;
+use App\Http\Controllers\PaketPeminjamanController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -21,10 +22,14 @@ Route::middleware('auth')->group(function () {
         ->middleware('role:admin,super_admin,super_duper_admin')
         ->name('dashboard');
 
-    // Admin Aula: CRUD Fasilitas
+    // Admin Aula: CRUD Fasilitas & Paket Peminjaman
     Route::middleware('adminFitur:aula')->prefix('admin')->name('admin.')->group(function () {
         Route::resource('fasilitas', FasilitasController::class)
             ->parameters(['fasilitas' => 'facility'])
+            ->except(['create', 'edit', 'show']);
+
+        Route::resource('paket', PaketPeminjamanController::class)
+            ->parameters(['paket' => 'paket'])
             ->except(['create', 'edit', 'show']);
     });
 });

@@ -5,9 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['facility_id', 'kategori', 'harga', 'deskripsi'])]
+#[Fillable(['nama_paket', 'kategori', 'harga', 'deskripsi'])]
 class PaketPeminjaman extends Model
 {
     use HasFactory;
@@ -20,10 +21,27 @@ class PaketPeminjaman extends Model
     protected $table = 'paket_peminjamans';
 
     /**
-     * Relasi ke fasilitas utama paket.
+     * Relasi many-to-many ke Facility melalui detail_paket_peminjamans.
      */
-    public function facility(): BelongsTo
+    public function facilities(): BelongsToMany
     {
-        return $this->belongsTo(Facility::class, 'facility_id');
+        return $this->belongsToMany(Facility::class, 'detail_paket_peminjamans', 'paket_peminjaman_id', 'facility_id')
+            ->withTimestamps();
+    }
+
+    /**
+     * Relasi has-many ke tabel detail pivot.
+     */
+    public function details(): HasMany
+    {
+        return $this->hasMany(DetailPaketPeminjaman::class, 'paket_peminjaman_id');
+    }
+
+    /**
+     * Nama tampilan paket peminjaman.
+     */
+    public function getDisplayNameAttribute(): string
+    {
+        return $this->nama_paket ?: 'Paket '.ucwords($this->kategori);
     }
 }
