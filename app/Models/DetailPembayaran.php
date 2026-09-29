@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Storage;
 
 #[Fillable([
     'pembayaran_id',
@@ -78,5 +79,21 @@ class DetailPembayaran extends Model
             'refund' => 'Pengembalian Dana (Refund)',
             default => ucwords(str_replace('_', ' ', (string) $this->tipe_pembayaran)),
         };
+    }
+
+    /**
+     * URL publik untuk bukti transfer pembayaran.
+     */
+    public function getBuktiPembayaranUrlAttribute(): ?string
+    {
+        if (! $this->bukti_pembayaran) {
+            return null;
+        }
+
+        if (str_starts_with($this->bukti_pembayaran, 'http://') || str_starts_with($this->bukti_pembayaran, 'https://')) {
+            return $this->bukti_pembayaran;
+        }
+
+        return Storage::disk('public')->url($this->bukti_pembayaran);
     }
 }

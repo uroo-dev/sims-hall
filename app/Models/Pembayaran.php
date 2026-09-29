@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
     'total_refund',
     'sisa_tagihan',
     'status_pembayaran',
+    'jatuh_tempo_dp',
     'jatuh_tempo_pelunasan',
     'catatan',
 ])]
@@ -43,6 +44,7 @@ class Pembayaran extends Model
             'total_terbayar' => 'decimal:2',
             'total_refund' => 'decimal:2',
             'sisa_tagihan' => 'decimal:2',
+            'jatuh_tempo_dp' => 'datetime',
             'jatuh_tempo_pelunasan' => 'datetime',
         ];
     }

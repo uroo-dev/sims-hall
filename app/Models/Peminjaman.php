@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Facades\Storage;
 
 #[Fillable([
     'paket_peminjaman_id',
@@ -65,5 +66,21 @@ class Peminjaman extends Model
     public function persetujuans(): HasMany
     {
         return $this->hasMany(Persetujuan::class, 'peminjaman_id');
+    }
+
+    /**
+     * URL publik untuk berkas surat pengantar peminjaman.
+     */
+    public function getSuratPengantarUrlAttribute(): ?string
+    {
+        if (! $this->surat_pengantar) {
+            return null;
+        }
+
+        if (str_starts_with($this->surat_pengantar, 'http://') || str_starts_with($this->surat_pengantar, 'https://')) {
+            return $this->surat_pengantar;
+        }
+
+        return Storage::disk('public')->url($this->surat_pengantar);
     }
 }

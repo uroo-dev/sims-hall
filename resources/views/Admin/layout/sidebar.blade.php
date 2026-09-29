@@ -33,7 +33,7 @@
                 </a>
 
                 <!-- 3. PEMINJAMAN -->
-                <a href="{{ route('customer.paket') }}"
+                <a href="{{ route('customer.peminjaman.create') }}"
                     class="flex items-center gap-3 px-5 py-3.5 {{ request()->is('customer/peminjaman*') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
                     <i class="fa-regular fa-comment-dots text-base w-5 text-center"></i>
                     <span>Peminjaman</span>

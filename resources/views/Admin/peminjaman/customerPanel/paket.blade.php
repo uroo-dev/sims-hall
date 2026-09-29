@@ -97,7 +97,7 @@
                                     class="w-full text-xs text-[#0070ba] hover:underline font-semibold text-center block py-1">
                                 <i class="fa-solid fa-circle-info mr-1"></i> Lihat Detail Paket
                             </button>
-                            <a href="{{ route('customer.cek-peminjaman') }}"
+                            <a href="{{ route('customer.peminjaman.create', ['paket_id' => $unggulan->id]) }}"
                                class="w-full bg-[#0070ba] hover:bg-[#005a96] text-white text-sm font-bold py-2.5 px-4 rounded-xl text-center block shadow transition-colors">
                                 Pilih Paket
                             </a>
@@ -165,7 +165,7 @@
                                         class="w-full text-xs text-[#0070ba] hover:underline font-semibold text-center block py-1">
                                     <i class="fa-solid fa-circle-info mr-1"></i> Detail Paket
                                 </button>
-                                <a href="{{ route('customer.cek-peminjaman') }}"
+                                <a href="{{ route('customer.peminjaman.create', ['paket_id' => $pkt->id]) }}"
                                    class="w-full border-2 border-[#0070ba] text-[#0070ba] hover:bg-[#0070ba] hover:text-white text-sm font-bold py-2 px-4 rounded-xl text-center block transition-all">
                                     Pilih Paket
                                 </a>
@@ -259,7 +259,7 @@
                 class="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 text-xs md:text-sm font-semibold transition">
                 Tutup
             </button>
-            <a href="{{ route('customer.cek-peminjaman') }}"
+            <a id="modalPilihPaketBtn" href="{{ route('customer.peminjaman.create') }}"
                 class="px-5 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs md:text-sm font-bold shadow-sm transition inline-flex items-center gap-2">
                 <i class="fa-solid fa-arrow-right text-xs"></i>
                 <span>Pilih Paket</span>
@@ -280,6 +280,11 @@
 
         const harga = paket.harga ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(paket.harga) : 'Rp 0';
         document.getElementById('modalHarga').innerText = harga;
+
+        const pilihBtn = document.getElementById('modalPilihPaketBtn');
+        if (pilihBtn && paket.id) {
+            pilihBtn.href = "{{ route('customer.peminjaman.create') }}?paket_id=" + paket.id;
+        }
 
         const dpWrapper = document.getElementById('modalDpWrapper');
         if (paket.harga_dp && Number(paket.harga_dp) > 0) {

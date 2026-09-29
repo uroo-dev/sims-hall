@@ -17,7 +17,7 @@ class PaymentConfigurationController extends Controller
     {
         $config = PaymentConfiguration::current();
 
-        return view('Admin.paymentConfiguration.index', compact('config'));
+        return view('Admin.peminjaman.paymentConfiguration.index', compact('config'));
     }
 
     /**

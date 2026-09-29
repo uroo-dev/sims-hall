@@ -41,7 +41,7 @@ class PaketPeminjamanController extends Controller
             ->orderBy('judul')
             ->get();
 
-        return view('Admin.paket.index', compact('pakets', 'availableFacilities', 'search'));
+        return view('Admin.peminjaman.paket.index', compact('pakets', 'availableFacilities', 'search'));
     }
 
     /**

@@ -21,14 +21,14 @@ class UserSeeder extends Seeder
                 'password' => '1234',
             ]
         );
-        // User::firstOrCreate(
-        //     ['username' => 'dwika'],
-        //     [
-        //         'name' => 'dwika',
-        //         'email' => 'dwika@gmail.com',
-        //         'role' => 'pelanggan',
-        //         'password' => '1234',
-        //     ]
-        // );
+        User::firstOrCreate(
+            ['username' => 'dwika'],
+            [
+                'name' => 'dwika',
+                'email' => 'dwika@gmail.com',
+                'role' => 'pelanggan',
+                'password' => '1234',
+            ]
+        );
     }
 }

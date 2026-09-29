@@ -2,12 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\DetailPembayaran;
 use App\Models\PaketPeminjaman;
+use App\Models\PaymentConfiguration;
+use App\Models\Pembayaran;
 use App\Models\Peminjaman;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class CustomerPanelController extends Controller
@@ -86,7 +91,7 @@ class CustomerPanelController extends Controller
             }
         }
 
-        return view('Admin.customerPanel.dashboard', compact(
+        return view('Admin.peminjaman.customerPanel.dashboard', compact(
             'user',
             'peminjamanTerverifikasi',
             'peminjamanTertolak',
@@ -112,7 +117,7 @@ class CustomerPanelController extends Controller
         $paketUnggulan = $pakets->firstWhere('kategori', 'unggulan') ?? $pakets->first();
         $paketLainnya = $paketUnggulan ? $pakets->where('id', '!=', $paketUnggulan->id) : collect();
 
-        return view('Admin.customerPanel.paket', compact(
+        return view('Admin.peminjaman.customerPanel.paket', compact(
             'user',
             'pakets',
             'paketUnggulan',
@@ -121,19 +126,261 @@ class CustomerPanelController extends Controller
     }
 
     /**
+     * Halaman Formulir Pengajuan Peminjaman Aula:
+     * - Eager load facilities & details untuk paket terpilih (ramah N+1 query)
+     * - Form isian: Paket, Nama Pemohon, Email Instansi, Jadwal Mulai & Selesai, Catatan, dan Surat Pengantar
+     */
+    public function peminjamanCreate(Request $request): View
+    {
+        $user = $this->getCurrentUser();
+        $selectedPaketId = $request->query('paket_id');
+
+        // Eager load facilities & details agar bebas N+1 query
+        $pakets = PaketPeminjaman::with(['facilities', 'details'])
+            ->orderBy('harga', 'asc')
+            ->get();
+
+        $selectedPaket = $pakets->firstWhere('id', (int) $selectedPaketId) ?? $pakets->first();
+        $paymentConfig = PaymentConfiguration::current();
+
+        return view('Admin.peminjaman.customerPanel.pengajuan', compact(
+            'user',
+            'pakets',
+            'selectedPaket',
+            'paymentConfig'
+        ));
+    }
+
+    /**
+     * Simpan pengajuan peminjaman aula baru:
+     * - Validasi form berdasarkan skema migrasi peminjamans
+     * - Cek ketersediaan jadwal aula agar tidak bentrok
+     * - Upload surat pengantar (jika ada)
+     * - Inisialisasi tagihan pembayaran & tenggat jatuh tempo DP
+     */
+    public function peminjamanStore(Request $request): RedirectResponse
+    {
+        $user = $this->getCurrentUser();
+
+        $validated = $request->validate([
+            'paket_peminjaman_id' => ['required', 'exists:paket_peminjamans,id'],
+            'nama' => ['required', 'string', 'max:150'],
+            'email_instansi' => ['required', 'email', 'max:150'],
+            'tanggal_mulai' => ['required', 'date', 'after_or_equal:today'],
+            'tanggal_selesai' => ['required', 'date', 'after:tanggal_mulai'],
+            'catatan' => ['nullable', 'string', 'max:2000'],
+            'surat_pengantar' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png,doc,docx', 'max:5120'],
+        ], [
+            'paket_peminjaman_id.required' => 'Pilih salah satu paket peminjaman aula.',
+            'paket_peminjaman_id.exists' => 'Paket peminjaman yang dipilih tidak valid.',
+            'nama.required' => 'Nama pemohon atau penanggung jawab wajib diisi.',
+            'email_instansi.required' => 'Email instansi pemohon wajib diisi.',
+            'tanggal_mulai.required' => 'Waktu mulai peminjaman aula wajib diisi.',
+            'tanggal_mulai.after_or_equal' => 'Waktu mulai tidak boleh mendahului hari ini.',
+            'tanggal_selesai.required' => 'Waktu selesai peminjaman aula wajib diisi.',
+            'tanggal_selesai.after' => 'Waktu selesai harus setelah waktu mulai peminjaman.',
+            'surat_pengantar.mimes' => 'Format berkas surat pengantar harus PDF, JPG, PNG, atau DOC/DOCX.',
+            'surat_pengantar.max' => 'Ukuran berkas surat pengantar maksimal 5MB.',
+        ]);
+
+        $start = Carbon::parse($validated['tanggal_mulai']);
+        $end = Carbon::parse($validated['tanggal_selesai']);
+
+        // Cek apakah ada jadwal aula yang bentrok dengan peminjaman yang sudah disetujui (1 query ringan)
+        $isConflict = Peminjaman::query()
+            ->whereIn('status', ['approved_1', 'approved_final'])
+            ->where(function ($query) use ($start, $end) {
+                $query->where('tanggal_mulai', '<', $end)
+                    ->where('tanggal_selesai', '>', $start);
+            })
+            ->exists();
+
+        if ($isConflict) {
+            return back()->withInput()->withErrors([
+                'tanggal_mulai' => 'Jadwal aula pada tanggal dan jam tersebut sudah dipesan dan terverifikasi untuk acara lain. Silakan pilih rentang waktu lainnya.',
+            ]);
+        }
+
+        $suratPath = null;
+        if ($request->hasFile('surat_pengantar')) {
+            $suratPath = $request->file('surat_pengantar')->store('surat_pengantar', 'public');
+        }
+
+        $pembayaran = DB::transaction(function () use ($validated, $suratPath) {
+            $paket = PaketPeminjaman::findOrFail($validated['paket_peminjaman_id']);
+
+            $peminjaman = Peminjaman::create([
+                'paket_peminjaman_id' => $paket->id,
+                'nama' => $validated['nama'],
+                'email_instansi' => $validated['email_instansi'],
+                'tanggal_mulai' => $validated['tanggal_mulai'],
+                'tanggal_selesai' => $validated['tanggal_selesai'],
+                'catatan' => $validated['catatan'] ?? null,
+                'surat_pengantar' => $suratPath,
+                'status' => 'pending',
+            ]);
+
+            $config = PaymentConfiguration::current();
+            $jatuhTempoDp = now()->addHours($config->jatuh_tempo_dp_jam);
+            $jatuhTempoPelunasan = now()->addHours($config->jatuh_tempo_pelunasan_jam);
+
+            return Pembayaran::create([
+                'peminjaman_id' => $peminjaman->id,
+                'kode_pembayaran' => 'INV-'.date('Ym').'-'.str_pad((string) $peminjaman->id, 4, '0', STR_PAD_LEFT),
+                'total_tagihan' => $paket->harga,
+                'total_terbayar' => 0,
+                'total_refund' => 0,
+                'sisa_tagihan' => $paket->harga,
+                'status_pembayaran' => 'pending',
+                'jatuh_tempo_dp' => $jatuhTempoDp,
+                'jatuh_tempo_pelunasan' => $jatuhTempoPelunasan,
+                'catatan' => 'Tagihan sewa paket aula '.($paket->nama_paket ?: ucfirst($paket->kategori)),
+            ]);
+        });
+
+        return redirect()->route('customer.pembayaran.show', $pembayaran->id)
+            ->with('success', 'Formulir pengajuan peminjaman aula berhasil diajukan. Silakan lakukan pembayaran uang muka (DP) atau pembayaran lunas.');
+    }
+
+    /**
+     * Halaman Pembayaran Tagihan Aula:
+     * - Countdown waktu tenggang pembayaran DP real-time
+     * - Informasi lengkap rekening bank resmi sekolah & QRIS
+     * - Pilihan pembayaran: Bayar DP atau Langsung Lunas
+     * - Formulir unggah bukti transfer
+     * - Eager loaded: bebas N+1 query
+     */
+    public function pembayaranShow(Pembayaran $pembayaran): View
+    {
+        $user = $this->getCurrentUser();
+
+        // Keamanan akses: pastikan peminjam hanya melihat tagihannya sendiri (kecuali admin/super admin)
+        if ($user && $user->role !== 'admin' && ! $user->isSuperAdmin()) {
+            if ($pembayaran->peminjaman && $pembayaran->peminjaman->email_instansi !== $user->email && $pembayaran->peminjaman->nama !== $user->name) {
+                abort(403, 'Anda tidak memiliki hak akses untuk melihat tagihan pembayaran ini.');
+            }
+        }
+
+        // Eager load seluruh relasi terkait (mencegah N+1 query)
+        $pembayaran->load([
+            'peminjaman.paketPeminjaman.facilities',
+            'details.diverifikasiOleh',
+        ]);
+
+        $config = PaymentConfiguration::current();
+        $paket = $pembayaran->peminjaman?->paketPeminjaman;
+        $nominalDp = ($paket && $paket->harga_dp > 0) ? (float) $paket->harga_dp : ((float) $pembayaran->total_tagihan * 0.3);
+
+        return view('Admin.peminjaman.customerPanel.pembayaran', compact(
+            'user',
+            'pembayaran',
+            'config',
+            'paket',
+            'nominalDp'
+        ));
+    }
+
+    /**
+     * Kirim bukti pembayaran (DP / Lunas Langsung / Pelunasan):
+     */
+    public function pembayaranBayar(Request $request, Pembayaran $pembayaran): RedirectResponse
+    {
+        $user = $this->getCurrentUser();
+
+        if ($user && $user->role !== 'admin' && ! $user->isSuperAdmin()) {
+            if ($pembayaran->peminjaman && $pembayaran->peminjaman->email_instansi !== $user->email && $pembayaran->peminjaman->nama !== $user->name) {
+                abort(403, 'Akses ditolak.');
+            }
+        }
+
+        $validated = $request->validate([
+            'tipe_pembayaran' => ['required', 'in:dp,lunas_langsung,pelunasan'],
+            'bank_tujuan' => ['required', 'string', 'max:100'],
+            'bank_pengirim' => ['required', 'string', 'max:100'],
+            'norek_pengirim' => ['required', 'string', 'max:100'],
+            'atas_nama_pengirim' => ['required', 'string', 'max:150'],
+            'jumlah_bayar' => ['required', 'numeric', 'min:1000'],
+            'tanggal_bayar' => ['required', 'date'],
+            'bukti_pembayaran' => ['required', 'file', 'mimes:jpeg,png,jpg,webp,pdf', 'max:3072'],
+            'catatan' => ['nullable', 'string', 'max:1000'],
+        ], [
+            'tipe_pembayaran.required' => 'Pilih jenis pembayaran (DP atau Lunas Langsung).',
+            'bank_tujuan.required' => 'Pilih rekening tujuan transfer sekolah.',
+            'bank_pengirim.required' => 'Nama bank asal pengirim wajib diisi.',
+            'norek_pengirim.required' => 'Nomor rekening pengirim wajib diisi.',
+            'atas_nama_pengirim.required' => 'Nama pemilik rekening pengirim wajib diisi.',
+            'jumlah_bayar.required' => 'Nominal transfer wajib diisi.',
+            'bukti_pembayaran.required' => 'Unggah berkas bukti transfer atau struk pembayaran.',
+            'bukti_pembayaran.mimes' => 'Format berkas bukti transfer harus berupa JPG, PNG, WEBP, atau PDF.',
+            'bukti_pembayaran.max' => 'Ukuran berkas bukti transfer maksimal 3MB.',
+        ]);
+
+        $buktiPath = $request->file('bukti_pembayaran')->store('bukti_pembayaran', 'public');
+
+        DB::transaction(function () use ($pembayaran, $validated, $buktiPath) {
+            $prefix = match ($validated['tipe_pembayaran']) {
+                'dp' => 'DP',
+                'pelunasan' => 'PLN',
+                'lunas_langsung' => 'LNS',
+                default => 'TRX',
+            };
+
+            $detailCount = $pembayaran->details()->count() + 1;
+            $kodeTransaksi = 'TRX-'.$prefix.'-'.date('Ym').'-'.str_pad((string) $detailCount, 3, '0', STR_PAD_LEFT);
+
+            // Norek tujuan otomatis dicocokkan
+            $norekTujuan = null;
+            $config = PaymentConfiguration::current();
+            if ($validated['bank_tujuan'] === $config->bank_utama) {
+                $norekTujuan = $config->norek_utama;
+            } elseif ($validated['bank_tujuan'] === $config->bank_alternatif_1) {
+                $norekTujuan = $config->norek_alternatif_1;
+            } elseif ($validated['bank_tujuan'] === $config->bank_alternatif_2) {
+                $norekTujuan = $config->norek_alternatif_2;
+            } elseif (str_contains(strtolower($validated['bank_tujuan']), 'qris')) {
+                $norekTujuan = $config->qris_merchant;
+            }
+
+            DetailPembayaran::create([
+                'pembayaran_id' => $pembayaran->id,
+                'kode_transaksi' => $kodeTransaksi,
+                'tipe_pembayaran' => $validated['tipe_pembayaran'],
+                'jumlah_bayar' => $validated['jumlah_bayar'],
+                'metode' => str_contains(strtolower($validated['bank_tujuan']), 'cash') ? 'cash' : 'transfer',
+                'bank_tujuan' => $validated['bank_tujuan'],
+                'norek_tujuan' => $norekTujuan,
+                'bank_pengirim' => $validated['bank_pengirim'],
+                'norek_pengirim' => $validated['norek_pengirim'],
+                'atas_nama_pengirim' => $validated['atas_nama_pengirim'],
+                'bukti_pembayaran' => $buktiPath,
+                'tanggal_bayar' => $validated['tanggal_bayar'],
+                'status' => 'pending',
+                'catatan' => $validated['catatan'] ?? null,
+            ]);
+
+            // Jika peminjaman masih draft, ubah status ke pending
+            if ($pembayaran->peminjaman && $pembayaran->peminjaman->status === 'draft') {
+                $pembayaran->peminjaman->update(['status' => 'pending']);
+            }
+        });
+
+        return redirect()->route('customer.pembayaran.show', $pembayaran->id)
+            ->with('success', 'Bukti pembayaran berhasil diunggah! Pihak sekolah akan segera memverifikasi transaksi Anda.');
+    }
+
+    /**
      * Halaman Daftar Peminjaman / Cek Peminjaman:
      * - Riwayat peminjaman milik user
-     * - Status verifikasi Tahap 1, Tahap 2, dan Status Pembayaran
-     * - Card Pembayaran
+     * - Bebas N+1 query dengan pre-loading facilities & details
      */
     public function riwayat(): View
     {
         $user = $this->getCurrentUser();
 
         $query = Peminjaman::with([
-            'paketPeminjaman',
+            'paketPeminjaman.facilities',
             'persetujuans.approver',
-            'pembayaran.details',
+            'pembayaran.details.diverifikasiOleh',
         ])->latest();
 
         if ($user && $user->role !== 'admin' && ! $user->isSuperAdmin()) {
@@ -158,7 +405,7 @@ class CustomerPanelController extends Controller
             }
         }
 
-        return view('Admin.customerPanel.riwayat', compact(
+        return view('Admin.peminjaman.customerPanel.riwayat', compact(
             'user',
             'peminjamans',
             'hasUnpaid',
@@ -173,6 +420,6 @@ class CustomerPanelController extends Controller
     {
         $user = $this->getCurrentUser();
 
-        return view('Admin.customerPanel.profil', compact('user'));
+        return view('Admin.peminjaman.customerPanel.profil', compact('user'));
     }
 }

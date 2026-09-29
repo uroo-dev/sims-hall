@@ -47,6 +47,15 @@ Route::middleware('auth')->group(function () {
         });
         Route::get('/dashboard', [CustomerPanelController::class, 'dashboard'])->name('dashboard');
         Route::get('/paket', [CustomerPanelController::class, 'paket'])->name('paket');
+
+        // Pengajuan Peminjaman Aula
+        Route::get('/peminjaman/buat', [CustomerPanelController::class, 'peminjamanCreate'])->name('peminjaman.create');
+        Route::post('/peminjaman', [CustomerPanelController::class, 'peminjamanStore'])->name('peminjaman.store');
+
+        // Pembayaran Aula
+        Route::get('/pembayaran/{pembayaran}', [CustomerPanelController::class, 'pembayaranShow'])->name('pembayaran.show');
+        Route::post('/pembayaran/{pembayaran}', [CustomerPanelController::class, 'pembayaranBayar'])->name('pembayaran.bayar');
+
         Route::get('/cek-peminjaman', [CustomerPanelController::class, 'riwayat'])->name('cek-peminjaman');
         Route::get('/riwayat', [CustomerPanelController::class, 'riwayat'])->name('riwayat');
         Route::get('/profil', [CustomerPanelController::class, 'profil'])->name('profil');

@@ -51,7 +51,7 @@ class PaymentConfigurationTest extends TestCase
         $response = $this->actingAs($superAdmin)->get(route('admin.payment-configuration.index'));
 
         $response->assertOk();
-        $response->assertViewIs('Admin.paymentConfiguration.index');
+        $response->assertViewIs('Admin.peminjaman.paymentConfiguration.index');
         $response->assertSee('Konfigurasi Pembayaran & Rekening Sekolah');
         $response->assertSee('Bank Jateng');
         $response->assertSee('Batas Waktu Transfer DP (Jam)');

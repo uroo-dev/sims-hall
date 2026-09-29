@@ -27,7 +27,7 @@ class FasilitasController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        return view('Admin.fasilitas.index', compact('facilities', 'search'));
+        return view('Admin.peminjaman.fasilitas.index', compact('facilities', 'search'));
     }
 
     /**
