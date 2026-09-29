@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('kode_pembayaran', 50)->unique()->nullable(); // Contoh: INV-202609-0001
             $table->decimal('total_tagihan', 12, 2); // Total biaya paket sewa
             $table->decimal('total_terbayar', 12, 2)->default(0); // Akumulasi cicilan yang sudah diverifikasi
+            $table->decimal('total_refund', 12, 2)->nullable()->default(0); // Akumulasi cicilan yang sudah direfund
             $table->decimal('sisa_tagihan', 12, 2)->default(0); // Sisa nominal yang belum dilunasi
             $table->enum('status_pembayaran', ['pending', 'partial', 'lunas', 'free', 'rejected', 'refunded', 'refund_pending', 'hangus'])->default('pending')->index();
             $table->dateTime('jatuh_tempo_pelunasan')->nullable()->index(); // Batas waktu transfer pelunasan
