@@ -83,6 +83,7 @@ class PaketPeminjamanTest extends TestCase
             'nama_paket' => 'Paket Wisuda',
             'kategori' => 'unggulan',
             'harga' => 7500000,
+            'harga_dp' => 2500000,
             'deskripsi' => 'Termasuk sound dan AC',
             'facility_ids' => [$facility1->id, $facility2->id, $facility3->id],
         ]);
@@ -94,6 +95,7 @@ class PaketPeminjamanTest extends TestCase
             'nama_paket' => 'Paket Wisuda',
             'kategori' => 'unggulan',
             'harga' => 7500000,
+            'harga_dp' => 2500000,
         ]);
 
         $paket = PaketPeminjaman::where('nama_paket', 'Paket Wisuda')->first();
@@ -124,6 +126,7 @@ class PaketPeminjamanTest extends TestCase
             'nama_paket' => 'Paket Awal',
             'kategori' => 'terjangkau',
             'harga' => 2000000,
+            'harga_dp' => 500000,
         ]);
         $paket->facilities()->sync([$facility1->id]);
 
@@ -131,6 +134,7 @@ class PaketPeminjamanTest extends TestCase
             'nama_paket' => 'Paket Update',
             'kategori' => 'standar 1',
             'harga' => 3500000,
+            'harga_dp' => 1000000,
             'deskripsi' => 'Updated deskripsi',
             'facility_ids' => [$facility2->id, $facility3->id],
         ]);
@@ -142,6 +146,7 @@ class PaketPeminjamanTest extends TestCase
             'id' => $paket->id,
             'nama_paket' => 'Paket Update',
             'kategori' => 'standar 1',
+            'harga_dp' => 1000000,
         ]);
 
         $paket->refresh();

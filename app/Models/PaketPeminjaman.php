@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['nama_paket', 'kategori', 'harga', 'deskripsi'])]
+#[Fillable(['nama_paket', 'kategori', 'harga', 'harga_dp', 'deskripsi'])]
 class PaketPeminjaman extends Model
 {
     use HasFactory;

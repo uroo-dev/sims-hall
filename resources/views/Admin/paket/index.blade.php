@@ -142,8 +142,11 @@
                                     </div>
                                 </div>
                             </td>
-                            <td class="py-3.5 px-4 font-bold text-brand-600 whitespace-nowrap">
-                                Rp {{ number_format($paket->harga, 0, ',', '.') }}
+                            <td class="py-3.5 px-4 whitespace-nowrap">
+                                <div class="font-bold text-brand-600">Rp {{ number_format($paket->harga, 0, ',', '.') }}</div>
+                                @if ($paket->harga_dp)
+                                    <div class="text-[11px] text-slate-500 font-medium">DP: Rp {{ number_format($paket->harga_dp, 0, ',', '.') }}</div>
+                                @endif
                             </td>
                             <td class="py-3.5 px-4 max-w-xs md:max-w-md">
                                 <div class="flex flex-wrap gap-1.5">
@@ -165,7 +168,7 @@
                             <td class="py-3.5 px-4 text-center">
                                 <div class="flex items-center justify-center gap-2">
                                     <button type="button"
-                                        onclick="openEditModal({{ $paket->id }}, @js($paket->nama_paket), @js($paket->kategori), {{ $paket->harga }}, @js($paket->deskripsi), @js($paket->facilities->pluck('id')), '{{ route('admin.paket.update', $paket->id) }}')"
+                                        onclick="openEditModal({{ $paket->id }}, @js($paket->nama_paket), @js($paket->kategori), {{ $paket->harga }}, @js($paket->harga_dp), @js($paket->deskripsi), @js($paket->facilities->pluck('id')), '{{ route('admin.paket.update', $paket->id) }}')"
                                         class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 hover:bg-amber-100 flex items-center justify-center transition shadow-sm"
                                         title="Edit Paket Peminjaman">
                                         <i class="fa-regular fa-pen-to-square text-xs"></i>
@@ -280,18 +283,35 @@
                 </div>
             </div>
 
-            <div>
-                <label for="create_harga" class="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wide">
-                    Harga Sewa (Rp) <span class="text-red-500">*</span>
-                </label>
-                <div class="relative">
-                    <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center font-bold text-slate-500 text-xs">
-                        Rp
-                    </span>
-                    <input type="number" name="harga" id="create_harga" required min="0" step="1000"
-                        value="{{ old('harga') }}"
-                        placeholder="Contoh: 6000000"
-                        class="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs md:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-600/20 focus:border-brand-600 transition">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label for="create_harga" class="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wide">
+                        Harga Sewa (Rp) <span class="text-red-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center font-bold text-slate-500 text-xs">
+                            Rp
+                        </span>
+                        <input type="number" name="harga" id="create_harga" required min="0" step="1000"
+                            value="{{ old('harga') }}"
+                            placeholder="Contoh: 6000000"
+                            class="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs md:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-600/20 focus:border-brand-600 transition">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="create_harga_dp" class="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wide">
+                        Harga Deposit (DP) (Rp)
+                    </label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center font-bold text-slate-500 text-xs">
+                            Rp
+                        </span>
+                        <input type="number" name="harga_dp" id="create_harga_dp" min="0" step="1000"
+                            value="{{ old('harga_dp') }}"
+                            placeholder="Contoh: 2000000"
+                            class="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs md:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-600/20 focus:border-brand-600 transition">
+                    </div>
                 </div>
             </div>
 
@@ -424,16 +444,32 @@
                 </div>
             </div>
 
-            <div>
-                <label for="edit_harga" class="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wide">
-                    Harga Sewa (Rp) <span class="text-red-500">*</span>
-                </label>
-                <div class="relative">
-                    <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center font-bold text-slate-500 text-xs">
-                        Rp
-                    </span>
-                    <input type="number" name="harga" id="edit_harga" required min="0" step="1000"
-                        class="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs md:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label for="edit_harga" class="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wide">
+                        Harga Sewa (Rp) <span class="text-red-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center font-bold text-slate-500 text-xs">
+                            Rp
+                        </span>
+                        <input type="number" name="harga" id="edit_harga" required min="0" step="1000"
+                            class="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs md:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="edit_harga_dp" class="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wide">
+                        Harga Deposit (DP) (Rp)
+                    </label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center font-bold text-slate-500 text-xs">
+                            Rp
+                        </span>
+                        <input type="number" name="harga_dp" id="edit_harga_dp" min="0" step="1000"
+                            placeholder="Contoh: 2000000"
+                            class="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs md:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition">
+                    </div>
                 </div>
             </div>
 
@@ -643,7 +679,7 @@
     }
 
     // Modal Edit Handlers
-    function openEditModal(id, namaPaket, kategori, harga, deskripsi, facilityIds, updateUrl) {
+    function openEditModal(id, namaPaket, kategori, harga, hargaDp, deskripsi, facilityIds, updateUrl) {
         const modal = document.getElementById('modalEdit');
         const box = document.getElementById('modalEditBox');
         const form = document.getElementById('formEdit');
@@ -652,6 +688,7 @@
         document.getElementById('edit_nama_paket').value = namaPaket || '';
         document.getElementById('edit_kategori').value = kategori;
         document.getElementById('edit_harga').value = harga;
+        document.getElementById('edit_harga_dp').value = (hargaDp !== null && hargaDp !== undefined) ? hargaDp : '';
         document.getElementById('edit_deskripsi').value = deskripsi || '';
 
         // Reset and check matching checkboxes

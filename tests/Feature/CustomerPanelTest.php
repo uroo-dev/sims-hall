@@ -54,6 +54,7 @@ class CustomerPanelTest extends TestCase
             'nama_paket' => 'Unggulan',
             'kategori' => 'unggulan',
             'harga' => 6000000,
+            'harga_dp' => 2000000,
         ]);
 
         $response = $this->actingAs($pelanggan)->get(route('customer.paket'));
@@ -62,6 +63,8 @@ class CustomerPanelTest extends TestCase
         $response->assertViewIs('Admin.customerPanel.paket');
         $response->assertSee('Unggulan');
         $response->assertSee('Pilih Paket');
+        $response->assertSee('Deposit (DP):');
+        $response->assertSee('2.000.000');
     }
 
     public function test_customer_cek_peminjaman_riwayat_dapat_diakses_oleh_pelanggan(): void

@@ -21,6 +21,7 @@ class PaketPeminjamanSeeder extends Seeder
                 'kategori' => 'unggulan',
                 'nama_paket' => 'Unggulan',
                 'harga' => 6000000,
+                'harga_dp' => 2000000,
                 'deskripsi' => 'Paket terlengkap aula untuk resepsi, wisuda, atau gathering instansi skala besar hingga 12 jam.',
                 'fasilitas' => [
                     'Sound System Medium',
@@ -39,6 +40,7 @@ class PaketPeminjamanSeeder extends Seeder
                 'kategori' => 'terjangkau',
                 'nama_paket' => 'Terjangkau',
                 'harga' => 1500000,
+                'harga_dp' => 500000,
                 'deskripsi' => 'Paket hemat untuk seminar singkat, rapat pleno, atau workshop berdurasi 4 jam.',
                 'fasilitas' => [
                     'Sound System Standar',
@@ -51,6 +53,7 @@ class PaketPeminjamanSeeder extends Seeder
                 'kategori' => 'standar 1',
                 'nama_paket' => 'Standar 1',
                 'harga' => 3500000,
+                'harga_dp' => 1000000,
                 'deskripsi' => 'Pilihan ideal untuk kegiatan seminar umum, pentas seni sekolah, dan pelatihan hingga 12 jam.',
                 'fasilitas' => [
                     'Sound System Medium',
@@ -63,6 +66,7 @@ class PaketPeminjamanSeeder extends Seeder
                 'kategori' => 'standar 2',
                 'nama_paket' => 'Standar 2',
                 'harga' => 4400000,
+                'harga_dp' => 1500000,
                 'deskripsi' => 'Fasilitas medium dengan kapasitas kursi penuh dan dukungan audiovisual prima hingga 12 jam.',
                 'fasilitas' => [
                     'Sound System Medium',
@@ -77,6 +81,7 @@ class PaketPeminjamanSeeder extends Seeder
                 'kategori' => 'standar 3',
                 'nama_paket' => 'Standar 3',
                 'harga' => 5500000,
+                'harga_dp' => 2000000,
                 'deskripsi' => 'Fasilitas premium dengan kenyamanan maksimal untuk berbagai perhelatan formal hingga 12 jam.',
                 'fasilitas' => [
                     'Sound System Medium',
@@ -97,6 +102,7 @@ class PaketPeminjamanSeeder extends Seeder
                 [
                     'nama_paket' => $item['nama_paket'],
                     'harga' => $item['harga'],
+                    'harga_dp' => $item['harga_dp'],
                     'deskripsi' => $item['deskripsi'],
                 ]
             );

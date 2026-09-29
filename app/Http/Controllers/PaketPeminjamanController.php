@@ -20,7 +20,7 @@ class PaketPeminjamanController extends Controller
 
         // Optimasi: Pilih kolom spesifik dan eager load fasilitas terkait (hanya id dan judul)
         $pakets = PaketPeminjaman::query()
-            ->select(['id', 'nama_paket', 'kategori', 'harga', 'deskripsi', 'created_at', 'updated_at'])
+            ->select(['id', 'nama_paket', 'kategori', 'harga', 'harga_dp', 'deskripsi', 'created_at', 'updated_at'])
             ->with(['facilities:id,judul'])
             ->when($search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
@@ -53,6 +53,7 @@ class PaketPeminjamanController extends Controller
             'nama_paket' => ['nullable', 'string', 'max:150'],
             'kategori' => ['required', 'in:unggulan,terjangkau,standar 1,standar 2,standar 3'],
             'harga' => ['required', 'numeric', 'min:0'],
+            'harga_dp' => ['nullable', 'numeric', 'min:0'],
             'deskripsi' => ['nullable', 'string', 'max:2000'],
             'facility_ids' => ['required', 'array', 'min:1'],
             'facility_ids.*' => ['exists:facilities,id'],
@@ -62,6 +63,8 @@ class PaketPeminjamanController extends Controller
             'harga.required' => 'Harga paket wajib diisi.',
             'harga.numeric' => 'Harga paket harus berupa angka valid.',
             'harga.min' => 'Harga paket tidak boleh bernilai negatif.',
+            'harga_dp.numeric' => 'Harga deposit (DP) harus berupa angka valid.',
+            'harga_dp.min' => 'Harga deposit (DP) tidak boleh bernilai negatif.',
             'facility_ids.required' => 'Pilih minimal satu fasilitas untuk paket ini.',
             'facility_ids.min' => 'Pilih minimal satu fasilitas untuk paket ini.',
             'facility_ids.*.exists' => 'Fasilitas yang dipilih tidak ditemukan.',
@@ -72,6 +75,7 @@ class PaketPeminjamanController extends Controller
                 'nama_paket' => $validated['nama_paket'] ?? null,
                 'kategori' => $validated['kategori'],
                 'harga' => $validated['harga'],
+                'harga_dp' => $validated['harga_dp'] ?? null,
                 'deskripsi' => $validated['deskripsi'] ?? null,
             ]);
 
@@ -93,6 +97,7 @@ class PaketPeminjamanController extends Controller
             'nama_paket' => ['nullable', 'string', 'max:150'],
             'kategori' => ['required', 'in:unggulan,terjangkau,standar 1,standar 2,standar 3'],
             'harga' => ['required', 'numeric', 'min:0'],
+            'harga_dp' => ['nullable', 'numeric', 'min:0'],
             'deskripsi' => ['nullable', 'string', 'max:2000'],
             'facility_ids' => ['required', 'array', 'min:1'],
             'facility_ids.*' => ['exists:facilities,id'],
@@ -102,6 +107,8 @@ class PaketPeminjamanController extends Controller
             'harga.required' => 'Harga paket wajib diisi.',
             'harga.numeric' => 'Harga paket harus berupa angka valid.',
             'harga.min' => 'Harga paket tidak boleh bernilai negatif.',
+            'harga_dp.numeric' => 'Harga deposit (DP) harus berupa angka valid.',
+            'harga_dp.min' => 'Harga deposit (DP) tidak boleh bernilai negatif.',
             'facility_ids.required' => 'Pilih minimal satu fasilitas untuk paket ini.',
             'facility_ids.min' => 'Pilih minimal satu fasilitas untuk paket ini.',
             'facility_ids.*.exists' => 'Fasilitas yang dipilih tidak ditemukan.',
@@ -112,6 +119,7 @@ class PaketPeminjamanController extends Controller
                 'nama_paket' => $validated['nama_paket'] ?? null,
                 'kategori' => $validated['kategori'],
                 'harga' => $validated['harga'],
+                'harga_dp' => $validated['harga_dp'] ?? null,
                 'deskripsi' => $validated['deskripsi'] ?? null,
             ]);
 

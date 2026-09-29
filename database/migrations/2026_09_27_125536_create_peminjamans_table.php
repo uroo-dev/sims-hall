@@ -20,7 +20,7 @@ return new class extends Migration
             $table->dateTime('tanggal_selesai');
             $table->text('catatan')->nullable();
             $table->string('surat_pengantar', 250)->nullable();
-            $table->enum('status', ['pending', 'approved_1', 'approved_final', 'rejected'])->default('pending')->index();
+            $table->enum('status', ['draft', 'pending', 'approved_1', 'approved_final', 'rejected'])->default('draft')->index();
             $table->timestamps();
 
             // Index pencarian & validasi rentang jadwal peminjaman

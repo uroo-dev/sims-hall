@@ -43,6 +43,12 @@
                                 <span class="text-sm">Rp. </span>
                                 <span class="text-3xl font-black text-[#0070ba] tracking-tight">{{ $hargaUnggulan }}</span>
                                 <span class="text-xs text-gray-500"> / 12 Jam</span>
+                                @if ($unggulan->harga_dp)
+                                    <div class="mt-1.5 flex items-center gap-1.5 text-xs text-slate-500 font-medium">
+                                        <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                        <span>Deposit (DP): <strong class="text-emerald-600 font-bold">Rp {{ number_format($unggulan->harga_dp, 0, ',', '.') }}</strong></span>
+                                    </div>
+                                @endif
                             </div>
 
                             @if ($unggulan->facilities->isNotEmpty())
@@ -121,6 +127,12 @@
                                     <span class="text-sm">Rp. </span>
                                     <span class="text-2xl md:text-3xl font-black text-[#0070ba] tracking-tight">{{ $hargaFormatted }}</span>
                                     <span class="text-xs text-gray-500"> / 12 Jam</span>
+                                    @if ($pkt->harga_dp)
+                                        <div class="mt-1.5 flex items-center gap-1.5 text-xs text-slate-500 font-medium">
+                                            <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                            <span>Deposit (DP): <strong class="text-emerald-600 font-bold">Rp {{ number_format($pkt->harga_dp, 0, ',', '.') }}</strong></span>
+                                        </div>
+                                    @endif
                                 </div>
 
                                 <!-- Fitur Centang -->
@@ -201,14 +213,22 @@
         <!-- BODY -->
         <div class="p-5 md:p-6 space-y-4 overflow-y-auto">
             <!-- Harga Card -->
-            <div class="bg-gradient-to-r from-blue-50/80 to-slate-50 border border-blue-100/80 rounded-2xl p-4 flex items-center justify-between">
-                <div>
-                    <span class="block text-slate-500 text-xs font-semibold uppercase tracking-wider">Biaya Sewa Paket</span>
-                    <span class="text-xs text-slate-400">Durasi pemakaian standar aula</span>
+            <div class="bg-gradient-to-r from-blue-50/80 to-slate-50 border border-blue-100/80 rounded-2xl p-4 space-y-3">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <span class="block text-slate-500 text-xs font-semibold uppercase tracking-wider">Biaya Sewa Paket</span>
+                        <span class="text-xs text-slate-400">Durasi pemakaian standar aula</span>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-xl md:text-2xl font-black text-brand-600 tracking-tight" id="modalHarga">Rp 0</span>
+                        <span class="block text-[11px] text-slate-500">/ 12 Jam</span>
+                    </div>
                 </div>
-                <div class="text-right">
-                    <span class="text-xl md:text-2xl font-black text-brand-600 tracking-tight" id="modalHarga">Rp 0</span>
-                    <span class="block text-[11px] text-slate-500">/ 12 Jam</span>
+                <div id="modalDpWrapper" class="pt-2.5 border-t border-blue-100/60 flex items-center justify-between text-xs">
+                    <span class="text-slate-600 font-medium flex items-center gap-1.5">
+                        <i class="fa-solid fa-shield-halved text-emerald-600"></i> Deposit Minimal (DP) :
+                    </span>
+                    <span class="font-extrabold text-emerald-700" id="modalHargaDp">Rp 0</span>
                 </div>
             </div>
 
@@ -260,6 +280,15 @@
 
         const harga = paket.harga ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(paket.harga) : 'Rp 0';
         document.getElementById('modalHarga').innerText = harga;
+
+        const dpWrapper = document.getElementById('modalDpWrapper');
+        if (paket.harga_dp && Number(paket.harga_dp) > 0) {
+            const hargaDp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(paket.harga_dp);
+            document.getElementById('modalHargaDp').innerText = hargaDp;
+            dpWrapper.classList.remove('hidden');
+        } else {
+            dpWrapper.classList.add('hidden');
+        }
 
         document.getElementById('modalDeskripsi').innerText = paket.deskripsi || 'Paket sewa fasilitas aula SMK Negeri 2 Karanganyar.';
 

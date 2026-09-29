@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('nama_paket', 150)->nullable();
             $table->enum('kategori', ['unggulan', 'terjangkau', 'standar 1', 'standar 2', 'standar 3'])->index();
             $table->decimal('harga', 12, 2); // Diubah dari varchar ke decimal untuk kemudahan kalkulasi
+            $table->decimal('harga_dp', 12, 2)->nullable(); // Diubah dari varchar ke decimal untuk kemudahan kalkulasi
             $table->text('deskripsi')->nullable();
             $table->timestamps();
         });
