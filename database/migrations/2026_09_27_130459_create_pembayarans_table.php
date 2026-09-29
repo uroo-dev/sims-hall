@@ -13,13 +13,14 @@ return new class extends Migration
     {
         Schema::create('pembayarans', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('peminjaman_id')->constrained('peminjamans')->cascadeOnDelete();
-            $table->decimal('jumlah_bayar', 12, 2);
-            $table->enum('metode', ['transfer', 'cash'])->nullable();
-            $table->string('norek_tujuan', 100)->nullable(); // Contoh: Rekening SMKN 2 Karanganyar
-            $table->string('bukti_pembayaran', 255)->nullable();
-            $table->dateTime('tanggal_bayar')->nullable()->index();
-            $table->enum('status_pembayaran', ['free', 'pending', 'verified', 'rejected'])->default('pending')->index();
+            $table->foreignId('peminjaman_id')->unique()->constrained('peminjamans')->cascadeOnDelete();
+            $table->string('kode_pembayaran', 50)->unique()->nullable(); // Contoh: INV-202609-0001
+            $table->decimal('total_tagihan', 12, 2); // Total biaya paket sewa
+            $table->decimal('total_terbayar', 12, 2)->default(0); // Akumulasi cicilan yang sudah diverifikasi
+            $table->decimal('sisa_tagihan', 12, 2)->default(0); // Sisa nominal yang belum dilunasi
+            $table->enum('status_pembayaran', ['pending', 'partial', 'lunas', 'free', 'rejected'])->default('pending')->index();
+            $table->dateTime('jatuh_tempo_pelunasan')->nullable()->index(); // Batas waktu transfer pelunasan
+            $table->text('catatan')->nullable(); // Keterangan tambahan tagihan
             $table->timestamps();
         });
     }
