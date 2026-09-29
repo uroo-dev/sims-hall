@@ -126,33 +126,22 @@
                             </td>
                         </tr>
                     @empty
-                        <tr class="hover:bg-gray-50/70 transition-colors">
-                            <td class="py-4 px-3 font-semibold text-gray-900">ORD-002</td>
-                            <td class="py-4 px-3 font-medium">Standar 2</td>
-                            <td class="py-4 px-3">Rp.0</td>
-                            <td class="py-4 px-3 text-gray-600">2025-01-22</td>
-                            <td class="py-4 px-3 text-center">
-                                <span class="inline-flex items-center gap-1 px-3 py-1 rounded-md text-[11px] font-semibold bg-[#00a844] text-white">
-                                    <i class="fa-regular fa-circle-check text-[10px]"></i> Terverifikasi
-                                </span>
-                            </td>
-                            <td class="py-4 px-3 text-center">
-                                <span class="inline-flex items-center gap-1 px-3 py-1 rounded-md text-[11px] font-semibold bg-[#00a844] text-white">
-                                    <i class="fa-regular fa-circle-check text-[10px]"></i> Terverifikasi
-                                </span>
-                            </td>
-                            <td class="py-4 px-3 text-center">
-                                <span class="inline-flex items-center gap-1 px-3 py-1 rounded-md text-[11px] font-semibold bg-[#00a844] text-white">
-                                    <i class="fa-regular fa-circle-check text-[10px]"></i> Terbayar
-                                </span>
-                            </td>
-                            <td class="py-4 px-3 text-center">
-                                <button type="button"
-                                        onclick="showNotaModal('ORD-002', 'Standar 2', '0', '2025-01-22', 'LUNAS')"
-                                        class="inline-flex items-center gap-1.5 px-3 py-1 bg-[#0070ba] hover:bg-[#005a96] text-white text-xs font-semibold rounded-md shadow-xs transition-colors">
-                                    <i class="fa-regular fa-circle-dot text-[10px]"></i>
-                                    <span>Nota</span>
-                                </button>
+                        <tr>
+                            <td colspan="8" class="py-12 px-4 text-center">
+                                <div class="flex flex-col items-center justify-center text-gray-400 space-y-3">
+                                    <div class="w-14 h-14 rounded-full bg-blue-50/60 border border-blue-100 flex items-center justify-center text-[#0070ba] text-2xl">
+                                        <i class="fa-regular fa-folder-open"></i>
+                                    </div>
+                                    <div class="space-y-1">
+                                        <p class="text-sm font-bold text-gray-800">Belum Ada Riwayat Peminjaman</p>
+                                        <p class="text-xs text-gray-500">Anda belum memiliki riwayat pengajuan peminjaman aula.</p>
+                                    </div>
+                                    <a href="{{ route('customer.paket') }}"
+                                       class="inline-flex items-center gap-1.5 px-4 py-2 bg-[#0070ba] hover:bg-[#005a96] text-white text-xs font-semibold rounded-xl shadow-xs transition-colors">
+                                        <i class="fa-solid fa-plus text-[10px]"></i>
+                                        <span>Ajukan Peminjaman</span>
+                                    </a>
+                                </div>
                             </td>
                         </tr>
                     @endforelse
@@ -162,15 +151,22 @@
 
     </div>
 
-    <!-- CARD 2: PEMBAYARAN SESUAI SCREENSHOT 2 -->
+    <!-- CARD 2: PEMBAYARAN -->
     <div class="bg-white rounded-2xl figma-card-shadow p-6 md:p-8 border border-blue-50/50 space-y-6">
 
         <h3 class="text-base md:text-lg font-bold text-gray-900 tracking-tight">
             Pembayaran
         </h3>
 
-        <!-- Status Box: Sudah Terbayar Semua / Rincian Tagihan -->
-        @if (! $hasUnpaid)
+        <!-- Status Box: Belum ada tagihan / Sudah Terbayar Semua / Rincian Tagihan -->
+        @if ($peminjamans->isEmpty())
+            <div class="py-12 flex flex-col items-center justify-center text-center text-gray-400 space-y-2">
+                <div class="w-12 h-12 rounded-full bg-blue-50/50 border border-blue-100 flex items-center justify-center text-[#0070ba] text-xl">
+                    <i class="fa-regular fa-credit-card"></i>
+                </div>
+                <p class="text-xs md:text-sm font-medium text-gray-500">Tidak ada tagihan pembayaran aktif.</p>
+            </div>
+        @elseif (! $hasUnpaid)
             <div class="py-16 md:py-24 flex items-center justify-center text-center">
                 <span class="text-base md:text-lg font-medium text-gray-900 tracking-wide">
                     Sudah terbayar semua
@@ -204,58 +200,75 @@
         @endif
 
     </div>
-
 </div>
+@endsection
 
-<!-- MODAL NOTA PEMINJAMAN -->
-<div id="modalNota" class="fixed inset-0 z-50 hidden overflow-y-auto bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl max-w-md w-full p-6 md:p-7 shadow-2xl relative space-y-5 animate-in fade-in zoom-in-95 duration-200">
-        <!-- Header Polos Putih -->
-        <div class="flex items-center justify-between pb-3 border-b border-gray-100">
-            <div>
-                <h3 class="text-lg font-bold text-gray-900">Nota Peminjaman Aula</h3>
-                <span class="text-xs text-gray-500">SMK Negeri 2 Karanganyar</span>
+@push('modals')
+<!-- ============================================================== -->
+<!-- MODAL: NOTA PEMINJAMAN AULA -->
+<!-- ============================================================== -->
+<div id="modalNota" class="fixed inset-0 !m-0 z-[100] hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity">
+    <div class="bg-white rounded-3xl w-full max-w-lg shadow-2xl border border-slate-100 overflow-hidden transform transition-all scale-95 duration-200 max-h-[90vh] flex flex-col" id="modalNotaBox">
+        <!-- HEADER -->
+        <div class="p-5 md:p-6 pb-3 bg-white flex items-center justify-between border-b border-slate-100/80 flex-shrink-0">
+            <div class="flex items-center gap-3.5">
+                <div class="w-11 h-11 rounded-2xl bg-blue-50 text-brand-600 flex items-center justify-center text-lg border border-blue-100/80 shadow-xs flex-shrink-0">
+                    <i class="fa-solid fa-receipt"></i>
+                </div>
+                <div>
+                    <h3 class="font-extrabold text-slate-900 text-base md:text-lg tracking-tight">Nota Peminjaman Aula</h3>
+                    <p class="text-slate-500 text-xs mt-0.5">Bukti rincian peminjaman aula SMK Negeri 2 Karanganyar</p>
+                </div>
             </div>
-            <button type="button" onclick="closeNotaModal()" class="text-gray-400 hover:text-gray-600 p-1">
-                <i class="fa-solid fa-xmark text-lg"></i>
+            <button type="button" onclick="closeNotaModal()" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition" title="Tutup Modal">
+                <i class="fa-solid fa-xmark text-sm"></i>
             </button>
         </div>
 
-        <!-- Body Nota -->
-        <div class="space-y-3 text-xs md:text-sm text-gray-700 bg-gray-50/60 p-4 rounded-xl border border-gray-100">
-            <div class="flex justify-between">
-                <span class="text-gray-500">No. Tagihan:</span>
-                <span class="font-bold text-gray-900" id="notaKode">-</span>
-            </div>
-            <div class="flex justify-between">
-                <span class="text-gray-500">Paket:</span>
-                <span class="font-semibold text-gray-900" id="notaPaket">-</span>
-            </div>
-            <div class="flex justify-between">
-                <span class="text-gray-500">Tanggal Pelaksanaan:</span>
-                <span class="font-medium text-gray-800" id="notaTanggal">-</span>
-            </div>
-            <div class="flex justify-between">
-                <span class="text-gray-500">Total Biaya:</span>
-                <span class="font-black text-[#0070ba]" id="notaHarga">Rp 0</span>
-            </div>
-            <div class="flex justify-between pt-2 border-t border-gray-200">
-                <span class="text-gray-500">Status Pembayaran:</span>
-                <span class="font-bold text-[#00a844]" id="notaStatus">LUNAS</span>
+        <!-- BODY -->
+        <div class="p-5 md:p-6 space-y-4 overflow-y-auto">
+            <div class="space-y-3 text-xs md:text-sm text-slate-700 bg-slate-50/70 p-5 rounded-2xl border border-slate-200/70">
+                <div class="flex justify-between items-center py-2 border-b border-slate-200/60">
+                    <span class="text-slate-500 font-medium">No. Tagihan / ID</span>
+                    <span class="font-extrabold text-slate-900 font-mono tracking-tight" id="notaKode">-</span>
+                </div>
+                <div class="flex justify-between items-center py-2 border-b border-slate-200/60">
+                    <span class="text-slate-500 font-medium">Paket Peminjaman</span>
+                    <span class="font-bold text-slate-900" id="notaPaket">-</span>
+                </div>
+                <div class="flex justify-between items-center py-2 border-b border-slate-200/60">
+                    <span class="text-slate-500 font-medium">Tanggal Pelaksanaan</span>
+                    <span class="font-semibold text-slate-800" id="notaTanggal">-</span>
+                </div>
+                <div class="flex justify-between items-center py-2 border-b border-slate-200/60">
+                    <span class="text-slate-500 font-medium">Total Biaya</span>
+                    <span class="font-black text-brand-600 text-base md:text-lg" id="notaHarga">Rp 0</span>
+                </div>
+                <div class="flex justify-between items-center pt-2">
+                    <span class="text-slate-500 font-medium">Status Pembayaran</span>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200" id="notaStatusBadge">
+                        <i class="fa-solid fa-circle-check text-[10px]" id="notaStatusIcon"></i>
+                        <span id="notaStatus">LUNAS</span>
+                    </span>
+                </div>
             </div>
         </div>
 
-        <!-- Footer -->
-        <div class="pt-3 flex items-center justify-end gap-2">
-            <button type="button" onclick="closeNotaModal()" class="px-4 py-2 text-xs font-semibold text-gray-600 hover:bg-gray-100 rounded-lg">
+        <!-- FOOTER -->
+        <div class="p-5 md:p-6 pt-3 border-t border-slate-100 flex items-center justify-end gap-2.5 bg-slate-50/50 flex-shrink-0">
+            <button type="button" onclick="closeNotaModal()"
+                class="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 text-xs md:text-sm font-semibold transition">
                 Tutup
             </button>
-            <button type="button" onclick="window.print()" class="px-4 py-2 text-xs font-bold bg-[#0070ba] text-white rounded-lg hover:bg-blue-700">
-                <i class="fa-solid fa-print mr-1"></i> Cetak Nota
+            <button type="button" onclick="window.print()"
+                class="px-5 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs md:text-sm font-bold shadow-sm transition inline-flex items-center gap-2">
+                <i class="fa-solid fa-print text-xs"></i>
+                <span>Cetak Nota</span>
             </button>
         </div>
     </div>
 </div>
+@endpush
 
 @push('scripts')
 <script>
@@ -266,12 +279,52 @@
         document.getElementById('notaTanggal').innerText = tanggal;
         document.getElementById('notaStatus').innerText = status;
 
-        document.getElementById('modalNota').classList.remove('hidden');
+        const badge = document.getElementById('notaStatusBadge');
+        const icon = document.getElementById('notaStatusIcon');
+        if (status === 'LUNAS' || status === 'TERBAYAR') {
+            badge.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200';
+            icon.className = 'fa-solid fa-circle-check text-[10px]';
+        } else {
+            badge.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200';
+            icon.className = 'fa-solid fa-clock text-[10px]';
+        }
+
+        const modal = document.getElementById('modalNota');
+        const box = document.getElementById('modalNotaBox');
+        document.body.classList.add('overflow-hidden');
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            box.classList.remove('scale-95');
+            box.classList.add('scale-100');
+        }, 10);
     }
 
     function closeNotaModal() {
-        document.getElementById('modalNota').classList.add('hidden');
+        const modal = document.getElementById('modalNota');
+        const box = document.getElementById('modalNotaBox');
+        box.classList.remove('scale-100');
+        box.classList.add('scale-95');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+        }, 150);
+    }
+
+    // Close on Escape key
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            closeNotaModal();
+        }
+    });
+
+    // Close on click outside box
+    const modalNota = document.getElementById('modalNota');
+    if (modalNota) {
+        modalNota.addEventListener('click', function(event) {
+            if (event.target === modalNota) {
+                closeNotaModal();
+            }
+        });
     }
 </script>
 @endpush
-@endsection

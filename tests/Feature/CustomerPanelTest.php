@@ -123,4 +123,30 @@ class CustomerPanelTest extends TestCase
 
         $response->assertRedirect('/login');
     }
+
+    public function test_customer_riwayat_menampilkan_empty_case_saat_data_kosong(): void
+    {
+        $pelanggan = User::factory()->create([
+            'role' => 'pelanggan',
+        ]);
+
+        $response = $this->actingAs($pelanggan)->get(route('customer.riwayat'));
+
+        $response->assertOk();
+        $response->assertSee('Belum Ada Riwayat Peminjaman');
+        $response->assertDontSee('ORD-002');
+    }
+
+    public function test_customer_paket_menampilkan_empty_case_saat_data_kosong(): void
+    {
+        $pelanggan = User::factory()->create([
+            'role' => 'pelanggan',
+        ]);
+
+        $response = $this->actingAs($pelanggan)->get(route('customer.paket'));
+
+        $response->assertOk();
+        $response->assertSee('Belum Ada Paket Peminjaman');
+        $response->assertDontSee('6.000.000');
+    }
 }

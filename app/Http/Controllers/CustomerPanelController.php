@@ -17,10 +17,7 @@ class CustomerPanelController extends Controller
      */
     private function getCurrentUser(): ?User
     {
-        return Auth::user()
-            ?: User::where('role', 'user')->first()
-            ?: User::where('username', 'ilham')->first()
-            ?: User::first();
+        return Auth::user();
     }
 
     /**
@@ -113,7 +110,7 @@ class CustomerPanelController extends Controller
 
         // Cari paket spesifik berdasarkan kategori untuk tampilan terstruktur
         $paketUnggulan = $pakets->firstWhere('kategori', 'unggulan') ?? $pakets->first();
-        $paketLainnya = $pakets->where('id', '!=', $paketUnggulan?->id);
+        $paketLainnya = $paketUnggulan ? $pakets->where('id', '!=', $paketUnggulan->id) : collect();
 
         return view('Admin.customerPanel.paket', compact(
             'user',

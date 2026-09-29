@@ -6,6 +6,7 @@
 @section('content')
 <div class="space-y-6">
 
+@if ($user)
     <div class="bg-white rounded-2xl figma-card-shadow p-6 md:p-8 border border-blue-50/50">
 
         <!-- Header Profil -->
@@ -15,8 +16,8 @@
                     <i class="fa-regular fa-user"></i>
                 </div>
                 <div>
-                    <h2 class="text-xl font-bold text-gray-900">{{ $user->name ?? 'Ilham' }}</h2>
-                    <p class="text-xs text-gray-500 font-medium">{{ $user->email ?? 'PBB@smk2nkra.sch.id' }}</p>
+                    <h2 class="text-xl font-bold text-gray-900">{{ $user->name ?? 'Pengguna' }}</h2>
+                    <p class="text-xs text-gray-500 font-medium">{{ $user->email ?? '-' }}</p>
                     <span class="inline-block mt-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-[#0070ba]">
                         Akun Peminjam / Organisasi
                     </span>
@@ -39,19 +40,19 @@
                 <div class="space-y-3 bg-gray-50/60 p-5 rounded-xl border border-gray-100">
                     <div>
                         <span class="text-gray-400 block text-xs">Nama Lengkap</span>
-                        <span class="font-bold text-gray-800">{{ $user->name ?? 'Ilham' }}</span>
+                        <span class="font-bold text-gray-800">{{ $user->name ?? '-' }}</span>
                     </div>
                     <div>
                         <span class="text-gray-400 block text-xs">Username</span>
-                        <span class="font-medium text-gray-800">{{ $user->username ?? 'ilham' }}</span>
+                        <span class="font-medium text-gray-800">{{ $user->username ?? '-' }}</span>
                     </div>
                     <div>
                         <span class="text-gray-400 block text-xs">Email Instansi / Kontak</span>
-                        <span class="font-medium text-gray-800">{{ $user->email ?? 'PBB@smk2nkra.sch.id' }}</span>
+                        <span class="font-medium text-gray-800">{{ $user->email ?? '-' }}</span>
                     </div>
                     <div>
                         <span class="text-gray-400 block text-xs">Role Akses</span>
-                        <span class="font-semibold text-gray-800 capitalize">{{ $user->role ?? 'pelanggan' }}</span>
+                        <span class="font-semibold text-gray-800 capitalize">{{ $user->role ?? '-' }}</span>
                     </div>
                 </div>
             </div>
@@ -80,6 +81,19 @@
         </div>
 
     </div>
+@else
+    <div class="bg-white rounded-2xl figma-card-shadow p-12 text-center border border-blue-50/50">
+        <div class="flex flex-col items-center justify-center text-gray-400 space-y-3">
+            <div class="w-16 h-16 rounded-full bg-blue-50/60 border border-blue-100 flex items-center justify-center text-[#0070ba] text-3xl">
+                <i class="fa-regular fa-user"></i>
+            </div>
+            <div class="space-y-1">
+                <h3 class="text-base font-bold text-gray-800">Data Profil Tidak Ditemukan</h3>
+                <p class="text-xs md:text-sm text-gray-500 max-w-sm">Silakan login kembali untuk melihat informasi profil Anda.</p>
+            </div>
+        </div>
+    </div>
+@endif
 
 </div>
 @endsection

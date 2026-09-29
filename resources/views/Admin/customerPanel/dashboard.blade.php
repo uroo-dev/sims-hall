@@ -220,10 +220,10 @@
                 <!-- Info User (Nama & Email Instansi) -->
                 <div class="mt-5 text-left space-y-1">
                     <h3 class="text-xl font-bold text-gray-900 tracking-tight">
-                        {{ $user->name ?? 'Ilham' }}
+                        {{ $user?->name ?? 'Pengguna' }}
                     </h3>
                     <p class="text-sm font-medium text-gray-500">
-                        {{ $user->email ?? 'PBB@smk2nkra.sch.id' }}
+                        {{ $user?->email ?? '-' }}
                     </p>
                 </div>
             </div>
