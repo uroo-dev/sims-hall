@@ -20,6 +20,7 @@ return new class extends Migration
             $table->decimal('total_refund', 12, 2)->nullable()->default(0); // Akumulasi cicilan yang sudah direfund
             $table->decimal('sisa_tagihan', 12, 2)->default(0); // Sisa nominal yang belum dilunasi
             $table->enum('status_pembayaran', ['pending', 'partial', 'lunas', 'free', 'rejected', 'refunded', 'refund_pending', 'hangus'])->default('pending')->index();
+            $table->dateTime('jatuh_tempo_dp')->nullable()->index(); // Batas waktu transfer deposit
             $table->dateTime('jatuh_tempo_pelunasan')->nullable()->index(); // Batas waktu transfer pelunasan
             $table->text('catatan')->nullable(); // Keterangan tambahan tagihan
             $table->timestamps();

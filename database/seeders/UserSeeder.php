@@ -12,23 +12,23 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::firstOrCreate(
-        //     ['username' => 'root'],
-        //     [
-        //         'name' => 'super admin',
-        //         'email' => 'super@gmail.com',
-        //         'role' => 'super_admin',
-        //         'password' => '1234',
-        //     ]
-        // );
         User::firstOrCreate(
-            ['username' => 'dwika'],
+            ['username' => 'root'],
             [
-                'name' => 'dwika',
-                'email' => 'dwika@gmail.com',
-                'role' => 'pelanggan',
+                'name' => 'super admin',
+                'email' => 'super@gmail.com',
+                'role' => 'super_admin',
                 'password' => '1234',
             ]
         );
+        // User::firstOrCreate(
+        //     ['username' => 'dwika'],
+        //     [
+        //         'name' => 'dwika',
+        //         'email' => 'dwika@gmail.com',
+        //         'role' => 'pelanggan',
+        //         'password' => '1234',
+        //     ]
+        // );
     }
 }

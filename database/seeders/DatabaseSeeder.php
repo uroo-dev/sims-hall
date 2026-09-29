@@ -26,6 +26,7 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             FasilitasSeeder::class,
             PaketPeminjamanSeeder::class,
+            PaymentConfigurationSeeder::class,
         ]);
     }
 }

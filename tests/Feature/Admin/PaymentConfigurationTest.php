@@ -1,0 +1,143 @@
+<?php
+
+namespace Tests\Feature\Admin;
+
+use App\Models\PaymentConfiguration;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
+use Tests\TestCase;
+
+class PaymentConfigurationTest extends TestCase
+{
+    use RefreshDatabase;
+
+    public function test_guest_is_redirected_from_payment_configuration(): void
+    {
+        $response = $this->get(route('admin.payment-configuration.index'));
+
+        $response->assertRedirect('/login');
+    }
+
+    public function test_regular_admin_cannot_access_payment_configuration(): void
+    {
+        $admin = User::factory()->create([
+            'role' => 'admin',
+        ]);
+
+        $response = $this->actingAs($admin)->get(route('admin.payment-configuration.index'));
+
+        $response->assertForbidden();
+    }
+
+    public function test_pelanggan_cannot_access_payment_configuration(): void
+    {
+        $pelanggan = User::factory()->create([
+            'role' => 'pelanggan',
+        ]);
+
+        $response = $this->actingAs($pelanggan)->get(route('admin.payment-configuration.index'));
+
+        $response->assertForbidden();
+    }
+
+    public function test_super_admin_can_view_payment_configuration(): void
+    {
+        $superAdmin = User::factory()->create([
+            'role' => 'super_admin',
+        ]);
+
+        $response = $this->actingAs($superAdmin)->get(route('admin.payment-configuration.index'));
+
+        $response->assertOk();
+        $response->assertViewIs('Admin.paymentConfiguration.index');
+        $response->assertSee('Konfigurasi Pembayaran & Rekening Sekolah');
+        $response->assertSee('Bank Jateng');
+        $response->assertSee('Batas Waktu Transfer DP (Jam)');
+    }
+
+    public function test_super_duper_admin_can_view_payment_configuration(): void
+    {
+        $superDuperAdmin = User::factory()->create([
+            'role' => 'super_duper_admin',
+        ]);
+
+        $response = $this->actingAs($superDuperAdmin)->get(route('admin.payment-configuration.index'));
+
+        $response->assertOk();
+    }
+
+    public function test_super_admin_can_update_payment_configuration(): void
+    {
+        Storage::fake('public');
+
+        $superAdmin = User::factory()->create([
+            'role' => 'super_admin',
+        ]);
+
+        $fakeQris = UploadedFile::fake()->image('qris.png', 400, 400);
+
+        $response = $this->actingAs($superAdmin)->put(route('admin.payment-configuration.update'), [
+            'bank_utama' => 'Bank Mandiri',
+            'norek_utama' => '1380012345678',
+            'atas_nama_utama' => 'SMKN 2 KARANGANYAR',
+            'bank_alternatif_1' => 'Bank BNI',
+            'norek_alternatif_1' => '987654321',
+            'atas_nama_alternatif_1' => 'SMKN 2 KRA',
+            'bank_alternatif_2' => 'Bank BCA',
+            'norek_alternatif_2' => '543216789',
+            'atas_nama_alternatif_2' => 'SMK NEGERI 2 KRA',
+            'qris_merchant' => 'AULA SMKN 2 KARANGANYAR',
+            'qris_image' => $fakeQris,
+            'jatuh_tempo_dp_jam' => 12,
+            'jatuh_tempo_pelunasan_jam' => 72,
+            'instruksi_pembayaran' => 'Transfer tepat waktu dan simpan struk transfer.',
+            'is_active' => '1',
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('success');
+
+        $this->assertDatabaseHas('payment_configurations', [
+            'bank_utama' => 'Bank Mandiri',
+            'norek_utama' => '1380012345678',
+            'bank_alternatif_1' => 'Bank BNI',
+            'bank_alternatif_2' => 'Bank BCA',
+            'jatuh_tempo_dp_jam' => 12,
+            'jatuh_tempo_pelunasan_jam' => 72,
+            'qris_merchant' => 'AULA SMKN 2 KARANGANYAR',
+        ]);
+
+        $config = PaymentConfiguration::current();
+        $this->assertNotNull($config->qris_image);
+        Storage::disk('public')->assertExists($config->qris_image);
+    }
+
+    public function test_super_admin_sees_payment_configuration_on_dashboard(): void
+    {
+        $superAdmin = User::factory()->create([
+            'role' => 'super_admin',
+        ]);
+
+        $response = $this->actingAs($superAdmin)->get(route('dashboard'));
+
+        $response->assertOk();
+        $response->assertSee('Konfigurasi Rekening & Pembayaran Sekolah');
+        $response->assertSee('Kelola Konfigurasi');
+        $response->assertSee('Bank Jateng');
+    }
+
+    public function test_regular_admin_does_not_see_payment_configuration_section_on_dashboard(): void
+    {
+        $admin = User::factory()->create([
+            'role' => 'admin',
+        ]);
+
+        $response = $this->actingAs($admin)->get(route('dashboard'));
+
+        $response->assertOk();
+        $response->assertDontSee('SUPER ADMIN PAYMENT CONFIGURATION SECTION');
+        $response->assertDontSee('Khusus Super Admin: Pengaturan rekening transfer tujuan');
+    }
+}

@@ -5,6 +5,7 @@ use App\Http\Controllers\CustomerPanelController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FasilitasController;
 use App\Http\Controllers\PaketPeminjamanController;
+use App\Http\Controllers\PaymentConfigurationController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -32,6 +33,12 @@ Route::middleware('auth')->group(function () {
         Route::resource('paket', PaketPeminjamanController::class)
             ->parameters(['paket' => 'paket'])
             ->except(['create', 'edit', 'show']);
+    });
+
+    // Super Admin: Konfigurasi Pembayaran Sekolah
+    Route::middleware('role:super_admin,super_duper_admin')->prefix('admin')->name('admin.')->group(function () {
+        Route::get('/payment-configuration', [PaymentConfigurationController::class, 'index'])->name('payment-configuration.index');
+        Route::put('/payment-configuration', [PaymentConfigurationController::class, 'update'])->name('payment-configuration.update');
     });
 
     Route::prefix('customer')->name('customer.')->group(function () {

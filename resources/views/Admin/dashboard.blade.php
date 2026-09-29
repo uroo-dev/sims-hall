@@ -46,6 +46,114 @@
 
         </section>
 
+        @if (!empty($isSuperAdmin) && !empty($paymentConfig))
+            <!-- SUPER ADMIN PAYMENT CONFIGURATION SECTION -->
+            <section class="bg-white rounded-2xl p-5 md:p-6 figma-card-shadow border border-slate-100 space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-100 gap-3">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center font-bold text-base flex-shrink-0">
+                            <i class="fa-solid fa-credit-card"></i>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h2 class="text-sm md:text-base font-extrabold text-slate-800 uppercase tracking-wide">
+                                    Konfigurasi Rekening &amp; Pembayaran Sekolah
+                                </h2>
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold {{ $paymentConfig->is_active ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-red-50 text-red-700 border border-red-200' }}">
+                                    {{ $paymentConfig->is_active ? 'Sistem Aktif' : 'Nonaktif' }}
+                                </span>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-0.5">
+                                Khusus Super Admin: Pengaturan rekening transfer tujuan, QRIS, serta tenggat jatuh tempo DP &amp; pelunasan aula.
+                            </p>
+                        </div>
+                    </div>
+                    <a href="{{ route('admin.payment-configuration.index') }}"
+                        class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-brand-600 hover:bg-brand-700 active:scale-95 text-white rounded-xl text-xs font-bold shadow-sm transition flex-shrink-0">
+                        <i class="fa-solid fa-sliders text-xs"></i>
+                        <span>Kelola Konfigurasi</span>
+                    </a>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-1">
+                    <!-- Card Rekening Utama -->
+                    <div class="p-3.5 bg-slate-50 border border-slate-100 rounded-xl space-y-1">
+                        <span class="text-[11px] font-bold text-brand-700 uppercase tracking-wider block flex items-center gap-1.5">
+                            <i class="fa-solid fa-building-columns text-[10px]"></i>
+                            Rekening Utama
+                        </span>
+                        <div class="font-extrabold text-slate-800 text-sm">
+                            {{ $paymentConfig->bank_utama }}
+                        </div>
+                        <div class="font-mono text-xs text-slate-600 font-semibold">
+                            {{ $paymentConfig->norek_utama }}
+                        </div>
+                        <div class="text-[11px] text-slate-500 truncate" title="{{ $paymentConfig->atas_nama_utama }}">
+                            a.n. {{ $paymentConfig->atas_nama_utama }}
+                        </div>
+                    </div>
+
+                    <!-- Card Rekening Alternatif -->
+                    <div class="p-3.5 bg-slate-50 border border-slate-100 rounded-xl space-y-1">
+                        <span class="text-[11px] font-bold text-amber-700 uppercase tracking-wider block flex items-center gap-1.5">
+                            <i class="fa-solid fa-money-bill-transfer text-[10px]"></i>
+                            Rekening Alternatif
+                        </span>
+                        @if ($paymentConfig->bank_alternatif_1)
+                            <div class="font-bold text-slate-800 text-xs">
+                                1. {{ $paymentConfig->bank_alternatif_1 }} ({{ $paymentConfig->norek_alternatif_1 }})
+                            </div>
+                        @else
+                            <div class="text-xs text-slate-400 italic">Alternatif 1 belum diatur</div>
+                        @endif
+                        @if ($paymentConfig->bank_alternatif_2)
+                            <div class="font-bold text-slate-800 text-xs">
+                                2. {{ $paymentConfig->bank_alternatif_2 }} ({{ $paymentConfig->norek_alternatif_2 }})
+                            </div>
+                        @else
+                            <div class="text-[11px] text-slate-400 italic">Alternatif 2 belum diatur</div>
+                        @endif
+                    </div>
+
+                    <!-- Card QRIS -->
+                    <div class="p-3.5 bg-slate-50 border border-slate-100 rounded-xl space-y-1">
+                        <span class="text-[11px] font-bold text-emerald-700 uppercase tracking-wider block flex items-center gap-1.5">
+                            <i class="fa-solid fa-qrcode text-[10px]"></i>
+                            Metode QRIS
+                        </span>
+                        <div class="font-extrabold text-slate-800 text-xs">
+                            {{ $paymentConfig->qris_merchant ?: 'QRIS SMKN 2 KRA' }}
+                        </div>
+                        <div class="text-xs flex items-center gap-1.5">
+                            @if ($paymentConfig->qris_image)
+                                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                <span class="text-emerald-700 font-semibold text-[11px]">Barcode Siap Digunakan</span>
+                            @else
+                                <span class="w-2 h-2 rounded-full bg-slate-300"></span>
+                                <span class="text-slate-400 italic text-[11px]">Barcode belum diunggah</span>
+                            @endif
+                        </div>
+                    </div>
+
+                    <!-- Card Jatuh Tempo (Jam) -->
+                    <div class="p-3.5 bg-slate-50 border border-slate-100 rounded-xl space-y-1">
+                        <span class="text-[11px] font-bold text-purple-700 uppercase tracking-wider block flex items-center gap-1.5">
+                            <i class="fa-solid fa-clock text-[10px]"></i>
+                            Jatuh Tempo (Jam)
+                        </span>
+                        <div class="text-xs text-slate-700 flex items-center justify-between">
+                            <span>Batas Bayar DP:</span>
+                            <strong class="font-extrabold text-purple-700">{{ $paymentConfig->jatuh_tempo_dp_jam }} Jam</strong>
+                        </div>
+                        <div class="text-xs text-slate-700 flex items-center justify-between">
+                            <span>Batas Pelunasan:</span>
+                            <strong class="font-extrabold text-brand-700">{{ $paymentConfig->jatuh_tempo_pelunasan_jam }} Jam</strong>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        @endif
+
         <!-- MAIN CONTENT GRID (2 COLUMNS) -->
         <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
