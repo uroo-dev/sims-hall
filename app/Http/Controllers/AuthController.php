@@ -44,6 +44,10 @@ class AuthController extends Controller
 
         $request->session()->regenerate();
 
+        if (Auth::user()?->role === 'pelanggan') {
+            return redirect()->intended(route('customer.dashboard'));
+        }
+
         return redirect()->intended(route('dashboard'));
     }
 

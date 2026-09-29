@@ -9,7 +9,7 @@
         </button>
         <!-- BREADCRUMB -->
         <div class="text-xs md:text-sm font-semibold tracking-wide text-gray-700">
-            <span class="text-gray-900 font-bold uppercase">{{ auth()->user() ? strtoupper(str_replace('_', ' ', auth()->user()->role)) : 'ADMIN' }}</span>
+            <span class="text-gray-900 font-bold uppercase">{{ (auth()->user() && auth()->user()->role === 'pelanggan') || request()->routeIs('customer.*') ? 'ORGANISASI' : (auth()->user() ? strtoupper(str_replace('_', ' ', auth()->user()->role)) : 'ADMIN') }}</span>
             <span class="mx-1 text-gray-400">&gt;</span>
             <span class="text-gray-600">@yield('page_title', 'Dashboard')</span>
         </div>
@@ -17,11 +17,11 @@
 
     <!-- USER PROFILE RIGHT -->
     <div class="flex items-center gap-3">
-        <button type="button"
+        <a href="{{ (auth()->user() && auth()->user()->role === 'pelanggan') ? route('customer.profil') : '#' }}"
             class="w-8 h-8 rounded-lg bg-blue-50 text-brand-600 flex items-center justify-center hover:bg-blue-100 transition"
             title="Pengaturan">
             <i class="fa-solid fa-gear text-sm"></i>
-        </button>
+        </a>
 
         <div class="relative group">
             <button type="button"
@@ -32,7 +32,7 @@
                 </div>
                 <div class="text-left text-xs leading-none">
                     <div class="font-bold text-gray-800">{{ auth()->user()->name ?? 'Admin' }}</div>
-                    <div class="text-[10px] text-gray-500 mt-0.5">{{ auth()->user() ? ucwords(str_replace('_', ' ', auth()->user()->role)) : 'admin' }}</div>
+                    <div class="text-[10px] text-gray-500 mt-0.5">{{ (auth()->user() && auth()->user()->role === 'pelanggan') ? 'Organisasi' : (auth()->user() ? ucwords(str_replace('_', ' ', auth()->user()->role)) : 'admin') }}</div>
                 </div>
                 <i class="fa-solid fa-chevron-down text-[10px] text-gray-400 ml-1"></i>
             </button>
@@ -40,7 +40,7 @@
             <!-- DROPDOWN MENU -->
             <div
                 class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 hidden group-hover:block z-50 py-1">
-                <a href="#" class="block px-4 py-2 text-xs text-gray-700 hover:bg-gray-50">
+                <a href="{{ (auth()->user() && auth()->user()->role === 'pelanggan') ? route('customer.profil') : '#' }}" class="block px-4 py-2 text-xs text-gray-700 hover:bg-gray-50">
                     <i class="fa-regular fa-user mr-2"></i> Profil Saya
                 </a>
                 <a href="#" class="block px-4 py-2 text-xs text-gray-700 hover:bg-gray-50">

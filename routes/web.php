@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CustomerPanelController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FasilitasController;
 use App\Http\Controllers\PaketPeminjamanController;
@@ -16,10 +17,10 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::middleware('auth')->group(function () {
-    Route::post('/logout', [AuthController::class, 'destroy'])->name('logout');
+    Route::match(['get', 'post'], '/logout', [AuthController::class, 'destroy'])->name('logout');
 
     Route::get('/dashboard', [DashboardController::class, 'index'])
-        ->middleware('role:admin,super_admin,super_duper_admin')
+        ->middleware('role:admin,super_admin,super_duper_admin,pelanggan')
         ->name('dashboard');
 
     // Admin Aula: CRUD Fasilitas & Paket Peminjaman
@@ -31,6 +32,17 @@ Route::middleware('auth')->group(function () {
         Route::resource('paket', PaketPeminjamanController::class)
             ->parameters(['paket' => 'paket'])
             ->except(['create', 'edit', 'show']);
+    });
+
+    Route::prefix('customer')->name('customer.')->group(function () {
+        Route::get('/', function () {
+            return redirect()->route('customer.dashboard');
+        });
+        Route::get('/dashboard', [CustomerPanelController::class, 'dashboard'])->name('dashboard');
+        Route::get('/paket', [CustomerPanelController::class, 'paket'])->name('paket');
+        Route::get('/cek-peminjaman', [CustomerPanelController::class, 'riwayat'])->name('cek-peminjaman');
+        Route::get('/riwayat', [CustomerPanelController::class, 'riwayat'])->name('riwayat');
+        Route::get('/profil', [CustomerPanelController::class, 'profil'])->name('profil');
     });
 });
 

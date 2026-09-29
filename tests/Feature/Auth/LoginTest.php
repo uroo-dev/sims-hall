@@ -30,6 +30,21 @@ class LoginTest extends TestCase
         $this->assertAuthenticatedAs($user);
     }
 
+    public function test_pelanggan_is_redirected_to_customer_dashboard_after_login(): void
+    {
+        $pelanggan = User::factory()->create([
+            'role' => 'pelanggan',
+        ]);
+
+        $response = $this->post('/login', [
+            'username' => $pelanggan->username,
+            'password' => 'password',
+        ]);
+
+        $response->assertRedirect('/customer/dashboard');
+        $this->assertAuthenticatedAs($pelanggan);
+    }
+
     public function test_users_cannot_authenticate_with_invalid_password(): void
     {
         $user = User::factory()->create();

@@ -18,6 +18,12 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => CheckRole::class,
             'adminFitur' => AdminFiturMiddleware::class,
         ]);
+
+        $middleware->redirectUsersTo(function (Request $request) {
+            return $request->user()?->role === 'pelanggan'
+                ? route('customer.dashboard')
+                : route('dashboard');
+        });
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

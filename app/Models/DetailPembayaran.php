@@ -75,6 +75,7 @@ class DetailPembayaran extends Model
             'dp' => 'Cicilan 1 (Uang Muka / DP)',
             'pelunasan' => 'Cicilan 2 (Pelunasan)',
             'lunas_langsung' => 'Pembayaran Penuh (100%)',
+            'refund' => 'Pengembalian Dana (Refund)',
             default => ucwords(str_replace('_', ' ', (string) $this->tipe_pembayaran)),
         };
     }
