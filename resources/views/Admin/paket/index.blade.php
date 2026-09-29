@@ -225,24 +225,26 @@
     </div>
 
 </div>
+@endsection
 
+@push('modals')
 <!-- ============================================================== -->
 <!-- MODAL: TAMBAH PAKET PEMINJAMAN -->
 <!-- ============================================================== -->
-<div id="modalCreate" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm transition-opacity">
+<div id="modalCreate" class="fixed inset-0 !m-0 z-[100] hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity">
     <div class="bg-white rounded-3xl w-full max-w-2xl shadow-2xl border border-slate-100 overflow-hidden transform transition-all scale-95 duration-200 max-h-[90vh] flex flex-col" id="modalCreateBox">
         <!-- HEADER -->
-        <div class="p-5 md:p-6 bg-gradient-to-r from-brand-600 to-[#0073c6] text-white flex items-center justify-between flex-shrink-0">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-2xl bg-white/20 flex items-center justify-center text-lg">
+        <div class="p-5 md:p-6 pb-2 md:pb-3 bg-white flex items-center justify-between flex-shrink-0">
+            <div class="flex items-center gap-3.5">
+                <div class="w-11 h-11 rounded-2xl bg-blue-50 text-brand-600 flex items-center justify-center text-lg border border-blue-100/80 shadow-xs flex-shrink-0">
                     <i class="fa-solid fa-boxes-packing"></i>
                 </div>
                 <div>
-                    <h3 class="font-extrabold text-base md:text-lg">Tambah Paket Peminjaman Baru</h3>
-                    <p class="text-blue-100 text-xs">Atur paket sewa aula beserta fasilitas di dalamnya</p>
+                    <h3 class="font-extrabold text-slate-900 text-base md:text-lg tracking-tight">Tambah Paket Peminjaman Baru</h3>
+                    <p class="text-slate-500 text-xs mt-0.5">Atur paket sewa aula beserta fasilitas di dalamnya</p>
                 </div>
             </div>
-            <button type="button" onclick="closeCreateModal()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition">
+            <button type="button" onclick="closeCreateModal()" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition" title="Tutup Modal">
                 <i class="fa-solid fa-xmark text-sm"></i>
             </button>
         </div>
@@ -374,20 +376,20 @@
 <!-- ============================================================== -->
 <!-- MODAL: EDIT PAKET PEMINJAMAN -->
 <!-- ============================================================== -->
-<div id="modalEdit" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm transition-opacity">
+<div id="modalEdit" class="fixed inset-0 !m-0 z-[100] hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity">
     <div class="bg-white rounded-3xl w-full max-w-2xl shadow-2xl border border-slate-100 overflow-hidden transform transition-all scale-95 duration-200 max-h-[90vh] flex flex-col" id="modalEditBox">
         <!-- HEADER -->
-        <div class="p-5 md:p-6 bg-gradient-to-r from-amber-500 to-amber-600 text-white flex items-center justify-between flex-shrink-0">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-2xl bg-white/20 flex items-center justify-center text-lg">
+        <div class="p-5 md:p-6 pb-2 md:pb-3 bg-white flex items-center justify-between flex-shrink-0">
+            <div class="flex items-center gap-3.5">
+                <div class="w-11 h-11 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-lg border border-amber-100/80 shadow-xs flex-shrink-0">
                     <i class="fa-regular fa-pen-to-square"></i>
                 </div>
                 <div>
-                    <h3 class="font-extrabold text-base md:text-lg">Edit Paket Peminjaman</h3>
-                    <p class="text-amber-100 text-xs">Perbarui kategori, tarif, dan fasilitas paket aula</p>
+                    <h3 class="font-extrabold text-slate-900 text-base md:text-lg tracking-tight">Edit Paket Peminjaman</h3>
+                    <p class="text-slate-500 text-xs mt-0.5">Perbarui kategori, tarif, dan fasilitas paket aula</p>
                 </div>
             </div>
-            <button type="button" onclick="closeEditModal()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition">
+            <button type="button" onclick="closeEditModal()" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition" title="Tutup Modal">
                 <i class="fa-solid fa-xmark text-sm"></i>
             </button>
         </div>
@@ -496,7 +498,7 @@
                 </label>
                 <textarea name="deskripsi" id="edit_deskripsi" rows="3" maxlength="2000"
                     placeholder="Contoh: Ketentuan tambahan paket..."
-                    class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs md:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition"></textarea>
+                    class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs md:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition">{{ old('deskripsi') }}</textarea>
             </div>
 
             <div class="pt-3 border-t border-slate-100 flex items-center justify-end gap-2.5 flex-shrink-0">
@@ -516,18 +518,18 @@
 <!-- ============================================================== -->
 <!-- MODAL: HAPUS PAKET PEMINJAMAN -->
 <!-- ============================================================== -->
-<div id="modalDelete" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm transition-opacity">
+<div id="modalDelete" class="fixed inset-0 !m-0 z-[100] hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity">
     <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl border border-slate-100 overflow-hidden transform transition-all scale-95 duration-200" id="modalDeleteBox">
         <div class="p-6 text-center space-y-4">
-            <div class="w-14 h-14 mx-auto rounded-full bg-red-100 text-red-600 flex items-center justify-center text-2xl">
+            <div class="w-14 h-14 mx-auto rounded-2xl bg-red-50 text-red-600 border border-red-100 flex items-center justify-center text-2xl shadow-xs">
                 <i class="fa-solid fa-triangle-exclamation"></i>
             </div>
             <div>
-                <h3 class="font-extrabold text-slate-800 text-lg">Konfirmasi Hapus Paket</h3>
+                <h3 class="font-extrabold text-slate-900 text-lg tracking-tight">Konfirmasi Hapus Paket</h3>
                 <p class="text-xs text-slate-500 mt-1">
                     Apakah Anda yakin ingin menghapus paket peminjaman:
                 </p>
-                <div id="delete_paket_title" class="font-bold text-slate-800 text-sm mt-2 bg-slate-50 py-2 px-3 rounded-xl border border-slate-200">
+                <div id="delete_paket_title" class="font-bold text-slate-800 text-sm mt-2 bg-slate-50 py-2.5 px-3 rounded-xl border border-slate-200">
                     -
                 </div>
                 <p class="text-[11px] text-red-500 mt-2 font-medium">
@@ -550,8 +552,7 @@
         </div>
     </div>
 </div>
-
-@endsection
+@endpush
 
 @push('scripts')
 <script>
@@ -621,6 +622,7 @@
     function openCreateModal() {
         const modal = document.getElementById('modalCreate');
         const box = document.getElementById('modalCreateBox');
+        document.body.classList.add('overflow-hidden');
         modal.classList.remove('hidden');
         setTimeout(() => {
             box.classList.remove('scale-95');
@@ -636,6 +638,7 @@
         box.classList.add('scale-95');
         setTimeout(() => {
             modal.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
         }, 150);
     }
 
@@ -659,6 +662,7 @@
 
         updateFacilitySelection('edit');
 
+        document.body.classList.add('overflow-hidden');
         modal.classList.remove('hidden');
         setTimeout(() => {
             box.classList.remove('scale-95');
@@ -674,6 +678,7 @@
         box.classList.add('scale-95');
         setTimeout(() => {
             modal.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
         }, 150);
     }
 
@@ -686,6 +691,7 @@
         form.action = deleteUrl;
         document.getElementById('delete_paket_title').innerText = nama;
 
+        document.body.classList.add('overflow-hidden');
         modal.classList.remove('hidden');
         setTimeout(() => {
             box.classList.remove('scale-95');
@@ -700,6 +706,7 @@
         box.classList.add('scale-95');
         setTimeout(() => {
             modal.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
         }, 150);
     }
 

@@ -92,6 +92,9 @@
 
     </div>
 
+    <!-- MODAL STACK -->
+    @stack('modals')
+
     @vite(['resources/js/app.js'])
     <script>
         // Sidebar drawer toggle for mobile devices
