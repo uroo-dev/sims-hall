@@ -18,7 +18,7 @@ return new class extends Migration
             $table->decimal('total_tagihan', 12, 2); // Total biaya paket sewa
             $table->decimal('total_terbayar', 12, 2)->default(0); // Akumulasi cicilan yang sudah diverifikasi
             $table->decimal('sisa_tagihan', 12, 2)->default(0); // Sisa nominal yang belum dilunasi
-            $table->enum('status_pembayaran', ['pending', 'partial', 'lunas', 'free', 'rejected'])->default('pending')->index();
+            $table->enum('status_pembayaran', ['pending', 'partial', 'lunas', 'free', 'rejected', 'refunded', 'refund_pending', 'hangus'])->default('pending')->index();
             $table->dateTime('jatuh_tempo_pelunasan')->nullable()->index(); // Batas waktu transfer pelunasan
             $table->text('catatan')->nullable(); // Keterangan tambahan tagihan
             $table->timestamps();

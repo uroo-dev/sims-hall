@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('pembayaran_id')->constrained('pembayarans')->cascadeOnDelete();
             $table->string('kode_transaksi', 50)->unique()->nullable(); // Contoh: TRX-DP-202609-001
-            $table->enum('tipe_pembayaran', ['dp', 'pelunasan', 'lunas_langsung'])->index(); // Cicilan 1 / DP atau Cicilan 2 / Pelunasan
+            $table->enum('tipe_pembayaran', ['dp', 'pelunasan', 'lunas_langsung', 'refund'])->index(); // Cicilan 1 / DP atau Cicilan 2 / Pelunasan
             $table->decimal('jumlah_bayar', 12, 2); // Nominal transfer pada cicilan ini
             $table->enum('metode', ['transfer', 'cash'])->default('transfer');
             $table->string('bank_tujuan', 100)->nullable(); // Bank tujuan sekolah (misal: Bank Jateng)
