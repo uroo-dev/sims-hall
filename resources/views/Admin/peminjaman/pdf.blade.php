@@ -6,14 +6,14 @@
     <title>Daftar Peminjaman Aula - SMKN 2 Karanganyar</title>
     <style>
         @page {
-            margin: 12mm 15mm 15mm 15mm;
-            size: a4 landscape;
+            margin: 10mm 10mm 12mm 10mm;
+            size: a4 portrait;
         }
 
         body {
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
             font-size: 8.5pt;
-            line-height: 1.35;
+            line-height: 1.3;
             color: #1e293b;
             background-color: #ffffff;
             margin: 0;
@@ -129,41 +129,12 @@
             padding: 2px 0;
         }
 
-        /* KARTU RINGKASAN */
-        .summary-box {
-            width: 100%;
-            margin-bottom: 12px;
-            border-collapse: collapse;
-        }
-
-        .summary-card {
-            border: 1px solid #cbd5e1;
-            background-color: #f8fafc;
-            padding: 6px 10px;
-            text-align: center;
-            vertical-align: middle;
-        }
-
-        .summary-label {
-            font-size: 7pt;
-            font-weight: bold;
-            text-transform: uppercase;
-            color: #64748b;
-            margin-bottom: 2px;
-        }
-
-        .summary-value {
-            font-size: 10pt;
-            font-weight: bold;
-            color: #0f172a;
-        }
-
         /* TABEL UTAMA */
         .data-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 7.8pt;
-            margin-bottom: 14px;
+            font-size: 7pt;
+            margin-bottom: 12px;
         }
 
         .data-table th {
@@ -171,13 +142,13 @@
             color: #ffffff;
             font-weight: bold;
             text-align: center;
-            padding: 6px 4px;
+            padding: 4px 3px;
             border: 1px solid #004f8f;
             vertical-align: middle;
         }
 
         .data-table td {
-            padding: 5px 4px;
+            padding: 3.5px 3px;
             border: 1px solid #cbd5e1;
             vertical-align: middle;
         }
@@ -194,22 +165,22 @@
         /* BADGE STATUS */
         .badge {
             display: inline-block;
-            padding: 2px 5px;
-            border-radius: 3px;
-            font-size: 6.8pt;
+            padding: 1px 3.5px;
+            border-radius: 2.5px;
+            font-size: 5.8pt;
             font-weight: bold;
             text-transform: uppercase;
         }
 
-        .badge-approved-final { background-color: #dcfce7; color: #15803d; border: 1px solid #86efac; }
-        .badge-approved-1 { background-color: #fef3c7; color: #b45309; border: 1px solid #fcd34d; }
-        .badge-pending { background-color: #e0f2fe; color: #0369a1; border: 1px solid #7dd3fc; }
-        .badge-rejected { background-color: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
+        .badge-approved-final { background-color: #dcfce7; color: #15803d; border: 0.5px solid #86efac; }
+        .badge-approved-1 { background-color: #fef3c7; color: #b45309; border: 0.5px solid #fcd34d; }
+        .badge-pending { background-color: #e0f2fe; color: #0369a1; border: 0.5px solid #7dd3fc; }
+        .badge-rejected { background-color: #fee2e2; color: #b91c1c; border: 0.5px solid #fca5a5; }
 
-        .badge-lunas { background-color: #dcfce7; color: #15803d; border: 1px solid #86efac; }
-        .badge-partial { background-color: #fef3c7; color: #b45309; border: 1px solid #fcd34d; }
-        .badge-unpaid { background-color: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
-        .badge-refund { background-color: #f3e8ff; color: #7e22ce; border: 1px solid #d8b4fe; }
+        .badge-lunas { background-color: #dcfce7; color: #15803d; border: 0.5px solid #86efac; }
+        .badge-partial { background-color: #fef3c7; color: #b45309; border: 0.5px solid #fcd34d; }
+        .badge-unpaid { background-color: #f1f5f9; color: #475569; border: 0.5px solid #cbd5e1; }
+        .badge-refund { background-color: #f3e8ff; color: #7e22ce; border: 0.5px solid #d8b4fe; }
 
         /* GRAND TOTAL BARIS */
         .total-row {
@@ -318,46 +289,20 @@
         </tr>
     </table>
 
-    <!-- 4. KOTAK REKAPITULASI -->
-    <table class="summary-box">
-        <tr>
-            <td class="summary-card" style="width: 20%;">
-                <div class="summary-label">Total Permohonan</div>
-                <div class="summary-value">{{ number_format($stats['total']) }}</div>
-            </td>
-            <td class="summary-card" style="width: 20%;">
-                <div class="summary-label" style="color: #15803d;">Disetujui</div>
-                <div class="summary-value" style="color: #15803d;">{{ number_format($stats['approved']) }}</div>
-            </td>
-            <td class="summary-card" style="width: 20%;">
-                <div class="summary-label" style="color: #b45309;">Menunggu Persetujuan</div>
-                <div class="summary-value" style="color: #b45309;">{{ number_format($stats['pending']) }}</div>
-            </td>
-            <td class="summary-card" style="width: 20%;">
-                <div class="summary-label" style="color: #b91c1c;">Ditolak</div>
-                <div class="summary-value" style="color: #b91c1c;">{{ number_format($stats['rejected']) }}</div>
-            </td>
-            <td class="summary-card" style="width: 20%;">
-                <div class="summary-label" style="color: #0060ac;">Total Nilai Sewa</div>
-                <div class="summary-value" style="color: #0060ac;">Rp {{ number_format($stats['total_tagihan'], 0, ',', '.') }}</div>
-            </td>
-        </tr>
-    </table>
-
-    <!-- 5. TABEL DAFTAR PEMINJAMAN -->
+    <!-- 4. TABEL DAFTAR PEMINJAMAN -->
     <table class="data-table">
         <thead>
             <tr>
-                <th style="width: 24px;">No</th>
-                <th style="width: 75px;">No. Invoice</th>
-                <th style="width: 140px;">Pemohon & Instansi</th>
-                <th style="width: 110px;">Paket Aula</th>
-                <th style="width: 110px;">Jadwal Pelaksanaan</th>
-                <th style="width: 85px;">Status Peminjaman</th>
-                <th style="width: 80px;">Total Tagihan</th>
-                <th style="width: 80px;">Terbayar</th>
-                <th style="width: 75px;">Sisa Tagihan</th>
-                <th style="width: 75px;">Status Bayar</th>
+                <th style="width: 18px;">No</th>
+                <th style="width: 62px;">No. Invoice</th>
+                <th style="width: 95px;">Pemohon & Instansi</th>
+                <th style="width: 68px;">Paket Aula</th>
+                <th style="width: 68px;">Jadwal Pelaksanaan</th>
+                <th style="width: 48px;">Status</th>
+                <th style="width: 52px;">Tagihan</th>
+                <th style="width: 52px;">Terbayar</th>
+                <th style="width: 52px;">Sisa Tagihan</th>
+                <th style="width: 45px;">Status Bayar</th>
             </tr>
         </thead>
         <tbody>

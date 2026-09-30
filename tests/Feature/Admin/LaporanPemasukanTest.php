@@ -312,4 +312,110 @@ class LaporanPemasukanTest extends TestCase
         $response->assertOk();
         $response->assertHeader('content-type', 'application/pdf');
     }
+
+    public function test_peminjaman_pada_tanggal_hari_ini_masuk_ke_laporan(): void
+    {
+        $admin = $this->createAdminAula();
+        $paket = PaketPeminjaman::create([
+            'nama_paket' => 'Paket Sewa Harian',
+            'kategori' => 'standar 1',
+            'harga' => 1500000,
+            'harga_dp' => 500000,
+            'deskripsi' => 'Paket harian',
+        ]);
+
+        $todayPeminjaman = Peminjaman::create([
+            'paket_peminjaman_id' => $paket->id,
+            'nama' => 'Penyewa Hari Ini',
+            'email_instansi' => 'hariini@gmail.com',
+            'tanggal_mulai' => Carbon::today()->setTime(9, 0),
+            'tanggal_selesai' => Carbon::today()->setTime(17, 0),
+            'status' => 'approved_final',
+        ]);
+
+        Pembayaran::create([
+            'peminjaman_id' => $todayPeminjaman->id,
+            'kode_pembayaran' => 'INV-TODAY-001',
+            'total_tagihan' => 1500000,
+            'total_terbayar' => 1500000,
+            'total_refund' => 0,
+            'sisa_tagihan' => 0,
+            'status_pembayaran' => 'lunas',
+        ]);
+
+        // Akses laporan dengan preset 'hari_ini'
+        $response = $this->actingAs($admin)->get(route('admin.laporan.index', [
+            'preset' => 'hari_ini',
+        ]));
+
+        $response->assertOk();
+        $response->assertSee('Penyewa Hari Ini');
+
+        // Akses export PDF dengan preset 'hari_ini'
+        $pdfResponse = $this->actingAs($admin)->get(route('admin.laporan.pdf', [
+            'preset' => 'hari_ini',
+        ]));
+
+        $pdfResponse->assertOk();
+        $pdfResponse->assertHeader('content-type', 'application/pdf');
+    }
+
+    public function test_view_pdf_laporan_dan_peminjaman_tidak_memiliki_summary_box(): void
+    {
+        $admin = $this->createAdminAula();
+        $this->createDummyData();
+
+        // Render view PDF laporan langsung untuk memeriksa konten HTML tanpa Dompdf wrapper
+        $viewLaporan = view('Admin.laporan.pdf', [
+            'peminjamans' => Peminjaman::all(),
+            'stats' => [
+                'total_peminjaman' => 2,
+                'total_tagihan' => 7000000,
+                'total_pemasukan_bruto' => 6000000,
+                'total_refund' => 0,
+                'total_pemasukan_netto' => 6000000,
+                'total_sisa_tagihan' => 1000000,
+            ],
+            'filter' => [
+                'tanggal_dari' => null,
+                'tanggal_sampai' => null,
+                'filter_by' => 'sewa',
+                'status_pembayaran' => 'all',
+            ],
+            'isKepalaSekolah' => false,
+            'kepalaSekolah' => null,
+            'petugasAdmin' => $admin,
+            'paymentConfig' => null,
+            'logoBase64' => null,
+            'printedAt' => '30 September 2026, 12:00 WIB',
+        ])->render();
+
+        $this->assertStringNotContainsString('summary-box', $viewLaporan);
+        $this->assertStringNotContainsString('summary-card', $viewLaporan);
+        $this->assertStringContainsString('data-table', $viewLaporan);
+
+        // Render view PDF peminjaman
+        $viewPeminjaman = view('Admin.peminjaman.pdf', [
+            'peminjamans' => Peminjaman::all(),
+            'stats' => [
+                'total' => 2,
+                'approved' => 2,
+                'pending' => 0,
+                'rejected' => 0,
+                'total_tagihan' => 7000000,
+                'total_terbayar' => 6000000,
+                'total_sisa_tagihan' => 1000000,
+            ],
+            'tanggalDari' => null,
+            'tanggalSampai' => null,
+            'kepalaSekolah' => null,
+            'petugasAdmin' => $admin,
+            'paymentConfig' => null,
+            'logoBase64' => null,
+        ])->render();
+
+        $this->assertStringNotContainsString('summary-box', $viewPeminjaman);
+        $this->assertStringNotContainsString('summary-card', $viewPeminjaman);
+        $this->assertStringContainsString('data-table', $viewPeminjaman);
+    }
 }

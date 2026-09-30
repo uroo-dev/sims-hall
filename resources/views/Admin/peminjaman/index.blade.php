@@ -346,21 +346,25 @@
             <!-- Quick Preset Buttons -->
             <div>
                 <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Preset Periode Waktu</label>
-                <div class="grid grid-cols-4 gap-2 text-center text-xs">
+                <div class="grid grid-cols-5 gap-1.5 text-center text-xs">
+                    <button type="button" onclick="setExportPreset('hari_ini')"
+                        class="py-2 px-1.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 font-semibold transition cursor-pointer">
+                        Hari Ini
+                    </button>
                     <button type="button" onclick="setExportPreset('bulan_ini')"
-                        class="py-2 px-2.5 rounded-xl border border-brand-200 bg-brand-50 hover:bg-brand-100 text-brand-700 font-bold transition cursor-pointer">
+                        class="py-2 px-1.5 rounded-xl border border-brand-200 bg-brand-50 hover:bg-brand-100 text-brand-700 font-bold transition cursor-pointer">
                         Bulan Ini
                     </button>
                     <button type="button" onclick="setExportPreset('bulan_lalu')"
-                        class="py-2 px-2.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 font-semibold transition cursor-pointer">
+                        class="py-2 px-1.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 font-semibold transition cursor-pointer">
                         Bulan Lalu
                     </button>
                     <button type="button" onclick="setExportPreset('tahun_ini')"
-                        class="py-2 px-2.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 font-semibold transition cursor-pointer">
+                        class="py-2 px-1.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 font-semibold transition cursor-pointer">
                         Tahun Ini
                     </button>
                     <button type="button" onclick="setExportPreset('semua')"
-                        class="py-2 px-2.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 font-semibold transition cursor-pointer">
+                        class="py-2 px-1.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 font-semibold transition cursor-pointer">
                         Semua
                     </button>
                 </div>
@@ -447,7 +451,10 @@
         let dari = '';
         let sampai = '';
 
-        if (preset === 'bulan_ini') {
+        if (preset === 'hari_ini') {
+            dari = formatDate(today);
+            sampai = formatDate(today);
+        } else if (preset === 'bulan_ini') {
             dari = formatDate(new Date(today.getFullYear(), today.getMonth(), 1));
             sampai = formatDate(new Date(today.getFullYear(), today.getMonth() + 1, 0));
         } else if (preset === 'bulan_lalu') {

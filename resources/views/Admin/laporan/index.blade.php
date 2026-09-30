@@ -233,8 +233,8 @@
                 <div class="space-y-1">
                     <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider">Dasar Acuan Tanggal</label>
                     <select name="filter_by" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3.5 py-2.5 text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500 font-medium">
-                        <option value="transaksi" {{ $filter['filter_by'] === 'transaksi' ? 'selected' : '' }}>Tanggal Transaksi (Uang Masuk)</option>
                         <option value="sewa" {{ $filter['filter_by'] === 'sewa' ? 'selected' : '' }}>Tanggal Sewa Pelaksanaan Aula</option>
+                        <option value="transaksi" {{ $filter['filter_by'] === 'transaksi' ? 'selected' : '' }}>Tanggal Transaksi (Uang Masuk)</option>
                         <option value="pengajuan" {{ $filter['filter_by'] === 'pengajuan' ? 'selected' : '' }}>Tanggal Pengajuan Booking</option>
                     </select>
                 </div>

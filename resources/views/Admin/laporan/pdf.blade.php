@@ -6,14 +6,14 @@
     <title>Laporan Rekapitulasi Pemasukan Aula - SMKN 2 Karanganyar</title>
     <style>
         @page {
-            margin: 12mm 15mm 15mm 15mm;
-            size: a4 landscape;
+            margin: 10mm 10mm 12mm 10mm;
+            size: a4 portrait;
         }
 
         body {
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            font-size: 9pt;
-            line-height: 1.35;
+            font-size: 8.5pt;
+            line-height: 1.3;
             color: #1e293b;
             background-color: #ffffff;
             margin: 0;
@@ -130,59 +130,12 @@
             padding: 2px 0;
         }
 
-        /* KARTU RINGKASAN FINANSIAL */
-        .summary-box {
-            width: 100%;
-            margin-bottom: 12px;
-            border-collapse: collapse;
-        }
-
-        .summary-card {
-            border: 1px solid #cbd5e1;
-            background-color: #f8fafc;
-            padding: 6px 10px;
-            text-align: center;
-            vertical-align: middle;
-        }
-
-        .summary-card-highlight {
-            border: 1.5px solid #0284c7;
-            background-color: #f0f7ff;
-        }
-
-        .summary-label {
-            font-size: 7pt;
-            font-weight: bold;
-            text-transform: uppercase;
-            color: #64748b;
-            margin-bottom: 2px;
-        }
-
-        .summary-value {
-            font-size: 10pt;
-            font-weight: bold;
-            color: #0f172a;
-        }
-
-        .summary-value-highlight {
-            color: #0060ac;
-            font-size: 11pt;
-        }
-
-        .summary-value-green {
-            color: #047857;
-        }
-
-        .summary-value-red {
-            color: #b91c1c;
-        }
-
-        /* TABEL UTAMA LAPORAN */
+        /* TABEL UTAMA LAPORAN PEMINJAMAN */
         .data-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 7.8pt;
-            margin-bottom: 14px;
+            font-size: 6.8pt;
+            margin-bottom: 12px;
         }
 
         .data-table th {
@@ -190,13 +143,13 @@
             color: #ffffff;
             font-weight: bold;
             text-align: center;
-            padding: 6px 4px;
+            padding: 4px 2.5px;
             border: 1px solid #004f8f;
             vertical-align: middle;
         }
 
         .data-table td {
-            padding: 5px 4px;
+            padding: 3.5px 2.5px;
             border: 1px solid #cbd5e1;
             vertical-align: middle;
         }
@@ -217,18 +170,18 @@
         /* BADGE STATUS */
         .badge {
             display: inline-block;
-            padding: 2px 5px;
-            border-radius: 3px;
-            font-size: 6.8pt;
+            padding: 1px 3.5px;
+            border-radius: 2.5px;
+            font-size: 5.8pt;
             font-weight: bold;
             text-transform: uppercase;
         }
 
-        .badge-lunas { background-color: #dcfce7; color: #15803d; border: 1px solid #86efac; }
-        .badge-partial { background-color: #fef3c7; color: #b45309; border: 1px solid #fcd34d; }
-        .badge-pending { background-color: #e0f2fe; color: #0369a1; border: 1px solid #7dd3fc; }
-        .badge-refunded { background-color: #f3e8ff; color: #7e22ce; border: 1px solid #d8b4fe; }
-        .badge-rejected { background-color: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
+        .badge-lunas { background-color: #dcfce7; color: #15803d; border: 0.5px solid #86efac; }
+        .badge-partial { background-color: #fef3c7; color: #b45309; border: 0.5px solid #fcd34d; }
+        .badge-pending { background-color: #e0f2fe; color: #0369a1; border: 0.5px solid #7dd3fc; }
+        .badge-refunded { background-color: #f3e8ff; color: #7e22ce; border: 0.5px solid #d8b4fe; }
+        .badge-rejected { background-color: #fee2e2; color: #b91c1c; border: 0.5px solid #fca5a5; }
 
         /* GRAND TOTAL BARIS */
         .total-row {
@@ -339,46 +292,21 @@
         </tr>
     </table>
 
-    <!-- 4. KOTAK REKAPITULASI FINANSIAL -->
-    <table class="summary-box">
-        <tr>
-            <td class="summary-card" style="width: 20%;">
-                <div class="summary-label">Total Peminjaman</div>
-                <div class="summary-value">{{ number_format($stats['total_peminjaman']) }} <span style="font-size: 7.5pt; font-weight: normal; color: #64748b;">Pengajuan</span></div>
-            </td>
-            <td class="summary-card" style="width: 20%;">
-                <div class="summary-label">Total Nilai Tagihan</div>
-                <div class="summary-value">Rp {{ number_format($stats['total_tagihan'], 0, ',', '.') }}</div>
-            </td>
-            <td class="summary-card summary-card-highlight" style="width: 20%;">
-                <div class="summary-label" style="color: #004f8f;">Pemasukan Bruto (Masuk)</div>
-                <div class="summary-value summary-value-highlight">Rp {{ number_format($stats['total_pemasukan_bruto'], 0, ',', '.') }}</div>
-            </td>
-            <td class="summary-card" style="width: 20%;">
-                <div class="summary-label">Total Refund (Retur)</div>
-                <div class="summary-value summary-value-red">Rp {{ number_format($stats['total_refund'], 0, ',', '.') }}</div>
-            </td>
-            <td class="summary-card summary-card-highlight" style="width: 20%; background-color: #f0fdf4; border-color: #86efac;">
-                <div class="summary-label" style="color: #15803d;">Pemasukan Bersih (Netto)</div>
-                <div class="summary-value summary-value-green" style="font-size: 11pt;">Rp {{ number_format($stats['total_pemasukan_netto'], 0, ',', '.') }}</div>
-            </td>
-        </tr>
-    </table>
-
-    <!-- 5. TABEL DETAIL TRANSAKSI PEMINJAMAN & PEMBAYARAN -->
+    <!-- 4. TABEL DAFTAR DATA PEMINJAMAN & TRANSAKSI -->
     <table class="data-table">
         <thead>
             <tr>
-                <th style="width: 24px;">No</th>
-                <th style="width: 75px;">No. Invoice</th>
-                <th style="width: 140px;">Pemohon / Instansi</th>
-                <th style="width: 110px;">Paket Aula</th>
-                <th style="width: 105px;">Jadwal Sewa</th>
-                <th style="width: 80px;">Total Tagihan</th>
-                <th style="width: 85px;">Dana Masuk</th>
-                <th style="width: 70px;">Refund</th>
-                <th style="width: 80px;">Sisa Tagihan</th>
-                <th style="width: 75px;">Status</th>
+                <th style="width: 18px;">No</th>
+                <th style="width: 58px;">No. Invoice</th>
+                <th style="width: 82px;">Pemohon & Instansi</th>
+                <th style="width: 60px;">Paket Aula</th>
+                <th style="width: 60px;">Jadwal Sewa</th>
+                <th style="width: 44px;">Status Sewa</th>
+                <th style="width: 50px;">Tagihan</th>
+                <th style="width: 50px;">Dana Masuk</th>
+                <th style="width: 40px;">Refund</th>
+                <th style="width: 50px;">Sisa Tagihan</th>
+                <th style="width: 44px;">Status Bayar</th>
             </tr>
         </thead>
         <tbody>
@@ -407,6 +335,19 @@
                     <td class="text-center" style="font-size: 7pt;">
                         <div>{{ $item->tanggal_mulai ? $item->tanggal_mulai->format('d/m/Y H:i') : '-' }}</div>
                         <div style="color: #64748b;">s/d {{ $item->tanggal_selesai ? $item->tanggal_selesai->format('d/m/Y H:i') : '-' }}</div>
+                    </td>
+                    <td class="text-center">
+                        @if ($item->status === 'approved_final')
+                            <span class="badge badge-lunas">DISETUJUI</span>
+                        @elseif ($item->status === 'approved_1')
+                            <span class="badge badge-partial">ADM ACC</span>
+                        @elseif ($item->status === 'pending')
+                            <span class="badge badge-pending">PENDING</span>
+                        @elseif ($item->status === 'rejected')
+                            <span class="badge badge-rejected">DITOLAK</span>
+                        @else
+                            <span class="badge badge-pending">{{ strtoupper($item->status) }}</span>
+                        @endif
                     </td>
                     <td class="text-right">Rp {{ number_format($tagihan, 0, ',', '.') }}</td>
                     <td class="text-right font-bold" style="color: #0060ac;">
@@ -439,7 +380,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="10" class="text-center" style="padding: 18px; color: #64748b;">
+                    <td colspan="11" class="text-center" style="padding: 18px; color: #64748b;">
                         <em>Tidak ada rekaman transaksi peminjaman aula yang sesuai dengan kriteria filter pada periode ini.</em>
                     </td>
                 </tr>
@@ -447,13 +388,13 @@
         </tbody>
         <tfoot>
             <tr class="total-row">
-                <td colspan="5" class="text-center">GRAND TOTAL AKUMULASI ({{ count($peminjamans) }} TRANSAKSI)</td>
+                <td colspan="6" class="text-center">GRAND TOTAL AKUMULASI ({{ count($peminjamans) }} DATA PEMINJAMAN)</td>
                 <td class="text-right font-bold">Rp {{ number_format($stats['total_tagihan'], 0, ',', '.') }}</td>
                 <td class="text-right font-bold" style="color: #004f8f;">Rp {{ number_format($stats['total_pemasukan_bruto'], 0, ',', '.') }}</td>
                 <td class="text-right font-bold" style="color: #b91c1c;">Rp {{ number_format($stats['total_refund'], 0, ',', '.') }}</td>
                 <td class="text-right font-bold" style="color: #d97706;">Rp {{ number_format($stats['total_sisa_tagihan'], 0, ',', '.') }}</td>
-                <td class="text-center font-bold" style="color: #15803d;">
-                    NET: Rp {{ number_format($stats['total_pemasukan_netto'], 0, ',', '.') }}
+                <td class="text-center font-bold" style="color: #15803d; font-size: 7.2pt;">
+                    NETTO: Rp {{ number_format($stats['total_pemasukan_netto'], 0, ',', '.') }}
                 </td>
             </tr>
         </tfoot>

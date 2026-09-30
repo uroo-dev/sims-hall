@@ -115,11 +115,26 @@ class KepalaSekolahController extends Controller
 
         $query = Peminjaman::with(['paketPeminjaman', 'pembayaran.details', 'persetujuans']);
 
-        if ($tanggalDari) {
-            $query->whereDate('tanggal_mulai', '>=', $tanggalDari);
-        }
-        if ($tanggalSampai) {
-            $query->whereDate('tanggal_mulai', '<=', $tanggalSampai);
+        if ($tanggalDari && $tanggalSampai) {
+            $query->where(function ($q) use ($tanggalDari, $tanggalSampai) {
+                $q->where(function ($sub) use ($tanggalDari, $tanggalSampai) {
+                    $sub->whereDate('tanggal_mulai', '<=', $tanggalSampai)
+                        ->whereDate('tanggal_selesai', '>=', $tanggalDari);
+                })->orWhere(function ($sub) use ($tanggalDari, $tanggalSampai) {
+                    $sub->whereDate('created_at', '>=', $tanggalDari)
+                        ->whereDate('created_at', '<=', $tanggalSampai);
+                });
+            });
+        } elseif ($tanggalDari) {
+            $query->where(function ($q) use ($tanggalDari) {
+                $q->whereDate('tanggal_selesai', '>=', $tanggalDari)
+                    ->orWhereDate('created_at', '>=', $tanggalDari);
+            });
+        } elseif ($tanggalSampai) {
+            $query->where(function ($q) use ($tanggalSampai) {
+                $q->whereDate('tanggal_mulai', '<=', $tanggalSampai)
+                    ->orWhereDate('created_at', '<=', $tanggalSampai);
+            });
         }
 
         if ($request->filled('status')) {
@@ -170,7 +185,7 @@ class KepalaSekolahController extends Controller
             'petugasAdmin',
             'paymentConfig',
             'logoBase64'
-        ))->setPaper('a4', 'landscape');
+        ))->setPaper('a4', 'portrait');
 
         $filename = 'Daftar-Peminjaman-Aula-Kepsek-'.Carbon::now()->format('Ymd-His').'.pdf';
 

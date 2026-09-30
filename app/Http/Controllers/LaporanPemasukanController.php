@@ -100,7 +100,7 @@ class LaporanPemasukanController extends Controller
         ];
 
         $pdf = Pdf::loadView('Admin.laporan.pdf', $pdfData);
-        $pdf->setPaper('a4', 'landscape');
+        $pdf->setPaper('a4', 'portrait');
         $pdf->setOption('isRemoteEnabled', true);
         $pdf->setOption('isHtml5ParserEnabled', true);
 
@@ -156,7 +156,7 @@ class LaporanPemasukanController extends Controller
             'preset' => $preset,
             'tanggal_dari' => $tanggalDari,
             'tanggal_sampai' => $tanggalSampai,
-            'filter_by' => $request->query('filter_by', 'transaksi'), // 'transaksi' (pembayaran), 'sewa' (tanggal aula), 'pengajuan'
+            'filter_by' => $request->query('filter_by', 'sewa'), // 'sewa' (jadwal pelaksanaan aula), 'transaksi' (pembayaran), 'pengajuan'
             'status_pembayaran' => $request->query('status_pembayaran', 'all'),
             'paket_id' => $request->query('paket_id', 'all'),
             'search' => trim((string) $request->query('search', '')),
@@ -183,43 +183,59 @@ class LaporanPemasukanController extends Controller
             $sampai = $filter['tanggal_sampai'] ? Carbon::parse($filter['tanggal_sampai'])->endOfDay() : null;
 
             if ($filter['filter_by'] === 'sewa') {
-                // Berdasarkan tanggal mulai acara sewa aula
+                // Berdasarkan jadwal sewa aula (mencakup peminjaman aktif/berjalan atau diajukan pada tanggal tersebut)
                 if ($dari && $sampai) {
-                    $query->whereBetween('tanggal_mulai', [$dari, $sampai]);
+                    $query->where(function ($q) use ($dari, $sampai) {
+                        $q->where(function ($sub) use ($dari, $sampai) {
+                            $sub->whereDate('tanggal_mulai', '<=', $sampai->toDateString())
+                                ->whereDate('tanggal_selesai', '>=', $dari->toDateString());
+                        })->orWhere(function ($sub) use ($dari, $sampai) {
+                            $sub->whereDate('created_at', '>=', $dari->toDateString())
+                                ->whereDate('created_at', '<=', $sampai->toDateString());
+                        });
+                    });
                 } elseif ($dari) {
-                    $query->where('tanggal_mulai', '>=', $dari);
+                    $query->where(function ($q) use ($dari) {
+                        $q->whereDate('tanggal_selesai', '>=', $dari->toDateString())
+                            ->orWhereDate('created_at', '>=', $dari->toDateString());
+                    });
                 } elseif ($sampai) {
-                    $query->where('tanggal_mulai', '<=', $sampai);
+                    $query->where(function ($q) use ($sampai) {
+                        $q->whereDate('tanggal_mulai', '<=', $sampai->toDateString())
+                            ->orWhereDate('created_at', '<=', $sampai->toDateString());
+                    });
                 }
             } elseif ($filter['filter_by'] === 'pengajuan') {
                 // Berdasarkan waktu permohonan booking dibuat
                 if ($dari && $sampai) {
-                    $query->whereBetween('created_at', [$dari, $sampai]);
+                    $query->whereDate('created_at', '>=', $dari->toDateString())
+                        ->whereDate('created_at', '<=', $sampai->toDateString());
                 } elseif ($dari) {
-                    $query->where('created_at', '>=', $dari);
+                    $query->whereDate('created_at', '>=', $dari->toDateString());
                 } elseif ($sampai) {
-                    $query->where('created_at', '<=', $sampai);
+                    $query->whereDate('created_at', '<=', $sampai->toDateString());
                 }
             } else {
-                // Default: Berdasarkan tanggal transaksi pembayaran (detail_pembayarans) atau pembayaran tagihan
+                // Berdasarkan tanggal transaksi pembayaran (detail_pembayarans) atau fallback
                 $query->where(function ($sub) use ($dari, $sampai) {
                     $sub->whereHas('pembayaran.details', function ($detailQ) use ($dari, $sampai) {
                         $detailQ->where('status', 'verified');
                         if ($dari && $sampai) {
-                            $detailQ->whereBetween(DB::raw('COALESCE(tanggal_bayar, diverifikasi_pada, created_at)'), [$dari, $sampai]);
+                            $detailQ->whereDate(DB::raw('COALESCE(tanggal_bayar, diverifikasi_pada, created_at)'), '>=', $dari->toDateString())
+                                ->whereDate(DB::raw('COALESCE(tanggal_bayar, diverifikasi_pada, created_at)'), '<=', $sampai->toDateString());
                         } elseif ($dari) {
-                            $detailQ->where(DB::raw('COALESCE(tanggal_bayar, diverifikasi_pada, created_at)'), '>=', $dari);
+                            $detailQ->whereDate(DB::raw('COALESCE(tanggal_bayar, diverifikasi_pada, created_at)'), '>=', $dari->toDateString());
                         } elseif ($sampai) {
-                            $detailQ->where(DB::raw('COALESCE(tanggal_bayar, diverifikasi_pada, created_at)'), '<=', $sampai);
+                            $detailQ->whereDate(DB::raw('COALESCE(tanggal_bayar, diverifikasi_pada, created_at)'), '<=', $sampai->toDateString());
                         }
                     })->orWhere(function ($fallbackQ) use ($dari, $sampai) {
-                        // Jika belum ada detail pembayaran verified (misal pending), filter berdasarkan created_at pembayaran
                         if ($dari && $sampai) {
-                            $fallbackQ->whereBetween('created_at', [$dari, $sampai]);
+                            $fallbackQ->whereDate('created_at', '>=', $dari->toDateString())
+                                ->whereDate('created_at', '<=', $sampai->toDateString());
                         } elseif ($dari) {
-                            $fallbackQ->where('created_at', '>=', $dari);
+                            $fallbackQ->whereDate('created_at', '>=', $dari->toDateString());
                         } elseif ($sampai) {
-                            $fallbackQ->where('created_at', '<=', $sampai);
+                            $fallbackQ->whereDate('created_at', '<=', $sampai->toDateString());
                         }
                     });
                 });
