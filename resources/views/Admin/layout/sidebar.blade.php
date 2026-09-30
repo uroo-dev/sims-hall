@@ -201,12 +201,12 @@
                     <span class="w-12 h-[1px] bg-white/30"></span>
                 </div>
                 <div class="space-y-2.5 pl-1">
-                    <a href="#"
+                    <a href="{{ route('index.dashboard.ppdb')}}"
                         class="flex items-center gap-3 py-1.5 text-white hover:text-blue-100 font-medium text-sm transition">
                         <i class="fa-solid fa-user-plus w-5 text-center text-base"></i>
                         <span>Dashboard PPDB</span>
                     </a>
-                    <a href="#"
+                    <a href="{{ route('index.informasi.ppdb')}}"
                         class="flex items-center gap-3 py-1.5 text-white hover:text-blue-100 font-medium text-sm transition">
                         <i class="fa-solid fa-file-lines w-5 text-center text-base"></i>
                         <span>Informasi & Persyaratan</span>
