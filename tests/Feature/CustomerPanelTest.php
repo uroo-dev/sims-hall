@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Models\DetailPembayaran;
+use App\Models\Fitur;
 use App\Models\PaketPeminjaman;
 use App\Models\PaymentConfiguration;
 use App\Models\Pembayaran;
@@ -927,5 +929,95 @@ class CustomerPanelTest extends TestCase
         $resView->assertOk();
         $resView->assertSee('Refund Selesai');
         $resView->assertSee('Pengembalian dana telah selesai dan dikonfirmasi diterima.');
+    }
+
+    public function test_halaman_pembayaran_setelah_admin_menolak_dp_menampilkan_form_transfer_ulang_bukan_refund(): void
+    {
+        $pelanggan = User::factory()->create([
+            'role' => 'user',
+            'email' => 'buyer@example.com',
+            'name' => 'Buyer Test',
+        ]);
+
+        $admin = User::factory()->create([
+            'role' => 'admin',
+            'email' => 'admin_sarpras@example.com',
+        ]);
+        Fitur::create([
+            'user_id' => $admin->id,
+            'nama_fitur' => 'aula',
+        ]);
+
+        $paket = PaketPeminjaman::create([
+            'nama_paket' => 'Paket Seminar',
+            'harga' => 1000000,
+            'harga_dp' => 300000,
+            'kategori' => 'unggulan',
+            'deskripsi' => 'Paket lengkap',
+        ]);
+
+        $peminjaman = Peminjaman::create([
+            'paket_peminjaman_id' => $paket->id,
+            'nama' => 'Buyer Test',
+            'email_instansi' => 'buyer@example.com',
+            'tanggal_mulai' => now()->addDays(5)->format('Y-m-d H:i:s'),
+            'tanggal_selesai' => now()->addDays(5)->addHours(4)->format('Y-m-d H:i:s'),
+            'status' => 'pending',
+        ]);
+
+        $pembayaran = Pembayaran::create([
+            'peminjaman_id' => $peminjaman->id,
+            'kode_pembayaran' => 'ORD-TEST-REJECT',
+            'total_tagihan' => 1000000,
+            'total_terbayar' => 0,
+            'sisa_tagihan' => 1000000,
+            'status_pembayaran' => 'pending',
+            'jatuh_tempo_dp' => now()->addDay(),
+        ]);
+
+        $detailDp = DetailPembayaran::create([
+            'pembayaran_id' => $pembayaran->id,
+            'kode_transaksi' => 'TRX-DP-099',
+            'tipe_pembayaran' => 'dp',
+            'jumlah_bayar' => 300000,
+            'metode' => 'transfer',
+            'bank_tujuan' => 'Bank Jateng',
+            'norek_tujuan' => '123456',
+            'bank_pengirim' => 'BCA',
+            'norek_pengirim' => '654321',
+            'atas_nama_pengirim' => 'Buyer Test',
+            'bukti_pembayaran' => 'bukti/dp.jpg',
+            'tanggal_bayar' => now(),
+            'status' => 'pending',
+        ]);
+
+        // Admin menolak bukti pembayaran DP
+        $responseReject = $this->actingAs($admin)->post('/admin/peminjaman/'.$peminjaman->id.'/reject-pembayaran', [
+            'alasan_penolakan' => 'Bukti transfer tidak jelas / palsu',
+            'detail_id' => $detailDp->id,
+        ]);
+        $responseReject->assertRedirect('/admin/peminjaman/'.$peminjaman->id);
+
+        $pembayaran->refresh();
+        $detailDp->refresh();
+
+        // 1. Status pembayaran harus tetap pending, detail DP berstatus rejected
+        $this->assertEquals('pending', $pembayaran->status_pembayaran);
+        $this->assertEquals('rejected', $detailDp->status);
+        $this->assertEquals(1000000, (float) $pembayaran->sisa_tagihan);
+
+        // 2. Di sisi pelanggan: melihat halaman pembayaran
+        $responseCustomer = $this->actingAs($pelanggan)->get(route('customer.pembayaran.show', $pembayaran->id));
+        $responseCustomer->assertOk();
+
+        // Tidak boleh menampilkan info refund karena pelanggan harus bayar ulang DP
+        $responseCustomer->assertDontSee('Status Pengembalian Dana');
+        $responseCustomer->assertDontSee('Pengajuan Peminjaman Ditolak & Proses Pengembalian Dana');
+
+        // Harus menampilkan informasi penolakan bukti & formulir transfer ulang & tenggat waktu DP
+        $responseCustomer->assertSee('Bukti Pembayaran Ditolak Oleh Admin! Silakan Transfer Ulang');
+        $responseCustomer->assertSee('Bukti transfer tidak jelas / palsu');
+        $responseCustomer->assertSee('Konfirmasi Transfer Ulang Bukti Pembayaran');
+        $responseCustomer->assertSee('Tenggat Waktu Pembayaran DP');
     }
 }

@@ -358,7 +358,7 @@ class AdminPeminjamanTest extends TestCase
         $pembayaran->refresh();
         $detailDp->refresh();
 
-        $this->assertEquals('rejected', $pembayaran->status_pembayaran);
+        $this->assertEquals('pending', $pembayaran->status_pembayaran);
         $this->assertEquals('rejected', $detailDp->status);
         $this->assertTrue(now()->diffInHours($pembayaran->jatuh_tempo_dp) >= 23);
 
@@ -512,7 +512,7 @@ class AdminPeminjamanTest extends TestCase
         $detail->refresh();
         $pembayaran->refresh();
         $this->assertEquals('rejected', $detail->status);
-        $this->assertEquals('rejected', $pembayaran->status_pembayaran);
+        $this->assertEquals('pending', $pembayaran->status_pembayaran);
         $this->assertEquals(0, (float) $pembayaran->total_terbayar);
 
         // 2. Admin menolak permohonan peminjaman
@@ -582,5 +582,47 @@ class AdminPeminjamanTest extends TestCase
             'jumlah_bayar' => 1200000,
             'status' => 'pending',
         ]);
+    }
+
+    public function test_admin_reject_pelunasan_menjaga_status_pembayaran_tetap_partial(): void
+    {
+        $admin = $this->createAdminAula();
+        [$peminjaman, $pembayaran] = $this->createPeminjamanDanTagihan('approved_1', 'partial', 500000);
+
+        // DP sudah terverifikasi
+        DetailPembayaran::create([
+            'pembayaran_id' => $pembayaran->id,
+            'kode_transaksi' => 'TRX-DP-010',
+            'tipe_pembayaran' => 'dp',
+            'jumlah_bayar' => 500000,
+            'metode' => 'transfer',
+            'status' => 'verified',
+            'tanggal_bayar' => now()->subDay(),
+        ]);
+
+        // Pelunasan baru diunggah tapi ditolak admin
+        $detailPelunasan = DetailPembayaran::create([
+            'pembayaran_id' => $pembayaran->id,
+            'kode_transaksi' => 'TRX-PLN-010',
+            'tipe_pembayaran' => 'pelunasan',
+            'jumlah_bayar' => 500000,
+            'metode' => 'transfer',
+            'status' => 'pending',
+            'tanggal_bayar' => now(),
+        ]);
+
+        $response = $this->actingAs($admin)->post('/admin/peminjaman/'.$peminjaman->id.'/reject-pembayaran', [
+            'alasan_penolakan' => 'Bukti pelunasan buram dan tidak terbaca',
+            'detail_id' => $detailPelunasan->id,
+        ]);
+
+        $response->assertRedirect('/admin/peminjaman/'.$peminjaman->id);
+        $detailPelunasan->refresh();
+        $pembayaran->refresh();
+
+        $this->assertEquals('rejected', $detailPelunasan->status);
+        $this->assertEquals('partial', $pembayaran->status_pembayaran);
+        $this->assertEquals(500000, (float) $pembayaran->total_terbayar);
+        $this->assertEquals(4500000, (float) $pembayaran->sisa_tagihan);
     }
 }

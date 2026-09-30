@@ -415,24 +415,33 @@ class AdminPeminjamanController extends Controller
                 ]);
             }
 
+            // Sinkronisasi akumulasi total terbayar dan status pembayaran berdasarkan transaksi yang verified
             $pembayaran->syncAkumulasiPembayaran();
             $pembayaran->refresh();
 
             // Atur batas waktu baru sesuai konfigurasi pembayaran
             $config = PaymentConfiguration::current();
-            $jatuhTempoBaru = now()->addHours($config->jatuh_tempo_dp_jam);
+            $isDp = ! $detailTerakhir || $detailTerakhir->tipe_pembayaran === 'dp';
 
-            $pembayaran->update([
-                'status_pembayaran' => 'rejected',
-                'jatuh_tempo_dp' => $jatuhTempoBaru,
-                'total_terbayar' => 0,
-                'sisa_tagihan' => $pembayaran->total_tagihan,
-                'catatan' => 'Bukti pembayaran deposit ditolak admin: '.$validated['alasan_penolakan'].'. Pemohon diminta transfer ulang sebelum '.$jatuhTempoBaru->format('d/m/Y H:i').' WIB.',
-            ]);
+            if ($isDp) {
+                $jatuhTempoBaru = now()->addHours((int) ($config->jatuh_tempo_dp_jam ?? 24));
+                $pembayaran->update([
+                    'jatuh_tempo_dp' => $jatuhTempoBaru,
+                    'catatan' => 'Bukti pembayaran uang muka (DP) ditolak admin: '.$validated['alasan_penolakan'].'. Pemohon diminta transfer ulang sebelum '.$jatuhTempoBaru->format('d/m/Y H:i').' WIB.',
+                ]);
+            } else {
+                $jatuhTempoPelunasan = $pembayaran->jatuh_tempo_pelunasan;
+                if (! $jatuhTempoPelunasan && $peminjaman->tanggal_mulai) {
+                    $jatuhTempoPelunasan = Carbon::parse($peminjaman->tanggal_mulai)->subHours((int) ($config->jatuh_tempo_pelunasan_jam ?? 24));
+                }
+                $pembayaran->update([
+                    'catatan' => 'Bukti pembayaran pelunasan ditolak admin: '.$validated['alasan_penolakan'].'. Pemohon diminta transfer ulang sebelum '.($jatuhTempoPelunasan ? $jatuhTempoPelunasan->format('d/m/Y H:i').' WIB' : 'hari H').'.',
+                ]);
+            }
         });
 
         return redirect()->route('admin.peminjaman.show', $peminjaman->id)
-            ->with('success', 'Bukti pembayaran deposit ditolak (Status: Gagal). Status pembayaran diubah menjadi Rejected.');
+            ->with('success', 'Bukti pembayaran berhasil ditolak. Status bukti transfer diubah menjadi Ditolak dan pemohon diminta melakukan transfer ulang.');
     }
 
     /**

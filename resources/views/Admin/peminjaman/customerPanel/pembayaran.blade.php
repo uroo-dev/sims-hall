@@ -95,7 +95,15 @@
             ? ($pembayaran->jatuh_tempo_pelunasan ?: ($pembayaran->peminjaman?->tanggal_mulai ? \Carbon\Carbon::parse($pembayaran->peminjaman->tanggal_mulai)->subHours((int) ($config->jatuh_tempo_pelunasan_jam ?? 24)) : now()->addHours(48)))
             : ($pembayaran->jatuh_tempo_dp ?: now()->addHours(24));
         $isExpired = now()->isAfter($targetDeadline) && in_array($pembayaran->status_pembayaran, ['pending', 'rejected']);
-        $isRefundOrRejected = in_array($pembayaran->status_pembayaran, ['refund_pending', 'refunded', 'rejected', 'hangus']) || $pembayaran->peminjaman?->status === 'rejected';
+
+        $latestPaymentDetail = $pembayaran->details->where('tipe_pembayaran', '!=', 'refund')->sortByDesc('id')->first();
+        $isDetailRejected = $latestPaymentDetail && $latestPaymentDetail->status === 'rejected';
+
+        // 1. isRefund: Benar-benar ada proses pengembalian dana (status pembayaran refund_pending atau refunded)
+        $isRefund = in_array($pembayaran->status_pembayaran, ['refund_pending', 'refunded']);
+
+        // 2. isPeminjamanClosed: Permohonan peminjaman sudah selesai/ditolak/hangus sehingga tidak menerima pembayaran baru
+        $isPeminjamanClosed = $isRefund || $pembayaran->peminjaman?->status === 'rejected' || $pembayaran->status_pembayaran === 'hangus';
     @endphp
     <div class="bg-white rounded-2xl p-4 md:py-3.5 md:px-5 border border-slate-100 figma-card-shadow flex flex-col md:flex-row md:items-center justify-between gap-4">
         <!-- Info Kiri: Invoice, Paket, Pemohon & Jadwal -->
@@ -108,10 +116,6 @@
                     <span class="px-2.5 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-md text-[10px] font-bold uppercase">
                         <i class="fa-solid fa-check mr-1"></i> Lunas
                     </span>
-                @elseif ($pembayaran->status_pembayaran === 'partial')
-                    <span class="px-2.5 py-0.5 bg-blue-50 text-brand-700 border border-blue-200 rounded-md text-[10px] font-bold uppercase">
-                        <i class="fa-solid fa-shield-halved mr-1"></i> DP Terverifikasi
-                    </span>
                 @elseif ($pembayaran->status_pembayaran === 'refund_pending')
                     <span class="px-2.5 py-0.5 bg-purple-50 text-purple-700 border border-purple-200 rounded-md text-[10px] font-bold uppercase animate-pulse">
                         <i class="fa-solid fa-hand-holding-dollar mr-1"></i> Menunggu Refund
@@ -120,9 +124,17 @@
                     <span class="px-2.5 py-0.5 bg-slate-100 text-slate-700 border border-slate-200 rounded-md text-[10px] font-bold uppercase">
                         <i class="fa-solid fa-check-double mr-1"></i> Refund Selesai
                     </span>
-                @elseif ($pembayaran->status_pembayaran === 'rejected')
+                @elseif ($pembayaran->peminjaman?->status === 'rejected' || $pembayaran->status_pembayaran === 'rejected')
                     <span class="px-2.5 py-0.5 bg-red-50 text-red-700 border border-red-200 rounded-md text-[10px] font-bold uppercase">
-                        <i class="fa-solid fa-triangle-exclamation mr-1"></i> Transfer Ditolak
+                        <i class="fa-solid fa-ban mr-1"></i> Pengajuan Ditolak
+                    </span>
+                @elseif ($isDetailRejected)
+                    <span class="px-2.5 py-0.5 bg-red-50 text-red-700 border border-red-200 rounded-md text-[10px] font-bold uppercase">
+                        <i class="fa-solid fa-triangle-exclamation mr-1"></i> Bukti Ditolak (Transfer Ulang)
+                    </span>
+                @elseif ($pembayaran->status_pembayaran === 'partial')
+                    <span class="px-2.5 py-0.5 bg-blue-50 text-brand-700 border border-blue-200 rounded-md text-[10px] font-bold uppercase">
+                        <i class="fa-solid fa-shield-halved mr-1"></i> DP Terverifikasi
                     </span>
                 @elseif ($pembayaran->status_pembayaran === 'hangus')
                     <span class="px-2.5 py-0.5 bg-slate-200 text-slate-700 rounded-md text-[10px] font-bold uppercase">
@@ -144,8 +156,8 @@
             </p>
         </div>
 
-        @if ($isRefundOrRejected)
-            <!-- Info Kanan Saat Status Refund / Peminjaman Ditolak (Tidak Menampilkan Tenggat Waktu) -->
+        @if ($isRefund)
+            <!-- Info Kanan Saat Status Refund (Proses Pengembalian Dana) -->
             <div class="flex flex-col md:items-end justify-center pt-2 md:pt-0 border-t md:border-t-0 border-slate-100">
                 <span class="text-[10px] font-bold text-purple-600 uppercase tracking-wider flex items-center gap-1">
                     <i class="fa-solid fa-hand-holding-dollar"></i> Status Pengembalian Dana
@@ -157,8 +169,21 @@
                     Total Dana: <strong class="text-purple-800">Rp {{ number_format($pembayaran->total_refund ?: $pembayaran->total_terbayar, 0, ',', '.') }}</strong>
                 </div>
             </div>
+        @elseif ($isPeminjamanClosed)
+            <!-- Info Kanan Saat Permohonan Ditolak / Kedaluwarsa (Tanpa Refund) -->
+            <div class="flex flex-col md:items-end justify-center pt-2 md:pt-0 border-t md:border-t-0 border-slate-100">
+                <span class="text-[10px] font-bold text-red-600 uppercase tracking-wider flex items-center gap-1">
+                    <i class="fa-solid fa-ban"></i> Status Permohonan
+                </span>
+                <div class="text-base md:text-lg font-black text-red-700 mt-0.5">
+                    Permohonan Dibatalkan / Ditolak
+                </div>
+                <div class="text-[11px] font-medium text-slate-500">
+                    {{ $pembayaran->status_pembayaran === 'hangus' ? 'Batas waktu transfer telah berakhir' : 'Pengajuan ditolak oleh admin' }}
+                </div>
+            </div>
         @else
-            <!-- Info Kanan: Highlight Countdown Teks Saja -->
+            <!-- Info Kanan: Highlight Countdown Teks Saja (Menunggu Pembayaran / Transfer Ulang) -->
             <div class="flex flex-col md:items-end justify-center pt-2 md:pt-0 border-t md:border-t-0 border-slate-100">
                 <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
                     <i class="fa-regular fa-clock text-amber-500"></i> {{ $isPartial ? 'Tenggat Waktu Pelunasan' : 'Tenggat Waktu Pembayaran DP' }}
@@ -178,7 +203,7 @@
     </div>
 
     <!-- BANNER PERINGATAN REJECT PEMBAYARAN (TRANSFER ULANG) -->
-    @if ($pembayaran->status_pembayaran === 'rejected' && $pembayaran->peminjaman?->status !== 'rejected')
+    @if (($isDetailRejected || $pembayaran->status_pembayaran === 'rejected') && $pembayaran->peminjaman?->status !== 'rejected')
         <div class="bg-red-50 border-2 border-red-200 text-red-900 rounded-2xl p-5 shadow-xs flex items-start gap-4">
             <div class="w-10 h-10 rounded-xl bg-red-600 text-white flex items-center justify-center font-bold text-lg flex-shrink-0">
                 <i class="fa-solid fa-triangle-exclamation"></i>
@@ -186,7 +211,7 @@
             <div class="space-y-1.5 text-xs md:text-sm">
                 <h3 class="font-black text-red-900 text-sm md:text-base">Bukti Pembayaran Ditolak Oleh Admin! Silakan Transfer Ulang</h3>
                 <p class="text-red-700 leading-relaxed">
-                    <strong>Alasan Penolakan:</strong> {{ $pembayaran->catatan }}
+                    <strong>Alasan Penolakan:</strong> {{ $latestPaymentDetail?->catatan ?: $pembayaran->catatan }}
                 </p>
                 <div class="text-[11px] text-red-800 bg-red-100/60 p-2.5 rounded-xl border border-red-200">
                     <i class="fa-regular fa-clock mr-1 font-bold"></i> Batas Waktu Transfer Ulang: <strong>{{ $targetDeadline->translatedFormat('d F Y, H:i') }} WIB</strong>. Jika melewati batas waktu tersebut tanpa mengunggah bukti pembayaran yang valid, sistem secara otomatis akan membatalkan dan menolak permohonan peminjaman aula.
@@ -381,7 +406,7 @@
                         </div>
                         <div>
                             <h2 class="text-sm md:text-base font-bold text-slate-800 uppercase tracking-wide">
-                                {{ $pembayaran->status_pembayaran === 'rejected' ? 'Konfirmasi Transfer Ulang Bukti Pembayaran' : 'Konfirmasi & Unggah Bukti Transfer' }}
+                                {{ ($pembayaran->status_pembayaran === 'rejected' || $isDetailRejected) ? 'Konfirmasi Transfer Ulang Bukti Pembayaran' : 'Konfirmasi & Unggah Bukti Transfer' }}
                             </h2>
                             <p class="text-xs text-slate-500 mt-0.5">Pilih rekening tujuan, skema pembayaran, dan kirimkan struk transfer Anda</p>
                         </div>
@@ -677,13 +702,13 @@
                     </div>
                     <div class="flex items-center justify-between pt-1">
                         <span class="text-sm font-bold text-slate-800">Sisa Tagihan:</span>
-                        <span class="text-lg font-black {{ $isRefundOrRejected ? 'text-slate-500' : 'text-brand-700' }}">
-                            Rp {{ number_format($isRefundOrRejected ? 0 : $pembayaran->sisa_tagihan, 0, ',', '.') }}
+                        <span class="text-lg font-black {{ $isPeminjamanClosed ? 'text-slate-500' : 'text-brand-700' }}">
+                            Rp {{ number_format($isPeminjamanClosed ? 0 : $pembayaran->sisa_tagihan, 0, ',', '.') }}
                         </span>
                     </div>
                 </div>
 
-                @if (!$isRefundOrRejected)
+                @if (!$isPeminjamanClosed)
                     <div class="p-3 bg-blue-50/70 border border-blue-100 rounded-xl space-y-1 text-xs">
                         <div class="flex items-center justify-between text-slate-700">
                             <span>Minimal DP:</span>
@@ -693,14 +718,24 @@
                             Pembayaran DP dapat mengamankan jadwal aula untuk Anda.
                         </div>
                     </div>
-                @else
+                @elseif ($isRefund)
                     <div class="p-3 bg-purple-50 border border-purple-100 rounded-xl space-y-1 text-xs">
                         <div class="flex items-center justify-between text-slate-700">
                             <span class="text-purple-800 font-bold">Status Peminjaman:</span>
                             <strong class="text-purple-700 font-bold uppercase text-[11px]">Ditolak / Refund</strong>
                         </div>
                         <div class="text-[11px] text-slate-500">
-                            Permohonan ditolak. Tidak ada sisa tagihan yang harus dibayarkan.
+                            Permohonan ditolak. Total dana yang dikembalikan: <strong>Rp {{ number_format($pembayaran->total_refund ?: $pembayaran->total_terbayar, 0, ',', '.') }}</strong>.
+                        </div>
+                    </div>
+                @else
+                    <div class="p-3 bg-red-50 border border-red-100 rounded-xl space-y-1 text-xs">
+                        <div class="flex items-center justify-between text-slate-700">
+                            <span class="text-red-800 font-bold">Status Peminjaman:</span>
+                            <strong class="text-red-700 font-bold uppercase text-[11px]">Ditolak / Batal</strong>
+                        </div>
+                        <div class="text-[11px] text-slate-500">
+                            Permohonan telah ditolak. Tidak ada tagihan pembayaran.
                         </div>
                     </div>
                 @endif
@@ -931,7 +966,7 @@
         });
     }
 
-    @if (!$isRefundOrRejected)
+    @if (!$isPeminjamanClosed)
     // REAL-TIME COUNTDOWN TIMER (NO REFRESH REQUIRED)
     // Target ISO timestamp
     const deadlineIso = @js($targetDeadline->toIso8601String());
