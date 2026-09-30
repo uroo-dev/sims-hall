@@ -149,6 +149,10 @@
                             <span>Batas Pelunasan:</span>
                             <strong class="font-extrabold text-brand-700">{{ $paymentConfig->jatuh_tempo_pelunasan_jam }} Jam</strong>
                         </div>
+                        <div class="text-xs text-slate-700 flex items-center justify-between">
+                            <span>Min. Booking:</span>
+                            <strong class="font-extrabold text-emerald-700">{{ $paymentConfig->minimal_hari_booking ?? 3 }} Hari</strong>
+                        </div>
                     </div>
                 </div>
             </section>

@@ -48,9 +48,34 @@ class PaymentConfigurationController extends Controller
             'qris_image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
             'delete_qris' => ['nullable', 'boolean'],
 
-            // Jatuh Tempo Pembayaran (jam)
+            // Jatuh Tempo Pembayaran (jam) & Minimal Hari Booking (hari)
             'jatuh_tempo_dp_jam' => ['required', 'integer', 'min:1', 'max:720'],
-            'jatuh_tempo_pelunasan_jam' => ['required', 'integer', 'min:1', 'max:720'],
+            'jatuh_tempo_pelunasan_jam' => [
+                'required',
+                'integer',
+                'min:1',
+                'max:720',
+                function ($attribute, $value, $fail) use ($request) {
+                    $minHari = (int) $request->input('minimal_hari_booking', 0);
+                    if ($minHari > 0 && (int) $value >= ($minHari * 24)) {
+                        $fail("Tenggat waktu pembayaran final ({$value} jam) harus lebih kecil dari selisih minimal hari peminjaman ({$minHari} hari = ".($minHari * 24).' jam).');
+                    }
+                },
+            ],
+            'minimal_hari_booking' => [
+                'required',
+                'integer',
+                'min:1',
+                'max:365',
+                function ($attribute, $value, $fail) use ($request) {
+                    $pelunasanJam = (int) $request->input('jatuh_tempo_pelunasan_jam', 0);
+                    $minBookingJam = (int) $value * 24;
+                    if ($minBookingJam <= $pelunasanJam) {
+                        $minHariDibutuhkan = (int) ceil(($pelunasanJam + 1) / 24);
+                        $fail("Selisih minimal hari peminjaman ({$value} hari = {$minBookingJam} jam) harus lebih besar dari tenggat waktu pembayaran final ({$pelunasanJam} jam). Nilai minimal yang diizinkan adalah {$minHariDibutuhkan} hari.");
+                    }
+                },
+            ],
 
             // Keterangan & Status
             'instruksi_pembayaran' => ['nullable', 'string', 'max:2000'],
@@ -66,6 +91,9 @@ class PaymentConfigurationController extends Controller
             'jatuh_tempo_dp_jam.min' => 'Batas waktu transfer deposit minimal 1 jam.',
             'jatuh_tempo_pelunasan_jam.required' => 'Batas waktu (jam) pelunasan wajib diisi.',
             'jatuh_tempo_pelunasan_jam.min' => 'Batas waktu pelunasan minimal 1 jam.',
+            'minimal_hari_booking.required' => 'Minimal selisih hari peminjaman wajib diisi.',
+            'minimal_hari_booking.integer' => 'Minimal selisih hari peminjaman harus berupa angka bulat.',
+            'minimal_hari_booking.min' => 'Minimal selisih hari peminjaman minimal 1 hari.',
         ]);
 
         $data = [
@@ -81,6 +109,7 @@ class PaymentConfigurationController extends Controller
             'qris_merchant' => $validated['qris_merchant'] ?? null,
             'jatuh_tempo_dp_jam' => (int) $validated['jatuh_tempo_dp_jam'],
             'jatuh_tempo_pelunasan_jam' => (int) $validated['jatuh_tempo_pelunasan_jam'],
+            'minimal_hari_booking' => (int) $validated['minimal_hari_booking'],
             'instruksi_pembayaran' => $validated['instruksi_pembayaran'] ?? null,
             'is_active' => $request->has('is_active') ? $request->boolean('is_active') : true,
         ];

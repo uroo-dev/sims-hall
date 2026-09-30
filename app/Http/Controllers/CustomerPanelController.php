@@ -186,6 +186,24 @@ class CustomerPanelController extends Controller
         $start = Carbon::parse($validated['tanggal_mulai']);
         $end = Carbon::parse($validated['tanggal_selesai']);
 
+        // Validasi selisih waktu dinamis peminjaman sesuai konfigurasi (minimal_hari_booking)
+        $config = PaymentConfiguration::current();
+        $minHari = (int) ($config->minimal_hari_booking ?? 3);
+        $earliestAllowedDate = now()->startOfDay()->addDays($minHari);
+
+        if ($start->lt($earliestAllowedDate)) {
+            return back()->withInput()->withErrors([
+                'tanggal_mulai' => "Pemesanan aula minimal dilakukan {$minHari} hari sebelum tanggal pelaksanaan acara. Tanggal peminjaman paling awal yang dapat dipilih adalah ".$earliestAllowedDate->translatedFormat('d F Y').'.',
+            ]);
+        }
+
+        // Pastikan waktu mulai peminjaman lebih besar dari batas waktu pelunasan sebelum hari H
+        if ($start->copy()->subHours((int) $config->jatuh_tempo_pelunasan_jam)->lte(now())) {
+            return back()->withInput()->withErrors([
+                'tanggal_mulai' => "Waktu mulai peminjaman harus lebih dari {$config->jatuh_tempo_pelunasan_jam} jam dari sekarang untuk memenuhi tenggat waktu pembayaran final.",
+            ]);
+        }
+
         // Cek apakah ada jadwal aula yang bentrok dengan peminjaman yang sudah disetujui (1 query ringan)
         $isConflict = Peminjaman::query()
             ->whereIn('status', ['approved_1', 'approved_final'])

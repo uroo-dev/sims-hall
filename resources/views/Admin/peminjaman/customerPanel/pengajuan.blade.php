@@ -144,15 +144,21 @@
                         </div>
                     </div>
 
+                    @php
+                        $minHariBooking = (int) ($paymentConfig->minimal_hari_booking ?? 3);
+                        $earliestDate = now()->startOfDay()->addDays($minHariBooking)->setHour(8)->setMinute(0);
+                    @endphp
+
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label for="tanggal_mulai" class="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wide">
                                 Waktu Mulai Peminjaman <span class="text-red-500">*</span>
                             </label>
                             <input type="datetime-local" name="tanggal_mulai" id="tanggal_mulai" required
-                                value="{{ old('tanggal_mulai', now()->addDay()->setHour(8)->setMinute(0)->format('Y-m-d\TH:i')) }}"
+                                min="{{ $earliestDate->format('Y-m-d\TH:i') }}"
+                                value="{{ old('tanggal_mulai', $earliestDate->format('Y-m-d\TH:i')) }}"
                                 class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs md:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition font-medium">
-                            <p class="text-[11px] text-slate-400 mt-1">Tanggal dan jam mulai persiapan / acara.</p>
+                            <p class="text-[11px] text-slate-400 mt-1">Pemesanan minimal {{ $minHariBooking }} hari sebelum acara (paling awal: {{ $earliestDate->translatedFormat('d F Y, H:i') }} WIB).</p>
                         </div>
 
                         <div>
@@ -160,7 +166,8 @@
                                 Waktu Selesai Peminjaman <span class="text-red-500">*</span>
                             </label>
                             <input type="datetime-local" name="tanggal_selesai" id="tanggal_selesai" required
-                                value="{{ old('tanggal_selesai', now()->addDay()->setHour(20)->setMinute(0)->format('Y-m-d\TH:i')) }}"
+                                min="{{ $earliestDate->copy()->addHour()->format('Y-m-d\TH:i') }}"
+                                value="{{ old('tanggal_selesai', $earliestDate->copy()->setHour(20)->setMinute(0)->format('Y-m-d\TH:i')) }}"
                                 class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs md:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition font-medium">
                             <p class="text-[11px] text-slate-400 mt-1">Tanggal dan jam selesai acara / aula dikosongkan.</p>
                         </div>

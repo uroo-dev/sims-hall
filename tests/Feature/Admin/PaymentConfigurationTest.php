@@ -92,6 +92,7 @@ class PaymentConfigurationTest extends TestCase
             'qris_image' => $fakeQris,
             'jatuh_tempo_dp_jam' => 12,
             'jatuh_tempo_pelunasan_jam' => 72,
+            'minimal_hari_booking' => 4,
             'instruksi_pembayaran' => 'Transfer tepat waktu dan simpan struk transfer.',
             'is_active' => '1',
         ]);
@@ -106,12 +107,44 @@ class PaymentConfigurationTest extends TestCase
             'bank_alternatif_2' => 'Bank BCA',
             'jatuh_tempo_dp_jam' => 12,
             'jatuh_tempo_pelunasan_jam' => 72,
+            'minimal_hari_booking' => 4,
             'qris_merchant' => 'AULA SMKN 2 KARANGANYAR',
         ]);
 
         $config = PaymentConfiguration::current();
         $this->assertNotNull($config->qris_image);
         Storage::disk('public')->assertExists($config->qris_image);
+    }
+
+    public function test_super_admin_gagal_update_jika_minimal_hari_booking_kurang_dari_atau_sama_dengan_tenggat_pelunasan(): void
+    {
+        $superAdmin = User::factory()->create([
+            'role' => 'super_admin',
+        ]);
+
+        // Pelunasan 48 jam (= 2 hari), tapi minimal_hari_booking hanya diisi 2 hari (2*24 = 48 <= 48)
+        $response = $this->actingAs($superAdmin)->put(route('admin.payment-configuration.update'), [
+            'bank_utama' => 'Bank Jateng',
+            'norek_utama' => '123456789',
+            'atas_nama_utama' => 'Bendahara',
+            'jatuh_tempo_dp_jam' => 24,
+            'jatuh_tempo_pelunasan_jam' => 48,
+            'minimal_hari_booking' => 2,
+        ]);
+
+        $response->assertSessionHasErrors(['minimal_hari_booking']);
+
+        // Pelunasan 72 jam (= 3 hari), tapi minimal_hari_booking hanya diisi 1 hari
+        $response2 = $this->actingAs($superAdmin)->put(route('admin.payment-configuration.update'), [
+            'bank_utama' => 'Bank Jateng',
+            'norek_utama' => '123456789',
+            'atas_nama_utama' => 'Bendahara',
+            'jatuh_tempo_dp_jam' => 24,
+            'jatuh_tempo_pelunasan_jam' => 72,
+            'minimal_hari_booking' => 1,
+        ]);
+
+        $response2->assertSessionHasErrors(['minimal_hari_booking']);
     }
 
     public function test_super_admin_sees_payment_configuration_on_dashboard(): void

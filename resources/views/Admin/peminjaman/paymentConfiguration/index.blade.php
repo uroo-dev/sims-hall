@@ -210,7 +210,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
                         <div class="p-4 bg-purple-50/40 border border-purple-100 rounded-xl space-y-2">
                             <div class="flex items-center justify-between">
                                 <label for="jatuh_tempo_dp_jam" class="block text-xs font-bold text-slate-800 uppercase tracking-wide">
@@ -248,6 +248,26 @@
                             </div>
                             <p class="text-[11px] text-slate-500 leading-tight">
                                 Batas waktu untuk menyelesaikan pelunasan sisa tagihan sewa aula sebelum hari pelaksanaan (default: 48 jam).
+                            </p>
+                        </div>
+
+                        <div class="p-4 bg-emerald-50/40 border border-emerald-100 rounded-xl space-y-2">
+                            <div class="flex items-center justify-between">
+                                <label for="minimal_hari_booking" class="block text-xs font-bold text-slate-800 uppercase tracking-wide">
+                                    Min. Selisih Booking (Hari) <span class="text-red-500">*</span>
+                                </label>
+                                <span class="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">H-Hari</span>
+                            </div>
+                            <div class="relative">
+                                <input type="number" name="minimal_hari_booking" id="minimal_hari_booking" required min="1" max="365"
+                                    value="{{ old('minimal_hari_booking', $config->minimal_hari_booking ?? 3) }}"
+                                    class="w-full pl-3.5 pr-14 py-2.5 bg-white border border-slate-200 rounded-xl text-xs md:text-sm text-slate-800 font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition">
+                                <span class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-xs font-bold text-slate-400">
+                                    Hari
+                                </span>
+                            </div>
+                            <p class="text-[11px] text-slate-500 leading-tight">
+                                Minimal selisih hari pemesanan ke hari H acara. Nilai waktu ini harus lebih besar dari batas waktu pelunasan final.
                             </p>
                         </div>
                     </div>

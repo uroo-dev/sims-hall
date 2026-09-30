@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Storage;
     'qris_merchant',
     'jatuh_tempo_dp_jam',
     'jatuh_tempo_pelunasan_jam',
+    'minimal_hari_booking',
     'instruksi_pembayaran',
     'is_active',
 ])]
@@ -43,6 +44,7 @@ class PaymentConfiguration extends Model
     protected $casts = [
         'jatuh_tempo_dp_jam' => 'integer',
         'jatuh_tempo_pelunasan_jam' => 'integer',
+        'minimal_hari_booking' => 'integer',
         'is_active' => 'boolean',
     ];
 
@@ -64,6 +66,7 @@ class PaymentConfiguration extends Model
             'qris_merchant' => 'SMKN 2 KRA AULA',
             'jatuh_tempo_dp_jam' => 24,
             'jatuh_tempo_pelunasan_jam' => 48,
+            'minimal_hari_booking' => 3,
             'instruksi_pembayaran' => 'Silakan lakukan transfer sesuai nominal tagihan sebelum batas waktu jatuh tempo berakhir. Simpan bukti transfer untuk diunggah.',
             'is_active' => true,
         ]);

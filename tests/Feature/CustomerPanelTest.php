@@ -584,4 +584,59 @@ class CustomerPanelTest extends TestCase
         $responseJpg->assertSessionHasNoErrors();
         $responseJpg->assertRedirect(route('customer.pembayaran.show', $pembayaran));
     }
+
+    public function test_pelanggan_hanya_dapat_memilih_waktu_peminjaman_sesuai_selisih_minimal_hari_booking(): void
+    {
+        Storage::fake('public');
+
+        PaymentConfiguration::truncate();
+        PaymentConfiguration::create([
+            'nama_sekolah' => 'SMK Negeri 2 Karanganyar',
+            'bank_utama' => 'Bank Jateng',
+            'norek_utama' => '1234567890',
+            'atas_nama_utama' => 'Bendahara Aula SMK 2',
+            'jatuh_tempo_dp_jam' => 24,
+            'jatuh_tempo_pelunasan_jam' => 48,
+            'minimal_hari_booking' => 10,
+        ]);
+
+        $pelanggan = User::factory()->create([
+            'email' => 'customer_selisih@test.com',
+            'role' => 'pelanggan',
+        ]);
+
+        $paket = PaketPeminjaman::create([
+            'nama_paket' => 'Paket Selisih Waktu',
+            'kategori' => 'standar 1',
+            'harga' => 2000000,
+        ]);
+
+        // Coba pilih tanggal 5 hari ke depan (harus gagal validasi karena min 10 hari)
+        $tglGagal = now()->addDays(5)->setTime(8, 0)->format('Y-m-d\TH:i');
+        $responseGagal = $this->actingAs($pelanggan)->post(route('customer.peminjaman.store'), [
+            'paket_peminjaman_id' => $paket->id,
+            'nama' => 'Pemesan Gagal',
+            'email_instansi' => 'customer_selisih@test.com',
+            'tanggal_mulai' => $tglGagal,
+            'tanggal_selesai' => now()->addDays(5)->setTime(16, 0)->format('Y-m-d\TH:i'),
+        ]);
+
+        $responseGagal->assertSessionHasErrors(['tanggal_mulai']);
+
+        // Pilih tanggal 10 hari ke depan (harus sukses)
+        $tglSukses = now()->startOfDay()->addDays(10)->setTime(8, 0)->format('Y-m-d\TH:i');
+        $responseSukses = $this->actingAs($pelanggan)->post(route('customer.peminjaman.store'), [
+            'paket_peminjaman_id' => $paket->id,
+            'nama' => 'Pemesan Sukses',
+            'email_instansi' => 'customer_selisih@test.com',
+            'tanggal_mulai' => $tglSukses,
+            'tanggal_selesai' => now()->startOfDay()->addDays(10)->setTime(16, 0)->format('Y-m-d\TH:i'),
+        ]);
+
+        $responseSukses->assertSessionHasNoErrors();
+        $this->assertDatabaseHas('peminjamans', [
+            'email_instansi' => 'customer_selisih@test.com',
+            'status' => 'pending',
+        ]);
+    }
 }

@@ -25,6 +25,7 @@ class PaymentConfigurationSeeder extends Seeder
             'qris_merchant' => 'SMKN 2 KRA AULA',
             'jatuh_tempo_dp_jam' => 24,
             'jatuh_tempo_pelunasan_jam' => 48,
+            'minimal_hari_booking' => 3,
             'instruksi_pembayaran' => 'Silakan lakukan transfer sesuai nominal tagihan sebelum batas waktu jatuh tempo berakhir. Simpan bukti transfer untuk diunggah pada sistem.',
             'is_active' => true,
         ]);
