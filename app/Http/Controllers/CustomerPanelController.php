@@ -316,6 +316,14 @@ class CustomerPanelController extends Controller
         $nominalDp = ($paket && $paket->harga_dp > 0) ? (float) $paket->harga_dp : ((float) $pembayaran->total_tagihan * 0.3);
         $refundDetail = $pembayaran->details->firstWhere('tipe_pembayaran', 'refund');
 
+        // Pastikan sisa_tagihan bernilai 0 jika peminjaman ditolak atau berstatus refund
+        if (in_array($pembayaran->status_pembayaran, ['refund_pending', 'refunded', 'rejected', 'hangus']) || $pembayaran->peminjaman?->status === 'rejected') {
+            if ($pembayaran->sisa_tagihan > 0) {
+                $pembayaran->update(['sisa_tagihan' => 0]);
+                $pembayaran->refresh();
+            }
+        }
+
         return view('Admin.peminjaman.customerPanel.pembayaran', compact(
             'user',
             'pembayaran',

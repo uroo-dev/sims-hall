@@ -775,4 +775,157 @@ class CustomerPanelTest extends TestCase
             'status' => 'pending',
         ]);
     }
+
+    public function test_tolak_peminjaman_refund_pending_hapus_tenggat_waktu_sisa_tagihan_nol_dan_sembunyikan_riwayat_transfer_tanpa_bukti(): void
+    {
+        Storage::fake('public');
+
+        $pelanggan = User::factory()->create([
+            'email' => 'customer_refund@test.com',
+            'role' => 'pelanggan',
+        ]);
+
+        $admin = User::factory()->create([
+            'role' => 'super_admin',
+        ]);
+
+        $paket = PaketPeminjaman::create([
+            'nama_paket' => 'Paket Refund Test',
+            'kategori' => 'standar 1',
+            'harga' => 2000000,
+        ]);
+
+        $peminjaman = Peminjaman::create([
+            'paket_peminjaman_id' => $paket->id,
+            'nama' => 'Pemohon Refund',
+            'email_instansi' => 'customer_refund@test.com',
+            'tanggal_mulai' => now()->addDays(5),
+            'tanggal_selesai' => now()->addDays(5)->addHours(4),
+            'status' => 'pending',
+        ]);
+
+        $pembayaran = Pembayaran::create([
+            'peminjaman_id' => $peminjaman->id,
+            'kode_pembayaran' => 'PAY-RFD-001',
+            'total_tagihan' => 2000000,
+            'total_terbayar' => 600000,
+            'sisa_tagihan' => 1400000,
+            'status_pembayaran' => 'partial',
+            'jatuh_tempo_pelunasan' => now()->addDays(3),
+        ]);
+
+        // Detail DP yang sudah diverifikasi (ada bukti transfer)
+        $pembayaran->details()->create([
+            'kode_transaksi' => 'TRX-DP-001',
+            'tipe_pembayaran' => 'dp',
+            'jumlah_bayar' => 600000,
+            'metode' => 'transfer',
+            'bank_pengirim' => 'BCA',
+            'norek_pengirim' => '112233',
+            'atas_nama_pengirim' => 'Pemohon',
+            'bank_tujuan' => 'Bank Jateng',
+            'status' => 'verified',
+            'bukti_pembayaran' => 'bukti/dp.jpg',
+        ]);
+
+        // Admin menolak peminjaman aula
+        $responseReject = $this->actingAs($admin)->post(route('admin.peminjaman.reject', $peminjaman->id), [
+            'alasan_penolakan' => 'Aula sedang direnovasi darurat',
+        ]);
+        $responseReject->assertRedirect();
+
+        $pembayaran->refresh();
+        $this->assertEquals('refund_pending', $pembayaran->status_pembayaran);
+        $this->assertEquals(0, (float) $pembayaran->sisa_tagihan);
+        $this->assertEquals(600000, (float) $pembayaran->total_refund);
+
+        // Pelanggan membuka halaman pembayaran
+        $resCustomer = $this->actingAs($pelanggan)->get(route('customer.pembayaran.show', $pembayaran));
+        $resCustomer->assertOk();
+
+        // 1. Informasi tenggat waktu & countdown pembayaran dihapus
+        $resCustomer->assertDontSee('id="cd-hours"', false);
+        $resCustomer->assertDontSee('Tenggat Waktu Pelunasan');
+        $resCustomer->assertDontSee('Tenggat Waktu Pembayaran DP');
+
+        // 2. Sisa tagihan bernilai 0
+        $resCustomer->assertSee('Sisa Tagihan:');
+        $resCustomer->assertSee('Rp 0');
+
+        // 3. Admin belum kirim bukti transfer refund -> Riwayat Transfer yang Telah Diunggah TIDAK boleh memuat refund kosong
+        $resCustomer->assertDontSee('TRX-RFD-');
+        $resCustomer->assertDontSee('Menunggu pemohon melengkapi data rekening pengembalian dana');
+
+        // 4. Modal konfirmasi refund tersedia dan tidak menggunakan alert confirm JS
+        $resCustomer->assertSee('id="modalKonfirmasiRefund"', false);
+        $resCustomer->assertDontSee("onsubmit=\"return confirm('Apakah Anda yakin telah menerima dana pengembalian ke rekening Anda?')\"", false);
+    }
+
+    public function test_pelanggan_konfirmasi_refund_mengubah_status_menjadi_refunded(): void
+    {
+        Storage::fake('public');
+
+        $pelanggan = User::factory()->create([
+            'email' => 'customer_confirm_refund@test.com',
+            'role' => 'pelanggan',
+        ]);
+
+        $admin = User::factory()->create([
+            'role' => 'super_admin',
+        ]);
+
+        $paket = PaketPeminjaman::create([
+            'nama_paket' => 'Paket Confirm Refund Test',
+            'kategori' => 'standar 1',
+            'harga' => 1500000,
+        ]);
+
+        $peminjaman = Peminjaman::create([
+            'paket_peminjaman_id' => $paket->id,
+            'nama' => 'Pemohon Confirm Refund',
+            'email_instansi' => 'customer_confirm_refund@test.com',
+            'tanggal_mulai' => now()->addDays(5),
+            'tanggal_selesai' => now()->addDays(5)->addHours(4),
+            'status' => 'rejected',
+        ]);
+
+        $pembayaran = Pembayaran::create([
+            'peminjaman_id' => $peminjaman->id,
+            'kode_pembayaran' => 'PAY-RFD-002',
+            'total_tagihan' => 1500000,
+            'total_terbayar' => 500000,
+            'total_refund' => 500000,
+            'sisa_tagihan' => 0,
+            'status_pembayaran' => 'refund_pending',
+        ]);
+
+        // Detail refund yang sudah diupload bukti oleh admin
+        $pembayaran->details()->create([
+            'kode_transaksi' => 'TRX-RFD-002',
+            'tipe_pembayaran' => 'refund',
+            'jumlah_bayar' => 500000,
+            'metode' => 'transfer',
+            'bank_pengirim' => 'Bank Sekolah',
+            'norek_pengirim' => '998877',
+            'atas_nama_pengirim' => 'SMKN 2 Kra',
+            'bank_tujuan' => 'BCA',
+            'status' => 'pending',
+            'bukti_pembayaran' => 'bukti/refund.jpg',
+        ]);
+
+        // Pelanggan mengonfirmasi dana telah diterima
+        $response = $this->actingAs($pelanggan)->post(route('customer.pembayaran.konfirmasi-refund', $pembayaran->id));
+        $response->assertRedirect(route('customer.pembayaran.show', $pembayaran->id));
+        $response->assertSessionHas('success');
+
+        $pembayaran->refresh();
+        $this->assertEquals('refunded', $pembayaran->status_pembayaran);
+        $this->assertEquals(0, (float) $pembayaran->sisa_tagihan);
+
+        // Halaman pembayaran menampilkan status selesai
+        $resView = $this->actingAs($pelanggan)->get(route('customer.pembayaran.show', $pembayaran->id));
+        $resView->assertOk();
+        $resView->assertSee('Refund Selesai');
+        $resView->assertSee('Pengembalian dana telah selesai dan dikonfirmasi diterima.');
+    }
 }

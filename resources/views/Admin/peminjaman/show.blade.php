@@ -366,9 +366,13 @@
                         <span>Total Terbayar:</span>
                         <span class="font-bold text-sm">Rp {{ number_format($pembayaran?->total_terbayar ?? 0, 0, ',', '.') }}</span>
                     </div>
+                    @php
+                        $isDitolakOrRefund = in_array($pembayaran?->status_pembayaran, ['refund_pending', 'refunded', 'rejected', 'hangus']) || $peminjaman->status === 'rejected';
+                        $sisaTagihanAdmin = $isDitolakOrRefund ? 0 : ($pembayaran?->sisa_tagihan ?? 0);
+                    @endphp
                     <div class="flex justify-between items-center text-brand-700">
                         <span>Sisa Tagihan:</span>
-                        <span class="font-bold text-sm">Rp {{ number_format($pembayaran?->sisa_tagihan ?? 0, 0, ',', '.') }}</span>
+                        <span class="font-bold text-sm">Rp {{ number_format($sisaTagihanAdmin, 0, ',', '.') }}</span>
                     </div>
 
                     @if ($pembayaran && $pembayaran->total_refund > 0)
@@ -384,6 +388,11 @@
                                 <div class="flex items-center gap-1.5 text-emerald-600 font-semibold">
                                     <i class="fa-solid fa-circle-check text-xs"></i>
                                     <span>Tagihan Telah Lunas (Tidak Ada Batas Waktu)</span>
+                                </div>
+                            @elseif ($isDitolakOrRefund)
+                                <div class="flex items-center gap-1.5 text-purple-700 font-semibold">
+                                    <i class="fa-solid fa-hand-holding-dollar text-xs"></i>
+                                    <span>Peminjaman Ditolak (Tidak Ada Batas Waktu Pembayaran)</span>
                                 </div>
                             @elseif ($pembayaran->status_pembayaran === 'partial' || ($pembayaran->total_terbayar > 0 && $pembayaran->sisa_tagihan > 0))
                                 <div class="space-y-0.5">

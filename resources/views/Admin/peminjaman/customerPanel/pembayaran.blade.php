@@ -89,11 +89,13 @@
 
     <!-- CARD TENGGAT WAKTU & STATUS (PUTIH SOLID, COMPACT/TIPIS, HIGHLIGHT COUNTDOWN SAJA) -->
     @php
+        $refund = $refundDetail ?? $pembayaran->details->firstWhere('tipe_pembayaran', 'refund');
         $isPartial = $pembayaran->status_pembayaran === 'partial' || ($pembayaran->total_terbayar > 0 && $pembayaran->sisa_tagihan > 0);
         $targetDeadline = $isPartial
             ? ($pembayaran->jatuh_tempo_pelunasan ?: ($pembayaran->peminjaman?->tanggal_mulai ? \Carbon\Carbon::parse($pembayaran->peminjaman->tanggal_mulai)->subHours((int) ($config->jatuh_tempo_pelunasan_jam ?? 24)) : now()->addHours(48)))
             : ($pembayaran->jatuh_tempo_dp ?: now()->addHours(24));
         $isExpired = now()->isAfter($targetDeadline) && in_array($pembayaran->status_pembayaran, ['pending', 'rejected']);
+        $isRefundOrRejected = in_array($pembayaran->status_pembayaran, ['refund_pending', 'refunded', 'rejected', 'hangus']) || $pembayaran->peminjaman?->status === 'rejected';
     @endphp
     <div class="bg-white rounded-2xl p-4 md:py-3.5 md:px-5 border border-slate-100 figma-card-shadow flex flex-col md:flex-row md:items-center justify-between gap-4">
         <!-- Info Kiri: Invoice, Paket, Pemohon & Jadwal -->
@@ -142,22 +144,37 @@
             </p>
         </div>
 
-        <!-- Info Kanan: Highlight Countdown Teks Saja -->
-        <div class="flex flex-col md:items-end justify-center pt-2 md:pt-0 border-t md:border-t-0 border-slate-100">
-            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
-                <i class="fa-regular fa-clock text-amber-500"></i> {{ $isPartial ? 'Tenggat Waktu Pelunasan' : 'Tenggat Waktu Pembayaran DP' }}
-            </span>
-            <div class="flex items-center gap-1 font-mono text-xl md:text-2xl font-black tracking-wider text-brand-700 mt-0.5">
-                <span id="cd-hours">00</span>
-                <span class="text-slate-300 font-sans">:</span>
-                <span id="cd-minutes">00</span>
-                <span class="text-slate-300 font-sans">:</span>
-                <span id="cd-seconds">00</span>
+        @if ($isRefundOrRejected)
+            <!-- Info Kanan Saat Status Refund / Peminjaman Ditolak (Tidak Menampilkan Tenggat Waktu) -->
+            <div class="flex flex-col md:items-end justify-center pt-2 md:pt-0 border-t md:border-t-0 border-slate-100">
+                <span class="text-[10px] font-bold text-purple-600 uppercase tracking-wider flex items-center gap-1">
+                    <i class="fa-solid fa-hand-holding-dollar"></i> Status Pengembalian Dana
+                </span>
+                <div class="text-base md:text-lg font-black text-purple-700 mt-0.5">
+                    {{ $pembayaran->status_pembayaran === 'refunded' ? 'Refund Selesai' : 'Pengembalian Dana (Refund)' }}
+                </div>
+                <div class="text-[11px] font-medium text-slate-500">
+                    Total Dana: <strong class="text-purple-800">Rp {{ number_format($pembayaran->total_refund ?: $pembayaran->total_terbayar, 0, ',', '.') }}</strong>
+                </div>
             </div>
-            <div id="countdownStatus" class="text-[11px] font-medium text-slate-500">
-                Batas: {{ $targetDeadline->translatedFormat('d M Y, H:i') }} WIB
+        @else
+            <!-- Info Kanan: Highlight Countdown Teks Saja -->
+            <div class="flex flex-col md:items-end justify-center pt-2 md:pt-0 border-t md:border-t-0 border-slate-100">
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                    <i class="fa-regular fa-clock text-amber-500"></i> {{ $isPartial ? 'Tenggat Waktu Pelunasan' : 'Tenggat Waktu Pembayaran DP' }}
+                </span>
+                <div class="flex items-center gap-1 font-mono text-xl md:text-2xl font-black tracking-wider text-brand-700 mt-0.5">
+                    <span id="cd-hours">00</span>
+                    <span class="text-slate-300 font-sans">:</span>
+                    <span id="cd-minutes">00</span>
+                    <span class="text-slate-300 font-sans">:</span>
+                    <span id="cd-seconds">00</span>
+                </div>
+                <div id="countdownStatus" class="text-[11px] font-medium text-slate-500">
+                    Batas: {{ $targetDeadline->translatedFormat('d M Y, H:i') }} WIB
+                </div>
             </div>
-        </div>
+        @endif
     </div>
 
     <!-- BANNER PERINGATAN REJECT PEMBAYARAN (TRANSFER ULANG) -->
@@ -319,16 +336,12 @@
                             </a>
 
                             @if ($pembayaran->status_pembayaran === 'refund_pending')
-                                <!-- Form Tombol Konfirmasi Dana Telah Diterima -->
-                                <form action="{{ route('customer.pembayaran.konfirmasi-refund', $pembayaran->id) }}" method="POST"
-                                    onsubmit="return confirm('Apakah Anda yakin telah menerima dana pengembalian ke rekening Anda?')">
-                                    @csrf
-                                    <button type="submit"
-                                        class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-black shadow-xs transition flex items-center justify-center gap-2">
-                                        <i class="fa-solid fa-circle-check"></i>
-                                        <span>Konfirmasi Dana Telah Diterima (Selesai)</span>
-                                    </button>
-                                </form>
+                                <!-- Tombol Konfirmasi Dana Telah Diterima via Modal -->
+                                <button type="button" onclick="openModalKonfirmasiRefund()"
+                                    class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-xl text-xs font-black shadow-xs transition flex items-center justify-center gap-2 cursor-pointer">
+                                    <i class="fa-solid fa-circle-check"></i>
+                                    <span>Konfirmasi Dana Telah Diterima (Selesai)</span>
+                                </button>
                             @else
                                 <div class="p-3.5 bg-emerald-50 rounded-xl text-xs text-emerald-800 text-center font-bold flex items-center justify-center gap-2">
                                     <i class="fa-solid fa-check-double text-base"></i>
@@ -582,7 +595,12 @@
             @endif
 
             <!-- 2. RIWAYAT TRANSAKSI / CICILAN -->
-            @if ($pembayaran->details->isNotEmpty())
+            @php
+                $uploadedTransactions = $pembayaran->details->filter(function ($trx) {
+                    return !empty($trx->bukti_pembayaran);
+                });
+            @endphp
+            @if ($uploadedTransactions->isNotEmpty())
                 <div class="bg-white rounded-2xl p-6 figma-card-shadow border border-slate-100 space-y-4">
                     <div class="flex items-center gap-2.5 pb-3 border-b border-slate-100">
                         <div class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-sm">
@@ -595,7 +613,7 @@
                     </div>
 
                     <div class="space-y-3">
-                        @foreach ($pembayaran->details as $trx)
+                        @foreach ($uploadedTransactions as $trx)
                             <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-3">
                                 <div class="space-y-1">
                                     <div class="flex items-center gap-2">
@@ -659,21 +677,33 @@
                     </div>
                     <div class="flex items-center justify-between pt-1">
                         <span class="text-sm font-bold text-slate-800">Sisa Tagihan:</span>
-                        <span class="text-lg font-black text-brand-700">
-                            Rp {{ number_format($pembayaran->sisa_tagihan, 0, ',', '.') }}
+                        <span class="text-lg font-black {{ $isRefundOrRejected ? 'text-slate-500' : 'text-brand-700' }}">
+                            Rp {{ number_format($isRefundOrRejected ? 0 : $pembayaran->sisa_tagihan, 0, ',', '.') }}
                         </span>
                     </div>
                 </div>
 
-                <div class="p-3 bg-blue-50/70 border border-blue-100 rounded-xl space-y-1 text-xs">
-                    <div class="flex items-center justify-between text-slate-700">
-                        <span>Minimal DP:</span>
-                        <strong class="text-brand-700 font-bold">Rp {{ number_format($nominalDp, 0, ',', '.') }}</strong>
+                @if (!$isRefundOrRejected)
+                    <div class="p-3 bg-blue-50/70 border border-blue-100 rounded-xl space-y-1 text-xs">
+                        <div class="flex items-center justify-between text-slate-700">
+                            <span>Minimal DP:</span>
+                            <strong class="text-brand-700 font-bold">Rp {{ number_format($nominalDp, 0, ',', '.') }}</strong>
+                        </div>
+                        <div class="text-[11px] text-slate-500">
+                            Pembayaran DP dapat mengamankan jadwal aula untuk Anda.
+                        </div>
                     </div>
-                    <div class="text-[11px] text-slate-500">
-                        Pembayaran DP dapat mengamankan jadwal aula untuk Anda.
+                @else
+                    <div class="p-3 bg-purple-50 border border-purple-100 rounded-xl space-y-1 text-xs">
+                        <div class="flex items-center justify-between text-slate-700">
+                            <span class="text-purple-800 font-bold">Status Peminjaman:</span>
+                            <strong class="text-purple-700 font-bold uppercase text-[11px]">Ditolak / Refund</strong>
+                        </div>
+                        <div class="text-[11px] text-slate-500">
+                            Permohonan ditolak. Tidak ada sisa tagihan yang harus dibayarkan.
+                        </div>
                     </div>
-                </div>
+                @endif
             </div>
 
             <!-- CARD DETAIL PAKET & FASILITAS -->
@@ -723,6 +753,76 @@
 </div>
 
 @endsection
+
+@push('modals')
+<!-- ============================================================== -->
+<!-- MODAL: KONFIRMASI PENERIMAAN DANA REFUND -->
+<!-- ============================================================== -->
+<div id="modalKonfirmasiRefund" class="fixed inset-0 !m-0 z-[100] hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity">
+    <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl border border-slate-100 overflow-hidden transform transition-all scale-95 duration-200" id="modalKonfirmasiRefundBox">
+        <!-- HEADER -->
+        <div class="p-6 pb-4 bg-white flex items-center justify-between border-b border-slate-100 flex-shrink-0">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg border border-emerald-100 shadow-xs flex-shrink-0">
+                    <i class="fa-solid fa-hand-holding-dollar"></i>
+                </div>
+                <div>
+                    <h3 class="font-extrabold text-slate-900 text-base tracking-tight">Konfirmasi Terima Refund</h3>
+                    <p class="text-slate-400 text-xs">Peminjaman Aula SMKN 2 Karanganyar</p>
+                </div>
+            </div>
+            <button type="button" onclick="closeModalKonfirmasiRefund()" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition cursor-pointer" title="Tutup">
+                <i class="fa-solid fa-xmark text-sm"></i>
+            </button>
+        </div>
+
+        <!-- BODY -->
+        <div class="p-6 space-y-4">
+            <div class="p-4 bg-emerald-50/70 border border-emerald-200/80 rounded-2xl space-y-2">
+                <div class="flex justify-between items-center text-xs">
+                    <span class="text-emerald-800 font-medium">Total Dana Dikembalikan:</span>
+                    <strong class="text-emerald-700 font-black text-sm">
+                        Rp {{ number_format($pembayaran->total_refund ?: $pembayaran->total_terbayar, 0, ',', '.') }}
+                    </strong>
+                </div>
+                @if (!empty($refund?->bank_pengirim))
+                    <div class="pt-2 border-t border-emerald-200/60 text-xs text-emerald-800 space-y-0.5">
+                        <div class="text-[11px] text-emerald-600">Dikirim ke Rekening Anda:</div>
+                        <div class="font-bold">{{ $refund->bank_pengirim }} &bull; {{ $refund->norek_pengirim }}</div>
+                        <div class="text-[11px] text-emerald-700">a.n. {{ $refund->atas_nama_pengirim }}</div>
+                    </div>
+                @endif
+            </div>
+
+            <div class="text-xs text-slate-600 leading-relaxed space-y-2">
+                <p>
+                    Apakah Anda yakin telah menerima dana pengembalian ke rekening Anda sesuai dengan bukti transfer dari sekolah?
+                </p>
+                <div class="p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-800 text-[11px] flex items-start gap-2">
+                    <i class="fa-solid fa-circle-exclamation text-amber-500 mt-0.5 flex-shrink-0"></i>
+                    <span>Setelah dikonfirmasi, status pembayaran akan menjadi <strong>Selesai (Refunded)</strong> dan proses transaksi peminjaman aula ini ditutup.</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- FOOTER ACTIONS -->
+        <div class="p-6 pt-3 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-3">
+            <button type="button" onclick="closeModalKonfirmasiRefund()"
+                class="px-4 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 text-xs font-bold transition cursor-pointer">
+                Batal
+            </button>
+            <form action="{{ route('customer.pembayaran.konfirmasi-refund', $pembayaran->id) }}" method="POST" class="inline">
+                @csrf
+                <button type="submit"
+                    class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-xs font-bold transition shadow-xs flex items-center gap-1.5 cursor-pointer">
+                    <i class="fa-solid fa-circle-check"></i>
+                    <span>Ya, Dana Telah Diterima</span>
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+@endpush
 
 @push('scripts')
 <script>
@@ -786,13 +886,52 @@
 
     function updatePaymentScheme(scheme) {
         const inputJumlah = document.getElementById('jumlah_bayar');
-        if (scheme === 'dp') {
-            inputJumlah.value = nominalDp;
-        } else {
-            inputJumlah.value = nominalLunas;
+        if (inputJumlah) {
+            if (scheme === 'dp') {
+                inputJumlah.value = nominalDp;
+            } else {
+                inputJumlah.value = nominalLunas;
+            }
         }
     }
 
+    // MODAL KONFIRMASI REFUND DANA DITERIMA
+    function openModalKonfirmasiRefund() {
+        const modal = document.getElementById('modalKonfirmasiRefund');
+        const box = document.getElementById('modalKonfirmasiRefundBox');
+        if (!modal || !box) return;
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+        setTimeout(() => {
+            box.classList.remove('scale-95');
+            box.classList.add('scale-100');
+        }, 10);
+    }
+
+    function closeModalKonfirmasiRefund() {
+        const modal = document.getElementById('modalKonfirmasiRefund');
+        const box = document.getElementById('modalKonfirmasiRefundBox');
+        if (!modal || !box) return;
+        box.classList.remove('scale-100');
+        box.classList.add('scale-95');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            document.body.style.overflow = '';
+        }, 150);
+    }
+
+    // Tutup modal jika klik di luar box (backdrop) atau tekan tombol ESC
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeModalKonfirmasiRefund();
+    });
+    const modalRefundEl = document.getElementById('modalKonfirmasiRefund');
+    if (modalRefundEl) {
+        modalRefundEl.addEventListener('click', (e) => {
+            if (e.target === modalRefundEl) closeModalKonfirmasiRefund();
+        });
+    }
+
+    @if (!$isRefundOrRejected)
     // REAL-TIME COUNTDOWN TIMER (NO REFRESH REQUIRED)
     // Target ISO timestamp
     const deadlineIso = @js($targetDeadline->toIso8601String());
@@ -834,5 +973,6 @@
     // Jalankan timer setiap 1 detik secara real-time
     updateCountdown();
     setInterval(updateCountdown, 1000);
+    @endif
 </script>
 @endpush

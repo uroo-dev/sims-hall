@@ -206,9 +206,9 @@
                             <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                                 <div class="space-y-1.5 flex-1">
                                     <div class="flex items-center gap-2 flex-wrap">
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold {{ $pem->status_pembayaran === 'partial' ? 'bg-blue-100 text-brand-800' : 'bg-amber-100 text-amber-800' }}">
-                                            <i class="fa-regular fa-clock text-[10px]"></i>
-                                            {{ $pem->status_pembayaran === 'partial' ? 'DP Terverifikasi (Menunggu Pelunasan)' : 'Tagihan Aktif ('.strtoupper($pem->status_pembayaran).')' }}
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold {{ $pem->status_pembayaran === 'partial' ? 'bg-blue-100 text-brand-800' : ($pem->status_pembayaran === 'refund_pending' ? 'bg-purple-100 text-purple-800 animate-pulse' : 'bg-amber-100 text-amber-800') }}">
+                                            <i class="{{ $pem->status_pembayaran === 'refund_pending' ? 'fa-solid fa-hand-holding-dollar text-purple-600' : 'fa-regular fa-clock' }} text-[10px]"></i>
+                                            {{ $pem->status_pembayaran === 'partial' ? 'DP Terverifikasi (Menunggu Pelunasan)' : ($pem->status_pembayaran === 'refund_pending' ? 'Pengajuan Ditolak (Menunggu Refund)' : 'Tagihan Aktif ('.strtoupper($pem->status_pembayaran).')') }}
                                         </span>
                                         <span class="text-xs font-semibold text-gray-700">
                                             {{ $pem->peminjaman?->paketPeminjaman?->nama_paket ?: 'Paket Sewa Aula' }}
@@ -225,11 +225,16 @@
                                     </h4>
                                     <div class="flex items-center gap-4 text-xs text-gray-600 flex-wrap pt-0.5">
                                         <span>Total Tagihan: <strong>Rp {{ number_format($pem->total_tagihan, 0, ',', '.') }}</strong></span>
-                                        <span>Sisa Tagihan: <strong class="text-[#0070ba] font-bold text-sm">Rp {{ number_format($pem->sisa_tagihan, 0, ',', '.') }}</strong></span>
-                                        @if ($pem->status_pembayaran === 'partial' && $pem->jatuh_tempo_pelunasan)
-                                            <span class="text-slate-500 text-[11px]">Tenggat Pelunasan: <strong class="text-amber-700">{{ $pem->jatuh_tempo_pelunasan->translatedFormat('d M Y, H:i') }} WIB</strong></span>
-                                        @elseif ($pem->jatuh_tempo_dp)
-                                            <span class="text-slate-500 text-[11px]">Tenggat DP: <strong class="text-amber-700">{{ $pem->jatuh_tempo_dp->translatedFormat('d M Y, H:i') }} WIB</strong></span>
+                                        @if ($pem->status_pembayaran === 'refund_pending' || $pem->peminjaman?->status === 'rejected')
+                                            <span>Sisa Tagihan: <strong class="text-slate-500 font-bold text-sm">Rp 0</strong></span>
+                                            <span class="text-purple-700 font-bold text-xs">Total Refund: Rp {{ number_format($pem->total_refund ?: $pem->total_terbayar, 0, ',', '.') }}</span>
+                                        @else
+                                            <span>Sisa Tagihan: <strong class="text-[#0070ba] font-bold text-sm">Rp {{ number_format($pem->sisa_tagihan, 0, ',', '.') }}</strong></span>
+                                            @if ($pem->status_pembayaran === 'partial' && $pem->jatuh_tempo_pelunasan)
+                                                <span class="text-slate-500 text-[11px]">Tenggat Pelunasan: <strong class="text-amber-700">{{ $pem->jatuh_tempo_pelunasan->translatedFormat('d M Y, H:i') }} WIB</strong></span>
+                                            @elseif ($pem->jatuh_tempo_dp)
+                                                <span class="text-slate-500 text-[11px]">Tenggat DP: <strong class="text-amber-700">{{ $pem->jatuh_tempo_dp->translatedFormat('d M Y, H:i') }} WIB</strong></span>
+                                            @endif
                                         @endif
                                     </div>
                                 </div>
@@ -238,8 +243,8 @@
                                     @if (!empty($config?->bank_utama) && !empty($config?->norek_utama))
                                         <span class="text-xs text-gray-500 hidden lg:inline">Tujuan: <strong>{{ $config->bank_utama }} - {{ $config->norek_utama }}</strong></span>
                                     @endif
-                                    <span class="inline-flex items-center gap-1.5 px-4 py-2.5 bg-[#0070ba] text-white text-xs font-bold rounded-xl shadow-xs group-hover:bg-[#005a96] transition">
-                                        <span>Buka Pembayaran</span>
+                                    <span class="inline-flex items-center gap-1.5 px-4 py-2.5 {{ $pem->status_pembayaran === 'refund_pending' ? 'bg-purple-600 group-hover:bg-purple-700' : 'bg-[#0070ba] group-hover:bg-[#005a96]' }} text-white text-xs font-bold rounded-xl shadow-xs transition">
+                                        <span>{{ $pem->status_pembayaran === 'refund_pending' ? 'Info Rekening Refund' : 'Buka Pembayaran' }}</span>
                                         <i class="fa-solid fa-chevron-right text-[10px] transform group-hover:translate-x-1 transition-transform"></i>
                                     </span>
                                 </div>

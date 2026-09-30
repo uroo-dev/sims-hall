@@ -267,6 +267,7 @@ class AdminPeminjamanController extends Controller
                 $pembayaran->update([
                     'status_pembayaran' => 'refund_pending',
                     'total_refund' => $nominalTerbayar,
+                    'sisa_tagihan' => 0,
                     'catatan' => 'Permohonan ditolak oleh admin. Alasan: '.$validated['alasan_penolakan'],
                 ]);
 
@@ -291,6 +292,7 @@ class AdminPeminjamanController extends Controller
             // Skenario jika belum ada pembayaran
             $pembayaran->update([
                 'status_pembayaran' => 'rejected',
+                'sisa_tagihan' => 0,
                 'catatan' => 'Permohonan ditolak oleh admin. Alasan: '.$validated['alasan_penolakan'],
             ]);
 
