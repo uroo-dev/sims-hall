@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\DetailPembayaran;
 use App\Models\PaymentConfiguration;
 use App\Models\Peminjaman;
 use App\Models\Persetujuan;
@@ -146,7 +147,30 @@ class AdminPeminjamanController extends Controller
             'catatan_approval' => ['nullable', 'string', 'max:1000'],
         ]);
 
-        // Validasi: Cegah approval jika jadwal bentrok dengan peminjaman lain yang sudah disetujui
+        // 1. Validasi: Sebelum approve, admin harus memverifikasi apakah pembayaran sudah benar terlebih dulu
+        $hasPendingPayment = $peminjaman->pembayaran && $peminjaman->pembayaran->details()
+            ->where('status', 'pending')
+            ->where('tipe_pembayaran', '!=', 'refund')
+            ->exists();
+
+        if ($hasPendingPayment) {
+            return back()->with('error', 'Persetujuan permohonan tidak dapat diproses: Terdapat bukti transfer pembayaran yang belum diverifikasi. Silakan periksa dan verifikasi pembayaran terlebih dahulu.');
+        }
+
+        // Cek apakah pembayaran sudah diverifikasi benar (valid)
+        $hasVerifiedPayment = $peminjaman->pembayaran && (
+            $peminjaman->pembayaran->total_terbayar > 0 ||
+            $peminjaman->pembayaran->details()
+                ->where('status', 'verified')
+                ->where('tipe_pembayaran', '!=', 'refund')
+                ->exists()
+        );
+
+        if (! $hasVerifiedPayment) {
+            return back()->with('error', 'Persetujuan permohonan tidak dapat diproses: Pembayaran belum diverifikasi benar (valid). Pastikan pemohon telah membayar dan bukti pembayaran telah diverifikasi valid sebelum menyetujui peminjaman.');
+        }
+
+        // 2. Validasi: Cegah approval jika jadwal bentrok dengan peminjaman lain yang sudah disetujui
         $conflictingPeminjaman = Peminjaman::query()
             ->where('id', '!=', $peminjaman->id)
             ->where(function ($q) {
@@ -183,29 +207,14 @@ class AdminPeminjamanController extends Controller
                 'tanggal_proses' => now(),
             ]);
 
-            // Jika ada bukti pembayaran yang pending, otomatis verifikasi
             if ($peminjaman->pembayaran) {
-                $pendingDetails = $peminjaman->pembayaran->details()
-                    ->where('status', 'pending')
-                    ->where('tipe_pembayaran', '!=', 'refund')
-                    ->get();
-
-                foreach ($pendingDetails as $detail) {
-                    $detail->update([
-                        'status' => 'verified',
-                        'diverifikasi_oleh' => auth()->id(),
-                        'diverifikasi_pada' => now(),
-                    ]);
-                }
-
-                $peminjaman->pembayaran->syncAkumulasiPembayaran();
                 $pembayaran = $peminjaman->pembayaran->fresh();
 
                 // Hitung tenggat waktu pembayaran final (pelunasan) setelah approve / pembayaran pertama (DP):
                 // Sesuai konfigurasi pembayaran, jatuh tempo pelunasan adalah X jam sebelum hari H (tanggal_mulai)
                 if ($pembayaran && ($pembayaran->status_pembayaran === 'partial' || ($pembayaran->sisa_tagihan > 0 && $pembayaran->total_terbayar > 0))) {
                     $config = PaymentConfiguration::current();
-                    $tenggatPelunasan = Carbon::parse($peminjaman->tanggal_mulai)->subHours((int) $config->jatuh_tempo_pelunasan_jam);
+                    $tenggatPelunasan = Carbon::parse($peminjaman->tanggal_mulai)->subHours((int) ($config->jatuh_tempo_pelunasan_jam ?? 24));
                     $pembayaran->update([
                         'jatuh_tempo_pelunasan' => $tenggatPelunasan,
                     ]);
@@ -214,15 +223,15 @@ class AdminPeminjamanController extends Controller
         });
 
         return redirect()->route('admin.peminjaman.show', $peminjaman->id)
-            ->with('success', 'Pengajuan peminjaman aula berhasil disetujui (Approved)! Bukti pembayaran yang masuk telah diverifikasi.');
+            ->with('success', 'Pengajuan peminjaman aula berhasil disetujui (Approved)!');
     }
 
     /**
      * Aksi Reject Pengajuan oleh Admin:
-     * - Wajib memberikan keterangan / alasan penolakan
-     * - Jika pemohon sudah melakukan pembayaran yang berhasil / ada uang masuk,
-     *   maka status pembayaran diubah menjadi refund_pending dan admin diminta merefund nominal tersebut.
-     * - Jika belum ada pembayaran atau pembayaran nol, status pembayaran langsung menjadi rejected.
+     * - Wajib memberikan keterangan / alasan penolakan.
+     * - Sebelum reject, admin harus memverifikasi pembayaran terlebih dahulu.
+     * - Jika pembayaran sudah diverifikasi benar (valid), maka proses dilanjutkan ke refund.
+     * - Jika status pembayaran gagal / ditolak / belum bayar, maka refund TIDAK dilakukan.
      */
     public function reject(Request $request, Peminjaman $peminjaman): RedirectResponse
     {
@@ -232,6 +241,16 @@ class AdminPeminjamanController extends Controller
             'alasan_penolakan.required' => 'Keterangan atau alasan penolakan permohonan wajib diisi oleh admin.',
             'alasan_penolakan.min' => 'Alasan penolakan permohonan minimal 5 karakter.',
         ]);
+
+        // Cek apakah ada bukti pembayaran yang masih pending verifikasi
+        $hasPendingPayment = $peminjaman->pembayaran && $peminjaman->pembayaran->details()
+            ->where('status', 'pending')
+            ->where('tipe_pembayaran', '!=', 'refund')
+            ->exists();
+
+        if ($hasPendingPayment) {
+            return back()->with('error', 'Penolakan permohonan tidak dapat diproses: Terdapat bukti transfer pembayaran yang masih menunggu verifikasi. Harap verifikasi bukti pembayaran terlebih dahulu (apakah pembayaran valid atau ditolak/gagal).');
+        }
 
         $message = DB::transaction(function () use ($peminjaman, $validated) {
             // Ubah status peminjaman menjadi rejected
@@ -252,17 +271,16 @@ class AdminPeminjamanController extends Controller
                 return 'Pengajuan peminjaman aula berhasil ditolak.';
             }
 
-            // Hitung nominal yang sudah dibayar oleh pemohon (uang masuk)
+            // Cek apakah ada pembayaran yang sudah diverifikasi benar (valid)
             $nominalTerbayar = (float) $pembayaran->total_terbayar;
             if ($nominalTerbayar <= 0) {
-                // Cek apakah ada bukti pembayaran yang masuk (status verified atau pending)
                 $nominalTerbayar = (float) $pembayaran->details()
-                    ->whereIn('status', ['verified', 'pending'])
-                    ->whereIn('tipe_pembayaran', ['dp', 'lunas_langsung', 'pelunasan'])
+                    ->where('status', 'verified')
+                    ->where('tipe_pembayaran', '!=', 'refund')
                     ->sum('jumlah_bayar');
             }
 
-            // Skenario A: Ada pembayaran berhasil / uang masuk -> refund_pending
+            // Skenario A: Pembayaran SUDAH BENAR (verified) -> lanjut ke proses refund
             if ($nominalTerbayar > 0) {
                 $pembayaran->update([
                     'status_pembayaran' => 'refund_pending',
@@ -286,17 +304,18 @@ class AdminPeminjamanController extends Controller
                     ]
                 );
 
-                return 'Pengajuan berhasil ditolak. Karena pemohon telah membayar sebesar Rp '.number_format($nominalTerbayar, 0, ',', '.').', status pembayaran diubah menjadi Refund Pending. Pemohon diminta mengisi nomor rekening pengembalian dana.';
+                return 'Pengajuan berhasil ditolak. Karena pembayaran telah diverifikasi benar sebesar Rp '.number_format($nominalTerbayar, 0, ',', '.').', status pembayaran diubah menjadi Refund Pending untuk melanjutkan proses pengembalian dana. Pemohon diminta mengisi nomor rekening pengembalian dana.';
             }
 
-            // Skenario jika belum ada pembayaran
+            // Skenario B: Status pembayaran GAGAL / ditolak / belum bayar -> refund TIDAK dilakukan
             $pembayaran->update([
                 'status_pembayaran' => 'rejected',
+                'total_refund' => 0,
                 'sisa_tagihan' => 0,
-                'catatan' => 'Permohonan ditolak oleh admin. Alasan: '.$validated['alasan_penolakan'],
+                'catatan' => 'Permohonan ditolak oleh admin. Alasan: '.$validated['alasan_penolakan'].'. Status pembayaran gagal/tidak valid sehingga proses refund tidak dilakukan.',
             ]);
 
-            return 'Pengajuan peminjaman aula berhasil ditolak.';
+            return 'Pengajuan peminjaman aula berhasil ditolak. Karena status pembayaran gagal / ditolak, proses pengembalian dana (refund) tidak dilakukan.';
         });
 
         return redirect()->route('admin.peminjaman.show', $peminjaman->id)
@@ -304,15 +323,68 @@ class AdminPeminjamanController extends Controller
     }
 
     /**
+     * Aksi Verifikasi Bukti Pembayaran Pemohon (Status: Benar / Valid):
+     * - Admin memeriksa bukti transfer dan menandai transaksi sebagai verified.
+     */
+    public function verifikasiPembayaran(Request $request, Peminjaman $peminjaman, ?DetailPembayaran $detail = null): RedirectResponse
+    {
+        $pembayaran = $peminjaman->pembayaran;
+        if (! $pembayaran) {
+            return back()->with('error', 'Data tagihan pembayaran peminjaman tidak ditemukan.');
+        }
+
+        $targetDetail = $detail;
+        if (! $targetDetail && $request->filled('detail_id')) {
+            $targetDetail = $pembayaran->details()->where('id', $request->input('detail_id'))->first();
+        }
+        if (! $targetDetail) {
+            $targetDetail = $pembayaran->details()
+                ->where('status', 'pending')
+                ->where('tipe_pembayaran', '!=', 'refund')
+                ->latest()
+                ->first();
+        }
+
+        if (! $targetDetail) {
+            return back()->with('error', 'Tidak ada bukti pembayaran yang memerlukan verifikasi.');
+        }
+
+        DB::transaction(function () use ($peminjaman, $pembayaran, $targetDetail, $request) {
+            $targetDetail->update([
+                'status' => 'verified',
+                'diverifikasi_oleh' => auth()->id(),
+                'diverifikasi_pada' => now(),
+                'catatan' => $request->input('catatan', 'Pembayaran telah diverifikasi benar dan valid oleh admin.'),
+            ]);
+
+            $pembayaran->syncAkumulasiPembayaran();
+            $pembayaran->refresh();
+
+            // Jika status pembayaran menjadi partial (DP terverifikasi), hitung tenggat waktu pelunasan
+            if ($pembayaran->status_pembayaran === 'partial' || ($pembayaran->sisa_tagihan > 0 && $pembayaran->total_terbayar > 0)) {
+                $config = PaymentConfiguration::current();
+                $tenggatPelunasan = Carbon::parse($peminjaman->tanggal_mulai)->subHours((int) ($config->jatuh_tempo_pelunasan_jam ?? 24));
+                $pembayaran->update([
+                    'jatuh_tempo_pelunasan' => $tenggatPelunasan,
+                ]);
+            }
+        });
+
+        return redirect()->route('admin.peminjaman.show', $peminjaman->id)
+            ->with('success', 'Bukti pembayaran berhasil diverifikasi (Status: Benar / Valid). Anda kini dapat melanjutkan proses persetujuan (Approve) atau penolakan (Reject) permohonan.');
+    }
+
+    /**
      * Aksi Reject Pembayaran Deposit (Deposit Gagal / Bukti Palsu):
      * - Admin mengubah status pembayaran menjadi rejected dan wajib mengisi alasan.
      * - Pemohon diminta untuk transfer ulang dengan tenggat waktu baru sesuai konfigurasi pembayaran.
-     * - Jika melewati batas waktu tersebut, sistem secara otomatis membatalkan peminjaman menjadi rejected.
+     * - Jika peminjaman ditolak saat status pembayaran gagal, proses refund tidak dilakukan.
      */
     public function rejectPembayaran(Request $request, Peminjaman $peminjaman): RedirectResponse
     {
         $validated = $request->validate([
             'alasan_penolakan' => ['required', 'string', 'min:5', 'max:1000'],
+            'detail_id' => ['nullable', 'exists:detail_pembayarans,id'],
         ], [
             'alasan_penolakan.required' => 'Keterangan atau alasan penolakan pembayaran wajib diisi oleh admin.',
             'alasan_penolakan.min' => 'Alasan penolakan pembayaran minimal 5 karakter.',
@@ -323,13 +395,16 @@ class AdminPeminjamanController extends Controller
             return back()->with('error', 'Data tagihan pembayaran peminjaman tidak ditemukan.');
         }
 
-        DB::transaction(function () use ($pembayaran, $validated) {
-            // Tolak detail transaksi pembayaran yang aktif / pending
-            $detailTerakhir = $pembayaran->details()
+        DB::transaction(function () use ($pembayaran, $validated, $request) {
+            $detailQuery = $pembayaran->details()
                 ->whereIn('status', ['pending', 'verified'])
-                ->where('tipe_pembayaran', '!=', 'refund')
-                ->latest()
-                ->first();
+                ->where('tipe_pembayaran', '!=', 'refund');
+
+            if ($request->filled('detail_id')) {
+                $detailQuery->where('id', $request->input('detail_id'));
+            }
+
+            $detailTerakhir = $detailQuery->latest()->first();
 
             if ($detailTerakhir) {
                 $detailTerakhir->update([
@@ -339,6 +414,9 @@ class AdminPeminjamanController extends Controller
                     'diverifikasi_pada' => now(),
                 ]);
             }
+
+            $pembayaran->syncAkumulasiPembayaran();
+            $pembayaran->refresh();
 
             // Atur batas waktu baru sesuai konfigurasi pembayaran
             $config = PaymentConfiguration::current();
@@ -354,7 +432,7 @@ class AdminPeminjamanController extends Controller
         });
 
         return redirect()->route('admin.peminjaman.show', $peminjaman->id)
-            ->with('success', 'Bukti pembayaran deposit berhasil ditolak. Status pembayaran diubah menjadi Rejected. Pemohon diberikan tenggat waktu baru untuk mentransfer ulang.');
+            ->with('success', 'Bukti pembayaran deposit ditolak (Status: Gagal). Status pembayaran diubah menjadi Rejected.');
     }
 
     /**

@@ -36,13 +36,30 @@
         </div>
 
         <!-- TOMBOL AKSI CEPAT APPROVE & REJECT DI HEADER (JIKA MASIH PENDING) -->
+        @php
+            $pendingPayments = $pembayaran ? $pembayaran->details->where('tipe_pembayaran', '!=', 'refund')->where('status', 'pending') : collect();
+            $verifiedPayments = $pembayaran ? $pembayaran->details->where('tipe_pembayaran', '!=', 'refund')->where('status', 'verified') : collect();
+            $hasPendingPayment = $pendingPayments->isNotEmpty();
+            $hasVerifiedPayment = $pembayaran && ($pembayaran->total_terbayar > 0 || $verifiedPayments->isNotEmpty());
+            $isPaymentFailed = $pembayaran && ($pembayaran->status_pembayaran === 'rejected' || ($pembayaran->details->where('tipe_pembayaran', '!=', 'refund')->isNotEmpty() && $pembayaran->details->where('tipe_pembayaran', '!=', 'refund')->every(fn($d) => $d->status === 'rejected')));
+        @endphp
         @if ($peminjaman->status !== 'rejected')
             <div class="flex items-center gap-2">
-                <button type="button" onclick="openModalReject()"
-                    class="px-4 py-2 bg-white hover:bg-red-50 text-red-600 border border-red-200 rounded-xl text-xs md:text-sm font-bold shadow-2xs transition flex items-center gap-2">
-                    <i class="fa-solid fa-ban text-xs"></i>
-                    <span>Tolak Pengajuan</span>
-                </button>
+                @if ($hasPendingPayment)
+                    <button type="button" onclick="alert('Harap verifikasi bukti pembayaran pemohon terlebih dahulu (apakah valid atau ditolak) sebelum menolak permohonan peminjaman.')"
+                        class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-500 border border-slate-300 rounded-xl text-xs md:text-sm font-bold shadow-2xs transition flex items-center gap-2 cursor-pointer"
+                        title="Verifikasi pembayaran terlebih dahulu">
+                        <i class="fa-solid fa-ban text-xs"></i>
+                        <span>Tolak Pengajuan</span>
+                    </button>
+                @else
+                    <button type="button" onclick="openModalReject()"
+                        class="px-4 py-2 bg-white hover:bg-red-50 text-red-600 border border-red-200 rounded-xl text-xs md:text-sm font-bold shadow-2xs transition flex items-center gap-2 cursor-pointer">
+                        <i class="fa-solid fa-ban text-xs"></i>
+                        <span>Tolak Pengajuan</span>
+                    </button>
+                @endif
+
                 @if (!in_array($peminjaman->status, ['approved_1', 'approved_final']))
                     @if (isset($conflictingApproved) && $conflictingApproved)
                         <button type="button" onclick="alert('Tidak dapat menyetujui peminjaman: Jadwal bentrok dengan peminjaman yang sudah disetujui (#{{ $conflictingApproved->id }} - {{ $conflictingApproved->nama }}).')"
@@ -51,9 +68,23 @@
                             <i class="fa-solid fa-triangle-exclamation text-amber-500 text-xs"></i>
                             <span>Jadwal Bentrok</span>
                         </button>
+                    @elseif ($hasPendingPayment)
+                        <button type="button" onclick="alert('Tidak dapat menyetujui peminjaman: Terdapat bukti transfer pembayaran yang belum diverifikasi. Harap verifikasi bukti pembayaran pemohon terlebih dahulu.')"
+                            title="Harap verifikasi bukti pembayaran terlebih dahulu"
+                            class="px-5 py-2 bg-slate-200 text-slate-500 hover:bg-slate-300 rounded-xl text-xs md:text-sm font-bold shadow-xs transition flex items-center gap-2 cursor-pointer">
+                            <i class="fa-solid fa-clock text-amber-500 text-xs"></i>
+                            <span>Verifikasi Pembayaran Dulu</span>
+                        </button>
+                    @elseif (!$hasVerifiedPayment)
+                        <button type="button" onclick="alert('Tidak dapat menyetujui peminjaman: Pembayaran belum diverifikasi benar (valid). Pastikan pemohon telah membayar dan bukti pembayaran telah diverifikasi valid sebelum menyetujui peminjaman.')"
+                            title="Pembayaran belum diverifikasi valid"
+                            class="px-5 py-2 bg-slate-200 text-slate-500 hover:bg-slate-300 rounded-xl text-xs md:text-sm font-bold shadow-xs transition flex items-center gap-2 cursor-pointer">
+                            <i class="fa-solid fa-shield-halved text-slate-400 text-xs"></i>
+                            <span>Belum Ada Pembayaran Valid</span>
+                        </button>
                     @else
                         <button type="button" onclick="openModalApprove()"
-                            class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs md:text-sm font-bold shadow-xs transition flex items-center gap-2">
+                            class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs md:text-sm font-bold shadow-xs transition flex items-center gap-2 cursor-pointer">
                             <i class="fa-solid fa-check text-xs"></i>
                             <span>Setujui (Approve)</span>
                         </button>
@@ -62,6 +93,29 @@
             </div>
         @endif
     </div>
+
+    <!-- PERINGATAN VERIFIKASI PEMBAYARAN TERTUNDA -->
+    @if ($hasPendingPayment)
+        <div class="bg-amber-50 border-2 border-amber-300 text-amber-900 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+            <div class="flex items-start gap-3">
+                <div class="w-8 h-8 rounded-full bg-amber-500 text-white flex items-center justify-center font-bold text-sm shrink-0 mt-0.5">
+                    <i class="fa-solid fa-receipt"></i>
+                </div>
+                <div class="text-xs md:text-sm space-y-0.5">
+                    <p class="font-bold text-amber-900">
+                        Verifikasi Bukti Pembayaran Diperlukan!
+                    </p>
+                    <p class="text-amber-800">
+                        Pemohon telah mengunggah bukti pembayaran yang menunggu verifikasi Anda. Sebelum menyetujui atau menolak permohonan, verifikasi apakah bukti pembayaran sudah benar (valid) atau ditolak (gagal).
+                    </p>
+                </div>
+            </div>
+            <a href="#cardBuktiTransfer" class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5 self-start sm:self-auto shrink-0 shadow-xs">
+                <span>Periksa Bukti</span>
+                <i class="fa-solid fa-arrow-down text-[10px]"></i>
+            </a>
+        </div>
+    @endif
 
     <!-- PERINGATAN JADWAL BENTROK -->
     @if (isset($conflictingApproved) && $conflictingApproved)
@@ -424,7 +478,7 @@
             </div>
 
             <!-- CARD 6: BUKTI TRANSAKSI PEMBAYARAN DARI PEMOHON -->
-            <div class="bg-white rounded-2xl p-6 border border-slate-100 figma-card-shadow space-y-4">
+            <div id="cardBuktiTransfer" class="bg-white rounded-2xl p-6 border border-slate-100 figma-card-shadow space-y-4">
                 <div class="flex items-center justify-between pb-3 border-b border-slate-100">
                     <h3 class="font-bold text-slate-800 text-xs md:text-sm uppercase tracking-wide">
                         Bukti Transfer Pemohon
@@ -437,15 +491,21 @@
                 @if ($pembayaran && $pembayaran->details->where('tipe_pembayaran', '!=', 'refund')->isNotEmpty())
                     <div class="space-y-4">
                         @foreach ($pembayaran->details->where('tipe_pembayaran', '!=', 'refund') as $trx)
-                            <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-3">
+                            <div class="p-4 bg-slate-50 rounded-2xl border {{ $trx->status === 'pending' ? 'border-amber-300 ring-2 ring-amber-100' : 'border-slate-200/80' }} space-y-3">
                                 <div class="flex items-center justify-between text-xs">
                                     <span class="font-bold text-slate-800">{{ $trx->label_tipe }}</span>
                                     @if ($trx->status === 'verified')
-                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">Valid</span>
+                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 flex items-center gap-1">
+                                            <i class="fa-solid fa-check text-[9px]"></i> Valid
+                                        </span>
                                     @elseif ($trx->status === 'rejected')
-                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-800">Ditolak</span>
+                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-800 flex items-center gap-1">
+                                            <i class="fa-solid fa-xmark text-[9px]"></i> Ditolak / Gagal
+                                        </span>
                                     @else
-                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800">Pending Review</span>
+                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 animate-pulse flex items-center gap-1">
+                                            <i class="fa-regular fa-clock text-[9px]"></i> Menunggu Verifikasi
+                                        </span>
                                     @endif
                                 </div>
 
@@ -474,13 +534,33 @@
                                     </div>
                                 @endif
 
-                                <!-- AKSI TOLAK BUKTI TRANSFER INI JIKA TIDAK VALID -->
-                                @if ($trx->status === 'pending' || ($trx->status === 'verified' && $peminjaman->status !== 'rejected'))
-                                    <div class="pt-2 border-t border-slate-200/60">
-                                        <button type="button" onclick="openModalRejectPayment()"
-                                            class="w-full py-2 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5">
+                                <!-- AKSI VERIFIKASI / TOLAK BUKTI TRANSFER -->
+                                @if ($trx->status === 'pending')
+                                    <div class="pt-3 border-t border-slate-200/60 flex items-center gap-2">
+                                        <form action="{{ route('admin.peminjaman.verifikasi-pembayaran', [$peminjaman->id, $trx->id]) }}" method="POST" class="flex-1">
+                                            @csrf
+                                            <button type="submit"
+                                                class="w-full py-2 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer">
+                                                <i class="fa-solid fa-circle-check text-xs"></i>
+                                                <span>Verifikasi Benar (Valid)</span>
+                                            </button>
+                                        </form>
+
+                                        <button type="button" onclick="openModalRejectPayment('{{ $trx->id }}')"
+                                            class="flex-1 py-2 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer">
                                             <i class="fa-solid fa-triangle-exclamation text-xs"></i>
-                                            <span>Tolak Bukti Pembayaran</span>
+                                            <span>Tolak Bukti (Gagal)</span>
+                                        </button>
+                                    </div>
+                                @elseif ($trx->status === 'verified' && $peminjaman->status !== 'rejected')
+                                    <div class="pt-2 border-t border-slate-200/60 flex items-center justify-between">
+                                        <span class="text-[11px] text-emerald-700 font-bold flex items-center gap-1">
+                                            <i class="fa-solid fa-circle-check"></i> Pembayaran Terverifikasi Benar
+                                        </span>
+                                        <button type="button" onclick="openModalRejectPayment('{{ $trx->id }}')"
+                                            class="text-xs text-red-600 hover:text-red-800 font-semibold transition flex items-center gap-1 cursor-pointer">
+                                            <i class="fa-solid fa-triangle-exclamation text-[10px]"></i>
+                                            <span>Tolak Pembayaran</span>
                                         </button>
                                     </div>
                                 @endif
@@ -643,14 +723,34 @@
             </div>
         </div>
 
-        @if ($pembayaran && ($pembayaran->total_terbayar > 0 || $pembayaran->details->whereIn('status', ['verified', 'pending'])->whereIn('tipe_pembayaran', ['dp', 'lunas_langsung', 'pelunasan'])->isNotEmpty()))
-            <div class="p-3.5 bg-amber-50 border border-amber-200 rounded-2xl text-xs text-amber-900 space-y-1">
-                <div class="font-bold flex items-center gap-1.5">
-                    <i class="fa-solid fa-circle-info text-amber-600"></i>
-                    <span>Perhatian: Pembayaran Telah Tercatat!</span>
+        @if ($hasVerifiedPayment)
+            <div class="p-3.5 bg-purple-50 border border-purple-200 rounded-2xl text-xs text-purple-900 space-y-1">
+                <div class="font-bold flex items-center gap-1.5 text-purple-700">
+                    <i class="fa-solid fa-hand-holding-dollar"></i>
+                    <span>Status Pembayaran: Terverifikasi Benar (Valid)</span>
                 </div>
                 <p class="leading-relaxed">
-                    Karena pemohon telah melakukan pembayaran, status pembayaran akan otomatis diubah menjadi <strong>Refund Pending</strong>. Anda akan diminta untuk mengembalikan dana (refund) sebesar nominal yang telah dibayar setelah permohonan ditolak.
+                    Karena pemohon telah melakukan pembayaran yang diverifikasi benar (<strong>Rp {{ number_format($pembayaran->total_terbayar ?: $verifiedPayments->sum('jumlah_bayar'), 0, ',', '.') }}</strong>), penolakan permohonan ini akan <strong>melanjutkan ke proses pengembalian dana (refund)</strong> ke rekening pemohon.
+                </p>
+            </div>
+        @elseif ($isPaymentFailed)
+            <div class="p-3.5 bg-red-50 border border-red-200 rounded-2xl text-xs text-red-900 space-y-1">
+                <div class="font-bold flex items-center gap-1.5 text-red-700">
+                    <i class="fa-solid fa-ban"></i>
+                    <span>Status Pembayaran: Gagal / Ditolak</span>
+                </div>
+                <p class="leading-relaxed">
+                    Karena status pembayaran gagal atau ditolak, permohonan peminjaman ini akan ditolak dan <strong>proses refund TIDAK akan dilakukan</strong>.
+                </p>
+            </div>
+        @else
+            <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs text-slate-700 space-y-1">
+                <div class="font-bold flex items-center gap-1.5">
+                    <i class="fa-solid fa-circle-info text-slate-500"></i>
+                    <span>Status Pembayaran: Belum Ada Pembayaran Masuk</span>
+                </div>
+                <p class="leading-relaxed">
+                    Pemohon belum melakukan pembayaran yang valid. Penolakan ini akan membatalkan peminjaman dan proses refund tidak dilakukan.
                 </p>
             </div>
         @endif
@@ -668,11 +768,11 @@
 
             <div class="flex items-center justify-end gap-2 pt-2">
                 <button type="button" onclick="closeModalReject()"
-                    class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition">
+                    class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition cursor-pointer">
                     Batal
                 </button>
                 <button type="submit"
-                    class="px-5 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold shadow-xs transition flex items-center gap-1.5">
+                    class="px-5 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold shadow-xs transition flex items-center gap-1.5 cursor-pointer">
                     <i class="fa-solid fa-ban"></i>
                     <span>Tolak Permohonan</span>
                 </button>
@@ -692,12 +792,13 @@
             </div>
             <div>
                 <h3 class="font-black text-slate-900 text-base">Tolak Bukti Pembayaran Deposit</h3>
-                <p class="text-xs text-slate-500">Status pembayaran akan diubah menjadi Rejected dan pemohon diminta transfer ulang.</p>
+                <p class="text-xs text-slate-500">Status pembayaran akan diubah menjadi Gagal / Ditolak.</p>
             </div>
         </div>
 
         <form action="{{ route('admin.peminjaman.reject-pembayaran', $peminjaman->id) }}" method="POST" class="space-y-4">
             @csrf
+            <input type="hidden" name="detail_id" id="reject_detail_id" value="">
             <div class="space-y-1">
                 <label class="block text-xs font-bold text-slate-700 uppercase">
                     Alasan Penolakan Pembayaran <span class="text-red-500">*</span>
@@ -708,16 +809,16 @@
             </div>
 
             <div class="p-3 bg-amber-50 rounded-xl text-[11px] text-amber-800 leading-relaxed">
-                Pemohon akan diberikan tenggat waktu pembayaran baru (<strong>{{ $config?->jatuh_tempo_dp_jam ?: 24 }} jam</strong>). Jika melewati tenggat waktu tersebut, sistem secara otomatis mengubah status peminjaman menjadi Rejected.
+                Pemohon akan diberikan tenggat waktu pembayaran baru (<strong>{{ $config?->jatuh_tempo_dp_jam ?: 24 }} jam</strong>). Jika nantinya peminjaman ditolak saat status pembayaran masih gagal, maka <strong>refund tidak akan dilakukan</strong>.
             </div>
 
             <div class="flex items-center justify-end gap-2 pt-2">
                 <button type="button" onclick="closeModalRejectPayment()"
-                    class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition">
+                    class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition cursor-pointer">
                     Batal
                 </button>
                 <button type="submit"
-                    class="px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold shadow-xs transition flex items-center gap-1.5">
+                    class="px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold shadow-xs transition flex items-center gap-1.5 cursor-pointer">
                     <i class="fa-solid fa-triangle-exclamation"></i>
                     <span>Tolak Pembayaran</span>
                 </button>
@@ -741,7 +842,11 @@
         document.getElementById('modalReject').classList.add('hidden');
     }
 
-    function openModalRejectPayment() {
+    function openModalRejectPayment(detailId = '') {
+        const inputDetail = document.getElementById('reject_detail_id');
+        if (inputDetail) {
+            inputDetail.value = detailId || '';
+        }
         document.getElementById('modalRejectPayment').classList.remove('hidden');
     }
     function closeModalRejectPayment() {

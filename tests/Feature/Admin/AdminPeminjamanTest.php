@@ -124,7 +124,7 @@ class AdminPeminjamanTest extends TestCase
         $response->assertSee($pembayaran->kode_pembayaran);
     }
 
-    public function test_admin_can_approve_peminjaman_and_verifies_pending_payment(): void
+    public function test_admin_must_verify_payment_before_approving_peminjaman(): void
     {
         $admin = $this->createAdminAula();
         [$peminjaman, $pembayaran] = $this->createPeminjamanDanTagihan('pending', 'pending', 0);
@@ -144,6 +144,32 @@ class AdminPeminjamanTest extends TestCase
             'tanggal_bayar' => now(),
         ]);
 
+        // Coba approve langsung sebelum verifikasi pembayaran -> Harus ditolak
+        $responsePending = $this->actingAs($admin)
+            ->from('/admin/peminjaman/'.$peminjaman->id)
+            ->post('/admin/peminjaman/'.$peminjaman->id.'/approve', [
+                'catatan_approval' => 'Coba approve langsung.',
+            ]);
+        $responsePending->assertRedirect('/admin/peminjaman/'.$peminjaman->id);
+        $responsePending->assertSessionHas('error');
+
+        $peminjaman->refresh();
+        $this->assertEquals('pending', $peminjaman->status);
+
+        // Admin memverifikasi pembayaran terlebih dahulu
+        $resVerify = $this->actingAs($admin)
+            ->post('/admin/peminjaman/'.$peminjaman->id.'/verifikasi-pembayaran/'.$detail->id);
+        $resVerify->assertRedirect('/admin/peminjaman/'.$peminjaman->id);
+        $resVerify->assertSessionHas('success');
+
+        $detail->refresh();
+        $pembayaran->refresh();
+        $this->assertEquals('verified', $detail->status);
+        $this->assertEquals($admin->id, $detail->diverifikasi_oleh);
+        $this->assertEquals(1500000, $pembayaran->total_terbayar);
+        $this->assertEquals('partial', $pembayaran->status_pembayaran);
+
+        // Setelah pembayaran diverifikasi, admin kini dapat menyetujui peminjaman
         $response = $this->actingAs($admin)->post('/admin/peminjaman/'.$peminjaman->id.'/approve', [
             'catatan_approval' => 'Pengajuan aula disetujui, jadwal aman.',
         ]);
@@ -152,14 +178,7 @@ class AdminPeminjamanTest extends TestCase
         $response->assertSessionHas('success');
 
         $peminjaman->refresh();
-        $pembayaran->refresh();
-        $detail->refresh();
-
         $this->assertEquals('approved_1', $peminjaman->status);
-        $this->assertEquals('verified', $detail->status);
-        $this->assertEquals($admin->id, $detail->diverifikasi_oleh);
-        $this->assertEquals(1500000, $pembayaran->total_terbayar);
-        $this->assertEquals('partial', $pembayaran->status_pembayaran);
         $this->assertDatabaseHas('persetujuans', [
             'peminjaman_id' => $peminjaman->id,
             'approver_id' => $admin->id,
@@ -402,7 +421,7 @@ class AdminPeminjamanTest extends TestCase
         ]);
 
         // Simulasikan ada transaksi DP
-        DetailPembayaran::create([
+        $detail = DetailPembayaran::create([
             'pembayaran_id' => $pembayaran->id,
             'kode_transaksi' => 'TRX-DP-DDL-1',
             'tipe_pembayaran' => 'dp',
@@ -411,6 +430,9 @@ class AdminPeminjamanTest extends TestCase
             'status' => 'pending',
             'tanggal_bayar' => now(),
         ]);
+
+        // Verifikasi pembayaran terlebih dahulu
+        $this->actingAs($admin)->post('/admin/peminjaman/'.$peminjaman->id.'/verifikasi-pembayaran/'.$detail->id);
 
         // Admin approve
         $response = $this->actingAs($admin)->post('/admin/peminjaman/'.$peminjaman->id.'/approve', [
@@ -435,5 +457,130 @@ class AdminPeminjamanTest extends TestCase
         $viewResponse->assertSee('Batas Waktu Pelunasan (Final):');
         $viewResponse->assertSee('24 jam sebelum Hari H');
         $viewResponse->assertSee($expectedDeadline->translatedFormat('d M Y, H:i'));
+    }
+
+    public function test_admin_cannot_reject_peminjaman_if_payment_is_still_pending(): void
+    {
+        $admin = $this->createAdminAula();
+        [$peminjaman, $pembayaran] = $this->createPeminjamanDanTagihan('pending', 'pending', 0);
+
+        DetailPembayaran::create([
+            'pembayaran_id' => $pembayaran->id,
+            'kode_transaksi' => 'TRX-DP-PND-1',
+            'tipe_pembayaran' => 'dp',
+            'jumlah_bayar' => 1000000,
+            'metode' => 'transfer',
+            'status' => 'pending',
+            'tanggal_bayar' => now(),
+        ]);
+
+        $response = $this->actingAs($admin)
+            ->from('/admin/peminjaman/'.$peminjaman->id)
+            ->post('/admin/peminjaman/'.$peminjaman->id.'/reject', [
+                'alasan_penolakan' => 'Coba tolak sebelum verifikasi pembayaran',
+            ]);
+
+        $response->assertRedirect('/admin/peminjaman/'.$peminjaman->id);
+        $response->assertSessionHas('error');
+
+        $peminjaman->refresh();
+        $this->assertEquals('pending', $peminjaman->status);
+    }
+
+    public function test_admin_reject_peminjaman_dengan_status_pembayaran_gagal_maka_refund_tidak_dilakukan(): void
+    {
+        $admin = $this->createAdminAula();
+        [$peminjaman, $pembayaran] = $this->createPeminjamanDanTagihan('pending', 'pending', 0);
+
+        $detail = DetailPembayaran::create([
+            'pembayaran_id' => $pembayaran->id,
+            'kode_transaksi' => 'TRX-DP-FAL-1',
+            'tipe_pembayaran' => 'dp',
+            'jumlah_bayar' => 1000000,
+            'metode' => 'transfer',
+            'status' => 'pending',
+            'tanggal_bayar' => now(),
+        ]);
+
+        // 1. Admin menolak pembayaran terlebih dahulu (status pembayaran gagal/rejected)
+        $resRejectPayment = $this->actingAs($admin)->post('/admin/peminjaman/'.$peminjaman->id.'/reject-pembayaran', [
+            'alasan_penolakan' => 'Bukti transfer palsu / tidak valid',
+            'detail_id' => $detail->id,
+        ]);
+        $resRejectPayment->assertRedirect('/admin/peminjaman/'.$peminjaman->id);
+
+        $detail->refresh();
+        $pembayaran->refresh();
+        $this->assertEquals('rejected', $detail->status);
+        $this->assertEquals('rejected', $pembayaran->status_pembayaran);
+        $this->assertEquals(0, (float) $pembayaran->total_terbayar);
+
+        // 2. Admin menolak permohonan peminjaman
+        $response = $this->actingAs($admin)->post('/admin/peminjaman/'.$peminjaman->id.'/reject', [
+            'alasan_penolakan' => 'Permohonan ditolak karena pembayaran deposit tidak valid',
+        ]);
+
+        $response->assertRedirect('/admin/peminjaman/'.$peminjaman->id);
+        $response->assertSessionHas('success');
+
+        $peminjaman->refresh();
+        $pembayaran->refresh();
+
+        $this->assertEquals('rejected', $peminjaman->status);
+        $this->assertEquals('rejected', $pembayaran->status_pembayaran);
+        $this->assertEquals(0, (float) $pembayaran->sisa_tagihan);
+        $this->assertEquals(0, (float) $pembayaran->total_refund);
+
+        // Pastikan TIDAK ADA detail refund yang dibuat
+        $this->assertEquals(0, $pembayaran->details()->where('tipe_pembayaran', 'refund')->count());
+    }
+
+    public function test_admin_reject_peminjaman_dan_pembayaran_sudah_benar_maka_lanjut_ke_proses_refund(): void
+    {
+        $admin = $this->createAdminAula();
+        [$peminjaman, $pembayaran] = $this->createPeminjamanDanTagihan('pending', 'pending', 0);
+
+        $detail = DetailPembayaran::create([
+            'pembayaran_id' => $pembayaran->id,
+            'kode_transaksi' => 'TRX-DP-RFD-1',
+            'tipe_pembayaran' => 'dp',
+            'jumlah_bayar' => 1200000,
+            'metode' => 'transfer',
+            'status' => 'pending',
+            'tanggal_bayar' => now(),
+        ]);
+
+        // 1. Admin memverifikasi bahwa pembayaran sudah benar (valid)
+        $this->actingAs($admin)->post('/admin/peminjaman/'.$peminjaman->id.'/verifikasi-pembayaran/'.$detail->id);
+
+        $detail->refresh();
+        $pembayaran->refresh();
+        $this->assertEquals('verified', $detail->status);
+        $this->assertEquals(1200000, (float) $pembayaran->total_terbayar);
+
+        // 2. Admin menolak permohonan peminjaman (misal aula dipakai acara mendadak sekolah)
+        $response = $this->actingAs($admin)->post('/admin/peminjaman/'.$peminjaman->id.'/reject', [
+            'alasan_penolakan' => 'Aula digunakan untuk agenda dinas provinsi mendadak',
+        ]);
+
+        $response->assertRedirect('/admin/peminjaman/'.$peminjaman->id);
+        $response->assertSessionHas('success');
+
+        $peminjaman->refresh();
+        $pembayaran->refresh();
+
+        $this->assertEquals('rejected', $peminjaman->status);
+        // Karena pembayaran sudah benar, status pembayaran lanjut ke refund_pending
+        $this->assertEquals('refund_pending', $pembayaran->status_pembayaran);
+        $this->assertEquals(0, (float) $pembayaran->sisa_tagihan);
+        $this->assertEquals(1200000, (float) $pembayaran->total_refund);
+
+        // Pastikan record detail refund telah dibuat
+        $this->assertDatabaseHas('detail_pembayarans', [
+            'pembayaran_id' => $pembayaran->id,
+            'tipe_pembayaran' => 'refund',
+            'jumlah_bayar' => 1200000,
+            'status' => 'pending',
+        ]);
     }
 }
