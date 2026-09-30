@@ -46,43 +46,6 @@
         }
     });
 
-    // ---- Chatbot Toggle & Interactive Responses ----
-    const chatbotWindow = document.getElementById('chatbot-window');
-    const chatInput = document.getElementById('chat-input');
-    const chatMessages = document.getElementById('chat-messages');
-
-    function toggleChatbot() {
-        chatbotWindow.classList.toggle('hidden');
-    }
-
-    function sendChatMessage() {
-        const text = chatInput.value.trim();
-        if (!text) return;
-
-        const userBubble = document.createElement('div');
-        userBubble.className = 'bg-brand-blue text-white p-2.5 rounded-xl max-w-[85%] ml-auto text-xs';
-        userBubble.innerText = text;
-        chatMessages.appendChild(userBubble);
-
-        chatInput.value = '';
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-
-        setTimeout(() => {
-            const botBubble = document.createElement('div');
-            botBubble.className = 'bg-slate-100 p-2.5 rounded-xl max-w-[85%] text-slate-700 text-xs';
-
-            if (text.toLowerCase().includes('ppdb') || text.toLowerCase().includes('daftar')) {
-                botBubble.innerText = "Informasi PPDB 2026 dapat dilihat pada bagian menu PPDB di atas atau langsung datang ke kampus SMKN 2 Karanganyar.";
-            } else if (text.toLowerCase().includes('aula') || text.toLowerCase().includes('sewa')) {
-                botBubble.innerText = "Kami memiliki 2 paket sewa aula: Paket Unggulan (12 Jam - Rp 6 Juta) dan Terjangkau (4 Jam - Rp 1.5 Juta).";
-            } else {
-                botBubble.innerText = "Terima kasih atas pertanyaan Anda. Layanan Informasi SMKN 2 Karanganyar akan segera merespon.";
-            }
-            chatMessages.appendChild(botBubble);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }, 600);
-    }
-
     // ---- News Carousel (hanya ada di halaman landing) ----
     const prevNews = document.getElementById('prev-news');
     const nextNews = document.getElementById('next-news');

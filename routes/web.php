@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BkkController;
+use App\Http\Controllers\ChatbotController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PklController;
 use Illuminate\Support\Facades\Route;
@@ -42,6 +43,19 @@ Route::get('/pkl-bkk', function () {
 Route::get('/registrasi', function () {
     return view('Public.registrasi');
 })->name('registrasi');
+
+/*
+|--------------------------------------------------------------------------
+ | Chatbot "Nanya AI"
+|
+| Endpoint publik, dipanggil widget chatbot di seluruh halaman website.
+| CSRF otomatis aktif karena berada di routes/web.php (grup middleware web).
+| throttle:20,1 = maksimal 20 permintaan per menit per IP.
+|--------------------------------------------------------------------------
+*/
+Route::post('/chatbot/send', [ChatbotController::class, 'send'])
+    ->middleware('throttle:20,1')
+    ->name('chatbot.send');
 
 /*
 |--------------------------------------------------------------------------
