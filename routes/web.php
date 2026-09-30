@@ -6,6 +6,7 @@ use App\Http\Controllers\CustomerPanelController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FasilitasController;
 use App\Http\Controllers\KepalaSekolahController;
+use App\Http\Controllers\LaporanPemasukanController;
 use App\Http\Controllers\PaketPeminjamanController;
 use App\Http\Controllers\PaymentConfigurationController;
 use Illuminate\Support\Facades\Route;
@@ -30,9 +31,14 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:kepala_sekolah,super_admin,super_duper_admin')->prefix('kepala-sekolah')->name('kepala-sekolah.')->group(function () {
         Route::get('/dashboard', [KepalaSekolahController::class, 'dashboard'])->name('dashboard');
         Route::get('/peminjaman', [KepalaSekolahController::class, 'index'])->name('peminjaman.index');
+        Route::get('/peminjaman/export/pdf', [KepalaSekolahController::class, 'exportPdf'])->name('peminjaman.export-pdf');
         Route::get('/peminjaman/{peminjaman}', [KepalaSekolahController::class, 'show'])->name('peminjaman.show');
         Route::post('/peminjaman/{peminjaman}/approve', [KepalaSekolahController::class, 'approve'])->name('peminjaman.approve');
         Route::post('/peminjaman/{peminjaman}/reject', [KepalaSekolahController::class, 'reject'])->name('peminjaman.reject');
+
+        // Laporan Rekapitulasi Pemasukan Aula (Kepala Sekolah)
+        Route::get('/laporan-pemasukan', [LaporanPemasukanController::class, 'index'])->name('laporan.index');
+        Route::get('/laporan-pemasukan/pdf', [LaporanPemasukanController::class, 'exportPdf'])->name('laporan.pdf');
     });
 
     // Admin Aula: CRUD Fasilitas, Paket Peminjaman, & Manajemen Peminjaman
@@ -47,12 +53,17 @@ Route::middleware('auth')->group(function () {
 
         // Manajemen Peminjaman Aula
         Route::get('/peminjaman', [AdminPeminjamanController::class, 'index'])->name('peminjaman.index');
+        Route::get('/peminjaman/export/pdf', [AdminPeminjamanController::class, 'exportPdf'])->name('peminjaman.export-pdf');
         Route::get('/peminjaman/{peminjaman}', [AdminPeminjamanController::class, 'show'])->name('peminjaman.show');
         Route::post('/peminjaman/{peminjaman}/approve', [AdminPeminjamanController::class, 'approve'])->name('peminjaman.approve');
         Route::post('/peminjaman/{peminjaman}/reject', [AdminPeminjamanController::class, 'reject'])->name('peminjaman.reject');
         Route::post('/peminjaman/{peminjaman}/verifikasi-pembayaran/{detail?}', [AdminPeminjamanController::class, 'verifikasiPembayaran'])->name('peminjaman.verifikasi-pembayaran');
         Route::post('/peminjaman/{peminjaman}/reject-pembayaran', [AdminPeminjamanController::class, 'rejectPembayaran'])->name('peminjaman.reject-pembayaran');
         Route::post('/peminjaman/{peminjaman}/upload-refund', [AdminPeminjamanController::class, 'uploadRefund'])->name('peminjaman.upload-refund');
+
+        // Laporan Rekapitulasi Pemasukan Aula (Admin Aula)
+        Route::get('/laporan-pemasukan', [LaporanPemasukanController::class, 'index'])->name('laporan.index');
+        Route::get('/laporan-pemasukan/pdf', [LaporanPemasukanController::class, 'exportPdf'])->name('laporan.pdf');
     });
 
     // Super Admin: Konfigurasi Pembayaran Sekolah

@@ -60,21 +60,28 @@
                     <span>Dashboard</span>
                 </a>
 
-                <!-- 2. PERSETUJUAN FINAL PEMINJAMAN -->
+                <!-- 2. DAFTAR PEMINJAMAN KEPALA SEKOLAH -->
                 @php
                     $pendingFinalCount = \App\Models\Peminjaman::where('status', 'approved_1')->count();
                 @endphp
                 <a href="{{ route('kepala-sekolah.peminjaman.index') }}"
                     class="flex items-center justify-between px-5 py-3.5 {{ request()->routeIs('kepala-sekolah.peminjaman.*') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
                     <div class="flex items-center gap-3">
-                        <i class="fa-solid fa-file-signature text-base w-5 text-center"></i>
-                        <span>Persetujuan Final</span>
+                        <i class="fa-solid fa-clipboard-list text-base w-5 text-center"></i>
+                        <span>Daftar Peminjaman</span>
                     </div>
                     @if ($pendingFinalCount > 0)
                         <span class="px-2 py-0.5 rounded-full text-[10px] font-black {{ request()->routeIs('kepala-sekolah.peminjaman.*') ? 'bg-amber-400 text-slate-900' : 'bg-amber-400 text-slate-900' }}">
                             {{ $pendingFinalCount }}
                         </span>
                     @endif
+                </a>
+
+                <!-- 3. LAPORAN PEMASUKAN AULA (KEPALA SEKOLAH) -->
+                <a href="{{ route('kepala-sekolah.laporan.index') }}"
+                    class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('kepala-sekolah.laporan.*') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
+                    <i class="fa-solid fa-file-invoice-dollar text-base w-5 text-center"></i>
+                    <span>Laporan Pemasukan</span>
                 </a>
             @else
                 <!-- 1. DASHBOARD ADMIN -->
@@ -105,12 +112,19 @@
                     <span>Daftar Peminjaman</span>
                 </a>
 
+                <!-- 5. LAPORAN PEMASUKAN AULA (ADMIN AULA) -->
+                <a href="{{ route('admin.laporan.index') }}"
+                    class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('admin.laporan.*') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
+                    <i class="fa-solid fa-file-invoice-dollar text-base w-5 text-center"></i>
+                    <span>Laporan Pemasukan</span>
+                </a>
+
                 @if(in_array(auth()->user()?->role, ['super_admin', 'super_duper_admin']))
-                    <!-- 5. PERSETUJUAN FINAL KEPALA SEKOLAH (SUPER ADMIN AKSES) -->
+                    <!-- 5. DAFTAR PEMINJAMAN KEPALA SEKOLAH (SUPER ADMIN AKSES) -->
                     <a href="{{ route('kepala-sekolah.peminjaman.index') }}"
                         class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('kepala-sekolah.*') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
-                        <i class="fa-solid fa-file-signature text-base w-5 text-center"></i>
-                        <span>Persetujuan Final</span>
+                        <i class="fa-solid fa-clipboard-list text-base w-5 text-center"></i>
+                        <span>Daftar Peminjaman</span>
                     </a>
 
                     <!-- 6. KONFIGURASI PEMBAYARAN (SUPER ADMIN) -->

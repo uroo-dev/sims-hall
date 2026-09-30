@@ -2,11 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\PaymentConfiguration;
 use App\Models\Peminjaman;
 use App\Models\Persetujuan;
+use App\Models\User;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
@@ -94,6 +98,87 @@ class KepalaSekolahController extends Controller
         ];
 
         return view('Admin.kepalaSekolah.index', compact('peminjamans', 'stats'));
+    }
+
+    /**
+     * Ekspor Daftar Peminjaman Aula ke format PDF (Kepala Sekolah) dengan filter tanggal (default: Bulan Ini).
+     */
+    public function exportPdf(Request $request): Response
+    {
+        Peminjaman::syncExpiredDeadlines();
+
+        $defaultDari = Carbon::now()->startOfMonth()->toDateString();
+        $defaultSampai = Carbon::now()->endOfMonth()->toDateString();
+
+        $tanggalDari = $request->query('all_dates') === '1' ? null : ($request->query('tanggal_dari') ?: $defaultDari);
+        $tanggalSampai = $request->query('all_dates') === '1' ? null : ($request->query('tanggal_sampai') ?: $defaultSampai);
+
+        $query = Peminjaman::with(['paketPeminjaman', 'pembayaran.details', 'persetujuans']);
+
+        if ($tanggalDari) {
+            $query->whereDate('tanggal_mulai', '>=', $tanggalDari);
+        }
+        if ($tanggalSampai) {
+            $query->whereDate('tanggal_mulai', '<=', $tanggalSampai);
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->query('status'));
+        }
+
+        if ($request->filled('search')) {
+            $search = trim((string) $request->query('search'));
+            $query->where(function ($q) use ($search) {
+                $q->where('nama', 'like', "%{$search}%")
+                    ->orWhere('email_instansi', 'like', "%{$search}%")
+                    ->orWhere('id', 'like', "%{$search}%")
+                    ->orWhereHas('pembayaran', function ($sq) use ($search) {
+                        $sq->where('kode_pembayaran', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        $peminjamans = $query->orderBy('tanggal_mulai', 'asc')->get();
+
+        $stats = [
+            'total' => $peminjamans->count(),
+            'approved' => $peminjamans->whereIn('status', ['approved_1', 'approved_final'])->count(),
+            'pending' => $peminjamans->where('status', 'pending')->count(),
+            'rejected' => $peminjamans->where('status', 'rejected')->count(),
+            'total_tagihan' => (float) $peminjamans->sum(fn ($p) => (float) ($p->pembayaran?->total_tagihan ?? 0)),
+            'total_terbayar' => (float) $peminjamans->sum(fn ($p) => (float) ($p->pembayaran?->total_terbayar ?? 0)),
+            'total_sisa_tagihan' => (float) $peminjamans->sum(fn ($p) => (float) ($p->pembayaran?->sisa_tagihan ?? 0)),
+        ];
+
+        $kepalaSekolah = $request->user()?->role === 'kepala_sekolah' ? $request->user() : User::where('role', 'kepala_sekolah')->first();
+        $petugasAdmin = User::where('role', 'admin')->whereHas('fitur', fn ($q) => $q->where('nama_fitur', 'aula'))->first() ?? $request->user();
+        $paymentConfig = PaymentConfiguration::current();
+
+        $logoBase64 = null;
+        $logoPath = public_path('assets/logosmkk.png');
+        if (file_exists($logoPath)) {
+            $logoData = file_get_contents($logoPath);
+            $logoBase64 = 'data:image/png;base64,'.base64_encode($logoData);
+        }
+
+        $pdf = Pdf::loadView('Admin.peminjaman.pdf', compact(
+            'peminjamans',
+            'stats',
+            'tanggalDari',
+            'tanggalSampai',
+            'kepalaSekolah',
+            'petugasAdmin',
+            'paymentConfig',
+            'logoBase64'
+        ))->setPaper('a4', 'landscape');
+
+        $filename = 'Daftar-Peminjaman-Aula-Kepsek-'.Carbon::now()->format('Ymd-His').'.pdf';
+
+        if ($request->query('stream') === '1') {
+            return $pdf->stream($filename);
+        }
+
+        return $pdf->download($filename);
     }
 
     /**

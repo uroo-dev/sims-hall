@@ -207,4 +207,30 @@ class KepalaSekolahTest extends TestCase
 
         $response->assertRedirect(route('kepala-sekolah.dashboard'));
     }
+
+    public function test_kepala_sekolah_dapat_mengekspor_pdf_daftar_peminjaman(): void
+    {
+        $kepsek = $this->createKepalaSekolah();
+        $this->createPeminjaman('approved_1');
+
+        $response = $this->actingAs($kepsek)->get(route('kepala-sekolah.peminjaman.export-pdf'));
+
+        $response->assertOk();
+        $response->assertHeader('content-type', 'application/pdf');
+    }
+
+    public function test_kepala_sekolah_dapat_mengekspor_pdf_daftar_peminjaman_dengan_custom_tanggal(): void
+    {
+        $kepsek = $this->createKepalaSekolah();
+        $this->createPeminjaman('approved_1');
+
+        $response = $this->actingAs($kepsek)->get(route('kepala-sekolah.peminjaman.export-pdf', [
+            'tanggal_dari' => now()->toDateString(),
+            'tanggal_sampai' => now()->addDays(10)->toDateString(),
+            'stream' => '1',
+        ]));
+
+        $response->assertOk();
+        $response->assertHeader('content-type', 'application/pdf');
+    }
 }

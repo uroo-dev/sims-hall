@@ -38,6 +38,14 @@ class PaketPeminjaman extends Model
     }
 
     /**
+     * Relasi ke seluruh peminjaman aula yang menggunakan paket ini.
+     */
+    public function peminjamans(): HasMany
+    {
+        return $this->hasMany(Peminjaman::class, 'paket_peminjaman_id');
+    }
+
+    /**
      * Nama tampilan paket peminjaman.
      */
     public function getDisplayNameAttribute(): string

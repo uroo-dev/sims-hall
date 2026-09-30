@@ -625,4 +625,30 @@ class AdminPeminjamanTest extends TestCase
         $this->assertEquals(500000, (float) $pembayaran->total_terbayar);
         $this->assertEquals(4500000, (float) $pembayaran->sisa_tagihan);
     }
+
+    public function test_admin_aula_dapat_mengekspor_pdf_daftar_peminjaman(): void
+    {
+        $admin = $this->createAdminAula();
+        $this->createPeminjamanDanTagihan('approved_1', 'partial', 1000000);
+
+        $response = $this->actingAs($admin)->get(route('admin.peminjaman.export-pdf'));
+
+        $response->assertOk();
+        $response->assertHeader('content-type', 'application/pdf');
+    }
+
+    public function test_admin_aula_dapat_mengekspor_pdf_daftar_peminjaman_dengan_custom_periode(): void
+    {
+        $admin = $this->createAdminAula();
+        $this->createPeminjamanDanTagihan('approved_1', 'partial', 1000000);
+
+        $response = $this->actingAs($admin)->get(route('admin.peminjaman.export-pdf', [
+            'tanggal_dari' => now()->toDateString(),
+            'tanggal_sampai' => now()->addDays(15)->toDateString(),
+            'stream' => '1',
+        ]));
+
+        $response->assertOk();
+        $response->assertHeader('content-type', 'application/pdf');
+    }
 }

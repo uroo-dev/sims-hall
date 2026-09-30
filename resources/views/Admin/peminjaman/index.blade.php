@@ -95,9 +95,9 @@
 
     <!-- ROW 2: FILTER & PENCARIAN -->
     <div class="bg-white rounded-2xl p-4 md:p-6 border border-slate-100 figma-card-shadow space-y-4">
-        <form method="GET" action="{{ route('admin.peminjaman.index') }}" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 items-end">
+        <form method="GET" action="{{ route('admin.peminjaman.index') }}" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3 md:gap-4 items-end">
             <!-- Search Text -->
-            <div class="space-y-1">
+            <div class="space-y-1 lg:col-span-2">
                 <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Cari Peminjam / Invoice</label>
                 <div class="relative">
                     <input type="text" name="search" value="{{ request('search') }}"
@@ -109,40 +109,39 @@
                 </div>
             </div>
 
-            <!-- Filter Status Peminjaman -->
+            <!-- Tanggal Dari -->
             <div class="space-y-1">
-                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Status Permohonan</label>
-                <select name="status" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs md:text-sm text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500">
-                    <option value="">Semua Status Pengajuan</option>
-                    <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>Pending (Menunggu)</option>
-                    <option value="approved_1" {{ request('status') === 'approved_1' ? 'selected' : '' }}>Disetujui Admin</option>
-                    <option value="approved_final" {{ request('status') === 'approved_final' ? 'selected' : '' }}>Disetujui Final</option>
-                    <option value="rejected" {{ request('status') === 'rejected' ? 'selected' : '' }}>Ditolak (Rejected)</option>
-                </select>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Tanggal Dari</label>
+                <input type="date" name="tanggal_dari" value="{{ request('tanggal_dari') }}"
+                    class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs md:text-sm text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500">
             </div>
 
-            <!-- Filter Status Pembayaran -->
+            <!-- Tanggal Sampai -->
             <div class="space-y-1">
-                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Status Pembayaran</label>
-                <select name="status_pembayaran" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs md:text-sm text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500">
-                    <option value="">Semua Status Pembayaran</option>
-                    <option value="pending" {{ request('status_pembayaran') === 'pending' ? 'selected' : '' }}>Belum Bayar (Pending)</option>
-                    <option value="partial" {{ request('status_pembayaran') === 'partial' ? 'selected' : '' }}>DP Terverifikasi (Partial)</option>
-                    <option value="lunas" {{ request('status_pembayaran') === 'lunas' ? 'selected' : '' }}>Lunas</option>
-                    <option value="refund_pending" {{ request('status_pembayaran') === 'refund_pending' ? 'selected' : '' }}>Menunggu Refund</option>
-                    <option value="refunded" {{ request('status_pembayaran') === 'refunded' ? 'selected' : '' }}>Sudah Direfund</option>
-                    <option value="rejected" {{ request('status_pembayaran') === 'rejected' ? 'selected' : '' }}>Pembayaran Ditolak</option>
-                    <option value="hangus" {{ request('status_pembayaran') === 'hangus' ? 'selected' : '' }}>Hangus (Expired)</option>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Sampai Tanggal</label>
+                <input type="date" name="tanggal_sampai" value="{{ request('tanggal_sampai') }}"
+                    class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs md:text-sm text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500">
+            </div>
+
+            <!-- Filter Status Peminjaman -->
+            <div class="space-y-1">
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Status Pengajuan</label>
+                <select name="status" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs md:text-sm text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500">
+                    <option value="">Semua Status</option>
+                    <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>Pending</option>
+                    <option value="approved_1" {{ request('status') === 'approved_1' ? 'selected' : '' }}>Disetujui Admin</option>
+                    <option value="approved_final" {{ request('status') === 'approved_final' ? 'selected' : '' }}>Disetujui Final</option>
+                    <option value="rejected" {{ request('status') === 'rejected' ? 'selected' : '' }}>Ditolak</option>
                 </select>
             </div>
 
             <!-- Tombol Aksi Filter & Reset -->
             <div class="flex items-center gap-2">
-                <button type="submit" class="flex-1 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs md:text-sm py-2.5 px-4 rounded-xl shadow-xs transition flex items-center justify-center gap-2">
+                <button type="submit" class="flex-1 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs md:text-sm py-2.5 px-4 rounded-xl shadow-xs transition flex items-center justify-center gap-2 cursor-pointer">
                     <i class="fa-solid fa-filter text-xs"></i>
                     <span>Terapkan</span>
                 </button>
-                @if(request()->anyFilled(['search', 'status', 'status_pembayaran']))
+                @if(request()->anyFilled(['search', 'status', 'status_pembayaran', 'tanggal_dari', 'tanggal_sampai']))
                     <a href="{{ route('admin.peminjaman.index') }}" class="bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs md:text-sm py-2.5 px-3 rounded-xl transition flex items-center justify-center" title="Reset Filter">
                         <i class="fa-solid fa-rotate-left text-xs"></i>
                     </a>
@@ -153,14 +152,22 @@
 
     <!-- ROW 3: TABEL DAFTAR PEMINJAMAN -->
     <div class="bg-white rounded-2xl border border-slate-100 figma-card-shadow overflow-hidden">
-        <div class="p-5 md:p-6 pb-4 border-b border-slate-100 flex items-center justify-between">
+        <div class="p-5 md:p-6 pb-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
                 <h3 class="font-black text-slate-900 text-base md:text-lg tracking-tight">Data Permohonan Peminjaman Aula</h3>
                 <p class="text-xs text-slate-500 mt-0.5">Kelola data peminjaman aula, persetujuan pengajuan, dan status tagihan</p>
             </div>
-            <span class="px-3 py-1 bg-slate-100 text-slate-700 rounded-lg text-xs font-bold">
-                {{ $peminjamans->total() }} Data
-            </span>
+            <div class="flex items-center gap-2.5">
+                <span class="px-3 py-1 bg-slate-100 text-slate-700 rounded-lg text-xs font-bold">
+                    {{ $peminjamans->total() }} Data
+                </span>
+                <!-- Tombol Ekspor PDF dengan Pilihan Periode Tanggal -->
+                <button type="button" onclick="openExportModal()"
+                    class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold shadow-xs transition flex items-center gap-1.5 cursor-pointer transform active:scale-95">
+                    <i class="fa-solid fa-file-pdf text-sm"></i>
+                    <span>Ekspor PDF</span>
+                </button>
+            </div>
         </div>
 
         <div class="overflow-x-auto">
@@ -313,4 +320,152 @@
     </div>
 
 </div>
+
+<!-- MODAL EKSPOR PDF DAFTAR PEMINJAMAN -->
+@push('modals')
+<div id="exportPdfModal" class="fixed inset-0 z-50 hidden overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 space-y-5 animate-in fade-in zoom-in-95 duration-200">
+        <!-- Modal Header -->
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center text-lg">
+                    <i class="fa-solid fa-file-pdf"></i>
+                </div>
+                <div>
+                    <h4 class="font-black text-slate-800 text-base">Ekspor PDF Daftar Peminjaman</h4>
+                    <p class="text-xs text-slate-400">Pilih periode tanggal rekapan peminjaman aula</p>
+                </div>
+            </div>
+            <button type="button" onclick="closeExportModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition cursor-pointer">
+                <i class="fa-solid fa-xmark text-sm"></i>
+            </button>
+        </div>
+
+        <!-- Form Ekspor PDF -->
+        <form action="{{ route('admin.peminjaman.export-pdf') }}" method="GET" target="_blank" class="space-y-4">
+            <!-- Quick Preset Buttons -->
+            <div>
+                <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Preset Periode Waktu</label>
+                <div class="grid grid-cols-4 gap-2 text-center text-xs">
+                    <button type="button" onclick="setExportPreset('bulan_ini')"
+                        class="py-2 px-2.5 rounded-xl border border-brand-200 bg-brand-50 hover:bg-brand-100 text-brand-700 font-bold transition cursor-pointer">
+                        Bulan Ini
+                    </button>
+                    <button type="button" onclick="setExportPreset('bulan_lalu')"
+                        class="py-2 px-2.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 font-semibold transition cursor-pointer">
+                        Bulan Lalu
+                    </button>
+                    <button type="button" onclick="setExportPreset('tahun_ini')"
+                        class="py-2 px-2.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 font-semibold transition cursor-pointer">
+                        Tahun Ini
+                    </button>
+                    <button type="button" onclick="setExportPreset('semua')"
+                        class="py-2 px-2.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 font-semibold transition cursor-pointer">
+                        Semua
+                    </button>
+                </div>
+            </div>
+
+            <!-- Date Inputs -->
+            <div class="grid grid-cols-2 gap-3">
+                <div class="space-y-1">
+                    <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider">Tanggal Dari</label>
+                    <input type="date" id="modal_tanggal_dari" name="tanggal_dari"
+                        value="{{ request('tanggal_dari', now()->startOfMonth()->toDateString()) }}"
+                        class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500 font-medium">
+                </div>
+                <div class="space-y-1">
+                    <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider">Hingga Tanggal</label>
+                    <input type="date" id="modal_tanggal_sampai" name="tanggal_sampai"
+                        value="{{ request('tanggal_sampai', now()->endOfMonth()->toDateString()) }}"
+                        class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500 font-medium">
+                </div>
+            </div>
+
+            <!-- Status Permohonan & Status Pembayaran -->
+            <div class="grid grid-cols-2 gap-3">
+                <div class="space-y-1">
+                    <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider">Status Permohonan</label>
+                    <select name="status" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500 font-medium">
+                        <option value="">Semua Status</option>
+                        <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>Pending</option>
+                        <option value="approved_1" {{ request('status') === 'approved_1' ? 'selected' : '' }}>Disetujui Admin</option>
+                        <option value="approved_final" {{ request('status') === 'approved_final' ? 'selected' : '' }}>Disetujui Final</option>
+                        <option value="rejected" {{ request('status') === 'rejected' ? 'selected' : '' }}>Ditolak</option>
+                    </select>
+                </div>
+                <div class="space-y-1">
+                    <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider">Status Pembayaran</label>
+                    <select name="status_pembayaran" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500 font-medium">
+                        <option value="">Semua Status</option>
+                        <option value="lunas" {{ request('status_pembayaran') === 'lunas' ? 'selected' : '' }}>Lunas</option>
+                        <option value="partial" {{ request('status_pembayaran') === 'partial' ? 'selected' : '' }}>DP / Sebagian</option>
+                        <option value="pending" {{ request('status_pembayaran') === 'pending' ? 'selected' : '' }}>Belum Bayar</option>
+                        <option value="refunded" {{ request('status_pembayaran') === 'refunded' ? 'selected' : '' }}>Refunded</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Modal Action Buttons -->
+            <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100">
+                <button type="button" onclick="closeExportModal()"
+                    class="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 font-semibold text-xs transition cursor-pointer">
+                    Batal
+                </button>
+                <button type="submit"
+                    class="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs shadow-xs transition flex items-center gap-2 cursor-pointer transform active:scale-95">
+                    <i class="fa-solid fa-file-pdf"></i>
+                    <span>Unduh Dokumen PDF</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+@endpush
+
+@push('scripts')
+<script>
+    function openExportModal() {
+        const modal = document.getElementById('exportPdfModal');
+        if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeExportModal() {
+        const modal = document.getElementById('exportPdfModal');
+        if (modal) modal.classList.add('hidden');
+    }
+
+    function setExportPreset(preset) {
+        const today = new Date();
+        const formatDate = (d) => {
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${y}-${m}-${day}`;
+        };
+
+        let dari = '';
+        let sampai = '';
+
+        if (preset === 'bulan_ini') {
+            dari = formatDate(new Date(today.getFullYear(), today.getMonth(), 1));
+            sampai = formatDate(new Date(today.getFullYear(), today.getMonth() + 1, 0));
+        } else if (preset === 'bulan_lalu') {
+            dari = formatDate(new Date(today.getFullYear(), today.getMonth() - 1, 1));
+            sampai = formatDate(new Date(today.getFullYear(), today.getMonth(), 0));
+        } else if (preset === 'tahun_ini') {
+            dari = formatDate(new Date(today.getFullYear(), 0, 1));
+            sampai = formatDate(new Date(today.getFullYear(), 11, 31));
+        } else if (preset === 'semua') {
+            dari = '';
+            sampai = '';
+        }
+
+        const inputDari = document.getElementById('modal_tanggal_dari');
+        const inputSampai = document.getElementById('modal_tanggal_sampai');
+        if (inputDari) inputDari.value = dari;
+        if (inputSampai) inputSampai.value = sampai;
+    }
+</script>
+@endpush
 @endsection
