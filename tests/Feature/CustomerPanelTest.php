@@ -471,4 +471,117 @@ class CustomerPanelTest extends TestCase
             'status' => 'pending',
         ]);
     }
+
+    public function test_card_daftar_pembayaran_dapat_diklik_menuju_halaman_pembayaran(): void
+    {
+        $pelanggan = User::factory()->create([
+            'email' => 'customer_card@test.com',
+            'role' => 'pelanggan',
+        ]);
+
+        $paket = PaketPeminjaman::create([
+            'nama_paket' => 'Paket Card Test',
+            'kategori' => 'standar 1',
+            'harga' => 2500000,
+        ]);
+
+        $peminjaman = Peminjaman::create([
+            'paket_peminjaman_id' => $paket->id,
+            'nama' => 'Customer Card',
+            'email_instansi' => 'customer_card@test.com',
+            'tanggal_mulai' => now()->addDays(4),
+            'tanggal_selesai' => now()->addDays(4)->addHours(5),
+            'status' => 'pending',
+        ]);
+
+        $pembayaran = Pembayaran::create([
+            'peminjaman_id' => $peminjaman->id,
+            'kode_pembayaran' => 'PAY-CARD-001',
+            'total_tagihan' => 2500000,
+            'sisa_tagihan' => 2500000,
+            'status_pembayaran' => 'pending',
+            'jatuh_tempo_dp' => now()->addHours(24),
+        ]);
+
+        $response = $this->actingAs($pelanggan)->get(route('customer.cek-peminjaman'));
+        $response->assertOk();
+        $response->assertSee(route('customer.pembayaran.show', $pembayaran->id));
+        $response->assertSee('Buka Pembayaran');
+    }
+
+    public function test_bukti_pembayaran_hanya_menerima_file_gambar_dan_menolak_pdf(): void
+    {
+        Storage::fake('public');
+
+        PaymentConfiguration::create([
+            'nama_sekolah' => 'SMK Negeri 2 Karanganyar',
+            'bank_utama' => 'Bank Jateng',
+            'norek_utama' => '1234567890',
+            'atas_nama_utama' => 'Bendahara Aula SMK 2',
+        ]);
+
+        $pelanggan = User::factory()->create([
+            'email' => 'customer_image_val@test.com',
+            'role' => 'pelanggan',
+        ]);
+
+        $paket = PaketPeminjaman::create([
+            'nama_paket' => 'Paket Val Image',
+            'kategori' => 'standar 1',
+            'harga' => 2000000,
+        ]);
+
+        $peminjaman = Peminjaman::create([
+            'paket_peminjaman_id' => $paket->id,
+            'nama' => 'Customer Image Val',
+            'email_instansi' => 'customer_image_val@test.com',
+            'tanggal_mulai' => now()->addDays(2),
+            'tanggal_selesai' => now()->addDays(2)->addHours(4),
+            'status' => 'draft',
+        ]);
+
+        $pembayaran = Pembayaran::create([
+            'peminjaman_id' => $peminjaman->id,
+            'kode_pembayaran' => 'PAY-VAL-001',
+            'total_tagihan' => 2000000,
+            'sisa_tagihan' => 2000000,
+            'status_pembayaran' => 'pending',
+            'jatuh_tempo_dp' => now()->addHours(24),
+        ]);
+
+        // 1. Coba upload file PDF (harus gagal validasi)
+        $filePdf = UploadedFile::fake()->create('struk_pembayaran.pdf', 200, 'application/pdf');
+
+        $responsePdf = $this->actingAs($pelanggan)->post(route('customer.pembayaran.bayar', $pembayaran), [
+            'tipe_pembayaran' => 'dp',
+            'metode' => 'transfer_bank',
+            'bank_tujuan' => 'Bank Jateng',
+            'bank_pengirim' => 'BCA',
+            'norek_pengirim' => '12345678',
+            'atas_nama_pengirim' => 'Pengirim PDF',
+            'jumlah_bayar' => 500000,
+            'tanggal_bayar' => now()->format('Y-m-d\TH:i'),
+            'bukti_pembayaran' => $filePdf,
+        ]);
+
+        $responsePdf->assertSessionHasErrors('bukti_pembayaran');
+
+        // 2. Upload file gambar JPG (harus sukses)
+        $fileJpg = UploadedFile::fake()->image('struk_pembayaran.jpg');
+
+        $responseJpg = $this->actingAs($pelanggan)->post(route('customer.pembayaran.bayar', $pembayaran), [
+            'tipe_pembayaran' => 'dp',
+            'metode' => 'transfer_bank',
+            'bank_tujuan' => 'Bank Jateng',
+            'bank_pengirim' => 'BCA',
+            'norek_pengirim' => '12345678',
+            'atas_nama_pengirim' => 'Pengirim JPG',
+            'jumlah_bayar' => 500000,
+            'tanggal_bayar' => now()->format('Y-m-d\TH:i'),
+            'bukti_pembayaran' => $fileJpg,
+        ]);
+
+        $responseJpg->assertSessionHasNoErrors();
+        $responseJpg->assertRedirect(route('customer.pembayaran.show', $pembayaran));
+    }
 }

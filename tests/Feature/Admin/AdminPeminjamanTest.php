@@ -316,4 +316,83 @@ class AdminPeminjamanTest extends TestCase
         $this->assertEquals('rejected', $peminjaman->status);
         $this->assertEquals('hangus', $pembayaran->status_pembayaran);
     }
+
+    public function test_approve_peminjaman_mengupdate_jatuh_tempo_pelunasan_sesuai_konfigurasi_dan_hari_h(): void
+    {
+        $admin = $this->createAdminAula();
+
+        PaymentConfiguration::truncate();
+        $config = PaymentConfiguration::create([
+            'nama_sekolah' => 'SMK Negeri 2 Karanganyar',
+            'bank_utama' => 'Bank Jateng',
+            'norek_utama' => '1234567890',
+            'atas_nama_utama' => 'Bendahara Aula SMK 2',
+            'jatuh_tempo_dp_jam' => 24,
+            'jatuh_tempo_pelunasan_jam' => 24,
+        ]);
+
+        $tanggalAcara = now()->addDays(5)->startOfHour();
+
+        $paket = PaketPeminjaman::create([
+            'nama_paket' => 'Paket Aula Uji Deadline',
+            'kategori' => 'standar 1',
+            'harga' => 3000000,
+            'harga_dp' => 1000000,
+        ]);
+
+        $peminjaman = Peminjaman::create([
+            'paket_peminjaman_id' => $paket->id,
+            'nama' => 'Peminjam Uji Deadline',
+            'email_instansi' => 'pemohon_deadline@test.com',
+            'tanggal_mulai' => $tanggalAcara,
+            'tanggal_selesai' => $tanggalAcara->copy()->addHours(6),
+            'status' => 'pending',
+        ]);
+
+        $pembayaran = Pembayaran::create([
+            'peminjaman_id' => $peminjaman->id,
+            'kode_pembayaran' => 'PAY-DDL-001',
+            'total_tagihan' => 3000000,
+            'total_terbayar' => 0,
+            'sisa_tagihan' => 3000000,
+            'status_pembayaran' => 'pending',
+            'jatuh_tempo_dp' => now()->addHours(24),
+            'jatuh_tempo_pelunasan' => now()->addHours(48),
+        ]);
+
+        // Simulasikan ada transaksi DP
+        DetailPembayaran::create([
+            'pembayaran_id' => $pembayaran->id,
+            'kode_transaksi' => 'TRX-DP-DDL-1',
+            'tipe_pembayaran' => 'dp',
+            'jumlah_bayar' => 1000000,
+            'metode' => 'transfer',
+            'status' => 'pending',
+            'tanggal_bayar' => now(),
+        ]);
+
+        // Admin approve
+        $response = $this->actingAs($admin)->post('/admin/peminjaman/'.$peminjaman->id.'/approve', [
+            'catatan_approval' => 'Approved dan jadwal terverifikasi.',
+        ]);
+
+        $response->assertRedirect('/admin/peminjaman/'.$peminjaman->id);
+
+        $pembayaran->refresh();
+        $this->assertEquals('partial', $pembayaran->status_pembayaran);
+
+        // Tenggat waktu pelunasan harus 24 jam sebelum hari H (tanggal_mulai)
+        $expectedDeadline = $tanggalAcara->copy()->subHours(24);
+        $this->assertEquals(
+            $expectedDeadline->format('Y-m-d H:i'),
+            $pembayaran->jatuh_tempo_pelunasan->format('Y-m-d H:i')
+        );
+
+        // Kunjungi halaman detail di dashboard admin
+        $viewResponse = $this->actingAs($admin)->get('/admin/peminjaman/'.$peminjaman->id);
+        $viewResponse->assertOk();
+        $viewResponse->assertSee('Batas Waktu Pelunasan (Final):');
+        $viewResponse->assertSee('24 jam sebelum Hari H');
+        $viewResponse->assertSee($expectedDeadline->translatedFormat('d M Y, H:i'));
+    }
 }

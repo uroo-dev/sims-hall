@@ -345,9 +345,37 @@
                         </div>
                     @endif
 
-                    @if ($pembayaran?->jatuh_tempo_dp)
+                    @if ($pembayaran)
                         <div class="pt-2 border-t border-slate-100 text-[11px] text-slate-500">
-                            Batas Waktu Transfer: <strong>{{ $pembayaran->jatuh_tempo_dp->translatedFormat('d M Y, H:i') }} WIB</strong>
+                            @if ($pembayaran->status_pembayaran === 'lunas' || $pembayaran->isLunas())
+                                <div class="flex items-center gap-1.5 text-emerald-600 font-semibold">
+                                    <i class="fa-solid fa-circle-check text-xs"></i>
+                                    <span>Tagihan Telah Lunas (Tidak Ada Batas Waktu)</span>
+                                </div>
+                            @elseif ($pembayaran->status_pembayaran === 'partial' || ($pembayaran->total_terbayar > 0 && $pembayaran->sisa_tagihan > 0))
+                                <div class="space-y-0.5">
+                                    <div class="flex items-center gap-1 text-brand-700 font-medium">
+                                        <i class="fa-solid fa-calendar-check text-[11px]"></i>
+                                        <span>Batas Waktu Pelunasan (Final):</span>
+                                    </div>
+                                    <div class="font-bold text-slate-800 text-xs">
+                                        {{ $pembayaran->jatuh_tempo_pelunasan ? $pembayaran->jatuh_tempo_pelunasan->translatedFormat('d M Y, H:i') . ' WIB' : '-' }}
+                                        @if ($peminjaman->tanggal_mulai && $config?->jatuh_tempo_pelunasan_jam)
+                                            <span class="text-[10px] font-normal text-slate-500">({{ $config->jatuh_tempo_pelunasan_jam }} jam sebelum Hari H)</span>
+                                        @endif
+                                    </div>
+                                </div>
+                            @elseif ($pembayaran->jatuh_tempo_dp)
+                                <div class="space-y-0.5">
+                                    <div class="flex items-center gap-1 text-slate-600 font-medium">
+                                        <i class="fa-regular fa-clock text-[11px]"></i>
+                                        <span>Batas Waktu Transfer DP:</span>
+                                    </div>
+                                    <div class="font-bold text-slate-800 text-xs">
+                                        {{ $pembayaran->jatuh_tempo_dp->translatedFormat('d M Y, H:i') }} WIB
+                                    </div>
+                                </div>
+                            @endif
                         </div>
                     @endif
                 </div>
@@ -484,7 +512,7 @@
 
                                 <div class="space-y-1">
                                     <label class="block text-xs font-bold text-slate-700 uppercase">Unggah Bukti Transfer Refund <span class="text-red-500">*</span></label>
-                                    <input type="file" name="bukti_refund" required accept="image/*,application/pdf"
+                                    <input type="file" name="bukti_refund" required accept="image/jpeg,image/png,image/webp"
                                         class="w-full text-xs text-slate-500 file:mr-2 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-purple-600 file:text-white hover:file:bg-purple-700">
                                 </div>
 

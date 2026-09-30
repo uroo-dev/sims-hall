@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\PaymentConfiguration;
 use App\Models\Peminjaman;
 use App\Models\Persetujuan;
+use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -94,6 +95,19 @@ class AdminPeminjamanController extends Controller
         $pembayaran = $peminjaman->pembayaran;
         $config = PaymentConfiguration::current();
 
+        // Pastikan batas waktu pembayaran final (pelunasan) terupdate jika DP telah dibayar / disetujui (partial)
+        if ($pembayaran && ($pembayaran->status_pembayaran === 'partial' || ($pembayaran->total_terbayar > 0 && $pembayaran->sisa_tagihan > 0))) {
+            if ($peminjaman->tanggal_mulai) {
+                $tenggatPelunasanSeharusnya = Carbon::parse($peminjaman->tanggal_mulai)->subHours((int) $config->jatuh_tempo_pelunasan_jam);
+                if (! $pembayaran->jatuh_tempo_pelunasan || $pembayaran->jatuh_tempo_pelunasan->format('Y-m-d H:i') !== $tenggatPelunasanSeharusnya->format('Y-m-d H:i')) {
+                    $pembayaran->update([
+                        'jatuh_tempo_pelunasan' => $tenggatPelunasanSeharusnya,
+                    ]);
+                    $pembayaran->refresh();
+                }
+            }
+        }
+
         // Ambil transaksi refund jika ada
         $refundDetail = $pembayaran ? $pembayaran->details->firstWhere('tipe_pembayaran', 'refund') : null;
 
@@ -142,6 +156,17 @@ class AdminPeminjamanController extends Controller
                 }
 
                 $peminjaman->pembayaran->syncAkumulasiPembayaran();
+                $pembayaran = $peminjaman->pembayaran->fresh();
+
+                // Hitung tenggat waktu pembayaran final (pelunasan) setelah approve / pembayaran pertama (DP):
+                // Sesuai konfigurasi pembayaran, jatuh tempo pelunasan adalah X jam sebelum hari H (tanggal_mulai)
+                if ($pembayaran && ($pembayaran->status_pembayaran === 'partial' || ($pembayaran->sisa_tagihan > 0 && $pembayaran->total_terbayar > 0))) {
+                    $config = PaymentConfiguration::current();
+                    $tenggatPelunasan = Carbon::parse($peminjaman->tanggal_mulai)->subHours((int) $config->jatuh_tempo_pelunasan_jam);
+                    $pembayaran->update([
+                        'jatuh_tempo_pelunasan' => $tenggatPelunasan,
+                    ]);
+                }
             }
         });
 
@@ -296,13 +321,14 @@ class AdminPeminjamanController extends Controller
     public function uploadRefund(Request $request, Peminjaman $peminjaman): RedirectResponse
     {
         $validated = $request->validate([
-            'bukti_refund' => ['required', 'file', 'mimes:jpeg,png,jpg,webp,pdf', 'max:3072'],
+            'bukti_refund' => ['required', 'image', 'mimes:jpeg,png,jpg,webp', 'max:3072'],
             'bank_pengirim' => ['nullable', 'string', 'max:100'],
             'norek_pengirim' => ['nullable', 'string', 'max:100'],
             'catatan' => ['nullable', 'string', 'max:1000'],
         ], [
             'bukti_refund.required' => 'Unggah berkas bukti transfer refund pengembalian dana.',
-            'bukti_refund.mimes' => 'Format bukti transfer harus berupa JPG, PNG, WEBP, atau PDF.',
+            'bukti_refund.image' => 'Berkas bukti transfer refund harus berupa file gambar.',
+            'bukti_refund.mimes' => 'Format berkas bukti transfer refund harus berupa gambar (JPG, JPEG, PNG, atau WEBP).',
             'bukti_refund.max' => 'Ukuran berkas bukti transfer maksimal 3MB.',
         ]);
 

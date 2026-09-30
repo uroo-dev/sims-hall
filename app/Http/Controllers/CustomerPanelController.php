@@ -222,7 +222,7 @@ class CustomerPanelController extends Controller
 
             $config = PaymentConfiguration::current();
             $jatuhTempoDp = now()->addHours($config->jatuh_tempo_dp_jam);
-            $jatuhTempoPelunasan = now()->addHours($config->jatuh_tempo_pelunasan_jam);
+            $jatuhTempoPelunasan = Carbon::parse($validated['tanggal_mulai'])->subHours((int) $config->jatuh_tempo_pelunasan_jam);
 
             return Pembayaran::create([
                 'peminjaman_id' => $peminjaman->id,
@@ -306,7 +306,7 @@ class CustomerPanelController extends Controller
             'atas_nama_pengirim' => ['required', 'string', 'max:150'],
             'jumlah_bayar' => ['required', 'numeric', 'min:1000'],
             'tanggal_bayar' => ['required', 'date'],
-            'bukti_pembayaran' => ['required', 'file', 'mimes:jpeg,png,jpg,webp,pdf', 'max:3072'],
+            'bukti_pembayaran' => ['required', 'image', 'mimes:jpeg,png,jpg,webp', 'max:3072'],
             'catatan' => ['nullable', 'string', 'max:1000'],
         ], [
             'tipe_pembayaran.required' => 'Pilih jenis pembayaran (DP atau Lunas Langsung).',
@@ -316,7 +316,8 @@ class CustomerPanelController extends Controller
             'atas_nama_pengirim.required' => 'Nama pemilik rekening pengirim wajib diisi.',
             'jumlah_bayar.required' => 'Nominal transfer wajib diisi.',
             'bukti_pembayaran.required' => 'Unggah berkas bukti transfer atau struk pembayaran.',
-            'bukti_pembayaran.mimes' => 'Format berkas bukti transfer harus berupa JPG, PNG, WEBP, atau PDF.',
+            'bukti_pembayaran.image' => 'Berkas bukti transfer harus berupa file gambar.',
+            'bukti_pembayaran.mimes' => 'Format berkas bukti transfer harus berupa gambar (JPG, JPEG, PNG, atau WEBP).',
             'bukti_pembayaran.max' => 'Ukuran berkas bukti transfer maksimal 3MB.',
         ]);
 
@@ -402,21 +403,28 @@ class CustomerPanelController extends Controller
         // Cek status akumulasi pembayaran
         $hasUnpaid = false;
         $activePembayarans = [];
+        $completedPembayarans = [];
 
         foreach ($peminjamans as $pem) {
             if ($pem->pembayaran) {
                 if ($pem->pembayaran->status_pembayaran !== 'lunas' && $pem->pembayaran->status_pembayaran !== 'free') {
                     $hasUnpaid = true;
                     $activePembayarans[] = $pem->pembayaran;
+                } else {
+                    $completedPembayarans[] = $pem->pembayaran;
                 }
             }
         }
+
+        $config = PaymentConfiguration::current();
 
         return view('Admin.peminjaman.customerPanel.riwayat', compact(
             'user',
             'peminjamans',
             'hasUnpaid',
-            'activePembayarans'
+            'activePembayarans',
+            'completedPembayarans',
+            'config'
         ));
     }
 

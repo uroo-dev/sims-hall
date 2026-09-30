@@ -89,8 +89,11 @@
 
     <!-- CARD TENGGAT WAKTU & STATUS (PUTIH SOLID, COMPACT/TIPIS, HIGHLIGHT COUNTDOWN SAJA) -->
     @php
-        $targetDeadline = $pembayaran->jatuh_tempo_dp ?: now()->addHours(24);
-        $isExpired = now()->isAfter($targetDeadline) && $pembayaran->status_pembayaran === 'pending';
+        $isPartial = $pembayaran->status_pembayaran === 'partial' || ($pembayaran->total_terbayar > 0 && $pembayaran->sisa_tagihan > 0);
+        $targetDeadline = $isPartial
+            ? ($pembayaran->jatuh_tempo_pelunasan ?: ($pembayaran->peminjaman?->tanggal_mulai ? \Carbon\Carbon::parse($pembayaran->peminjaman->tanggal_mulai)->subHours((int) ($config->jatuh_tempo_pelunasan_jam ?? 24)) : now()->addHours(48)))
+            : ($pembayaran->jatuh_tempo_dp ?: now()->addHours(24));
+        $isExpired = now()->isAfter($targetDeadline) && in_array($pembayaran->status_pembayaran, ['pending', 'rejected']);
     @endphp
     <div class="bg-white rounded-2xl p-4 md:py-3.5 md:px-5 border border-slate-100 figma-card-shadow flex flex-col md:flex-row md:items-center justify-between gap-4">
         <!-- Info Kiri: Invoice, Paket, Pemohon & Jadwal -->
@@ -142,7 +145,7 @@
         <!-- Info Kanan: Highlight Countdown Teks Saja -->
         <div class="flex flex-col md:items-end justify-center pt-2 md:pt-0 border-t md:border-t-0 border-slate-100">
             <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
-                <i class="fa-regular fa-clock text-amber-500"></i> Tenggat Waktu Pembayaran DP
+                <i class="fa-regular fa-clock text-amber-500"></i> {{ $isPartial ? 'Tenggat Waktu Pelunasan' : 'Tenggat Waktu Pembayaran DP' }}
             </span>
             <div class="flex items-center gap-1 font-mono text-xl md:text-2xl font-black tracking-wider text-brand-700 mt-0.5">
                 <span id="cd-hours">00</span>
@@ -538,9 +541,9 @@
                                     <label for="bukti_pembayaran" class="block text-xs font-semibold text-slate-600 mb-1.5">
                                         Unggah Bukti Struk / Transfer <span class="text-red-500">*</span>
                                     </label>
-                                    <input type="file" name="bukti_pembayaran" id="bukti_pembayaran" required accept="image/jpeg,image/png,image/webp,application/pdf"
+                                    <input type="file" name="bukti_pembayaran" id="bukti_pembayaran" required accept="image/jpeg,image/png,image/webp"
                                         class="w-full text-xs text-slate-500 file:mr-3 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100 cursor-pointer border border-slate-200 rounded-xl bg-slate-50/50 p-1">
-                                    <p class="text-[11px] text-slate-400 mt-1.5">Format berkas: JPG, PNG, WEBP, PDF (Maks. 3MB).</p>
+                                    <p class="text-[11px] text-slate-400 mt-1.5">Format berkas: Gambar JPG, JPEG, PNG, WEBP (Maks. 3MB).</p>
                                 </div>
 
                                 <div>

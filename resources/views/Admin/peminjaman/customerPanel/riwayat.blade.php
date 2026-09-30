@@ -177,14 +177,18 @@
 
     </div>
 
-    <!-- CARD 2: PEMBAYARAN -->
+    <!-- CARD 2: DAFTAR PEMBAYARAN -->
     <div class="bg-white rounded-2xl figma-card-shadow p-6 md:p-8 border border-blue-50/50 space-y-6">
 
-        <h3 class="text-base md:text-lg font-bold text-gray-900 tracking-tight">
-            Pembayaran
-        </h3>
+        <div>
+            <h3 class="text-base md:text-lg font-bold text-gray-900 tracking-tight">
+                Daftar Pembayaran
+            </h3>
+            <p class="text-xs md:text-sm text-gray-500 font-normal">
+                Klik kartu pembayaran di bawah untuk menuju halaman pembayaran dan melengkapi bukti transfer.
+            </p>
+        </div>
 
-        <!-- Status Box: Belum ada tagihan / Sudah Terbayar Semua / Rincian Tagihan -->
         @if ($peminjamans->isEmpty())
             <div class="py-12 flex flex-col items-center justify-center text-center text-gray-400 space-y-2">
                 <div class="w-12 h-12 rounded-full bg-blue-50/50 border border-blue-100 flex items-center justify-center text-[#0070ba] text-xl">
@@ -192,37 +196,101 @@
                 </div>
                 <p class="text-xs md:text-sm font-medium text-gray-500">Tidak ada tagihan pembayaran aktif.</p>
             </div>
-        @elseif (! $hasUnpaid)
-            <div class="py-16 md:py-24 flex items-center justify-center text-center">
-                <span class="text-base md:text-lg font-medium text-gray-900 tracking-wide">
-                    Sudah terbayar semua
-                </span>
-            </div>
         @else
             <!-- Tagihan Aktif yang Memerlukan Pembayaran -->
-            <div class="space-y-4">
-                @foreach ($activePembayarans as $pem)
-                    <div class="border border-blue-200 rounded-xl p-5 bg-blue-50/20 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                        <div class="space-y-1">
-                            <span class="inline-block px-2.5 py-0.5 rounded text-[11px] font-bold bg-amber-100 text-amber-800">
-                                Tagihan Aktif ({{ strtoupper($pem->status_pembayaran) }})
-                            </span>
-                            <h4 class="text-base font-bold text-gray-900">{{ $pem->kode_pembayaran }}</h4>
-                            <p class="text-xs text-gray-500">
-                                Sisa Tagihan: <strong class="text-[#0070ba] font-bold">Rp {{ number_format($pem->sisa_tagihan, 0, ',', '.') }}</strong>
-                                dari total Rp {{ number_format($pem->total_tagihan, 0, ',', '.') }}
-                            </p>
-                        </div>
+            @if (!empty($activePembayarans))
+                <div class="space-y-4">
+                    @foreach ($activePembayarans as $pem)
+                        <a href="{{ route('customer.pembayaran.show', $pem->id) }}"
+                           class="group block border border-blue-200/90 hover:border-[#0070ba] rounded-2xl p-5 md:p-6 bg-gradient-to-r from-blue-50/40 to-indigo-50/20 hover:from-blue-50/70 hover:to-indigo-50/40 shadow-xs hover:shadow-md transition-all cursor-pointer">
+                            <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                                <div class="space-y-1.5 flex-1">
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold {{ $pem->status_pembayaran === 'partial' ? 'bg-blue-100 text-brand-800' : 'bg-amber-100 text-amber-800' }}">
+                                            <i class="fa-regular fa-clock text-[10px]"></i>
+                                            {{ $pem->status_pembayaran === 'partial' ? 'DP Terverifikasi (Menunggu Pelunasan)' : 'Tagihan Aktif ('.strtoupper($pem->status_pembayaran).')' }}
+                                        </span>
+                                        <span class="text-xs font-semibold text-gray-700">
+                                            {{ $pem->peminjaman?->paketPeminjaman?->nama_paket ?: 'Paket Sewa Aula' }}
+                                        </span>
+                                        @if ($pem->peminjaman?->tanggal_mulai)
+                                            <span class="text-xs text-gray-500">
+                                                &bull; Jadwal: {{ \Carbon\Carbon::parse($pem->peminjaman->tanggal_mulai)->format('d M Y') }}
+                                            </span>
+                                        @endif
+                                    </div>
+                                    <h4 class="text-base font-bold text-gray-900 group-hover:text-[#0070ba] transition-colors flex items-center gap-2">
+                                        <span>{{ $pem->kode_pembayaran }}</span>
+                                        <i class="fa-solid fa-arrow-up-right-from-square text-xs text-gray-400 group-hover:text-[#0070ba] transition"></i>
+                                    </h4>
+                                    <div class="flex items-center gap-4 text-xs text-gray-600 flex-wrap pt-0.5">
+                                        <span>Total Tagihan: <strong>Rp {{ number_format($pem->total_tagihan, 0, ',', '.') }}</strong></span>
+                                        <span>Sisa Tagihan: <strong class="text-[#0070ba] font-bold text-sm">Rp {{ number_format($pem->sisa_tagihan, 0, ',', '.') }}</strong></span>
+                                        @if ($pem->status_pembayaran === 'partial' && $pem->jatuh_tempo_pelunasan)
+                                            <span class="text-slate-500 text-[11px]">Tenggat Pelunasan: <strong class="text-amber-700">{{ $pem->jatuh_tempo_pelunasan->translatedFormat('d M Y, H:i') }} WIB</strong></span>
+                                        @elseif ($pem->jatuh_tempo_dp)
+                                            <span class="text-slate-500 text-[11px]">Tenggat DP: <strong class="text-amber-700">{{ $pem->jatuh_tempo_dp->translatedFormat('d M Y, H:i') }} WIB</strong></span>
+                                        @endif
+                                    </div>
+                                </div>
 
-                        <div class="flex items-center gap-3">
-                            <span class="text-xs text-gray-500">Transfer ke: <strong>Bank Jateng - 1234567890</strong></span>
-                            <button type="button" class="px-4 py-2 bg-[#0070ba] text-white text-xs font-bold rounded-lg hover:bg-[#005a96] transition">
-                                Konfirmasi Transfer
-                            </button>
-                        </div>
+                                <div class="flex items-center gap-3 self-end md:self-center">
+                                    @if (!empty($config?->bank_utama) && !empty($config?->norek_utama))
+                                        <span class="text-xs text-gray-500 hidden lg:inline">Tujuan: <strong>{{ $config->bank_utama }} - {{ $config->norek_utama }}</strong></span>
+                                    @endif
+                                    <span class="inline-flex items-center gap-1.5 px-4 py-2.5 bg-[#0070ba] text-white text-xs font-bold rounded-xl shadow-xs group-hover:bg-[#005a96] transition">
+                                        <span>Buka Pembayaran</span>
+                                        <i class="fa-solid fa-chevron-right text-[10px] transform group-hover:translate-x-1 transition-transform"></i>
+                                    </span>
+                                </div>
+                            </div>
+                        </a>
+                    @endforeach
+                </div>
+            @endif
+
+            <!-- Riwayat Pembayaran Selesai / Lunas -->
+            @if (!empty($completedPembayarans))
+                <div class="{{ !empty($activePembayarans) ? 'pt-4 border-t border-slate-100' : '' }} space-y-3">
+                    <div class="flex items-center justify-between">
+                        <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                            {{ empty($activePembayarans) ? 'Semua Pembayaran Telah Lunas' : 'Riwayat Pembayaran Selesai' }}
+                        </h4>
                     </div>
-                @endforeach
-            </div>
+                    <div class="space-y-3">
+                        @foreach ($completedPembayarans as $pem)
+                            <a href="{{ route('customer.pembayaran.show', $pem->id) }}"
+                               class="group block border border-emerald-100 hover:border-emerald-500 rounded-2xl p-4 md:p-5 bg-emerald-50/20 hover:bg-emerald-50/50 shadow-xs hover:shadow-md transition-all cursor-pointer">
+                                <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+                                    <div class="space-y-1">
+                                        <div class="flex items-center gap-2 flex-wrap">
+                                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800">
+                                                <i class="fa-regular fa-circle-check text-[10px]"></i> LUNAS
+                                            </span>
+                                            <span class="text-xs font-semibold text-gray-700">
+                                                {{ $pem->peminjaman?->paketPeminjaman?->nama_paket ?: 'Paket Sewa Aula' }}
+                                            </span>
+                                            @if ($pem->peminjaman?->tanggal_mulai)
+                                                <span class="text-xs text-gray-500">
+                                                    &bull; Jadwal: {{ \Carbon\Carbon::parse($pem->peminjaman->tanggal_mulai)->format('d M Y') }}
+                                                </span>
+                                            @endif
+                                        </div>
+                                        <h5 class="text-sm font-bold text-gray-900 group-hover:text-emerald-700 transition flex items-center gap-1.5">
+                                            <span>{{ $pem->kode_pembayaran }} &bull; Total: Rp {{ number_format($pem->total_tagihan, 0, ',', '.') }}</span>
+                                            <i class="fa-solid fa-arrow-up-right-from-square text-xs text-gray-400 group-hover:text-emerald-600 transition"></i>
+                                        </h5>
+                                    </div>
+                                    <span class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-slate-700 text-white text-xs font-semibold rounded-xl group-hover:bg-emerald-600 shadow-xs transition">
+                                        <span>Lihat Rincian & Nota</span>
+                                        <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                                    </span>
+                                </div>
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
         @endif
 
     </div>
