@@ -52,6 +52,30 @@
                     <i class="fa-solid fa-user-group text-base w-5 text-center"></i>
                     <span>Profil</span>
                 </a>
+            @elseif(auth()->user() && auth()->user()->role === 'kepala_sekolah')
+                <!-- 1. DASHBOARD KEPALA SEKOLAH -->
+                <a href="{{ route('kepala-sekolah.dashboard') }}"
+                    class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('kepala-sekolah.dashboard') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
+                    <i class="fa-solid fa-table-cells-large text-base w-5 text-center"></i>
+                    <span>Dashboard</span>
+                </a>
+
+                <!-- 2. PERSETUJUAN FINAL PEMINJAMAN -->
+                @php
+                    $pendingFinalCount = \App\Models\Peminjaman::where('status', 'approved_1')->count();
+                @endphp
+                <a href="{{ route('kepala-sekolah.peminjaman.index') }}"
+                    class="flex items-center justify-between px-5 py-3.5 {{ request()->routeIs('kepala-sekolah.peminjaman.*') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-file-signature text-base w-5 text-center"></i>
+                        <span>Persetujuan Final</span>
+                    </div>
+                    @if ($pendingFinalCount > 0)
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-black {{ request()->routeIs('kepala-sekolah.peminjaman.*') ? 'bg-amber-400 text-slate-900' : 'bg-amber-400 text-slate-900' }}">
+                            {{ $pendingFinalCount }}
+                        </span>
+                    @endif
+                </a>
             @else
                 <!-- 1. DASHBOARD ADMIN -->
                 <a href="{{ route('dashboard') }}"
@@ -82,7 +106,14 @@
                 </a>
 
                 @if(in_array(auth()->user()?->role, ['super_admin', 'super_duper_admin']))
-                    <!-- 4. KONFIGURASI PEMBAYARAN (SUPER ADMIN) -->
+                    <!-- 5. PERSETUJUAN FINAL KEPALA SEKOLAH (SUPER ADMIN AKSES) -->
+                    <a href="{{ route('kepala-sekolah.peminjaman.index') }}"
+                        class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('kepala-sekolah.*') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
+                        <i class="fa-solid fa-file-signature text-base w-5 text-center"></i>
+                        <span>Persetujuan Final</span>
+                    </a>
+
+                    <!-- 6. KONFIGURASI PEMBAYARAN (SUPER ADMIN) -->
                     <a href="{{ route('admin.payment-configuration.index') }}"
                         class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('admin.payment-configuration.*') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
                         <i class="fa-solid fa-credit-card text-base w-5 text-center"></i>

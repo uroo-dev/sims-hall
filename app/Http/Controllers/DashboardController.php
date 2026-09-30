@@ -18,6 +18,10 @@ class DashboardController extends Controller
             return redirect()->route('customer.dashboard');
         }
 
+        if ($request->user()?->role === 'kepala_sekolah') {
+            return redirect()->route('kepala-sekolah.dashboard');
+        }
+
         $isSuperAdmin = in_array($request->user()?->role, ['super_admin', 'super_duper_admin'], true);
         $paymentConfig = $isSuperAdmin ? PaymentConfiguration::current() : null;
 

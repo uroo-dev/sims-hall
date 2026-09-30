@@ -30,5 +30,14 @@ class UserSeeder extends Seeder
                 'password' => '1234',
             ]
         );
+        User::firstOrCreate(
+            ['username' => 'kepsek'],
+            [
+                'name' => 'Kepala Sekolah',
+                'email' => 'kepsek@smk2nkra.sch.id',
+                'role' => 'kepala_sekolah',
+                'password' => '1234',
+            ]
+        );
     }
 }

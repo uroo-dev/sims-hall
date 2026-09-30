@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CustomerPanelController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FasilitasController;
+use App\Http\Controllers\KepalaSekolahController;
 use App\Http\Controllers\PaketPeminjamanController;
 use App\Http\Controllers\PaymentConfigurationController;
 use Illuminate\Support\Facades\Route;
@@ -22,8 +23,17 @@ Route::middleware('auth')->group(function () {
     Route::match(['get', 'post'], '/logout', [AuthController::class, 'destroy'])->name('logout');
 
     Route::get('/dashboard', [DashboardController::class, 'index'])
-        ->middleware('role:admin,super_admin,super_duper_admin,pelanggan')
+        ->middleware('role:admin,super_admin,super_duper_admin,pelanggan,kepala_sekolah')
         ->name('dashboard');
+
+    // Kepala Sekolah: Dashboard & Persetujuan Final Peminjaman Aula
+    Route::middleware('role:kepala_sekolah,super_admin,super_duper_admin')->prefix('kepala-sekolah')->name('kepala-sekolah.')->group(function () {
+        Route::get('/dashboard', [KepalaSekolahController::class, 'dashboard'])->name('dashboard');
+        Route::get('/peminjaman', [KepalaSekolahController::class, 'index'])->name('peminjaman.index');
+        Route::get('/peminjaman/{peminjaman}', [KepalaSekolahController::class, 'show'])->name('peminjaman.show');
+        Route::post('/peminjaman/{peminjaman}/approve', [KepalaSekolahController::class, 'approve'])->name('peminjaman.approve');
+        Route::post('/peminjaman/{peminjaman}/reject', [KepalaSekolahController::class, 'reject'])->name('peminjaman.reject');
+    });
 
     // Admin Aula: CRUD Fasilitas, Paket Peminjaman, & Manajemen Peminjaman
     Route::middleware('adminFitur:aula')->prefix('admin')->name('admin.')->group(function () {
