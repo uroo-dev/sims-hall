@@ -9,40 +9,40 @@
         <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
             <!-- Stat Card 1 -->
-            <div class="bg-white rounded-2xl p-6 figma-card-shadow border border-slate-100 flex items-center justify-between transition-transform duration-200 hover:-translate-y-1">
+            <a href="{{ route('admin.peminjaman.index', ['status' => 'approved_final']) }}" class="bg-white rounded-2xl p-6 figma-card-shadow border border-slate-100 flex items-center justify-between transition-transform duration-200 hover:-translate-y-1 block">
                 <div>
                     <h3 id="stat-1-label" class="text-xs md:text-sm font-extrabold text-brand-600 uppercase tracking-wide leading-snug max-w-[140px]">
                         PEMINJAMAN TERVERIFIKASI
                     </h3>
                 </div>
                 <div id="stat-1-value" class="text-4xl lg:text-5xl font-extrabold text-brand-600 pl-2">
-                    3
+                    {{ number_format($peminjamanTerverifikasiCount) }}
                 </div>
-            </div>
+            </a>
 
             <!-- Stat Card 2 -->
-            <div class="bg-white rounded-2xl p-6 figma-card-shadow border border-slate-100 flex items-center justify-between transition-transform duration-200 hover:-translate-y-1">
+            <a href="{{ route('admin.paket.index') }}" class="bg-white rounded-2xl p-6 figma-card-shadow border border-slate-100 flex items-center justify-between transition-transform duration-200 hover:-translate-y-1 block">
                 <div>
                     <h3 id="stat-2-label" class="text-xs md:text-sm font-extrabold text-brand-600 uppercase tracking-wide leading-snug max-w-[140px]">
                         JUMLAH PAKET PEMINJAMAN
                     </h3>
                 </div>
                 <div id="stat-2-value" class="text-4xl lg:text-5xl font-extrabold text-brand-600 pl-2">
-                    5
+                    {{ number_format($paketCount) }}
                 </div>
-            </div>
+            </a>
 
             <!-- Stat Card 3 -->
-            <div class="bg-white rounded-2xl p-6 figma-card-shadow border border-slate-100 flex items-center justify-between transition-transform duration-200 hover:-translate-y-1">
+            <a href="{{ route('admin.fasilitas.index') }}" class="bg-white rounded-2xl p-6 figma-card-shadow border border-slate-100 flex items-center justify-between transition-transform duration-200 hover:-translate-y-1 block">
                 <div>
                     <h3 id="stat-3-label" class="text-xs md:text-sm font-extrabold text-brand-600 uppercase tracking-wide leading-snug max-w-[140px]">
                         JUMLAH FASILITAS
                     </h3>
                 </div>
                 <div id="stat-3-value" class="text-4xl lg:text-5xl font-extrabold text-brand-600 pl-2">
-                    4
+                    {{ number_format($facilityCount) }}
                 </div>
-            </div>
+            </a>
 
         </section>
 
@@ -170,10 +170,10 @@
                             LAPORAN OPERASIONAL
                         </h2>
                         <!-- Selengkapnya Badge Button -->
-                        <button class="px-3.5 py-1 bg-brand-600 hover:bg-brand-700 text-white rounded-full text-[11px] font-semibold flex items-center space-x-1.5 transition-colors shadow-sm">
+                        <a href="{{ route('admin.peminjaman.index') }}" class="px-3.5 py-1 bg-brand-600 hover:bg-brand-700 text-white rounded-full text-[11px] font-semibold flex items-center space-x-1.5 transition-colors shadow-sm">
                             <i class="fa-solid fa-sliders text-[10px]"></i>
                             <span>Selengkapnya</span>
-                        </button>
+                        </a>
                     </div>
 
                     <!-- Data Table Container -->
@@ -182,34 +182,48 @@
                             <thead>
                                 <tr id="table-headers" class="border-b-2 border-slate-800 text-slate-800 font-extrabold">
                                     <th class="py-3 px-2">ID</th>
-                                    <th class="py-3 px-2">Email Instansi</th>
+                                    <th class="py-3 px-2">Pemohon / Instansi</th>
                                     <th class="py-3 px-2">Paket Peminjaman</th>
                                     <th class="py-3 px-2">Metode</th>
                                 </tr>
                             </thead>
                             <tbody id="table-body" class="divide-y divide-slate-200 text-slate-700 font-medium">
-
-                                <tr class="hover:bg-slate-50 transition-colors">
-                                    <td class="py-3.5 px-2 font-bold text-slate-800">ORD-001</td>
-                                    <td class="py-3.5 px-2 text-slate-600">Sekretariat@kemenkeu.go.id</td>
-                                    <td class="py-3.5 px-2">Unggulan</td>
-                                    <td class="py-3.5 px-2">Transfer</td>
-                                </tr>
-
-                                <tr class="hover:bg-slate-50 transition-colors">
-                                    <td class="py-3.5 px-2 font-bold text-slate-800">ORD-002</td>
-                                    <td class="py-3.5 px-2 text-slate-600">P3k@smk2nkra.sch.id</td>
-                                    <td class="py-3.5 px-2">Standar 2</td>
-                                    <td class="py-3.5 px-2">Transfer</td>
-                                </tr>
-
-                                <tr class="hover:bg-slate-50 transition-colors">
-                                    <td class="py-3.5 px-2 font-bold text-slate-800">ORD-003</td>
-                                    <td class="py-3.5 px-2 text-slate-600">Humas@smk2nkra.sch.id</td>
-                                    <td class="py-3.5 px-2">Standar 1</td>
-                                    <td class="py-3.5 px-2">Transfer</td>
-                                </tr>
-
+                                @forelse ($recentPeminjamans as $item)
+                                    <tr class="hover:bg-slate-50 transition-colors">
+                                        <td class="py-3.5 px-2 font-bold text-slate-800">
+                                            <a href="{{ route('admin.peminjaman.show', $item) }}" class="text-brand-600 hover:underline">
+                                                ORD-{{ str_pad($item->id, 3, '0', STR_PAD_LEFT) }}
+                                            </a>
+                                        </td>
+                                        <td class="py-3.5 px-2">
+                                            <div class="font-bold text-slate-800">{{ $item->nama }}</div>
+                                            <div class="text-[11px] text-slate-500">{{ $item->email_instansi }}</div>
+                                        </td>
+                                        <td class="py-3.5 px-2">
+                                            {{ $item->paketPeminjaman?->display_name ?? 'Paket Kustom' }}
+                                        </td>
+                                        <td class="py-3.5 px-2">
+                                            @php
+                                                $metode = $item->pembayaran?->details->first()?->metode;
+                                            @endphp
+                                            @if ($metode)
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-blue-50 text-blue-700 border border-blue-100 uppercase">
+                                                    {{ $metode }}
+                                                </span>
+                                            @else
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-slate-100 text-slate-500">
+                                                    Transfer
+                                                </span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="4" class="py-8 text-center text-slate-400 italic">
+                                            Belum ada data peminjaman operasional.
+                                        </td>
+                                    </tr>
+                                @endforelse
                             </tbody>
                         </table>
                     </div>
@@ -227,11 +241,10 @@
                                 <div class="h-0.5 w-full bg-brand-600 rounded-full mt-1"></div>
                             </h2>
                         </div>
-                        <!-- Selengkapnya Badge Button -->
-                        <button class="px-3.5 py-1 bg-brand-600 hover:bg-brand-700 text-white rounded-full text-[11px] font-semibold flex items-center space-x-1.5 transition-colors shadow-sm">
-                            <i class="fa-solid fa-sliders text-[10px]"></i>
-                            <span>Selengkapnya</span>
-                        </button>
+                        <a href="{{ route('customer.profil') }}" class="px-3.5 py-1 bg-brand-600 hover:bg-brand-700 text-white rounded-full text-[11px] font-semibold flex items-center space-x-1.5 transition-colors shadow-sm">
+                            <i class="fa-solid fa-user text-[10px]"></i>
+                            <span>Detail</span>
+                        </a>
                     </div>
 
                     <!-- Profile Image Frame (Figma Vector Silhouette Accent) -->
@@ -251,6 +264,10 @@
                             <p id="profile-card-email" class="text-xs font-semibold text-slate-500 mt-1">
                                 {{ auth()->user()->email }}
                             </p>
+                            <div class="mt-2 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                                <i class="fa-solid fa-shield-halved text-brand-600 text-[10px]"></i>
+                                <span>{{ strtoupper(str_replace('_', ' ', auth()->user()->role ?? 'ADMIN')) }}</span>
+                            </div>
                         </div>
                     </div>
 
@@ -260,119 +277,3 @@
         </section>
 
 @endsection
-
-@push('scripts')
-    <script>
-        // Data for Role Switcher (Supports Sapras and PKL/BKK for Lomba versatility)
-        const roleData = {
-            sapras: {
-                roleName: 'ADMIN SAPRAS',
-                userName: 'Teguh',
-                userEmail: 'AdminSapras@smk2nkra.sch.id',
-                categoryLabel: 'Admin Sapras',
-                menus: [
-                    { id: 'fasilitas', name: 'Fasilitas', icon: 'fa-building' },
-                    { id: 'paket', name: 'Paket Peminjaman', icon: 'fa-box' },
-                    { id: 'persetujuan', name: 'Persetujuan 1', icon: 'fa-cart-shopping' },
-                    { id: 'laporan', name: 'Laporan Operasional', icon: 'fa-chart-column' },
-                    { id: 'profil', name: 'Profil', icon: 'fa-user-group' },
-                ],
-                stats: [
-                    { label: 'PEMINJAMAN TERVERIFIKASI', value: '3' },
-                    { label: 'JUMLAH PAKET PEMINJAMAN', value: '5' },
-                    { label: 'JUMLAH FASILITAS', value: '4' }
-                ],
-                tableTitle: 'LAPORAN OPERASIONAL',
-                headers: ['ID', 'Email Instansi', 'Paket Peminjaman', 'Metode'],
-                rows: [
-                    ['ORD-001', 'Sekretariat@kemenkeu.go.id', 'Unggulan', 'Transfer'],
-                    ['ORD-002', 'P3k@smk2nkra.sch.id', 'Standar 2', 'Transfer'],
-                    ['ORD-003', 'Humas@smk2nkra.sch.id', 'Standar 1', 'Transfer']
-                ]
-            },
-            pkl_bkk: {
-                roleName: 'ADMIN PKL & BKK',
-                userName: 'Sri Astuti, S.Pd',
-                userEmail: 'BkkPkl@smk2nkra.sch.id',
-                categoryLabel: 'PKL & BKK',
-                menus: [
-                    { id: 'dudi', name: 'Data DUDI', icon: 'fa-handshake' },
-                    { id: 'loker', name: 'Lowongan Kerja', icon: 'fa-briefcase' },
-                    { id: 'pkl', name: 'Data PKL', icon: 'fa-graduation-cap' },
-                    { id: 'jurnal', name: 'Jurnal Siswa', icon: 'fa-book-open' },
-                    { id: 'profil', name: 'Profil', icon: 'fa-user-group' },
-                ],
-                stats: [
-                    { label: 'PERUSAHAAN MITRA', value: '42' },
-                    { label: 'LOKER AKTIF BKK', value: '12' },
-                    { label: 'SISWA PKL AKTIF', value: '286' }
-                ],
-                tableTitle: 'DAFTAR DUDI / MITRA TERBARU',
-                headers: ['ID', 'Nama Perusahaan', 'Bidang Industri', 'Kuota PKL'],
-                rows: [
-                    ['DUDI-01', 'PT Telekomunikasi Indonesia', 'Jaringan & IT', '12 Siswa'],
-                    ['DUDI-02', 'Nasmoco Karanganyar', 'Otomotif & TKR', '8 Siswa'],
-                    ['DUDI-03', 'Software House Solo', 'RPL & Software', '15 Siswa']
-                ]
-            }
-        };
-
-        // Switch role dynamically
-        function switchRole(roleKey) {
-            const data = roleData[roleKey];
-            if (!data) return;
-
-            // Update Header & Profile
-            document.getElementById('breadcrumb-role').innerText = data.roleName;
-            document.getElementById('header-user-name').innerText = data.userName;
-            document.getElementById('header-user-role').innerText = data.roleName.toLowerCase();
-            document.getElementById('profile-card-name').innerText = data.userName;
-            document.getElementById('profile-card-email').innerText = data.userEmail;
-            document.getElementById('role-category-label').innerText = data.categoryLabel;
-
-            // Update Stats
-            document.getElementById('stat-1-label').innerText = data.stats[0].label;
-            document.getElementById('stat-1-value').innerText = data.stats[0].value;
-            document.getElementById('stat-2-label').innerText = data.stats[1].label;
-            document.getElementById('stat-2-value').innerText = data.stats[1].value;
-            document.getElementById('stat-3-label').innerText = data.stats[2].label;
-            document.getElementById('stat-3-value').innerText = data.stats[2].value;
-
-            // Update Menus
-            const sidebarContainer = document.getElementById('sidebar-dynamic-menus');
-            sidebarContainer.innerHTML = '';
-            data.menus.forEach(menu => {
-                const a = document.createElement('a');
-                a.href = '#';
-                a.onclick = () => setActiveMenu(menu.id);
-                a.className = 'menu-item flex items-center space-x-3.5 px-5 py-2.5 rounded-xl text-white/90 hover:bg-white/10 font-normal transition-all duration-200';
-                a.innerHTML = `
-                    <i class="fa-solid ${menu.icon} text-base w-5 text-center"></i>
-                    <span class="text-sm">${menu.name}</span>
-                `;
-                sidebarContainer.appendChild(a);
-            });
-
-            // Update Table Title & Headers
-            document.getElementById('table-card-title').innerText = data.tableTitle;
-            const thContainer = document.getElementById('table-headers');
-            thContainer.innerHTML = data.headers.map(h => `<th class="py-3 px-2">${h}</th>`).join('');
-
-            // Update Table Rows
-            const tbody = document.getElementById('table-body');
-            tbody.innerHTML = data.rows.map(row => `
-                <tr class="hover:bg-slate-50 transition-colors">
-                    <td class="py-3.5 px-2 font-bold text-slate-800">${row[0]}</td>
-                    <td class="py-3.5 px-2 text-slate-600">${row[1]}</td>
-                    <td class="py-3.5 px-2">${row[2]}</td>
-                    <td class="py-3.5 px-2">${row[3]}</td>
-                </tr>
-            `).join('');
-        }
-
-        // Set active menu visual state
-        function setActiveMenu(menuId) {
-            document.getElementById('breadcrumb-page').innerText = menuId.charAt(0).toUpperCase() + menuId.slice(1);
-        }
-    </script>
-@endpush
