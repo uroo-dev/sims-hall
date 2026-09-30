@@ -43,9 +43,9 @@ return [
             'icon' => 'fa-graduation-cap',
             'roles' => ['admin', 'super_admin', 'super_duper_admin'],
             'children' => [
-                ['label' => 'Dashboard Sekolah', 'icon' => 'fa-comment-dots', 'route' => null],
-                ['label' => 'Data Sekolah', 'icon' => 'fa-school', 'route' => null],
-                ['label' => 'Users', 'icon' => 'fa-users-gear', 'route' => null],
+                ['label' => 'Dashboard Sekolah', 'icon' => 'fa-comment-dots', 'route' => 'datamaster.index'],
+                ['label' => 'Data Sekolah', 'icon' => 'fa-school', 'route' => 'datamaster.sekolah.edit'],
+                ['label' => 'Users', 'icon' => 'fa-users-gear', 'route' => 'datamaster.users'],
             ],
         ],
 

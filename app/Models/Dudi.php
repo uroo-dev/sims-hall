@@ -5,13 +5,16 @@ namespace App\Models;
 use Database\Factories\DudiFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable([
     'nama_dudi',
+    'nama',
     'alamat',
     'kota',
     'bidang_usaha',
@@ -20,11 +23,26 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'kuota_maksimal',
     'is_mitra_resmi',
     'tampil_di_landing',
+    'logo',
+    'program_1',
+    'program_2',
+    'program_3',
+    'deskripsi',
+    'jurusan_id',
 ])]
 class Dudi extends Model
 {
     /** @use HasFactory<DudiFactory> */
     use HasFactory;
+
+    /**
+     * Kolom sumber untuk atribut `nama`.
+     *
+     * Kolom fisik tetap `nama_dudi` (dipakai modul PKL & BKK). Atribut `nama`
+     * hanya alias baca/tulis supaya landing page yang ditulis untuk tabel
+     * versi lain tidak perlu diubah, dan tidak ada data yang terduplikasi.
+     */
+    private const KOLOM_NAMA = 'nama_dudi';
 
     /**
      * Get the attributes that should be cast.
@@ -38,6 +56,25 @@ class Dudi extends Model
             'is_mitra_resmi' => 'boolean',
             'tampil_di_landing' => 'boolean',
         ];
+    }
+
+    /**
+     * Alias baca untuk `nama_dudi`, dipakai landing page.
+     */
+    protected function nama(): Attribute
+    {
+        return Attribute::make(
+            get: fn (): ?string => $this->attributes[self::KOLOM_NAMA] ?? null,
+            set: fn (?string $value) => [self::KOLOM_NAMA => $value],
+        );
+    }
+
+    /**
+     * Jurusan asal mitra industri, bila terhubung.
+     */
+    public function jurusan(): BelongsTo
+    {
+        return $this->belongsTo(Jurusan::class);
     }
 
     /**

@@ -4,20 +4,26 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BkkController;
 use App\Http\Controllers\ChatbotController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DataMasterDashboardController;
 use App\Http\Controllers\PklController;
+use App\Http\Controllers\PublicController;
+use App\Models\Sekolah;
 use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
 | Halaman Publik
 |--------------------------------------------------------------------------
+|
+| Landing dan profil memakai PublicController karena view-nya butuh data
+| sekolah, mitra industri, prestasi, dan produk unggulan.
 */
-Route::get('/', function () {
-    return view('Public.landing');
-})->name('landing');
+Route::get('/', [PublicController::class, 'landing'])->name('landing');
 
 Route::get('/profil', function () {
-    return view('Public.profil');
+    return view('Public.profil', [
+        'sekolah' => Sekolah::first() ?? new Sekolah,
+    ]);
 })->name('profil');
 
 Route::get('/ppdb', function () {
@@ -122,7 +128,43 @@ Route::middleware(['auth', 'role:bkk,admin,super_admin,super_duper_admin'])
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'destroy'])->name('logout');
 
+    // --- DASHBOARD UTAMA ---
     Route::get('/dashboard', [DashboardController::class, 'index'])
         ->middleware('role:admin,super_admin,super_duper_admin')
         ->name('dashboard');
+
+    /*
+    |----------------------------------------------------------------------
+    | Data Master Sekolah
+    |----------------------------------------------------------------------
+    */
+    Route::prefix('dashboard/data-master')->group(function () {
+        Route::get('/', [DataMasterDashboardController::class, 'index'])
+            ->middleware('role:admin,super_admin,super_duper_admin')
+            ->name('datamaster.index');
+
+        Route::get('/sekolah', [DataMasterDashboardController::class, 'editSekolah'])
+            ->middleware('role:admin,super_admin,super_duper_admin')
+            ->name('datamaster.sekolah.edit');
+
+        Route::put('/sekolah', [DataMasterDashboardController::class, 'updateSekolah'])
+            ->middleware('role:admin,super_admin,super_duper_admin')
+            ->name('datamaster.sekolah.update');
+
+        Route::get('/users', [DataMasterDashboardController::class, 'users'])
+            ->middleware('role:admin,super_admin,super_duper_admin')
+            ->name('datamaster.users');
+
+        Route::post('/users', [DataMasterDashboardController::class, 'storeUser'])
+            ->middleware('role:admin,super_admin,super_duper_admin')
+            ->name('datamaster.users.store');
+
+        Route::put('/users/{id}', [DataMasterDashboardController::class, 'updateUser'])
+            ->middleware('role:admin,super_admin,super_duper_admin')
+            ->name('datamaster.users.update');
+
+        Route::delete('/users/{id}', [DataMasterDashboardController::class, 'destroyUser'])
+            ->middleware('role:admin,super_admin,super_duper_admin')
+            ->name('datamaster.users.destroy');
+    });
 });
