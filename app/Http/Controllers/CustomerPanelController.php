@@ -58,12 +58,20 @@ class CustomerPanelController extends Controller
         $year = (int) $request->input('year', now()->year);
         $month = (int) $request->input('month', now()->month);
         $calendarDate = Carbon::createFromDate($year, $month, 1);
+        $startOfMonth = $calendarDate->copy()->startOfMonth();
+        $endOfMonth = $calendarDate->copy()->endOfMonth();
 
-        // Ambil semua peminjaman yang tidak ditolak untuk penandaan kalender
+        // Ambil HANYA peminjaman yang SUDAH DISETUJUI (approved_1 atau approved_final) untuk menandai tanggal terpakai
         $allPeminjamans = Peminjaman::with('paketPeminjaman')
+            ->where(function ($q) {
+                $q->whereIn('status', ['approved_1', 'approved_final'])
+                    ->orWhereHas('persetujuans', function ($sq) {
+                        $sq->where('status', 'approved');
+                    });
+            })
             ->where('status', '!=', 'rejected')
-            ->whereYear('tanggal_mulai', $year)
-            ->whereMonth('tanggal_mulai', $month)
+            ->where('tanggal_mulai', '<=', $endOfMonth)
+            ->where('tanggal_selesai', '>=', $startOfMonth)
             ->get();
 
         // Peta hari yang terisi (booked) pada bulan ini

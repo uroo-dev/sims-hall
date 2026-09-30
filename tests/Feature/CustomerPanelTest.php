@@ -51,6 +51,81 @@ class CustomerPanelTest extends TestCase
         $response->assertSee('Ilham');
     }
 
+    public function test_kalender_ketersediaan_hanya_menandai_tanggal_sebagai_terpakai_jika_peminjaman_sudah_diapprove(): void
+    {
+        $pelanggan = User::factory()->create([
+            'role' => 'pelanggan',
+            'email' => 'buyer@example.com',
+        ]);
+
+        $paket = PaketPeminjaman::create([
+            'nama_paket' => 'Aula Utama',
+            'kategori' => 'unggulan',
+            'harga' => 5000000,
+        ]);
+
+        $targetMonth = now()->month;
+        $targetYear = now()->year;
+
+        // Peminjaman 1: Masih pending (BELUM diapprove) pada tanggal 10
+        Peminjaman::create([
+            'paket_peminjaman_id' => $paket->id,
+            'nama' => 'Peminjam Pending',
+            'email_instansi' => 'pending@example.com',
+            'tanggal_mulai' => now()->startOfMonth()->addDays(9)->setTime(8, 0), // Tanggal 10
+            'tanggal_selesai' => now()->startOfMonth()->addDays(9)->setTime(12, 0),
+            'status' => 'pending',
+        ]);
+
+        // Peminjaman 2: Masih draft (BELUM diapprove) pada tanggal 12
+        Peminjaman::create([
+            'paket_peminjaman_id' => $paket->id,
+            'nama' => 'Peminjam Draft',
+            'email_instansi' => 'draft@example.com',
+            'tanggal_mulai' => now()->startOfMonth()->addDays(11)->setTime(8, 0), // Tanggal 12
+            'tanggal_selesai' => now()->startOfMonth()->addDays(11)->setTime(12, 0),
+            'status' => 'draft',
+        ]);
+
+        // Peminjaman 3: SUDAH diapprove (approved_1) pada tanggal 18
+        Peminjaman::create([
+            'paket_peminjaman_id' => $paket->id,
+            'nama' => 'Peminjam Approved 1',
+            'email_instansi' => 'approved1@example.com',
+            'tanggal_mulai' => now()->startOfMonth()->addDays(17)->setTime(8, 0), // Tanggal 18
+            'tanggal_selesai' => now()->startOfMonth()->addDays(17)->setTime(15, 0),
+            'status' => 'approved_1',
+        ]);
+
+        // Peminjaman 4: SUDAH diapprove final (approved_final) pada tanggal 22
+        Peminjaman::create([
+            'paket_peminjaman_id' => $paket->id,
+            'nama' => 'Peminjam Approved Final',
+            'email_instansi' => 'final@example.com',
+            'tanggal_mulai' => now()->startOfMonth()->addDays(21)->setTime(8, 0), // Tanggal 22
+            'tanggal_selesai' => now()->startOfMonth()->addDays(21)->setTime(17, 0),
+            'status' => 'approved_final',
+        ]);
+
+        $response = $this->actingAs($pelanggan)->get(route('customer.dashboard', [
+            'month' => $targetMonth,
+            'year' => $targetYear,
+        ]));
+
+        $response->assertOk();
+        $bookedDays = $response->viewData('bookedDays');
+
+        // Tanggal 10 (pending) dan 12 (draft) TIDAK boleh ditandai sebagai booked/terpakai
+        $this->assertArrayNotHasKey(10, $bookedDays);
+        $this->assertArrayNotHasKey(12, $bookedDays);
+
+        // Tanggal 18 (approved_1) dan 22 (approved_final) HARUS ditandai sebagai booked/terpakai
+        $this->assertArrayHasKey(18, $bookedDays);
+        $this->assertArrayHasKey(22, $bookedDays);
+        $this->assertEquals('Peminjam Approved 1', $bookedDays[18][0]['nama']);
+        $this->assertEquals('Peminjam Approved Final', $bookedDays[22][0]['nama']);
+    }
+
     public function test_customer_paket_peminjaman_dapat_diakses_oleh_pelanggan(): void
     {
         $pelanggan = User::factory()->create([
