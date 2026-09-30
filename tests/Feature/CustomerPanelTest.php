@@ -863,7 +863,11 @@ class CustomerPanelTest extends TestCase
         ]);
 
         $admin = User::factory()->create([
-            'role' => 'super_admin',
+            'role' => 'admin',
+        ]);
+        Fitur::create([
+            'user_id' => $admin->id,
+            'nama_fitur' => 'aula',
         ]);
 
         $paket = PaketPeminjaman::create([

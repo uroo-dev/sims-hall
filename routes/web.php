@@ -33,8 +33,12 @@ Route::middleware('auth')->group(function () {
         Route::get('/peminjaman', [KepalaSekolahController::class, 'index'])->name('peminjaman.index');
         Route::get('/peminjaman/export/pdf', [KepalaSekolahController::class, 'exportPdf'])->name('peminjaman.export-pdf');
         Route::get('/peminjaman/{peminjaman}', [KepalaSekolahController::class, 'show'])->name('peminjaman.show');
-        Route::post('/peminjaman/{peminjaman}/approve', [KepalaSekolahController::class, 'approve'])->name('peminjaman.approve');
-        Route::post('/peminjaman/{peminjaman}/reject', [KepalaSekolahController::class, 'reject'])->name('peminjaman.reject');
+        Route::post('/peminjaman/{peminjaman}/approve', [KepalaSekolahController::class, 'approve'])
+            ->middleware('role:kepala_sekolah')
+            ->name('peminjaman.approve');
+        Route::post('/peminjaman/{peminjaman}/reject', [KepalaSekolahController::class, 'reject'])
+            ->middleware('role:kepala_sekolah')
+            ->name('peminjaman.reject');
 
         // Laporan Rekapitulasi Pemasukan Aula (Kepala Sekolah)
         Route::get('/laporan-pemasukan', [LaporanPemasukanController::class, 'index'])->name('laporan.index');

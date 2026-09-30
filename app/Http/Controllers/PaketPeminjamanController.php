@@ -49,6 +49,10 @@ class PaketPeminjamanController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        if ($request->user()?->isSuperAdmin()) {
+            abort(403, 'Akses ditolak: Super Admin hanya memiliki akses baca pada modul paket peminjaman.');
+        }
+
         $validated = $request->validate([
             'nama_paket' => ['nullable', 'string', 'max:150'],
             'kategori' => ['required', 'in:unggulan,terjangkau,standar 1,standar 2,standar 3'],
@@ -93,6 +97,10 @@ class PaketPeminjamanController extends Controller
      */
     public function update(Request $request, PaketPeminjaman $paket): RedirectResponse
     {
+        if ($request->user()?->isSuperAdmin()) {
+            abort(403, 'Akses ditolak: Super Admin hanya memiliki akses baca pada modul paket peminjaman.');
+        }
+
         $validated = $request->validate([
             'nama_paket' => ['nullable', 'string', 'max:150'],
             'kategori' => ['required', 'in:unggulan,terjangkau,standar 1,standar 2,standar 3'],
@@ -135,8 +143,12 @@ class PaketPeminjamanController extends Controller
     /**
      * Menghapus paket peminjaman aula beserta fasilitas detailnya.
      */
-    public function destroy(PaketPeminjaman $paket): RedirectResponse
+    public function destroy(Request $request, PaketPeminjaman $paket): RedirectResponse
     {
+        if ($request->user()?->isSuperAdmin()) {
+            abort(403, 'Akses ditolak: Super Admin hanya memiliki akses baca pada modul paket peminjaman.');
+        }
+
         // Proteksi: periksa apakah paket sedang digunakan dalam riwayat peminjaman
         $isUsedInBooking = DB::table('peminjamans')
             ->where('paket_peminjaman_id', $paket->id)

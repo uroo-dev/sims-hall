@@ -35,6 +35,10 @@ class FasilitasController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        if ($request->user()?->isSuperAdmin()) {
+            abort(403, 'Akses ditolak: Super Admin hanya memiliki akses baca pada modul fasilitas.');
+        }
+
         $validated = $request->validate([
             'judul' => ['required', 'string', 'max:250'],
             'deskripsi' => ['nullable', 'string', 'max:2000'],
@@ -56,6 +60,10 @@ class FasilitasController extends Controller
      */
     public function update(Request $request, Facility $facility): RedirectResponse
     {
+        if ($request->user()?->isSuperAdmin()) {
+            abort(403, 'Akses ditolak: Super Admin hanya memiliki akses baca pada modul fasilitas.');
+        }
+
         $validated = $request->validate([
             'judul' => ['required', 'string', 'max:250'],
             'deskripsi' => ['nullable', 'string', 'max:2000'],
@@ -75,8 +83,12 @@ class FasilitasController extends Controller
     /**
      * Menghapus fasilitas dari database.
      */
-    public function destroy(Facility $facility): RedirectResponse
+    public function destroy(Request $request, Facility $facility): RedirectResponse
     {
+        if ($request->user()?->isSuperAdmin()) {
+            abort(403, 'Akses ditolak: Super Admin hanya memiliki akses baca pada modul fasilitas.');
+        }
+
         $facility->delete();
 
         return redirect()

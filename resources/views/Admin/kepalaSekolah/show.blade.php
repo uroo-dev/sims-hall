@@ -343,27 +343,35 @@
                 </div>
 
                 @if ($peminjaman->status === 'approved_1')
-                    <div class="space-y-4">
-                        <p class="text-xs text-slate-600 leading-relaxed">
-                            Permohonan ini telah siap untuk disahkan. Silakan tentukan keputusan Anda:
-                        </p>
+                    @if(auth()->user()->role === 'kepala_sekolah')
+                        <div class="space-y-4">
+                            <p class="text-xs text-slate-600 leading-relaxed">
+                                Permohonan ini telah siap untuk disahkan. Silakan tentukan keputusan Anda:
+                            </p>
 
-                        <div class="space-y-2">
-                            <!-- Tombol Setuju -->
-                            <button type="button" onclick="openModalApproveFinal()"
-                                class="w-full py-3 px-4 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs md:text-sm shadow-md transition flex items-center justify-center gap-2 cursor-pointer transform active:scale-98">
-                                <i class="fa-solid fa-check text-base"></i>
-                                <span>Setujui Permohonan (Final)</span>
-                            </button>
+                            <div class="space-y-2">
+                                <!-- Tombol Setuju -->
+                                <button type="button" onclick="openModalApproveFinal()"
+                                    class="w-full py-3 px-4 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs md:text-sm shadow-md transition flex items-center justify-center gap-2 cursor-pointer transform active:scale-98">
+                                    <i class="fa-solid fa-check text-base"></i>
+                                    <span>Setujui Permohonan (Final)</span>
+                                </button>
 
-                            <!-- Tombol Tolak -->
-                            <button type="button" onclick="openModalRejectFinal()"
-                                class="w-full py-2.5 px-4 rounded-2xl bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 font-bold text-xs transition flex items-center justify-center gap-2 cursor-pointer">
-                                <i class="fa-solid fa-xmark text-sm"></i>
-                                <span>Tolak Permohonan</span>
-                            </button>
+                                <!-- Tombol Tolak -->
+                                <button type="button" onclick="openModalRejectFinal()"
+                                    class="w-full py-2.5 px-4 rounded-2xl bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 font-bold text-xs transition flex items-center justify-center gap-2 cursor-pointer">
+                                    <i class="fa-solid fa-xmark text-sm"></i>
+                                    <span>Tolak Permohonan</span>
+                                </button>
+                            </div>
                         </div>
-                    </div>
+                    @else
+                        <div class="p-4 bg-amber-50 rounded-2xl border border-amber-200 text-center space-y-1.5 text-xs text-amber-800">
+                            <i class="fa-solid fa-lock text-base text-amber-600 block mb-1"></i>
+                            <p class="font-bold">Mode Baca (Super Admin)</p>
+                            <p class="text-[11px] text-amber-700">Otorisasi persetujuan final hanya dapat diproses oleh akun Kepala Sekolah.</p>
+                        </div>
+                    @endif
                 @elseif ($peminjaman->status === 'approved_final')
                     <div class="p-4 bg-emerald-50 rounded-2xl border border-emerald-200 text-center space-y-2 text-xs">
                         <div class="w-12 h-12 rounded-full bg-emerald-600 text-white flex items-center justify-center text-xl mx-auto shadow-sm">
@@ -482,6 +490,7 @@
 @endsection
 
 @push('modals')
+@if(auth()->user()->role === 'kepala_sekolah')
 <!-- ============================================================== -->
 <!-- MODAL: APPROVE FINAL KEPALA SEKOLAH -->
 <!-- ============================================================== -->
@@ -676,4 +685,5 @@
         }
     });
 </script>
+@endif
 @endpush

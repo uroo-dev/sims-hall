@@ -244,6 +244,10 @@ class AdminPeminjamanController extends Controller
      */
     public function approve(Request $request, Peminjaman $peminjaman): RedirectResponse
     {
+        if ($request->user()?->isSuperAdmin()) {
+            abort(403, 'Akses ditolak: Super Admin hanya memiliki akses baca pada modul peminjaman.');
+        }
+
         $request->validate([
             'catatan_approval' => ['nullable', 'string', 'max:1000'],
         ]);
@@ -336,6 +340,10 @@ class AdminPeminjamanController extends Controller
      */
     public function reject(Request $request, Peminjaman $peminjaman): RedirectResponse
     {
+        if ($request->user()?->isSuperAdmin()) {
+            abort(403, 'Akses ditolak: Super Admin hanya memiliki akses baca pada modul peminjaman.');
+        }
+
         $validated = $request->validate([
             'alasan_penolakan' => ['required', 'string', 'min:5', 'max:1000'],
         ], [
@@ -429,6 +437,10 @@ class AdminPeminjamanController extends Controller
      */
     public function verifikasiPembayaran(Request $request, Peminjaman $peminjaman, ?DetailPembayaran $detail = null): RedirectResponse
     {
+        if ($request->user()?->isSuperAdmin()) {
+            abort(403, 'Akses ditolak: Super Admin hanya memiliki akses baca pada modul peminjaman.');
+        }
+
         $pembayaran = $peminjaman->pembayaran;
         if (! $pembayaran) {
             return back()->with('error', 'Data tagihan pembayaran peminjaman tidak ditemukan.');
@@ -483,6 +495,10 @@ class AdminPeminjamanController extends Controller
      */
     public function rejectPembayaran(Request $request, Peminjaman $peminjaman): RedirectResponse
     {
+        if ($request->user()?->isSuperAdmin()) {
+            abort(403, 'Akses ditolak: Super Admin hanya memiliki akses baca pada modul peminjaman.');
+        }
+
         $validated = $request->validate([
             'alasan_penolakan' => ['required', 'string', 'min:5', 'max:1000'],
             'detail_id' => ['nullable', 'exists:detail_pembayarans,id'],
@@ -553,6 +569,10 @@ class AdminPeminjamanController extends Controller
      */
     public function uploadRefund(Request $request, Peminjaman $peminjaman): RedirectResponse
     {
+        if ($request->user()?->isSuperAdmin()) {
+            abort(403, 'Akses ditolak: Super Admin hanya memiliki akses baca pada modul peminjaman.');
+        }
+
         $validated = $request->validate([
             'bukti_refund' => ['required', 'image', 'mimes:jpeg,png,jpg,webp', 'max:3072'],
             'bank_pengirim' => ['nullable', 'string', 'max:100'],

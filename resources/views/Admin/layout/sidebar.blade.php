@@ -120,13 +120,6 @@
                 </a>
 
                 @if(in_array(auth()->user()?->role, ['super_admin', 'super_duper_admin']))
-                    <!-- 5. DAFTAR PEMINJAMAN KEPALA SEKOLAH (SUPER ADMIN AKSES) -->
-                    <a href="{{ route('kepala-sekolah.peminjaman.index') }}"
-                        class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('kepala-sekolah.*') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
-                        <i class="fa-solid fa-clipboard-list text-base w-5 text-center"></i>
-                        <span>Daftar Peminjaman</span>
-                    </a>
-
                     <!-- 6. KONFIGURASI PEMBAYARAN (SUPER ADMIN) -->
                     <a href="{{ route('admin.payment-configuration.index') }}"
                         class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('admin.payment-configuration.*') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">

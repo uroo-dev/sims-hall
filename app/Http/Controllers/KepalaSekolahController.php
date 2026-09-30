@@ -216,6 +216,10 @@ class KepalaSekolahController extends Controller
      */
     public function approve(Request $request, Peminjaman $peminjaman): RedirectResponse
     {
+        if ($request->user()?->isSuperAdmin() || $request->user()?->role !== 'kepala_sekolah') {
+            abort(403, 'Akses ditolak: Persetujuan final hanya dapat diproses oleh Kepala Sekolah.');
+        }
+
         // Pastikan status peminjaman sudah disetujui admin sarpras (tahap awal)
         if ($peminjaman->status !== 'approved_1') {
             if ($peminjaman->status === 'approved_final') {
@@ -265,6 +269,10 @@ class KepalaSekolahController extends Controller
      */
     public function reject(Request $request, Peminjaman $peminjaman): RedirectResponse
     {
+        if ($request->user()?->isSuperAdmin() || $request->user()?->role !== 'kepala_sekolah') {
+            abort(403, 'Akses ditolak: Penolakan final hanya dapat diproses oleh Kepala Sekolah.');
+        }
+
         $validated = $request->validate([
             'alasan_penolakan' => ['required', 'string', 'min:5', 'max:1000'],
         ], [
