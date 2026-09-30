@@ -647,38 +647,60 @@
     </div>
 
 </div>
+@endsection
 
+@push('modals')
 <!-- ============================================================== -->
 <!-- MODAL: APPROVE PENGAJUAN -->
 <!-- ============================================================== -->
-<div id="modalApprove" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-    <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl border border-slate-100 p-6 space-y-5">
-        <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg flex-shrink-0">
-                <i class="fa-solid fa-circle-check"></i>
+<div id="modalApprove" class="fixed inset-0 !m-0 z-[100] hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity">
+    <div class="bg-white rounded-3xl w-full max-w-lg shadow-2xl border border-slate-100 overflow-hidden transform transition-all scale-95 duration-200" id="modalApproveBox">
+        <!-- HEADER -->
+        <div class="p-5 md:p-6 pb-2 md:pb-3 bg-white flex items-center justify-between flex-shrink-0">
+            <div class="flex items-center gap-3.5">
+                <div class="w-11 h-11 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg border border-emerald-100/80 shadow-xs flex-shrink-0">
+                    <i class="fa-solid fa-circle-check"></i>
+                </div>
+                <div>
+                    <h3 class="font-extrabold text-slate-900 text-base md:text-lg tracking-tight">Setujui Permohonan Peminjaman</h3>
+                    <p class="text-slate-500 text-xs mt-0.5">Konfirmasi persetujuan jadwal dan peminjaman aula</p>
+                </div>
             </div>
-            <div>
-                <h3 class="font-black text-slate-900 text-base">Setujui Permohonan Peminjaman?</h3>
-                <p class="text-xs text-slate-500">Peminjaman aula akan disetujui dan bukti pembayaran diverifikasi.</p>
-            </div>
+            <button type="button" onclick="closeModalApprove()" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition cursor-pointer" title="Tutup Modal">
+                <i class="fa-solid fa-xmark text-sm"></i>
+            </button>
         </div>
 
-        <form action="{{ route('admin.peminjaman.approve', $peminjaman->id) }}" method="POST" class="space-y-4">
+        <form action="{{ route('admin.peminjaman.approve', $peminjaman->id) }}" method="POST" class="p-5 md:p-6 space-y-4">
             @csrf
-            <div class="space-y-1">
-                <label class="block text-xs font-bold text-slate-700 uppercase">Catatan Approval (Opsional)</label>
-                <textarea name="catatan_approval" rows="3" placeholder="Masukkan catatan atau instruksi bagi pemohon..."
-                    class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs md:text-sm focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"></textarea>
+
+            <div class="p-4 bg-emerald-50/70 border border-emerald-200/80 rounded-2xl text-xs text-emerald-900 space-y-1">
+                <div class="font-bold flex items-center gap-1.5 text-emerald-800">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <span>Konfirmasi Pengesahan Jadwal</span>
+                </div>
+                <p class="leading-relaxed text-emerald-700">
+                    Peminjaman aula pada tanggal yang diajukan akan resmi dikunci dan disetujui. Pastikan Anda telah memeriksa dan memverifikasi bukti pembayaran yang masuk.
+                </p>
             </div>
 
-            <div class="flex items-center justify-end gap-2 pt-2">
+            <div>
+                <label for="catatan_approval" class="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wide">
+                    Catatan Approval (Opsional)
+                </label>
+                <textarea name="catatan_approval" id="catatan_approval" rows="3"
+                    placeholder="Masukkan catatan atau instruksi khusus bagi pemohon..."
+                    class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs md:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition"></textarea>
+            </div>
+
+            <div class="pt-3 border-t border-slate-100 flex items-center justify-end gap-2.5">
                 <button type="button" onclick="closeModalApprove()"
-                    class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition">
+                    class="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 text-xs md:text-sm font-semibold transition cursor-pointer">
                     Batal
                 </button>
                 <button type="submit"
-                    class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-xs transition flex items-center gap-1.5">
-                    <i class="fa-solid fa-check"></i>
+                    class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs md:text-sm font-bold shadow-sm transition flex items-center gap-1.5 cursor-pointer">
+                    <i class="fa-solid fa-check text-xs"></i>
                     <span>Ya, Setujui Permohonan</span>
                 </button>
             </div>
@@ -689,69 +711,76 @@
 <!-- ============================================================== -->
 <!-- MODAL: REJECT PENGAJUAN (WAJIB ALASAN & MEKANISME REFUND) -->
 <!-- ============================================================== -->
-<div id="modalReject" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-    <div class="bg-white rounded-3xl w-full max-w-lg shadow-2xl border border-slate-100 p-6 space-y-5">
-        <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center text-lg flex-shrink-0">
-                <i class="fa-solid fa-triangle-exclamation"></i>
+<div id="modalReject" class="fixed inset-0 !m-0 z-[100] hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity">
+    <div class="bg-white rounded-3xl w-full max-w-lg shadow-2xl border border-slate-100 overflow-hidden transform transition-all scale-95 duration-200" id="modalRejectBox">
+        <!-- HEADER -->
+        <div class="p-5 md:p-6 pb-2 md:pb-3 bg-white flex items-center justify-between flex-shrink-0">
+            <div class="flex items-center gap-3.5">
+                <div class="w-11 h-11 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center text-lg border border-red-100/80 shadow-xs flex-shrink-0">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <div>
+                    <h3 class="font-extrabold text-slate-900 text-base md:text-lg tracking-tight">Tolak Permohonan Peminjaman</h3>
+                    <p class="text-slate-500 text-xs mt-0.5">Wajib mengisi alasan penolakan permohonan</p>
+                </div>
             </div>
-            <div>
-                <h3 class="font-black text-slate-900 text-base">Tolak Permohonan Peminjaman</h3>
-                <p class="text-xs text-slate-500">Anda wajib mengisi keterangan alasan penolakan permohonan.</p>
-            </div>
+            <button type="button" onclick="closeModalReject()" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition cursor-pointer" title="Tutup Modal">
+                <i class="fa-solid fa-xmark text-sm"></i>
+            </button>
         </div>
 
-        @if ($hasVerifiedPayment)
-            <div class="p-3.5 bg-purple-50 border border-purple-200 rounded-2xl text-xs text-purple-900 space-y-1">
-                <div class="font-bold flex items-center gap-1.5 text-purple-700">
-                    <i class="fa-solid fa-hand-holding-dollar"></i>
-                    <span>Status Pembayaran: Terverifikasi Benar (Valid)</span>
-                </div>
-                <p class="leading-relaxed">
-                    Karena pemohon telah melakukan pembayaran yang diverifikasi benar (<strong>Rp {{ number_format($pembayaran->total_terbayar ?: $verifiedPayments->sum('jumlah_bayar'), 0, ',', '.') }}</strong>), penolakan permohonan ini akan <strong>melanjutkan ke proses pengembalian dana (refund)</strong> ke rekening pemohon.
-                </p>
-            </div>
-        @elseif ($isPaymentFailed)
-            <div class="p-3.5 bg-red-50 border border-red-200 rounded-2xl text-xs text-red-900 space-y-1">
-                <div class="font-bold flex items-center gap-1.5 text-red-700">
-                    <i class="fa-solid fa-ban"></i>
-                    <span>Status Pembayaran: Gagal / Ditolak</span>
-                </div>
-                <p class="leading-relaxed">
-                    Karena status pembayaran gagal atau ditolak, permohonan peminjaman ini akan ditolak dan <strong>proses refund TIDAK akan dilakukan</strong>.
-                </p>
-            </div>
-        @else
-            <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs text-slate-700 space-y-1">
-                <div class="font-bold flex items-center gap-1.5">
-                    <i class="fa-solid fa-circle-info text-slate-500"></i>
-                    <span>Status Pembayaran: Belum Ada Pembayaran Masuk</span>
-                </div>
-                <p class="leading-relaxed">
-                    Pemohon belum melakukan pembayaran yang valid. Penolakan ini akan membatalkan peminjaman dan proses refund tidak dilakukan.
-                </p>
-            </div>
-        @endif
-
-        <form action="{{ route('admin.peminjaman.reject', $peminjaman->id) }}" method="POST" class="space-y-4">
+        <form action="{{ route('admin.peminjaman.reject', $peminjaman->id) }}" method="POST" class="p-5 md:p-6 space-y-4">
             @csrf
-            <div class="space-y-1">
-                <label class="block text-xs font-bold text-slate-700 uppercase">
+
+            @if ($hasVerifiedPayment)
+                <div class="p-4 bg-purple-50/70 border border-purple-200/80 rounded-2xl text-xs text-purple-900 space-y-1.5">
+                    <div class="font-bold flex items-center gap-1.5 text-purple-700">
+                        <i class="fa-solid fa-hand-holding-dollar"></i>
+                        <span>Status Pembayaran: Terverifikasi Benar (Valid)</span>
+                    </div>
+                    <p class="leading-relaxed text-purple-800">
+                        Karena pemohon telah melakukan pembayaran yang diverifikasi benar (<strong>Rp {{ number_format($pembayaran->total_terbayar ?: $verifiedPayments->sum('jumlah_bayar'), 0, ',', '.') }}</strong>), penolakan permohonan ini akan <strong>melanjutkan ke proses pengembalian dana (refund)</strong> ke rekening pemohon.
+                    </p>
+                </div>
+            @elseif ($isPaymentFailed)
+                <div class="p-4 bg-red-50/70 border border-red-200/80 rounded-2xl text-xs text-red-900 space-y-1.5">
+                    <div class="font-bold flex items-center gap-1.5 text-red-700">
+                        <i class="fa-solid fa-ban"></i>
+                        <span>Status Pembayaran: Gagal / Ditolak</span>
+                    </div>
+                    <p class="leading-relaxed text-red-800">
+                        Karena status pembayaran gagal atau ditolak, permohonan peminjaman ini akan ditolak dan <strong>proses refund TIDAK akan dilakukan</strong>.
+                    </p>
+                </div>
+            @else
+                <div class="p-4 bg-slate-50 border border-slate-200/80 rounded-2xl text-xs text-slate-700 space-y-1.5">
+                    <div class="font-bold flex items-center gap-1.5 text-slate-800">
+                        <i class="fa-solid fa-circle-info text-slate-500"></i>
+                        <span>Status Pembayaran: Belum Ada Pembayaran Masuk</span>
+                    </div>
+                    <p class="leading-relaxed text-slate-600">
+                        Pemohon belum melakukan pembayaran yang valid. Penolakan ini akan membatalkan peminjaman dan proses refund tidak dilakukan.
+                    </p>
+                </div>
+            @endif
+
+            <div>
+                <label for="alasan_penolakan" class="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wide">
                     Alasan Penolakan <span class="text-red-500">* (Wajib diisi)</span>
                 </label>
-                <textarea name="alasan_penolakan" rows="3" required minlength="5"
+                <textarea name="alasan_penolakan" id="alasan_penolakan" rows="3" required minlength="5"
                     placeholder="Tuliskan alasan penolakan secara jelas (misal: Aula akan digunakan untuk agenda internal sekolah)..."
-                    class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs md:text-sm focus:bg-white focus:ring-2 focus:ring-red-500 focus:outline-none"></textarea>
+                    class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs md:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition"></textarea>
             </div>
 
-            <div class="flex items-center justify-end gap-2 pt-2">
+            <div class="pt-3 border-t border-slate-100 flex items-center justify-end gap-2.5">
                 <button type="button" onclick="closeModalReject()"
-                    class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition cursor-pointer">
+                    class="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 text-xs md:text-sm font-semibold transition cursor-pointer">
                     Batal
                 </button>
                 <button type="submit"
-                    class="px-5 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold shadow-xs transition flex items-center gap-1.5 cursor-pointer">
-                    <i class="fa-solid fa-ban"></i>
+                    class="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs md:text-sm font-bold shadow-sm transition flex items-center gap-1.5 cursor-pointer">
+                    <i class="fa-solid fa-ban text-xs"></i>
                     <span>Tolak Permohonan</span>
                 </button>
             </div>
@@ -762,73 +791,171 @@
 <!-- ============================================================== -->
 <!-- MODAL: REJECT PEMBAYARAN DEPOSIT (TRANSFER ULANG DENGAN DEADLINE BARU) -->
 <!-- ============================================================== -->
-<div id="modalRejectPayment" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-    <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl border border-slate-100 p-6 space-y-5">
-        <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-lg flex-shrink-0">
-                <i class="fa-solid fa-receipt"></i>
+<div id="modalRejectPayment" class="fixed inset-0 !m-0 z-[100] hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity">
+    <div class="bg-white rounded-3xl w-full max-w-lg shadow-2xl border border-slate-100 overflow-hidden transform transition-all scale-95 duration-200" id="modalRejectPaymentBox">
+        <!-- HEADER -->
+        <div class="p-5 md:p-6 pb-2 md:pb-3 bg-white flex items-center justify-between flex-shrink-0">
+            <div class="flex items-center gap-3.5">
+                <div class="w-11 h-11 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-lg border border-amber-100/80 shadow-xs flex-shrink-0">
+                    <i class="fa-solid fa-receipt"></i>
+                </div>
+                <div>
+                    <h3 class="font-extrabold text-slate-900 text-base md:text-lg tracking-tight">Tolak Bukti Pembayaran</h3>
+                    <p class="text-slate-500 text-xs mt-0.5">Status pembayaran akan diubah menjadi Gagal / Ditolak</p>
+                </div>
             </div>
-            <div>
-                <h3 class="font-black text-slate-900 text-base">Tolak Bukti Pembayaran Deposit</h3>
-                <p class="text-xs text-slate-500">Status pembayaran akan diubah menjadi Gagal / Ditolak.</p>
-            </div>
+            <button type="button" onclick="closeModalRejectPayment()" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition cursor-pointer" title="Tutup Modal">
+                <i class="fa-solid fa-xmark text-sm"></i>
+            </button>
         </div>
 
-        <form action="{{ route('admin.peminjaman.reject-pembayaran', $peminjaman->id) }}" method="POST" class="space-y-4">
+        <form action="{{ route('admin.peminjaman.reject-pembayaran', $peminjaman->id) }}" method="POST" class="p-5 md:p-6 space-y-4">
             @csrf
             <input type="hidden" name="detail_id" id="reject_detail_id" value="">
-            <div class="space-y-1">
-                <label class="block text-xs font-bold text-slate-700 uppercase">
+
+            <div class="p-4 bg-amber-50/70 border border-amber-200/80 rounded-2xl text-xs text-amber-900 space-y-1">
+                <div class="font-bold flex items-center gap-1.5 text-amber-800">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <span>Konsekuensi Penolakan Bukti</span>
+                </div>
+                <p class="leading-relaxed text-amber-800">
+                    Pemohon akan diminta mentransfer ulang dengan batas waktu pembayaran baru (<strong>{{ $config?->jatuh_tempo_dp_jam ?: 24 }} jam</strong>). Jika nantinya permohonan ditolak saat status pembayaran masih gagal, maka <strong>refund tidak akan dilakukan</strong>.
+                </p>
+            </div>
+
+            <div>
+                <label for="alasan_penolakan_pembayaran" class="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wide">
                     Alasan Penolakan Pembayaran <span class="text-red-500">*</span>
                 </label>
-                <textarea name="alasan_penolakan" rows="3" required minlength="5"
+                <textarea name="alasan_penolakan" id="alasan_penolakan_pembayaran" rows="3" required minlength="5"
                     placeholder="Contoh: Bukti transfer buram / nominal tidak sesuai / dana belum masuk mutasi..."
-                    class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs md:text-sm focus:bg-white focus:ring-2 focus:ring-amber-500 focus:outline-none"></textarea>
+                    class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs md:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition"></textarea>
             </div>
 
-            <div class="p-3 bg-amber-50 rounded-xl text-[11px] text-amber-800 leading-relaxed">
-                Pemohon akan diberikan tenggat waktu pembayaran baru (<strong>{{ $config?->jatuh_tempo_dp_jam ?: 24 }} jam</strong>). Jika nantinya peminjaman ditolak saat status pembayaran masih gagal, maka <strong>refund tidak akan dilakukan</strong>.
-            </div>
-
-            <div class="flex items-center justify-end gap-2 pt-2">
+            <div class="pt-3 border-t border-slate-100 flex items-center justify-end gap-2.5">
                 <button type="button" onclick="closeModalRejectPayment()"
-                    class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition cursor-pointer">
+                    class="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 text-xs md:text-sm font-semibold transition cursor-pointer">
                     Batal
                 </button>
                 <button type="submit"
-                    class="px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold shadow-xs transition flex items-center gap-1.5 cursor-pointer">
-                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    class="px-5 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs md:text-sm font-bold shadow-sm transition flex items-center gap-1.5 cursor-pointer">
+                    <i class="fa-solid fa-triangle-exclamation text-xs"></i>
                     <span>Tolak Pembayaran</span>
                 </button>
             </div>
         </form>
     </div>
 </div>
+@endpush
 
+@push('scripts')
 <script>
+    // Modal Approve Handlers
     function openModalApprove() {
-        document.getElementById('modalApprove').classList.remove('hidden');
+        const modal = document.getElementById('modalApprove');
+        const box = document.getElementById('modalApproveBox');
+        if (!modal || !box) return;
+        document.body.classList.add('overflow-hidden');
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            box.classList.remove('scale-95');
+            box.classList.add('scale-100');
+            const input = document.getElementById('catatan_approval');
+            if (input) input.focus();
+        }, 10);
     }
+
     function closeModalApprove() {
-        document.getElementById('modalApprove').classList.add('hidden');
+        const modal = document.getElementById('modalApprove');
+        const box = document.getElementById('modalApproveBox');
+        if (!modal || !box) return;
+        box.classList.remove('scale-100');
+        box.classList.add('scale-95');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+        }, 150);
     }
 
+    // Modal Reject Handlers
     function openModalReject() {
-        document.getElementById('modalReject').classList.remove('hidden');
-    }
-    function closeModalReject() {
-        document.getElementById('modalReject').classList.add('hidden');
+        const modal = document.getElementById('modalReject');
+        const box = document.getElementById('modalRejectBox');
+        if (!modal || !box) return;
+        document.body.classList.add('overflow-hidden');
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            box.classList.remove('scale-95');
+            box.classList.add('scale-100');
+            const input = document.getElementById('alasan_penolakan');
+            if (input) input.focus();
+        }, 10);
     }
 
+    function closeModalReject() {
+        const modal = document.getElementById('modalReject');
+        const box = document.getElementById('modalRejectBox');
+        if (!modal || !box) return;
+        box.classList.remove('scale-100');
+        box.classList.add('scale-95');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+        }, 150);
+    }
+
+    // Modal Reject Payment Handlers
     function openModalRejectPayment(detailId = '') {
         const inputDetail = document.getElementById('reject_detail_id');
         if (inputDetail) {
             inputDetail.value = detailId || '';
         }
-        document.getElementById('modalRejectPayment').classList.remove('hidden');
+        const modal = document.getElementById('modalRejectPayment');
+        const box = document.getElementById('modalRejectPaymentBox');
+        if (!modal || !box) return;
+        document.body.classList.add('overflow-hidden');
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            box.classList.remove('scale-95');
+            box.classList.add('scale-100');
+            const input = document.getElementById('alasan_penolakan_pembayaran');
+            if (input) input.focus();
+        }, 10);
     }
+
     function closeModalRejectPayment() {
-        document.getElementById('modalRejectPayment').classList.add('hidden');
+        const modal = document.getElementById('modalRejectPayment');
+        const box = document.getElementById('modalRejectPaymentBox');
+        if (!modal || !box) return;
+        box.classList.remove('scale-100');
+        box.classList.add('scale-95');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+        }, 150);
     }
+
+    // Close modal on escape key
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            closeModalApprove();
+            closeModalReject();
+            closeModalRejectPayment();
+        }
+    });
+
+    // Close modal on click outside box
+    ['modalApprove', 'modalReject', 'modalRejectPayment'].forEach(modalId => {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.addEventListener('click', function(event) {
+                if (event.target === modal) {
+                    if (modalId === 'modalApprove') closeModalApprove();
+                    if (modalId === 'modalReject') closeModalReject();
+                    if (modalId === 'modalRejectPayment') closeModalRejectPayment();
+                }
+            });
+        }
+    });
 </script>
-@endsection
+@endpush

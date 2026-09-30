@@ -796,23 +796,23 @@
 <div id="modalKonfirmasiRefund" class="fixed inset-0 !m-0 z-[100] hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity">
     <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl border border-slate-100 overflow-hidden transform transition-all scale-95 duration-200" id="modalKonfirmasiRefundBox">
         <!-- HEADER -->
-        <div class="p-6 pb-4 bg-white flex items-center justify-between border-b border-slate-100 flex-shrink-0">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg border border-emerald-100 shadow-xs flex-shrink-0">
+        <div class="p-5 md:p-6 pb-2 md:pb-3 bg-white flex items-center justify-between flex-shrink-0">
+            <div class="flex items-center gap-3.5">
+                <div class="w-11 h-11 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg border border-emerald-100/80 shadow-xs flex-shrink-0">
                     <i class="fa-solid fa-hand-holding-dollar"></i>
                 </div>
                 <div>
-                    <h3 class="font-extrabold text-slate-900 text-base tracking-tight">Konfirmasi Terima Refund</h3>
-                    <p class="text-slate-400 text-xs">Peminjaman Aula SMKN 2 Karanganyar</p>
+                    <h3 class="font-extrabold text-slate-900 text-base md:text-lg tracking-tight">Konfirmasi Terima Refund</h3>
+                    <p class="text-slate-500 text-xs mt-0.5">Peminjaman Aula SMKN 2 Karanganyar</p>
                 </div>
             </div>
-            <button type="button" onclick="closeModalKonfirmasiRefund()" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition cursor-pointer" title="Tutup">
+            <button type="button" onclick="closeModalKonfirmasiRefund()" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition cursor-pointer" title="Tutup Modal">
                 <i class="fa-solid fa-xmark text-sm"></i>
             </button>
         </div>
 
         <!-- BODY -->
-        <div class="p-6 space-y-4">
+        <div class="p-5 md:p-6 space-y-4">
             <div class="p-4 bg-emerald-50/70 border border-emerald-200/80 rounded-2xl space-y-2">
                 <div class="flex justify-between items-center text-xs">
                     <span class="text-emerald-800 font-medium">Total Dana Dikembalikan:</span>
@@ -833,27 +833,27 @@
                 <p>
                     Apakah Anda yakin telah menerima dana pengembalian ke rekening Anda sesuai dengan bukti transfer dari sekolah?
                 </p>
-                <div class="p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-800 text-[11px] flex items-start gap-2">
+                <div class="p-3 bg-amber-50 border border-amber-200/80 rounded-xl text-amber-800 text-[11px] flex items-start gap-2">
                     <i class="fa-solid fa-circle-exclamation text-amber-500 mt-0.5 flex-shrink-0"></i>
                     <span>Setelah dikonfirmasi, status pembayaran akan menjadi <strong>Selesai (Refunded)</strong> dan proses transaksi peminjaman aula ini ditutup.</span>
                 </div>
             </div>
-        </div>
 
-        <!-- FOOTER ACTIONS -->
-        <div class="p-6 pt-3 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-3">
-            <button type="button" onclick="closeModalKonfirmasiRefund()"
-                class="px-4 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 text-xs font-bold transition cursor-pointer">
-                Batal
-            </button>
-            <form action="{{ route('customer.pembayaran.konfirmasi-refund', $pembayaran->id) }}" method="POST" class="inline">
-                @csrf
-                <button type="submit"
-                    class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-xs font-bold transition shadow-xs flex items-center gap-1.5 cursor-pointer">
-                    <i class="fa-solid fa-circle-check"></i>
-                    <span>Ya, Dana Telah Diterima</span>
+            <!-- FOOTER ACTIONS -->
+            <div class="pt-3 border-t border-slate-100 flex items-center justify-end gap-2.5">
+                <button type="button" onclick="closeModalKonfirmasiRefund()"
+                    class="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 text-xs md:text-sm font-semibold transition cursor-pointer">
+                    Batal
                 </button>
-            </form>
+                <form action="{{ route('customer.pembayaran.konfirmasi-refund', $pembayaran->id) }}" method="POST" class="inline m-0">
+                    @csrf
+                    <button type="submit"
+                        class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs md:text-sm font-bold shadow-sm transition flex items-center gap-1.5 cursor-pointer">
+                        <i class="fa-solid fa-circle-check text-xs"></i>
+                        <span>Ya, Dana Telah Diterima</span>
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 </div>
@@ -935,8 +935,8 @@
         const modal = document.getElementById('modalKonfirmasiRefund');
         const box = document.getElementById('modalKonfirmasiRefundBox');
         if (!modal || !box) return;
+        document.body.classList.add('overflow-hidden');
         modal.classList.remove('hidden');
-        document.body.style.overflow = 'hidden';
         setTimeout(() => {
             box.classList.remove('scale-95');
             box.classList.add('scale-100');
@@ -951,7 +951,7 @@
         box.classList.add('scale-95');
         setTimeout(() => {
             modal.classList.add('hidden');
-            document.body.style.overflow = '';
+            document.body.classList.remove('overflow-hidden');
         }, 150);
     }
 
