@@ -94,28 +94,6 @@
         @endif
     </div>
 
-    <!-- PERINGATAN VERIFIKASI PEMBAYARAN TERTUNDA -->
-    @if ($hasPendingPayment)
-        <div class="bg-amber-50 border-2 border-amber-300 text-amber-900 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
-            <div class="flex items-start gap-3">
-                <div class="w-8 h-8 rounded-full bg-amber-500 text-white flex items-center justify-center font-bold text-sm shrink-0 mt-0.5">
-                    <i class="fa-solid fa-receipt"></i>
-                </div>
-                <div class="text-xs md:text-sm space-y-0.5">
-                    <p class="font-bold text-amber-900">
-                        Verifikasi Bukti Pembayaran Diperlukan!
-                    </p>
-                    <p class="text-amber-800">
-                        Pemohon telah mengunggah bukti pembayaran yang menunggu verifikasi Anda. Sebelum menyetujui atau menolak permohonan, verifikasi apakah bukti pembayaran sudah benar (valid) atau ditolak (gagal).
-                    </p>
-                </div>
-            </div>
-            <a href="#cardBuktiTransfer" class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5 self-start sm:self-auto shrink-0 shadow-xs">
-                <span>Periksa Bukti</span>
-                <i class="fa-solid fa-arrow-down text-[10px]"></i>
-            </a>
-        </div>
-    @endif
 
     <!-- PERINGATAN JADWAL BENTROK -->
     @if (isset($conflictingApproved) && $conflictingApproved)
@@ -536,20 +514,20 @@
 
                                 <!-- AKSI VERIFIKASI / TOLAK BUKTI TRANSFER -->
                                 @if ($trx->status === 'pending')
-                                    <div class="pt-3 border-t border-slate-200/60 flex items-center gap-2">
-                                        <form action="{{ route('admin.peminjaman.verifikasi-pembayaran', [$peminjaman->id, $trx->id]) }}" method="POST" class="flex-1">
+                                    <div class="pt-3 border-t border-slate-200/60 flex items-stretch gap-2">
+                                        <form action="{{ route('admin.peminjaman.verifikasi-pembayaran', [$peminjaman->id, $trx->id]) }}" method="POST" class="flex-1 m-0 flex">
                                             @csrf
                                             <button type="submit"
-                                                class="w-full py-2 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer">
+                                                class="w-full h-9 px-3 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer whitespace-nowrap">
                                                 <i class="fa-solid fa-circle-check text-xs"></i>
-                                                <span>Verifikasi Benar (Valid)</span>
+                                                <span>Verifikasi benar</span>
                                             </button>
                                         </form>
 
                                         <button type="button" onclick="openModalRejectPayment('{{ $trx->id }}')"
-                                            class="flex-1 py-2 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer">
+                                            class="flex-1 h-9 px-3 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap">
                                             <i class="fa-solid fa-triangle-exclamation text-xs"></i>
-                                            <span>Tolak Bukti (Gagal)</span>
+                                            <span>Tolak Bukti</span>
                                         </button>
                                     </div>
                                 @elseif ($trx->status === 'verified' && $peminjaman->status !== 'rejected')
