@@ -83,4 +83,30 @@ class Peminjaman extends Model
 
         return Storage::disk('public')->url($this->surat_pengantar);
     }
+
+    /**
+     * Memeriksa dan membatalkan otomatis peminjaman yang melewati batas waktu jatuh tempo
+     * (misalnya transfer ulang pembayaran yang ditolak atau tagihan yang kedaluwarsa).
+     */
+    public static function syncExpiredDeadlines(): void
+    {
+        $expiredPembayarans = Pembayaran::with('peminjaman')
+            ->whereIn('status_pembayaran', ['rejected', 'pending'])
+            ->whereNotNull('jatuh_tempo_dp')
+            ->where('jatuh_tempo_dp', '<', now())
+            ->whereHas('peminjaman', function ($q) {
+                $q->where('status', '!=', 'rejected');
+            })
+            ->get();
+
+        foreach ($expiredPembayarans as $pembayaran) {
+            if ($pembayaran->peminjaman) {
+                $pembayaran->peminjaman->update(['status' => 'rejected']);
+            }
+            $pembayaran->update([
+                'status_pembayaran' => 'hangus',
+                'catatan' => trim(($pembayaran->catatan ? $pembayaran->catatan.' | ' : '').'Peminjaman otomatis ditolak sistem karena melewati tenggat waktu pembayaran.'),
+            ]);
+        }
+    }
 }

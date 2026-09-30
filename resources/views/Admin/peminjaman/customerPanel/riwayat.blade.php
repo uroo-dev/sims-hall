@@ -109,6 +109,22 @@
                                     <span class="inline-flex items-center gap-1 px-3 py-1 rounded-md text-[11px] font-semibold bg-blue-600 text-white">
                                         DP Terverifikasi
                                     </span>
+                                @elseif ($statusBayar === 'refund_pending')
+                                    <span class="inline-flex items-center gap-1 px-3 py-1 rounded-md text-[11px] font-semibold bg-purple-600 text-white animate-pulse">
+                                        Proses Refund
+                                    </span>
+                                @elseif ($statusBayar === 'refunded')
+                                    <span class="inline-flex items-center gap-1 px-3 py-1 rounded-md text-[11px] font-semibold bg-slate-600 text-white">
+                                        Refund Selesai
+                                    </span>
+                                @elseif ($statusBayar === 'rejected')
+                                    <span class="inline-flex items-center gap-1 px-3 py-1 rounded-md text-[11px] font-semibold bg-red-600 text-white">
+                                        Transfer Ditolak
+                                    </span>
+                                @elseif ($statusBayar === 'hangus')
+                                    <span class="inline-flex items-center gap-1 px-3 py-1 rounded-md text-[11px] font-semibold bg-gray-500 text-white">
+                                        Expired
+                                    </span>
                                 @else
                                     <span class="inline-flex items-center gap-1 px-3 py-1 rounded-md text-[11px] font-semibold bg-amber-500 text-white">
                                         Pending
@@ -117,12 +133,22 @@
                             </td>
                             <!-- Aksi -->
                             <td class="py-4 px-3 text-center">
-                                <button type="button"
-                                        onclick="showNotaModal('{{ $kode }}', '{{ $namaPaket }}', '{{ number_format($harga, 0, ',', '.') }}', '{{ $tanggal }}', '{{ $isTerbayar ? 'LUNAS' : 'PENDING' }}')"
-                                        class="inline-flex items-center gap-1.5 px-3 py-1 bg-[#0070ba] hover:bg-[#005a96] text-white text-xs font-semibold rounded-md shadow-xs transition-colors">
-                                    <i class="fa-regular fa-circle-dot text-[10px]"></i>
-                                    <span>Nota</span>
-                                </button>
+                                <div class="flex items-center justify-center gap-1.5">
+                                    <button type="button"
+                                            onclick="showNotaModal('{{ $kode }}', '{{ $namaPaket }}', '{{ number_format($harga, 0, ',', '.') }}', '{{ $tanggal }}', '{{ $isTerbayar ? 'LUNAS' : 'PENDING' }}')"
+                                            class="inline-flex items-center gap-1 px-2.5 py-1 bg-[#0070ba] hover:bg-[#005a96] text-white text-xs font-semibold rounded-md shadow-xs transition-colors">
+                                        <i class="fa-regular fa-circle-dot text-[10px]"></i>
+                                        <span>Nota</span>
+                                    </button>
+                                    @if ($item->pembayaran)
+                                        <a href="{{ route('customer.pembayaran.show', $item->pembayaran->id) }}"
+                                           class="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-700 hover:bg-slate-800 text-white text-xs font-semibold rounded-md shadow-xs transition-colors"
+                                           title="Buka Rincian Tagihan & Pembayaran">
+                                            <i class="fa-solid fa-receipt text-[10px]"></i>
+                                            <span>Bayar</span>
+                                        </a>
+                                    @endif
+                                </div>
                             </td>
                         </tr>
                     @empty

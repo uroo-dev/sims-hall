@@ -74,6 +74,13 @@
                     <span>Paket Peminjaman</span>
                 </a>
 
+                <!-- 4. DAFTAR PEMINJAMAN -->
+                <a href="{{ route('admin.peminjaman.index') }}"
+                    class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('admin.peminjaman.*') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
+                    <i class="fa-solid fa-clipboard-list text-base w-5 text-center"></i>
+                    <span>Daftar Peminjaman</span>
+                </a>
+
                 @if(in_array(auth()->user()?->role, ['super_admin', 'super_duper_admin']))
                     <!-- 4. KONFIGURASI PEMBAYARAN (SUPER ADMIN) -->
                     <a href="{{ route('admin.payment-configuration.index') }}"

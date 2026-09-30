@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminPeminjamanController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CustomerPanelController;
 use App\Http\Controllers\DashboardController;
@@ -24,7 +25,7 @@ Route::middleware('auth')->group(function () {
         ->middleware('role:admin,super_admin,super_duper_admin,pelanggan')
         ->name('dashboard');
 
-    // Admin Aula: CRUD Fasilitas & Paket Peminjaman
+    // Admin Aula: CRUD Fasilitas, Paket Peminjaman, & Manajemen Peminjaman
     Route::middleware('adminFitur:aula')->prefix('admin')->name('admin.')->group(function () {
         Route::resource('fasilitas', FasilitasController::class)
             ->parameters(['fasilitas' => 'facility'])
@@ -33,6 +34,14 @@ Route::middleware('auth')->group(function () {
         Route::resource('paket', PaketPeminjamanController::class)
             ->parameters(['paket' => 'paket'])
             ->except(['create', 'edit', 'show']);
+
+        // Manajemen Peminjaman Aula
+        Route::get('/peminjaman', [AdminPeminjamanController::class, 'index'])->name('peminjaman.index');
+        Route::get('/peminjaman/{peminjaman}', [AdminPeminjamanController::class, 'show'])->name('peminjaman.show');
+        Route::post('/peminjaman/{peminjaman}/approve', [AdminPeminjamanController::class, 'approve'])->name('peminjaman.approve');
+        Route::post('/peminjaman/{peminjaman}/reject', [AdminPeminjamanController::class, 'reject'])->name('peminjaman.reject');
+        Route::post('/peminjaman/{peminjaman}/reject-pembayaran', [AdminPeminjamanController::class, 'rejectPembayaran'])->name('peminjaman.reject-pembayaran');
+        Route::post('/peminjaman/{peminjaman}/upload-refund', [AdminPeminjamanController::class, 'uploadRefund'])->name('peminjaman.upload-refund');
     });
 
     // Super Admin: Konfigurasi Pembayaran Sekolah
@@ -55,6 +64,10 @@ Route::middleware('auth')->group(function () {
         // Pembayaran Aula
         Route::get('/pembayaran/{pembayaran}', [CustomerPanelController::class, 'pembayaranShow'])->name('pembayaran.show');
         Route::post('/pembayaran/{pembayaran}', [CustomerPanelController::class, 'pembayaranBayar'])->name('pembayaran.bayar');
+
+        // Alur Pengembalian Dana (Refund)
+        Route::post('/pembayaran/{pembayaran}/rekening-refund', [CustomerPanelController::class, 'simpanRekeningRefund'])->name('pembayaran.rekening-refund');
+        Route::post('/pembayaran/{pembayaran}/konfirmasi-refund', [CustomerPanelController::class, 'konfirmasiRefund'])->name('pembayaran.konfirmasi-refund');
 
         Route::get('/cek-peminjaman', [CustomerPanelController::class, 'riwayat'])->name('cek-peminjaman');
         Route::get('/riwayat', [CustomerPanelController::class, 'riwayat'])->name('riwayat');

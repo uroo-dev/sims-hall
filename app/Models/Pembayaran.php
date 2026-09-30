@@ -82,6 +82,14 @@ class Pembayaran extends Model
     }
 
     /**
+     * Shortcut relasi ke transaksi Refund (Pengembalian Dana).
+     */
+    public function refund(): HasOne
+    {
+        return $this->hasOne(DetailPembayaran::class, 'pembayaran_id')->where('tipe_pembayaran', 'refund');
+    }
+
+    /**
      * Cek apakah tagihan sudah lunas sepenuhnya.
      */
     public function isLunas(): bool

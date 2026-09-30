@@ -107,6 +107,22 @@
                     <span class="px-2.5 py-0.5 bg-blue-50 text-brand-700 border border-blue-200 rounded-md text-[10px] font-bold uppercase">
                         <i class="fa-solid fa-shield-halved mr-1"></i> DP Terverifikasi
                     </span>
+                @elseif ($pembayaran->status_pembayaran === 'refund_pending')
+                    <span class="px-2.5 py-0.5 bg-purple-50 text-purple-700 border border-purple-200 rounded-md text-[10px] font-bold uppercase animate-pulse">
+                        <i class="fa-solid fa-hand-holding-dollar mr-1"></i> Menunggu Refund
+                    </span>
+                @elseif ($pembayaran->status_pembayaran === 'refunded')
+                    <span class="px-2.5 py-0.5 bg-slate-100 text-slate-700 border border-slate-200 rounded-md text-[10px] font-bold uppercase">
+                        <i class="fa-solid fa-check-double mr-1"></i> Refund Selesai
+                    </span>
+                @elseif ($pembayaran->status_pembayaran === 'rejected')
+                    <span class="px-2.5 py-0.5 bg-red-50 text-red-700 border border-red-200 rounded-md text-[10px] font-bold uppercase">
+                        <i class="fa-solid fa-triangle-exclamation mr-1"></i> Transfer Ditolak
+                    </span>
+                @elseif ($pembayaran->status_pembayaran === 'hangus')
+                    <span class="px-2.5 py-0.5 bg-slate-200 text-slate-700 rounded-md text-[10px] font-bold uppercase">
+                        Expired
+                    </span>
                 @else
                     <span class="px-2.5 py-0.5 bg-amber-50 text-amber-800 border border-amber-200 rounded-md text-[10px] font-bold uppercase">
                         Menunggu Pembayaran
@@ -141,14 +157,206 @@
         </div>
     </div>
 
+    <!-- BANNER PERINGATAN REJECT PEMBAYARAN (TRANSFER ULANG) -->
+    @if ($pembayaran->status_pembayaran === 'rejected' && $pembayaran->peminjaman?->status !== 'rejected')
+        <div class="bg-red-50 border-2 border-red-200 text-red-900 rounded-2xl p-5 shadow-xs flex items-start gap-4">
+            <div class="w-10 h-10 rounded-xl bg-red-600 text-white flex items-center justify-center font-bold text-lg flex-shrink-0">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <div class="space-y-1.5 text-xs md:text-sm">
+                <h3 class="font-black text-red-900 text-sm md:text-base">Bukti Pembayaran Ditolak Oleh Admin! Silakan Transfer Ulang</h3>
+                <p class="text-red-700 leading-relaxed">
+                    <strong>Alasan Penolakan:</strong> {{ $pembayaran->catatan }}
+                </p>
+                <div class="text-[11px] text-red-800 bg-red-100/60 p-2.5 rounded-xl border border-red-200">
+                    <i class="fa-regular fa-clock mr-1 font-bold"></i> Batas Waktu Transfer Ulang: <strong>{{ $targetDeadline->translatedFormat('d F Y, H:i') }} WIB</strong>. Jika melewati batas waktu tersebut tanpa mengunggah bukti pembayaran yang valid, sistem secara otomatis akan membatalkan dan menolak permohonan peminjaman aula.
+                </div>
+            </div>
+        </div>
+    @endif
+
+    <!-- BANNER KEDALUWARSA / PERMOHONAN DIBATALKAN OTOMATIS OLEH SISTEM -->
+    @if ($pembayaran->status_pembayaran === 'hangus' || ($pembayaran->peminjaman?->status === 'rejected' && $pembayaran->status_pembayaran !== 'refund_pending' && $pembayaran->status_pembayaran !== 'refunded'))
+        <div class="bg-slate-100 border-2 border-slate-300 text-slate-800 rounded-2xl p-5 shadow-xs flex items-start gap-4">
+            <div class="w-10 h-10 rounded-xl bg-slate-600 text-white flex items-center justify-center font-bold text-lg flex-shrink-0">
+                <i class="fa-solid fa-ban"></i>
+            </div>
+            <div class="space-y-1 text-xs md:text-sm">
+                <h3 class="font-black text-slate-900 text-sm md:text-base">Permohonan Peminjaman Aula Telah Ditolak / Dibatalkan</h3>
+                <p class="text-slate-600 leading-relaxed">
+                    {{ $pembayaran->catatan ?: 'Permohonan peminjaman aula ini telah ditolak oleh admin atau melewati batas waktu pembayaran yang ditentukan.' }}
+                </p>
+                <div class="pt-2">
+                    <a href="{{ route('customer.paket') }}" class="inline-flex items-center gap-1.5 px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-xl shadow-xs transition">
+                        <i class="fa-solid fa-plus text-[10px]"></i>
+                        <span>Ajukan Permohonan Baru</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    <!-- MODUL KHUSUS REFUND (JIKA STATUS PEMBAYARAN REFUND_PENDING ATAU REFUNDED) -->
+    @if (in_array($pembayaran->status_pembayaran, ['refund_pending', 'refunded']))
+        <div class="bg-purple-50/60 rounded-3xl p-6 md:p-8 border-2 border-purple-200 figma-card-shadow space-y-6">
+            <div class="flex items-center gap-3.5 pb-4 border-b border-purple-200/80">
+                <div class="w-12 h-12 rounded-2xl bg-purple-600 text-white flex items-center justify-center text-xl font-bold flex-shrink-0 shadow-xs">
+                    <i class="fa-solid fa-hand-holding-dollar"></i>
+                </div>
+                <div>
+                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-purple-200 text-purple-800 uppercase tracking-wider">
+                        Pengembalian Dana (Refund)
+                    </span>
+                    <h2 class="text-base md:text-lg font-black text-slate-900 tracking-tight mt-0.5">
+                        Pengajuan Peminjaman Ditolak & Proses Pengembalian Dana
+                    </h2>
+                    <p class="text-xs text-slate-500">
+                        Pihak sekolah mengembalikan dana sebesar <strong class="text-purple-700">Rp {{ number_format($pembayaran->total_refund, 0, ',', '.') }}</strong> yang telah Anda bayarkan.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Catatan Alasan Penolakan dari Admin -->
+            <div class="p-4 bg-white rounded-2xl border border-purple-100 text-xs md:text-sm space-y-1">
+                <span class="font-bold text-slate-700 block">Keterangan / Alasan Penolakan dari Pihak Sekolah:</span>
+                <p class="text-slate-600 italic">
+                    "{{ $pembayaran->catatan }}"
+                </p>
+            </div>
+
+            @php
+                $refund = $refundDetail ?: $pembayaran->details->firstWhere('tipe_pembayaran', 'refund');
+            @endphp
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                <!-- KOLOM 1: DATA REKENING PEMOHON -->
+                <div class="bg-white p-5 md:p-6 rounded-2xl border border-purple-100 space-y-4">
+                    <div class="flex items-center gap-2 font-bold text-slate-800 text-xs md:text-sm uppercase tracking-wide">
+                        <i class="fa-solid fa-credit-card text-purple-600"></i>
+                        <span>1. Rekening Pengembalian Dana Anda</span>
+                    </div>
+
+                    @if ($refund && $refund->norek_tujuan)
+                        <!-- Data Rekening Sudah Terisi -->
+                        <div class="p-4 bg-purple-50/40 rounded-xl border border-purple-100 space-y-2 text-xs">
+                            <div>
+                                <span class="text-slate-400 block text-[10px] uppercase font-bold">Nama Bank:</span>
+                                <strong class="text-slate-900 text-sm">{{ $refund->bank_tujuan }}</strong>
+                            </div>
+                            <div>
+                                <span class="text-slate-400 block text-[10px] uppercase font-bold">Nomor Rekening:</span>
+                                <span class="font-mono font-black text-purple-700 text-base">{{ $refund->norek_tujuan }}</span>
+                            </div>
+                            <div>
+                                <span class="text-slate-400 block text-[10px] uppercase font-bold">Atas Nama Pemilik:</span>
+                                <strong class="text-slate-800 text-xs">{{ $refund->atas_nama_pengirim }}</strong>
+                            </div>
+                        </div>
+
+                        @if ($pembayaran->status_pembayaran === 'refund_pending' && !$refund->bukti_pembayaran)
+                            <div class="p-3 bg-amber-50 rounded-xl border border-amber-200 text-[11px] text-amber-800 flex items-center gap-2">
+                                <i class="fa-solid fa-hourglass-half text-amber-600"></i>
+                                <span>Data rekening Anda telah diterima. Menunggu pihak sekolah mentransfer dan mengirimkan bukti transfer refund.</span>
+                            </div>
+                        @endif
+                    @else
+                        <!-- Form Pengisian Rekening Pemohon -->
+                        <form action="{{ route('customer.pembayaran.rekening-refund', $pembayaran->id) }}" method="POST" class="space-y-3">
+                            @csrf
+                            <p class="text-[11px] text-slate-500">
+                                Silakan masukkan nomor rekening tujuan yang aktif untuk menerima transfer pengembalian dana (refund):
+                            </p>
+
+                            <div class="space-y-1">
+                                <label class="block text-xs font-bold text-slate-700 uppercase">Nama Bank <span class="text-red-500">*</span></label>
+                                <input type="text" name="bank_tujuan" required placeholder="Contoh: Bank BCA, BRI, Mandiri, Bank Jateng"
+                                    class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 focus:bg-white focus:ring-2 focus:ring-purple-500 focus:outline-none">
+                            </div>
+
+                            <div class="space-y-1">
+                                <label class="block text-xs font-bold text-slate-700 uppercase">Nomor Rekening <span class="text-red-500">*</span></label>
+                                <input type="text" name="norek_tujuan" required placeholder="Contoh: 1234567890"
+                                    class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-mono text-slate-800 focus:bg-white focus:ring-2 focus:ring-purple-500 focus:outline-none">
+                            </div>
+
+                            <div class="space-y-1">
+                                <label class="block text-xs font-bold text-slate-700 uppercase">Atas Nama Pemilik Rekening <span class="text-red-500">*</span></label>
+                                <input type="text" name="atas_nama_pengirim" required placeholder="Nama lengkap sesuai buku tabungan"
+                                    class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 focus:bg-white focus:ring-2 focus:ring-purple-500 focus:outline-none">
+                            </div>
+
+                            <button type="submit"
+                                class="w-full py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold shadow-xs transition flex items-center justify-center gap-1.5">
+                                <i class="fa-solid fa-paper-plane text-xs"></i>
+                                <span>Simpan Data Rekening Refund</span>
+                            </button>
+                        </form>
+                    @endif
+                </div>
+
+                <!-- KOLOM 2: BUKTI TRANSFER REFUND DARI SEKOLAH & KONFIRMASI -->
+                <div class="bg-white p-5 md:p-6 rounded-2xl border border-purple-100 space-y-4">
+                    <div class="flex items-center gap-2 font-bold text-slate-800 text-xs md:text-sm uppercase tracking-wide">
+                        <i class="fa-solid fa-receipt text-purple-600"></i>
+                        <span>2. Bukti Transfer Refund Dari Sekolah</span>
+                    </div>
+
+                    @if ($refund && $refund->bukti_pembayaran)
+                        <!-- Admin Sudah Mengirim Bukti Transfer Refund -->
+                        <div class="space-y-3">
+                            <div class="p-3 bg-emerald-50 rounded-xl border border-emerald-200 text-xs text-emerald-800 flex items-center justify-between">
+                                <span class="font-bold"><i class="fa-solid fa-check-circle mr-1"></i> Bukti Transfer Telah Diunggah</span>
+                                <span class="text-[11px] text-emerald-600">{{ $refund->tanggal_bayar ? $refund->tanggal_bayar->format('d/m/Y H:i') : '' }}</span>
+                            </div>
+
+                            <a href="{{ $refund->bukti_pembayaran_url }}" target="_blank"
+                                class="block rounded-xl overflow-hidden border border-slate-200 hover:opacity-95 transition">
+                                <img src="{{ $refund->bukti_pembayaran_url }}" alt="Bukti Transfer Refund" class="w-full h-40 object-cover">
+                            </a>
+
+                            @if ($pembayaran->status_pembayaran === 'refund_pending')
+                                <!-- Form Tombol Konfirmasi Dana Telah Diterima -->
+                                <form action="{{ route('customer.pembayaran.konfirmasi-refund', $pembayaran->id) }}" method="POST"
+                                    onsubmit="return confirm('Apakah Anda yakin telah menerima dana pengembalian ke rekening Anda?')">
+                                    @csrf
+                                    <button type="submit"
+                                        class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-black shadow-xs transition flex items-center justify-center gap-2">
+                                        <i class="fa-solid fa-circle-check"></i>
+                                        <span>Konfirmasi Dana Telah Diterima (Selesai)</span>
+                                    </button>
+                                </form>
+                            @else
+                                <div class="p-3.5 bg-emerald-50 rounded-xl text-xs text-emerald-800 text-center font-bold flex items-center justify-center gap-2">
+                                    <i class="fa-solid fa-check-double text-base"></i>
+                                    <span>Pengembalian dana telah selesai dan dikonfirmasi diterima.</span>
+                                </div>
+                            @endif
+                        </div>
+                    @else
+                        <!-- Menunggu Admin Unggah Bukti -->
+                        <div class="p-8 text-center text-slate-400 space-y-2">
+                            <i class="fa-regular fa-clock text-3xl text-purple-300 block mb-1"></i>
+                            <p class="font-bold text-slate-700 text-xs md:text-sm">Menunggu Transfer Dari Sekolah</p>
+                            <p class="text-[11px] text-slate-400">
+                                Bukti transfer refund akan tampil di sini setelah admin sekolah mentransfer dana ke rekening yang Anda masukkan.
+                            </p>
+                        </div>
+                    @endif
+                </div>
+
+            </div>
+        </div>
+    @endif
+
     <!-- MAIN TWO-COLUMN CONTENT GRID -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
         <!-- KOLOM KIRI (SPAN 2): FORMULIR KONFIRMASI PEMBAYARAN & RIWAYAT -->
         <div class="lg:col-span-2 space-y-6">
 
-            <!-- 1. FORMULIR KONFIRMASI PEMBAYARAN -->
-            @if ($pembayaran->status_pembayaran !== 'lunas')
+            <!-- 1. FORMULIR KONFIRMASI PEMBAYARAN (HANYA MUNCUL JIKA STATUS BUKAN LUNAS, BUKAN REFUND, DAN BUKAN HANGUS) -->
+            @if (!in_array($pembayaran->status_pembayaran, ['lunas', 'refund_pending', 'refunded', 'hangus']) && $pembayaran->peminjaman?->status !== 'rejected')
                 <div class="bg-white rounded-2xl p-6 md:p-8 figma-card-shadow border border-slate-100 space-y-7">
                     <!-- Header Card -->
                     <div class="flex items-center gap-3 pb-4 border-b border-slate-100">
@@ -156,7 +364,9 @@
                             <i class="fa-solid fa-receipt"></i>
                         </div>
                         <div>
-                            <h2 class="text-sm md:text-base font-bold text-slate-800 uppercase tracking-wide">Konfirmasi & Unggah Bukti Transfer</h2>
+                            <h2 class="text-sm md:text-base font-bold text-slate-800 uppercase tracking-wide">
+                                {{ $pembayaran->status_pembayaran === 'rejected' ? 'Konfirmasi Transfer Ulang Bukti Pembayaran' : 'Konfirmasi & Unggah Bukti Transfer' }}
+                            </h2>
                             <p class="text-xs text-slate-500 mt-0.5">Pilih rekening tujuan, skema pembayaran, dan kirimkan struk transfer Anda</p>
                         </div>
                     </div>

@@ -252,6 +252,9 @@ class CustomerPanelController extends Controller
      */
     public function pembayaranShow(Pembayaran $pembayaran): View
     {
+        Peminjaman::syncExpiredDeadlines();
+        $pembayaran->refresh();
+
         $user = $this->getCurrentUser();
 
         // Keamanan akses: pastikan peminjam hanya melihat tagihannya sendiri (kecuali admin/super admin)
@@ -270,13 +273,15 @@ class CustomerPanelController extends Controller
         $config = PaymentConfiguration::current();
         $paket = $pembayaran->peminjaman?->paketPeminjaman;
         $nominalDp = ($paket && $paket->harga_dp > 0) ? (float) $paket->harga_dp : ((float) $pembayaran->total_tagihan * 0.3);
+        $refundDetail = $pembayaran->details->firstWhere('tipe_pembayaran', 'refund');
 
         return view('Admin.peminjaman.customerPanel.pembayaran', compact(
             'user',
             'pembayaran',
             'config',
             'paket',
-            'nominalDp'
+            'nominalDp',
+            'refundDetail'
         ));
     }
 
@@ -375,6 +380,8 @@ class CustomerPanelController extends Controller
      */
     public function riwayat(): View
     {
+        Peminjaman::syncExpiredDeadlines();
+
         $user = $this->getCurrentUser();
 
         $query = Peminjaman::with([
@@ -411,6 +418,76 @@ class CustomerPanelController extends Controller
             'hasUnpaid',
             'activePembayarans'
         ));
+    }
+
+    /**
+     * Pemohon Mengisi Rekening untuk Pengembalian Dana (Refund):
+     * Kolom pada tabel detail_pembayarans digunakan untuk mencatat rekening pemohon.
+     */
+    public function simpanRekeningRefund(Request $request, Pembayaran $pembayaran): RedirectResponse
+    {
+        $user = $this->getCurrentUser();
+
+        if ($user && $user->role !== 'admin' && ! $user->isSuperAdmin()) {
+            if ($pembayaran->peminjaman && $pembayaran->peminjaman->email_instansi !== $user->email && $pembayaran->peminjaman->nama !== $user->name) {
+                abort(403, 'Akses ditolak.');
+            }
+        }
+
+        $validated = $request->validate([
+            'bank_tujuan' => ['required', 'string', 'max:100'],
+            'norek_tujuan' => ['required', 'string', 'max:100'],
+            'atas_nama_pengirim' => ['required', 'string', 'max:150'],
+        ], [
+            'bank_tujuan.required' => 'Nama bank tujuan pengembalian dana wajib diisi.',
+            'norek_tujuan.required' => 'Nomor rekening pengembalian dana wajib diisi.',
+            'atas_nama_pengirim.required' => 'Nama lengkap pemilik rekening wajib diisi.',
+        ]);
+
+        $detailRefund = $pembayaran->details()->firstOrNew(['tipe_pembayaran' => 'refund']);
+        $detailRefund->kode_transaksi = $detailRefund->kode_transaksi ?: 'TRX-RFD-'.date('Ym').'-'.str_pad((string) $pembayaran->id, 3, '0', STR_PAD_LEFT);
+        $detailRefund->jumlah_bayar = $pembayaran->total_refund ?: $pembayaran->total_terbayar;
+        $detailRefund->metode = 'transfer';
+        $detailRefund->bank_tujuan = $validated['bank_tujuan'];
+        $detailRefund->norek_tujuan = $validated['norek_tujuan'];
+        $detailRefund->atas_nama_pengirim = $validated['atas_nama_pengirim'];
+        $detailRefund->status = 'pending';
+        $detailRefund->catatan = 'Data rekening refund telah dilengkapi pemohon. Menunggu admin mentransfer dana pengembalian.';
+        $detailRefund->save();
+
+        return redirect()->route('customer.pembayaran.show', $pembayaran->id)
+            ->with('success', 'Data rekening pengembalian dana berhasil disimpan! Pihak sekolah akan segera memproses transfer pengembalian dana.');
+    }
+
+    /**
+     * Pemohon Mengonfirmasi Penerimaan Dana Refund:
+     * Mengubah status pembayaran menjadi refunded dan detail refund menjadi verified.
+     */
+    public function konfirmasiRefund(Request $request, Pembayaran $pembayaran): RedirectResponse
+    {
+        $user = $this->getCurrentUser();
+
+        if ($user && $user->role !== 'admin' && ! $user->isSuperAdmin()) {
+            if ($pembayaran->peminjaman && $pembayaran->peminjaman->email_instansi !== $user->email && $pembayaran->peminjaman->nama !== $user->name) {
+                abort(403, 'Akses ditolak.');
+            }
+        }
+
+        $detailRefund = $pembayaran->details()->where('tipe_pembayaran', 'refund')->first();
+        if ($detailRefund) {
+            $detailRefund->update([
+                'status' => 'verified',
+                'diverifikasi_pada' => now(),
+            ]);
+        }
+
+        $pembayaran->update([
+            'status_pembayaran' => 'refunded',
+            'catatan' => trim(($pembayaran->catatan ? $pembayaran->catatan.' | ' : '').'Dana refund telah dikonfirmasi diterima oleh pemohon pada '.now()->format('d/m/Y H:i').' WIB.'),
+        ]);
+
+        return redirect()->route('customer.pembayaran.show', $pembayaran->id)
+            ->with('success', 'Terima kasih atas konfirmasi Anda. Pengembalian dana telah selesai (Status: Refunded).');
     }
 
     /**
