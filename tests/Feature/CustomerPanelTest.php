@@ -6,6 +6,7 @@ use App\Models\PaketPeminjaman;
 use App\Models\PaymentConfiguration;
 use App\Models\Pembayaran;
 use App\Models\Peminjaman;
+use App\Models\Persetujuan;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -270,6 +271,141 @@ class CustomerPanelTest extends TestCase
         $response->assertSessionHasErrors(['tanggal_mulai']);
         $this->assertDatabaseMissing('peminjamans', [
             'email_instansi' => 'peminjam2@instansi.com',
+        ]);
+    }
+
+    public function test_pengajuan_peminjaman_gagal_jika_bentrok_dengan_status_approved_1(): void
+    {
+        Storage::fake('public');
+
+        $pelanggan = User::factory()->create([
+            'role' => 'pelanggan',
+        ]);
+
+        $paket = PaketPeminjaman::create([
+            'nama_paket' => 'Paket Seminar',
+            'kategori' => 'standar 1',
+            'harga' => 3000000,
+        ]);
+
+        // Buat peminjaman approved_1 (disetujui admin)
+        Peminjaman::create([
+            'paket_peminjaman_id' => $paket->id,
+            'nama' => 'Peminjam Disetujui Admin',
+            'email_instansi' => 'approved1@instansi.com',
+            'tanggal_mulai' => now()->addDays(10)->setTime(9, 0),
+            'tanggal_selesai' => now()->addDays(10)->setTime(15, 0),
+            'status' => 'approved_1',
+        ]);
+
+        $suratFile = UploadedFile::fake()->create('surat.pdf', 200, 'application/pdf');
+
+        $response = $this->actingAs($pelanggan)->post(route('customer.peminjaman.store'), [
+            'paket_peminjaman_id' => $paket->id,
+            'nama' => 'Pemohon Bentrok',
+            'email_instansi' => 'bentrok@instansi.com',
+            'tanggal_mulai' => now()->addDays(10)->setTime(12, 0)->format('Y-m-d\TH:i'),
+            'tanggal_selesai' => now()->addDays(10)->setTime(17, 0)->format('Y-m-d\TH:i'),
+            'surat_pengantar' => $suratFile,
+        ]);
+
+        $response->assertSessionHasErrors(['tanggal_mulai']);
+        $this->assertDatabaseMissing('peminjamans', [
+            'email_instansi' => 'bentrok@instansi.com',
+        ]);
+    }
+
+    public function test_pengajuan_peminjaman_gagal_jika_bentrok_dengan_persetujuan_approved(): void
+    {
+        Storage::fake('public');
+
+        $pelanggan = User::factory()->create([
+            'role' => 'pelanggan',
+        ]);
+
+        $paket = PaketPeminjaman::create([
+            'nama_paket' => 'Paket Seminar',
+            'kategori' => 'standar 1',
+            'harga' => 3000000,
+        ]);
+
+        $admin = User::factory()->create(['role' => 'admin']);
+
+        // Buat peminjaman dengan relasi persetujuan status approved
+        $peminjaman = Peminjaman::create([
+            'paket_peminjaman_id' => $paket->id,
+            'nama' => 'Peminjam Dengan Persetujuan',
+            'email_instansi' => 'persetujuan@instansi.com',
+            'tanggal_mulai' => now()->addDays(12)->setTime(8, 0),
+            'tanggal_selesai' => now()->addDays(12)->setTime(14, 0),
+            'status' => 'pending',
+        ]);
+
+        Persetujuan::create([
+            'peminjaman_id' => $peminjaman->id,
+            'approver_id' => $admin->id,
+            'level' => 'admin',
+            'status' => 'approved',
+            'catatan_approval' => 'Disetujui',
+            'tanggal_proses' => now(),
+        ]);
+
+        $suratFile = UploadedFile::fake()->create('surat.pdf', 200, 'application/pdf');
+
+        $response = $this->actingAs($pelanggan)->post(route('customer.peminjaman.store'), [
+            'paket_peminjaman_id' => $paket->id,
+            'nama' => 'Pemohon Baru Bentrok',
+            'email_instansi' => 'pemohonbaru@instansi.com',
+            'tanggal_mulai' => now()->addDays(12)->setTime(10, 0)->format('Y-m-d\TH:i'),
+            'tanggal_selesai' => now()->addDays(12)->setTime(16, 0)->format('Y-m-d\TH:i'),
+            'surat_pengantar' => $suratFile,
+        ]);
+
+        $response->assertSessionHasErrors(['tanggal_mulai']);
+        $this->assertDatabaseMissing('peminjamans', [
+            'email_instansi' => 'pemohonbaru@instansi.com',
+        ]);
+    }
+
+    public function test_pengajuan_peminjaman_berhasil_jika_jadwal_tidak_bentrok(): void
+    {
+        Storage::fake('public');
+
+        $pelanggan = User::factory()->create([
+            'role' => 'pelanggan',
+        ]);
+
+        $paket = PaketPeminjaman::create([
+            'nama_paket' => 'Paket Seminar',
+            'kategori' => 'standar 1',
+            'harga' => 3000000,
+        ]);
+
+        // Buat peminjaman approved di hari ke-15
+        Peminjaman::create([
+            'paket_peminjaman_id' => $paket->id,
+            'nama' => 'Peminjam Hari 15',
+            'email_instansi' => 'hari15@instansi.com',
+            'tanggal_mulai' => now()->addDays(15)->setTime(8, 0),
+            'tanggal_selesai' => now()->addDays(15)->setTime(16, 0),
+            'status' => 'approved_final',
+        ]);
+
+        $suratFile = UploadedFile::fake()->create('surat.pdf', 200, 'application/pdf');
+
+        // Ajukan di hari ke-16 (tidak bentrok)
+        $response = $this->actingAs($pelanggan)->post(route('customer.peminjaman.store'), [
+            'paket_peminjaman_id' => $paket->id,
+            'nama' => 'Peminjam Hari 16',
+            'email_instansi' => 'hari16@instansi.com',
+            'tanggal_mulai' => now()->addDays(16)->setTime(8, 0)->format('Y-m-d\TH:i'),
+            'tanggal_selesai' => now()->addDays(16)->setTime(16, 0)->format('Y-m-d\TH:i'),
+            'surat_pengantar' => $suratFile,
+        ]);
+
+        $response->assertSessionDoesntHaveErrors();
+        $this->assertDatabaseHas('peminjamans', [
+            'email_instansi' => 'hari16@instansi.com',
         ]);
     }
 

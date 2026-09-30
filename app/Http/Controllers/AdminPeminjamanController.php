@@ -111,11 +111,31 @@ class AdminPeminjamanController extends Controller
         // Ambil transaksi refund jika ada
         $refundDetail = $pembayaran ? $pembayaran->details->firstWhere('tipe_pembayaran', 'refund') : null;
 
-        return view('Admin.peminjaman.show', compact('peminjaman', 'pembayaran', 'config', 'refundDetail'));
+        // Cek apakah jadwal peminjaman bentrok dengan peminjaman lain yang sudah disetujui
+        $conflictingApproved = null;
+        if (! in_array($peminjaman->status, ['approved_1', 'approved_final', 'rejected'])) {
+            $conflictingApproved = Peminjaman::query()
+                ->where('id', '!=', $peminjaman->id)
+                ->where(function ($q) {
+                    $q->whereIn('status', ['approved_1', 'approved_final'])
+                        ->orWhereHas('persetujuans', function ($sq) {
+                            $sq->where('status', 'approved');
+                        });
+                })
+                ->where('status', '!=', 'rejected')
+                ->where(function ($query) use ($peminjaman) {
+                    $query->where('tanggal_mulai', '<', $peminjaman->tanggal_selesai)
+                        ->where('tanggal_selesai', '>', $peminjaman->tanggal_mulai);
+                })
+                ->first();
+        }
+
+        return view('Admin.peminjaman.show', compact('peminjaman', 'pembayaran', 'config', 'refundDetail', 'conflictingApproved'));
     }
 
     /**
      * Aksi Approve Pengajuan oleh Admin Aula:
+     * - Memvalidasi ketiadaan jadwal bentrok dengan peminjaman lain yang sudah disetujui
      * - Mengubah status peminjaman menjadi approved_1 (atau approved_final)
      * - Menyimpan riwayat persetujuan admin
      * - Memverifikasi transaksi pembayaran pending (DP/Lunas) jika bukti sudah ada
@@ -125,6 +145,29 @@ class AdminPeminjamanController extends Controller
         $request->validate([
             'catatan_approval' => ['nullable', 'string', 'max:1000'],
         ]);
+
+        // Validasi: Cegah approval jika jadwal bentrok dengan peminjaman lain yang sudah disetujui
+        $conflictingPeminjaman = Peminjaman::query()
+            ->where('id', '!=', $peminjaman->id)
+            ->where(function ($q) {
+                $q->whereIn('status', ['approved_1', 'approved_final'])
+                    ->orWhereHas('persetujuans', function ($sq) {
+                        $sq->where('status', 'approved');
+                    });
+            })
+            ->where('status', '!=', 'rejected')
+            ->where(function ($query) use ($peminjaman) {
+                $query->where('tanggal_mulai', '<', $peminjaman->tanggal_selesai)
+                    ->where('tanggal_selesai', '>', $peminjaman->tanggal_mulai);
+            })
+            ->first();
+
+        if ($conflictingPeminjaman) {
+            $conflictStart = Carbon::parse($conflictingPeminjaman->tanggal_mulai)->translatedFormat('d F Y H:i');
+            $conflictEnd = Carbon::parse($conflictingPeminjaman->tanggal_selesai)->translatedFormat('d F Y H:i');
+
+            return back()->with('error', "Persetujuan gagal: Jadwal peminjaman ini bentrok dengan peminjaman lain yang sudah disetujui (#{$conflictingPeminjaman->id} - {$conflictingPeminjaman->nama} pada {$conflictStart} s/d {$conflictEnd} WIB).");
+        }
 
         DB::transaction(function () use ($request, $peminjaman) {
             // Update status peminjaman

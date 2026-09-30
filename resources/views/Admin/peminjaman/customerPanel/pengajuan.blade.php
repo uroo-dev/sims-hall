@@ -157,8 +157,12 @@
                             <input type="datetime-local" name="tanggal_mulai" id="tanggal_mulai" required
                                 min="{{ $earliestDate->format('Y-m-d\TH:i') }}"
                                 value="{{ old('tanggal_mulai', $earliestDate->format('Y-m-d\TH:i')) }}"
-                                class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs md:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition font-medium">
-                            <p class="text-[11px] text-slate-400 mt-1">Pemesanan minimal {{ $minHariBooking }} hari sebelum acara (paling awal: {{ $earliestDate->translatedFormat('d F Y, H:i') }} WIB).</p>
+                                class="w-full px-3.5 py-2.5 bg-slate-50 border @error('tanggal_mulai') border-red-500 @else border-slate-200 @enderror rounded-xl text-xs md:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition font-medium">
+                            @error('tanggal_mulai')
+                                <p class="text-[11px] text-red-600 font-semibold mt-1">{{ $message }}</p>
+                            @else
+                                <p class="text-[11px] text-slate-400 mt-1">Pemesanan minimal {{ $minHariBooking }} hari sebelum acara (paling awal: {{ $earliestDate->translatedFormat('d F Y, H:i') }} WIB).</p>
+                            @enderror
                         </div>
 
                         <div>
@@ -168,10 +172,32 @@
                             <input type="datetime-local" name="tanggal_selesai" id="tanggal_selesai" required
                                 min="{{ $earliestDate->copy()->addHour()->format('Y-m-d\TH:i') }}"
                                 value="{{ old('tanggal_selesai', $earliestDate->copy()->setHour(20)->setMinute(0)->format('Y-m-d\TH:i')) }}"
-                                class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs md:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition font-medium">
-                            <p class="text-[11px] text-slate-400 mt-1">Tanggal dan jam selesai acara / aula dikosongkan.</p>
+                                class="w-full px-3.5 py-2.5 bg-slate-50 border @error('tanggal_selesai') border-red-500 @else border-slate-200 @enderror rounded-xl text-xs md:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition font-medium">
+                            @error('tanggal_selesai')
+                                <p class="text-[11px] text-red-600 font-semibold mt-1">{{ $message }}</p>
+                            @else
+                                <p class="text-[11px] text-slate-400 mt-1">Tanggal dan jam selesai acara / aula dikosongkan.</p>
+                            @enderror
                         </div>
                     </div>
+
+                    @if(isset($approvedBookings) && $approvedBookings->isNotEmpty())
+                        <div class="pt-3 border-t border-slate-100">
+                            <span class="text-[11px] font-bold text-slate-600 uppercase tracking-wider flex items-center gap-1.5 mb-2">
+                                <i class="fa-solid fa-calendar-xmark text-amber-600"></i>
+                                Jadwal Aula yang Sudah Terisi (Approved):
+                            </span>
+                            <div class="flex flex-wrap gap-2">
+                                @foreach($approvedBookings as $b)
+                                    <div class="px-2.5 py-1 bg-amber-50 border border-amber-200 text-amber-800 rounded-lg text-[11px] font-medium flex items-center gap-1.5">
+                                        <i class="fa-solid fa-clock text-[10px] text-amber-600"></i>
+                                        <span>{{ \Carbon\Carbon::parse($b->tanggal_mulai)->translatedFormat('d M Y (H:i') }} - {{ \Carbon\Carbon::parse($b->tanggal_selesai)->translatedFormat('H:i)') }}</span>
+                                    </div>
+                                @endforeach
+                            </div>
+                            <p class="text-[10px] text-slate-400 mt-1.5 italic">* Pastikan jadwal pilihan Anda tidak bentrok dengan rentang waktu di atas.</p>
+                        </div>
+                    @endif
                 </div>
 
                 <!-- 3. DOKUMEN & SURAT PENGANTAR -->

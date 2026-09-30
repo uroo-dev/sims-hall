@@ -44,15 +44,48 @@
                     <span>Tolak Pengajuan</span>
                 </button>
                 @if (!in_array($peminjaman->status, ['approved_1', 'approved_final']))
-                    <button type="button" onclick="openModalApprove()"
-                        class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs md:text-sm font-bold shadow-xs transition flex items-center gap-2">
-                        <i class="fa-solid fa-check text-xs"></i>
-                        <span>Setujui (Approve)</span>
-                    </button>
+                    @if (isset($conflictingApproved) && $conflictingApproved)
+                        <button type="button" onclick="alert('Tidak dapat menyetujui peminjaman: Jadwal bentrok dengan peminjaman yang sudah disetujui (#{{ $conflictingApproved->id }} - {{ $conflictingApproved->nama }}).')"
+                            title="Jadwal peminjaman bentrok dengan peminjaman lain yang sudah disetujui"
+                            class="px-5 py-2 bg-slate-200 text-slate-500 cursor-not-allowed rounded-xl text-xs md:text-sm font-bold shadow-xs transition flex items-center gap-2">
+                            <i class="fa-solid fa-triangle-exclamation text-amber-500 text-xs"></i>
+                            <span>Jadwal Bentrok</span>
+                        </button>
+                    @else
+                        <button type="button" onclick="openModalApprove()"
+                            class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs md:text-sm font-bold shadow-xs transition flex items-center gap-2">
+                            <i class="fa-solid fa-check text-xs"></i>
+                            <span>Setujui (Approve)</span>
+                        </button>
+                    @endif
                 @endif
             </div>
         @endif
     </div>
+
+    <!-- PERINGATAN JADWAL BENTROK -->
+    @if (isset($conflictingApproved) && $conflictingApproved)
+        <div class="bg-amber-50 border-2 border-amber-300 text-amber-900 rounded-2xl p-4 flex items-start gap-3 shadow-xs">
+            <div class="w-8 h-8 rounded-full bg-amber-500 text-white flex items-center justify-center font-bold text-sm shrink-0 mt-0.5">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <div class="text-xs md:text-sm space-y-1">
+                <p class="font-bold text-amber-900">
+                    Peringatan: Jadwal Bentrok dengan Peminjaman yang Sudah Disetujui!
+                </p>
+                <p class="text-amber-800">
+                    Jadwal pengajuan ini (<span class="font-semibold">{{ \Carbon\Carbon::parse($peminjaman->tanggal_mulai)->translatedFormat('d M Y H:i') }} &ndash; {{ \Carbon\Carbon::parse($peminjaman->tanggal_selesai)->translatedFormat('d M Y H:i') }} WIB</span>) bertabrakan dengan peminjaman aula yang sudah disetujui:
+                    <a href="{{ route('admin.peminjaman.show', $conflictingApproved->id) }}" class="font-bold text-brand-700 underline hover:text-brand-900">
+                        #{{ $conflictingApproved->id }} - {{ $conflictingApproved->nama }}
+                    </a>
+                    (<span class="font-medium">{{ \Carbon\Carbon::parse($conflictingApproved->tanggal_mulai)->translatedFormat('d M Y H:i') }} &ndash; {{ \Carbon\Carbon::parse($conflictingApproved->tanggal_selesai)->translatedFormat('H:i') }} WIB</span>).
+                </p>
+                <p class="text-[11px] text-amber-700 font-medium">
+                    * Pengajuan ini tidak dapat disetujui sebelum peminjaman yang bentrok dibatalkan atau jadwal disesuaikan.
+                </p>
+            </div>
+        </div>
+    @endif
 
     <!-- FLASH MESSAGES -->
     @if (session('success'))

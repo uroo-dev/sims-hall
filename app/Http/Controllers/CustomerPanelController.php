@@ -143,11 +143,25 @@ class CustomerPanelController extends Controller
         $selectedPaket = $pakets->firstWhere('id', (int) $selectedPaketId) ?? $pakets->first();
         $paymentConfig = PaymentConfiguration::current();
 
+        $approvedBookings = Peminjaman::query()
+            ->where(function ($q) {
+                $q->whereIn('status', ['approved_1', 'approved_final'])
+                    ->orWhereHas('persetujuans', function ($sq) {
+                        $sq->where('status', 'approved');
+                    });
+            })
+            ->where('status', '!=', 'rejected')
+            ->where('tanggal_selesai', '>=', now())
+            ->orderBy('tanggal_mulai', 'asc')
+            ->take(6)
+            ->get();
+
         return view('Admin.peminjaman.customerPanel.pengajuan', compact(
             'user',
             'pakets',
             'selectedPaket',
-            'paymentConfig'
+            'paymentConfig',
+            'approvedBookings'
         ));
     }
 
@@ -204,18 +218,27 @@ class CustomerPanelController extends Controller
             ]);
         }
 
-        // Cek apakah ada jadwal aula yang bentrok dengan peminjaman yang sudah disetujui (1 query ringan)
-        $isConflict = Peminjaman::query()
-            ->whereIn('status', ['approved_1', 'approved_final'])
+        // Cek apakah ada jadwal aula yang bentrok dengan peminjaman yang sudah disetujui (approved)
+        $conflictingPeminjaman = Peminjaman::query()
+            ->where(function ($q) {
+                $q->whereIn('status', ['approved_1', 'approved_final'])
+                    ->orWhereHas('persetujuans', function ($sq) {
+                        $sq->where('status', 'approved');
+                    });
+            })
+            ->where('status', '!=', 'rejected')
             ->where(function ($query) use ($start, $end) {
                 $query->where('tanggal_mulai', '<', $end)
                     ->where('tanggal_selesai', '>', $start);
             })
-            ->exists();
+            ->first();
 
-        if ($isConflict) {
+        if ($conflictingPeminjaman) {
+            $conflictStart = Carbon::parse($conflictingPeminjaman->tanggal_mulai)->translatedFormat('d F Y H:i');
+            $conflictEnd = Carbon::parse($conflictingPeminjaman->tanggal_selesai)->translatedFormat('d F Y H:i');
+
             return back()->withInput()->withErrors([
-                'tanggal_mulai' => 'Jadwal aula pada tanggal dan jam tersebut sudah dipesan dan terverifikasi untuk acara lain. Silakan pilih rentang waktu lainnya.',
+                'tanggal_mulai' => "Pengajuan gagal: Jadwal aula bentrok dengan peminjaman yang sudah disetujui ({$conflictStart} s/d {$conflictEnd} WIB). Silakan pilih jadwal lain.",
             ]);
         }
 

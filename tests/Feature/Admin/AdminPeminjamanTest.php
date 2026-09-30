@@ -167,6 +167,47 @@ class AdminPeminjamanTest extends TestCase
         ]);
     }
 
+    public function test_admin_cannot_approve_peminjaman_if_schedule_conflicts_with_already_approved_peminjaman(): void
+    {
+        $admin = $this->createAdminAula();
+        $paket = PaketPeminjaman::create([
+            'nama_paket' => 'Paket Aula',
+            'kategori' => 'standar 1',
+            'harga' => 5000000,
+        ]);
+
+        // Peminjaman 1: Sudah disetujui (approved_1)
+        $peminjamanApproved = Peminjaman::create([
+            'paket_peminjaman_id' => $paket->id,
+            'nama' => 'Instansi Pertama',
+            'email_instansi' => 'pertama@instansi.com',
+            'tanggal_mulai' => now()->addDays(7)->setTime(8, 0),
+            'tanggal_selesai' => now()->addDays(7)->setTime(16, 0),
+            'status' => 'approved_1',
+        ]);
+
+        // Peminjaman 2: Masih pending, tetapi rentang waktu bentrok dengan Peminjaman 1
+        $peminjamanPending = Peminjaman::create([
+            'paket_peminjaman_id' => $paket->id,
+            'nama' => 'Instansi Kedua',
+            'email_instansi' => 'kedua@instansi.com',
+            'tanggal_mulai' => now()->addDays(7)->setTime(10, 0),
+            'tanggal_selesai' => now()->addDays(7)->setTime(14, 0),
+            'status' => 'pending',
+        ]);
+
+        $response = $this->actingAs($admin)->post('/admin/peminjaman/'.$peminjamanPending->id.'/approve', [
+            'catatan_approval' => 'Setuju',
+        ]);
+
+        $response->assertSessionHas('error');
+        $peminjamanPending->refresh();
+        $this->assertEquals('pending', $peminjamanPending->status);
+        $this->assertDatabaseMissing('persetujuans', [
+            'peminjaman_id' => $peminjamanPending->id,
+        ]);
+    }
+
     public function test_admin_reject_peminjaman_requires_alasan(): void
     {
         $admin = $this->createAdminAula();
