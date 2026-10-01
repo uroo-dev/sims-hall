@@ -52,7 +52,7 @@ class PaymentConfigurationTest extends TestCase
 
         $response->assertOk();
         $response->assertViewIs('Admin.peminjaman.paymentConfiguration.index');
-        $response->assertSee('Konfigurasi Pembayaran & Rekening Sekolah');
+        $response->assertSee('Konfigurasi Peminjaman & Rekening Sekolah');
         $response->assertSee('Bank Jateng');
         $response->assertSee('Batas Waktu Transfer DP (Jam)');
     }
@@ -156,7 +156,7 @@ class PaymentConfigurationTest extends TestCase
         $response = $this->actingAs($superAdmin)->get(route('dashboard'));
 
         $response->assertOk();
-        $response->assertSee('Konfigurasi Rekening & Pembayaran Sekolah');
+        $response->assertSee('Konfigurasi Peminjaman & Rekening Sekolah');
         $response->assertSee('Kelola Konfigurasi');
         $response->assertSee('Bank Jateng');
     }

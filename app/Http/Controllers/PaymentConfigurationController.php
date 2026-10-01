@@ -149,6 +149,6 @@ class PaymentConfigurationController extends Controller
 
         $config->update($data);
 
-        return redirect()->back()->with('success', 'Konfigurasi pembayaran sekolah berhasil disimpan.');
+        return redirect()->back()->with('success', 'Konfigurasi peminjaman berhasil disimpan.');
     }
 }

@@ -9,7 +9,7 @@
         </button>
         <!-- BREADCRUMB -->
         <div class="text-xs md:text-sm font-semibold tracking-wide text-gray-700">
-            <span class="text-gray-900 font-bold uppercase">{{ (auth()->user() && auth()->user()->role === 'pelanggan') || request()->routeIs('customer.*') ? 'ORGANISASI' : (auth()->user() ? strtoupper(str_replace('_', ' ', auth()->user()->role)) : 'ADMIN') }}</span>
+            <span class="text-gray-900 font-bold uppercase">{{ (auth()->user() && auth()->user()->role === 'pelanggan') || request()->routeIs('customer.*') ? 'PEMINJAMAN' : (auth()->user() ? strtoupper(str_replace('_', ' ', auth()->user()->role)) : 'ADMIN') }}</span>
             <span class="mx-1 text-gray-400">&gt;</span>
             <span class="text-gray-600">@yield('page_title', 'Dashboard')</span>
         </div>
@@ -32,7 +32,7 @@
                 </div>
                 <div class="text-left text-xs leading-none">
                     <div class="font-bold text-gray-800">{{ auth()->user()->name ?? 'Admin' }}</div>
-                    <div class="text-[10px] text-gray-500 mt-0.5">{{ (auth()->user() && auth()->user()->role === 'pelanggan') ? 'Organisasi' : (auth()->user() ? ucwords(str_replace('_', ' ', auth()->user()->role)) : 'admin') }}</div>
+                    <div class="text-[10px] text-gray-500 mt-0.5">{{ (auth()->user() && auth()->user()->role === 'pelanggan') ? 'Peminjaman' : (auth()->user() ? ucwords(str_replace('_', ' ', auth()->user()->role)) : 'admin') }}</div>
                 </div>
                 <i class="fa-solid fa-chevron-down text-[10px] text-gray-400 ml-1"></i>
             </button>

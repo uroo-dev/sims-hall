@@ -1,6 +1,7 @@
 @extends('Admin.layout.app')
 
-@section('title', 'Konfigurasi Pembayaran Sekolah - Admin')
+@section('title', 'Konfigurasi Peminjaman - Admin')
+@section('page_title', 'Konfigurasi Peminjaman')
 
 @section('content')
 <div class="space-y-6">
@@ -13,10 +14,10 @@
                 <span>SUPER ADMIN ACCESS</span>
             </div>
             <h1 class="text-xl md:text-2xl font-black text-slate-800 tracking-tight">
-                Konfigurasi Pembayaran &amp; Rekening Sekolah
+                Konfigurasi Peminjaman &amp; Rekening Sekolah
             </h1>
             <p class="text-xs md:text-sm text-slate-500 mt-1">
-                Kelola informasi rekening bank, QRIS, serta batas waktu (jam) jatuh tempo transfer deposit dan pelunasan aula.
+                Kelola informasi rekening bank, QRIS, minimal booking, toleransi pembatalan, serta batas waktu pembayaran aula.
             </p>
         </div>
         <div class="flex items-center gap-2">

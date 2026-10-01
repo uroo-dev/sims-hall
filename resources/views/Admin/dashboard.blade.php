@@ -57,14 +57,14 @@
                         <div>
                             <div class="flex items-center gap-2">
                                 <h2 class="text-sm md:text-base font-extrabold text-slate-800 uppercase tracking-wide">
-                                    Konfigurasi Rekening &amp; Pembayaran Sekolah
+                                    Konfigurasi Peminjaman &amp; Rekening Sekolah
                                 </h2>
                                 <span class="px-2 py-0.5 rounded-full text-[10px] font-bold {{ $paymentConfig->is_active ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-red-50 text-red-700 border border-red-200' }}">
                                     {{ $paymentConfig->is_active ? 'Sistem Aktif' : 'Nonaktif' }}
                                 </span>
                             </div>
                             <p class="text-xs text-slate-500 mt-0.5">
-                                Khusus Super Admin: Pengaturan rekening transfer tujuan, QRIS, serta tenggat jatuh tempo DP &amp; pelunasan aula.
+                                Khusus Super Admin: Pengaturan rekening transfer tujuan, QRIS, minimal booking, toleransi batal, serta tenggat pembayaran aula.
                             </p>
                         </div>
                     </div>
