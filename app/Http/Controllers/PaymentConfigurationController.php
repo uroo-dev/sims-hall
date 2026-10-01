@@ -76,6 +76,21 @@ class PaymentConfigurationController extends Controller
                     }
                 },
             ],
+            'offset_hari_pembatalan' => [
+                'nullable',
+                'integer',
+                'min:1',
+                'max:365',
+                function ($attribute, $value, $fail) use ($request) {
+                    if ($value === null || $value === '') {
+                        return;
+                    }
+                    $minHari = (int) $request->input('minimal_hari_booking', 0);
+                    if ($minHari > 0 && (int) $value > $minHari) {
+                        $fail("Batas maksimal pembatalan (H-{$value}) tidak boleh melebihi waktu minimal booking (H-{$minHari} peminjaman).");
+                    }
+                },
+            ],
 
             // Keterangan & Status
             'instruksi_pembayaran' => ['nullable', 'string', 'max:2000'],
@@ -94,6 +109,8 @@ class PaymentConfigurationController extends Controller
             'minimal_hari_booking.required' => 'Minimal selisih hari peminjaman wajib diisi.',
             'minimal_hari_booking.integer' => 'Minimal selisih hari peminjaman harus berupa angka bulat.',
             'minimal_hari_booking.min' => 'Minimal selisih hari peminjaman minimal 1 hari.',
+            'offset_hari_pembatalan.integer' => 'Offset batas waktu pembatalan harus berupa angka bulat.',
+            'offset_hari_pembatalan.min' => 'Offset batas waktu pembatalan minimal 1 hari.',
         ]);
 
         $data = [
@@ -110,6 +127,9 @@ class PaymentConfigurationController extends Controller
             'jatuh_tempo_dp_jam' => (int) $validated['jatuh_tempo_dp_jam'],
             'jatuh_tempo_pelunasan_jam' => (int) $validated['jatuh_tempo_pelunasan_jam'],
             'minimal_hari_booking' => (int) $validated['minimal_hari_booking'],
+            'offset_hari_pembatalan' => isset($validated['offset_hari_pembatalan']) && $validated['offset_hari_pembatalan'] !== null
+                ? (int) $validated['offset_hari_pembatalan']
+                : (int) ($config->offset_hari_pembatalan ?? 1),
             'instruksi_pembayaran' => $validated['instruksi_pembayaran'] ?? null,
             'is_active' => $request->has('is_active') ? $request->boolean('is_active') : true,
         ];

@@ -69,7 +69,11 @@
                             </td>
                             <!-- Tahap 1 -->
                             <td class="py-4 px-3 text-center">
-                                @if ($isTahap1Verified)
+                                @if ($item->status === 'cancelled')
+                                    <span class="inline-flex items-center gap-1 px-3 py-1 rounded-md text-[11px] font-semibold bg-slate-500 text-white">
+                                        Dibatalkan
+                                    </span>
+                                @elseif ($isTahap1Verified)
                                     <span class="inline-flex items-center gap-1 px-3 py-1 rounded-md text-[11px] font-semibold bg-[#00a844] text-white">
                                         <i class="fa-regular fa-circle-check text-[10px]"></i> Terverifikasi
                                     </span>
@@ -85,7 +89,11 @@
                             </td>
                             <!-- Tahap 2 -->
                             <td class="py-4 px-3 text-center">
-                                @if ($isTahap2Verified)
+                                @if ($item->status === 'cancelled')
+                                    <span class="inline-flex items-center gap-1 px-3 py-1 rounded-md text-[11px] font-semibold bg-slate-500 text-white">
+                                        Dibatalkan
+                                    </span>
+                                @elseif ($isTahap2Verified)
                                     <span class="inline-flex items-center gap-1 px-3 py-1 rounded-md text-[11px] font-semibold bg-[#00a844] text-white">
                                         <i class="fa-regular fa-circle-check text-[10px]"></i> Terverifikasi
                                     </span>
@@ -101,7 +109,21 @@
                             </td>
                             <!-- Status -->
                             <td class="py-4 px-3 text-center">
-                                @if ($isTerbayar)
+                                @if ($item->status === 'cancelled')
+                                    @if ($statusBayar === 'refund_pending')
+                                        <span class="inline-flex items-center gap-1 px-3 py-1 rounded-md text-[11px] font-semibold bg-purple-600 text-white animate-pulse">
+                                            Proses Refund
+                                        </span>
+                                    @elseif ($statusBayar === 'refunded')
+                                        <span class="inline-flex items-center gap-1 px-3 py-1 rounded-md text-[11px] font-semibold bg-slate-600 text-white">
+                                            Refund Selesai
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center gap-1 px-3 py-1 rounded-md text-[11px] font-semibold bg-slate-500 text-white">
+                                            Dibatalkan
+                                        </span>
+                                    @endif
+                                @elseif ($isTerbayar)
                                     <span class="inline-flex items-center gap-1 px-3 py-1 rounded-md text-[11px] font-semibold bg-[#00a844] text-white">
                                         <i class="fa-regular fa-circle-check text-[10px]"></i> Terbayar
                                     </span>
@@ -133,20 +155,39 @@
                             </td>
                             <!-- Aksi -->
                             <td class="py-4 px-3 text-center">
-                                <div class="flex items-center justify-center gap-1.5">
+                                <div class="flex items-center justify-center gap-1.5 flex-wrap">
                                     <button type="button"
                                             onclick="showNotaModal('{{ $kode }}', '{{ $namaPaket }}', '{{ number_format($harga, 0, ',', '.') }}', '{{ $tanggal }}', '{{ $isTerbayar ? 'LUNAS' : 'PENDING' }}')"
                                             class="inline-flex items-center gap-1 px-2.5 py-1 bg-[#0070ba] hover:bg-[#005a96] text-white text-xs font-semibold rounded-md shadow-xs transition-colors">
                                         <i class="fa-regular fa-circle-dot text-[10px]"></i>
                                         <span>Nota</span>
                                     </button>
-                                    @if ($item->pembayaran)
+                                    @if ($item->pembayaran && !in_array($item->status, ['cancelled', 'rejected']))
                                         <a href="{{ route('customer.pembayaran.show', $item->pembayaran->id) }}"
                                            class="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-700 hover:bg-slate-800 text-white text-xs font-semibold rounded-md shadow-xs transition-colors"
                                            title="Buka Rincian Tagihan & Pembayaran">
                                             <i class="fa-solid fa-receipt text-[10px]"></i>
                                             <span>Bayar</span>
                                         </a>
+                                    @elseif ($item->pembayaran && in_array($statusBayar, ['refund_pending', 'refunded']))
+                                        <a href="{{ route('customer.pembayaran.show', $item->pembayaran->id) }}"
+                                           class="inline-flex items-center gap-1 px-2.5 py-1 bg-purple-700 hover:bg-purple-800 text-white text-xs font-semibold rounded-md shadow-xs transition-colors"
+                                           title="Buka Status Refund Dana">
+                                            <i class="fa-solid fa-hand-holding-dollar text-[10px]"></i>
+                                            <span>Refund</span>
+                                        </a>
+                                    @endif
+                                    @if ($item->canBeCancelled())
+                                        @php
+                                            $totalTerbayarFormat = $item->pembayaran?->total_terbayar > 0 ? number_format($item->pembayaran->total_terbayar, 0, ',', '.') : '0';
+                                        @endphp
+                                        <button type="button"
+                                                onclick="openCancelModal('{{ $item->id }}', '{{ $kode }}', '{{ $namaPaket }}', '{{ $item->hari_maksimal_cancel }}', '{{ $item->batas_pembatalan->translatedFormat('d M Y, H:i') }}', '{{ route('customer.peminjaman.cancel', $item->id) }}', '{{ $totalTerbayarFormat }}', {{ $item->isEligibleForRefund() ? 'true' : 'false' }})"
+                                                class="inline-flex items-center gap-1 px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-semibold rounded-md shadow-xs transition-colors cursor-pointer"
+                                                title="Batalkan Pengajuan">
+                                            <i class="fa-solid fa-ban text-[10px]"></i>
+                                            <span>Batal</span>
+                                        </button>
                                     @endif
                                 </div>
                             </td>
@@ -366,6 +407,82 @@
             </button>
         </div>
     </div>
+<!-- MODAL PEMBATALAN PENGAJUAN -->
+<div id="modalCancel" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 hidden">
+    <div id="modalCancelBox" class="bg-white rounded-3xl max-w-lg w-full p-6 md:p-7 figma-card-shadow transform transition-all duration-200 scale-95 space-y-5">
+        <div class="flex items-center gap-3 pb-3 border-b border-slate-100">
+            <div class="w-10 h-10 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center text-lg font-bold flex-shrink-0">
+                <i class="fa-solid fa-ban"></i>
+            </div>
+            <div>
+                <h3 class="font-black text-slate-900 text-base md:text-lg">Konfirmasi Pembatalan Pengajuan</h3>
+                <p class="text-xs text-slate-500">Peminjaman Aula SMKN 2 Karanganyar</p>
+            </div>
+        </div>
+
+        <form id="formCancel" action="" method="POST" class="space-y-4 m-0">
+            @csrf
+            <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200/70 space-y-2 text-xs">
+                <div class="flex justify-between items-center text-slate-600">
+                    <span class="font-medium">Invoice:</span>
+                    <span class="font-bold font-mono text-slate-900" id="cancelInvoice">-</span>
+                </div>
+                <div class="flex justify-between items-center text-slate-600">
+                    <span class="font-medium">Paket:</span>
+                    <span class="font-bold text-slate-900" id="cancelPaket">-</span>
+                </div>
+                <div class="flex justify-between items-center text-slate-600">
+                    <span class="font-medium">Batas Toleransi Refund:</span>
+                    <span class="font-bold text-rose-700" id="cancelDeadlineText">-</span>
+                </div>
+            </div>
+
+            <!-- Dynamic Notification Box for Refund Eligibility -->
+            <div id="cancelEligibleBox" class="p-3.5 bg-emerald-50/80 border border-emerald-200 text-emerald-900 rounded-2xl text-[11px] leading-relaxed space-y-1">
+                <div class="font-bold flex items-center gap-1.5 text-emerald-800">
+                    <i class="fa-solid fa-circle-check text-xs"></i>
+                    <span>Toleransi Pengembalian Dana (Refund) Aktif:</span>
+                </div>
+                <p>
+                    Pembatalan diajukan dalam batas toleransi (maksimal <strong>H-<span id="cancelHMinTextEligible"></span></strong>).
+                </p>
+                <div id="refundInfoBox" class="font-semibold text-purple-900 pt-1 border-t border-emerald-200/60 hidden">
+                    Dana pembayaran yang telah terverifikasi sebesar <strong class="text-purple-700" id="cancelRefundNominalText">Rp 0</strong> akan dikembalikan (refund) oleh pihak admin sekolah setelah pembatalan diproses.
+                </div>
+            </div>
+
+            <div id="cancelExpiredBox" class="p-3.5 bg-rose-50/80 border border-rose-200 text-rose-900 rounded-2xl text-[11px] leading-relaxed space-y-1 hidden">
+                <div class="font-bold flex items-center gap-1.5 text-rose-800">
+                    <i class="fa-solid fa-triangle-exclamation text-xs"></i>
+                    <span>Perhatian: Melebihi Batas Offset Pembatalan</span>
+                </div>
+                <p>
+                    Anda dapat membatalkan pengajuan aula ini kapan saja. Namun karena pembatalan diajukan <strong>melebihi batas offset cancelation (H-<span id="cancelHMinTextExpired"></span>)</strong>, maka seluruh dana pembayaran yang telah disetorkan <strong>TIDAK DAPAT DIREUND (DANA HANGUS)</strong>.
+                </p>
+            </div>
+
+            <div class="space-y-1.5">
+                <label for="alasan_pembatalan" class="block text-xs font-bold text-slate-700">
+                    Alasan Pembatalan (Opsional):
+                </label>
+                <textarea name="alasan_pembatalan" id="alasan_pembatalan" rows="3"
+                          placeholder="Tuliskan alasan pembatalan peminjaman..."
+                          class="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs md:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition"></textarea>
+            </div>
+
+            <div class="flex items-center justify-end gap-2.5 pt-2 border-t border-slate-100">
+                <button type="button" onclick="closeCancelModal()"
+                        class="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 text-xs md:text-sm font-semibold transition cursor-pointer">
+                    Batal
+                </button>
+                <button type="submit"
+                        class="px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs md:text-sm font-bold shadow-xs transition flex items-center gap-2 cursor-pointer">
+                    <i class="fa-solid fa-ban text-xs"></i>
+                    <span>Ya, Batalkan Pengajuan</span>
+                </button>
+            </div>
+        </form>
+    </div>
 </div>
 @endpush
 
@@ -409,10 +526,59 @@
         }, 150);
     }
 
+    function openCancelModal(id, invoice, paket, hMin, deadline, routeUrl, terbayar, isEligible) {
+        document.getElementById('cancelInvoice').innerText = invoice;
+        document.getElementById('cancelPaket').innerText = paket;
+        document.getElementById('cancelDeadlineText').innerText = 'H-' + hMin + ' (' + deadline + ' WIB)';
+        document.getElementById('formCancel').action = routeUrl;
+
+        const eligibleBox = document.getElementById('cancelEligibleBox');
+        const expiredBox = document.getElementById('cancelExpiredBox');
+        const refundInfo = document.getElementById('refundInfoBox');
+
+        if (isEligible) {
+            eligibleBox.classList.remove('hidden');
+            expiredBox.classList.add('hidden');
+            document.getElementById('cancelHMinTextEligible').innerText = hMin;
+            if (terbayar && terbayar !== '0') {
+                document.getElementById('cancelRefundNominalText').innerText = 'Rp ' + terbayar;
+                refundInfo.classList.remove('hidden');
+            } else {
+                refundInfo.classList.add('hidden');
+            }
+        } else {
+            eligibleBox.classList.add('hidden');
+            expiredBox.classList.remove('hidden');
+            document.getElementById('cancelHMinTextExpired').innerText = hMin;
+        }
+
+        const modal = document.getElementById('modalCancel');
+        const box = document.getElementById('modalCancelBox');
+        document.body.classList.add('overflow-hidden');
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            box.classList.remove('scale-95');
+            box.classList.add('scale-100');
+        }, 10);
+    }
+
+    function closeCancelModal() {
+        const modal = document.getElementById('modalCancel');
+        const box = document.getElementById('modalCancelBox');
+        if (!modal) return;
+        box.classList.remove('scale-100');
+        box.classList.add('scale-95');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+        }, 150);
+    }
+
     // Close on Escape key
     document.addEventListener('keydown', function(event) {
         if (event.key === 'Escape') {
             closeNotaModal();
+            closeCancelModal();
         }
     });
 
@@ -422,6 +588,15 @@
         modalNota.addEventListener('click', function(event) {
             if (event.target === modalNota) {
                 closeNotaModal();
+            }
+        });
+    }
+
+    const modalCancel = document.getElementById('modalCancel');
+    if (modalCancel) {
+        modalCancel.addEventListener('click', function(event) {
+            if (event.target === modalCancel) {
+                closeCancelModal();
             }
         });
     }

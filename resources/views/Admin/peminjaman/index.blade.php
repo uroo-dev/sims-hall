@@ -132,6 +132,7 @@
                     <option value="approved_1" {{ request('status') === 'approved_1' ? 'selected' : '' }}>Disetujui Admin</option>
                     <option value="approved_final" {{ request('status') === 'approved_final' ? 'selected' : '' }}>Disetujui Final</option>
                     <option value="rejected" {{ request('status') === 'rejected' ? 'selected' : '' }}>Ditolak</option>
+                    <option value="cancelled" {{ request('status') === 'cancelled' ? 'selected' : '' }}>Dibatalkan</option>
                 </select>
             </div>
 
@@ -237,6 +238,10 @@
                                 @if (in_array($item->status, ['approved_1', 'approved_final']))
                                     <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
                                         <i class="fa-solid fa-circle-check text-[10px]"></i> Disetujui
+                                    </span>
+                                @elseif ($item->status === 'cancelled')
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-slate-100 text-slate-700 border border-slate-300">
+                                        <i class="fa-solid fa-ban text-[10px]"></i> Dibatalkan
                                     </span>
                                 @elseif ($item->status === 'rejected')
                                     <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-red-50 text-red-700 border border-red-200">

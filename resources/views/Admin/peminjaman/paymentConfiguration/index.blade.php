@@ -198,76 +198,109 @@
                     </div>
                 </div>
 
-                <!-- 3. JATUH TEMPO PEMBAYARAN (JAM) -->
+                <!-- 3. JATUH TEMPO PEMBAYARAN & BATAS PEMBATALAN -->
                 <div class="bg-white rounded-2xl p-6 figma-card-shadow border border-slate-100 space-y-5">
                     <div class="flex items-center gap-2.5 pb-3 border-b border-slate-100">
                         <div class="w-8 h-8 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center font-bold text-sm">
-                            <i class="fa-solid fa-clock"></i>
+                            <i class="fa-solid fa-clock-rotate-left"></i>
                         </div>
                         <div>
-                            <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wide">Pengaturan Jatuh Tempo Pembayaran (Jam)</h2>
-                            <p class="text-xs text-slate-500">Masa tenggang waktu (dalam jam) sebelum tagihan pembayaran dianggap hangus/kadaluarsa.</p>
+                            <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wide">Pengaturan Waktu Pembayaran & Batas Pembatalan</h2>
+                            <p class="text-xs text-slate-500">Masa tenggang pembayaran, batas waktu pelunasan, minimal selisih peminjaman, serta toleransi pembatalan pemohon.</p>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-                        <div class="p-4 bg-purple-50/40 border border-purple-100 rounded-xl space-y-2">
-                            <div class="flex items-center justify-between">
-                                <label for="jatuh_tempo_dp_jam" class="block text-xs font-bold text-slate-800 uppercase tracking-wide">
-                                    Batas Waktu Transfer DP (Jam) <span class="text-red-500">*</span>
-                                </label>
-                                <span class="text-[10px] font-bold text-purple-700 bg-purple-100 px-2 py-0.5 rounded-full">Deposit</span>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <!-- 1. DP JAM -->
+                        <div class="p-4 bg-purple-50/40 border border-purple-100 rounded-xl space-y-2 flex flex-col justify-between">
+                            <div class="space-y-2">
+                                <div class="flex items-center justify-between">
+                                    <label for="jatuh_tempo_dp_jam" class="block text-xs font-bold text-slate-800 uppercase tracking-wide">
+                                        Batas Waktu Transfer DP (Jam) <span class="text-red-500">*</span>
+                                    </label>
+                                    <span class="text-[10px] font-bold text-purple-700 bg-purple-100 px-2 py-0.5 rounded-full">Deposit</span>
+                                </div>
+                                <div class="relative">
+                                    <input type="number" name="jatuh_tempo_dp_jam" id="jatuh_tempo_dp_jam" required min="1" max="720"
+                                        value="{{ old('jatuh_tempo_dp_jam', $config->jatuh_tempo_dp_jam) }}"
+                                        class="w-full pl-3.5 pr-14 py-2.5 bg-white border border-slate-200 rounded-xl text-xs md:text-sm text-slate-800 font-bold focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition">
+                                    <span class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-xs font-bold text-slate-400">
+                                        Jam
+                                    </span>
+                                </div>
                             </div>
-                            <div class="relative">
-                                <input type="number" name="jatuh_tempo_dp_jam" id="jatuh_tempo_dp_jam" required min="1" max="720"
-                                    value="{{ old('jatuh_tempo_dp_jam', $config->jatuh_tempo_dp_jam) }}"
-                                    class="w-full pl-3.5 pr-14 py-2.5 bg-white border border-slate-200 rounded-xl text-xs md:text-sm text-slate-800 font-bold focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition">
-                                <span class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-xs font-bold text-slate-400">
-                                    Jam
-                                </span>
-                            </div>
-                            <p class="text-[11px] text-slate-500 leading-tight">
-                                Waktu toleransi bagi pemohon untuk mengunggah bukti transfer DP setelah jadwal diajukan/disetujui (default: 24 jam).
+                            <p class="text-[11px] text-slate-500 leading-tight pt-1">
+                                Batas waktu bagi pemohon untuk mengunggah bukti transfer DP setelah pengajuan disetujui (default: 24 jam).
                             </p>
                         </div>
 
-                        <div class="p-4 bg-blue-50/40 border border-blue-100 rounded-xl space-y-2">
-                            <div class="flex items-center justify-between">
-                                <label for="jatuh_tempo_pelunasan_jam" class="block text-xs font-bold text-slate-800 uppercase tracking-wide">
-                                    Batas Waktu Pelunasan (Jam) <span class="text-red-500">*</span>
-                                </label>
-                                <span class="text-[10px] font-bold text-brand-700 bg-blue-100 px-2 py-0.5 rounded-full">Pelunasan</span>
+                        <!-- 2. PELUNASAN JAM -->
+                        <div class="p-4 bg-blue-50/40 border border-blue-100 rounded-xl space-y-2 flex flex-col justify-between">
+                            <div class="space-y-2">
+                                <div class="flex items-center justify-between">
+                                    <label for="jatuh_tempo_pelunasan_jam" class="block text-xs font-bold text-slate-800 uppercase tracking-wide">
+                                        Pelunasan <span class="text-red-500">*</span>
+                                    </label>
+                                    <span class="text-[10px] font-bold text-brand-700 bg-blue-100 px-2 py-0.5 rounded-full">Pelunasan</span>
+                                </div>
+                                <div class="relative">
+                                    <input type="number" name="jatuh_tempo_pelunasan_jam" id="jatuh_tempo_pelunasan_jam" required min="1" max="720"
+                                        value="{{ old('jatuh_tempo_pelunasan_jam', $config->jatuh_tempo_pelunasan_jam) }}"
+                                        class="w-full pl-3.5 pr-14 py-2.5 bg-white border border-slate-200 rounded-xl text-xs md:text-sm text-slate-800 font-bold focus:outline-none focus:ring-2 focus:ring-brand-600/20 focus:border-brand-600 transition">
+                                    <span class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-xs font-bold text-slate-400">
+                                        Jam
+                                    </span>
+                                </div>
                             </div>
-                            <div class="relative">
-                                <input type="number" name="jatuh_tempo_pelunasan_jam" id="jatuh_tempo_pelunasan_jam" required min="1" max="720"
-                                    value="{{ old('jatuh_tempo_pelunasan_jam', $config->jatuh_tempo_pelunasan_jam) }}"
-                                    class="w-full pl-3.5 pr-14 py-2.5 bg-white border border-slate-200 rounded-xl text-xs md:text-sm text-slate-800 font-bold focus:outline-none focus:ring-2 focus:ring-brand-600/20 focus:border-brand-600 transition">
-                                <span class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-xs font-bold text-slate-400">
-                                    Jam
-                                </span>
-                            </div>
-                            <p class="text-[11px] text-slate-500 leading-tight">
-                                Batas waktu untuk menyelesaikan pelunasan sisa tagihan sewa aula sebelum hari pelaksanaan (default: 48 jam).
+                            <p class="text-[11px] text-slate-500 leading-tight pt-1">
+                                Batas waktu menyelesaikan pelunasan sisa tagihan sewa aula sebelum hari pelaksanaan (default: 48 jam).
                             </p>
                         </div>
 
-                        <div class="p-4 bg-emerald-50/40 border border-emerald-100 rounded-xl space-y-2">
-                            <div class="flex items-center justify-between">
-                                <label for="minimal_hari_booking" class="block text-xs font-bold text-slate-800 uppercase tracking-wide">
-                                    Min. Selisih Booking (Hari) <span class="text-red-500">*</span>
-                                </label>
-                                <span class="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">H-Hari</span>
+                        <!-- 3. MINIMAL SELISIH BOOKING (HARI) -->
+                        <div class="p-4 bg-emerald-50/40 border border-emerald-100 rounded-xl space-y-2 flex flex-col justify-between">
+                            <div class="space-y-2">
+                                <div class="flex items-center justify-between">
+                                    <label for="minimal_hari_booking" class="block text-xs font-bold text-slate-800 uppercase tracking-wide">
+                                        Min. Booking <span class="text-red-500">*</span>
+                                    </label>
+                                    <span class="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">H-Acara</span>
+                                </div>
+                                <div class="relative">
+                                    <input type="number" name="minimal_hari_booking" id="minimal_hari_booking" required min="1" max="365"
+                                        value="{{ old('minimal_hari_booking', $config->minimal_hari_booking ?? 3) }}"
+                                        class="w-full pl-3.5 pr-14 py-2.5 bg-white border border-slate-200 rounded-xl text-xs md:text-sm text-slate-800 font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition">
+                                    <span class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-xs font-bold text-slate-400">
+                                        Hari
+                                    </span>
+                                </div>
                             </div>
-                            <div class="relative">
-                                <input type="number" name="minimal_hari_booking" id="minimal_hari_booking" required min="1" max="365"
-                                    value="{{ old('minimal_hari_booking', $config->minimal_hari_booking ?? 3) }}"
-                                    class="w-full pl-3.5 pr-14 py-2.5 bg-white border border-slate-200 rounded-xl text-xs md:text-sm text-slate-800 font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition">
-                                <span class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-xs font-bold text-slate-400">
-                                    Hari
-                                </span>
+                            <p class="text-[11px] text-slate-500 leading-tight pt-1">
+                                Minimal selisih hari pemesanan ke hari H acara. Wajib lebih besar dari batas waktu pelunasan final.
+                            </p>
+                        </div>
+
+                        <!-- 4. OFFSET BATAS WAKTU PEMBATALAN (H-) -->
+                        <div class="p-4 bg-rose-50/40 border border-rose-100 rounded-xl space-y-2 flex flex-col justify-between">
+                            <div class="space-y-2">
+                                <div class="flex items-center justify-between">
+                                    <label for="offset_hari_pembatalan" class="block text-xs font-bold text-slate-800 uppercase tracking-wide">
+                                        Batas Batal (H-) <span class="text-red-500">*</span>
+                                    </label>
+                                    <span class="text-[10px] font-bold text-rose-700 bg-rose-100 px-2 py-0.5 rounded-full">Batal Sewa</span>
+                                </div>
+                                <div class="relative">
+                                    <input type="number" name="offset_hari_pembatalan" id="offset_hari_pembatalan" required min="1" max="365"
+                                        value="{{ old('offset_hari_pembatalan', $config->offset_hari_pembatalan ?? 1) }}"
+                                        placeholder="Contoh: 9"
+                                        class="w-full pl-3.5 pr-14 py-2.5 bg-white border border-slate-200 rounded-xl text-xs md:text-sm text-slate-800 font-bold focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition">
+                                    <span class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-xs font-bold text-slate-400">
+                                        H-Hari
+                                    </span>
+                                </div>
                             </div>
-                            <p class="text-[11px] text-slate-500 leading-tight">
-                                Minimal selisih hari pemesanan ke hari H acara. Nilai waktu ini harus lebih besar dari batas waktu pelunasan final.
+                            <p class="text-[11px] text-slate-500 leading-tight pt-1">
+                                Waktu toleransi maksimal pembatalan pengajuan sebelum hari H. Misal diatur <strong>9</strong>, maka pembatalan bisa dilakukan sampai <strong>H-9</strong> peminjaman. Nilai ini tidak boleh melebihi minimal selisih booking.
                             </p>
                         </div>
                     </div>

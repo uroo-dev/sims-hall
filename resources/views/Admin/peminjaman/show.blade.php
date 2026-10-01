@@ -23,6 +23,10 @@
                     <span class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
                         <i class="fa-solid fa-circle-check mr-1"></i> Disetujui
                     </span>
+                @elseif ($peminjaman->status === 'cancelled')
+                    <span class="px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-700 border border-slate-300">
+                        <i class="fa-solid fa-ban mr-1"></i> Dibatalkan Pemohon
+                    </span>
                 @elseif ($peminjaman->status === 'rejected')
                     <span class="px-3 py-1 rounded-full text-xs font-bold bg-red-50 text-red-700 border border-red-200">
                         <i class="fa-solid fa-circle-xmark mr-1"></i> Ditolak
@@ -43,7 +47,7 @@
             $hasVerifiedPayment = $pembayaran && ($pembayaran->total_terbayar > 0 || $verifiedPayments->isNotEmpty());
             $isPaymentFailed = $pembayaran && ($pembayaran->status_pembayaran === 'rejected' || ($pembayaran->details->where('tipe_pembayaran', '!=', 'refund')->isNotEmpty() && $pembayaran->details->where('tipe_pembayaran', '!=', 'refund')->every(fn($d) => $d->status === 'rejected')));
         @endphp
-        @if ($peminjaman->status !== 'rejected')
+        @if (!in_array($peminjaman->status, ['rejected', 'cancelled']))
             @if(!auth()->user()->isSuperAdmin())
                 <div class="flex items-center gap-2">
                     @if ($hasPendingPayment)
@@ -121,6 +125,26 @@
                 </p>
                 <p class="text-[11px] text-amber-700 font-medium">
                     * Pengajuan ini tidak dapat disetujui sebelum peminjaman yang bentrok dibatalkan atau jadwal disesuaikan.
+                </p>
+            </div>
+        </div>
+    @endif
+
+    <!-- BANNER PERINGATAN PEMBATALAN OLEH PEMOHON -->
+    @if ($peminjaman->status === 'cancelled')
+        <div class="bg-slate-50 border-2 border-slate-300 text-slate-800 rounded-2xl p-4 md:p-5 flex items-start gap-3.5 shadow-xs">
+            <div class="w-9 h-9 rounded-xl bg-slate-700 text-white flex items-center justify-center font-bold text-base flex-shrink-0">
+                <i class="fa-solid fa-ban"></i>
+            </div>
+            <div class="space-y-1 text-xs md:text-sm">
+                <h4 class="font-black text-slate-900">Pengajuan Peminjaman Telah Dibatalkan</h4>
+                <p class="text-slate-600">
+                    Pengajuan peminjaman aula ini telah dibatalkan oleh pemohon.
+                    @if ($hasPendingPayment)
+                        <strong class="text-amber-700 block mt-1"><i class="fa-solid fa-circle-exclamation mr-1"></i> Perhatian Admin: Terdapat bukti transfer pembayaran pemohon yang menunggu verifikasi di bawah. Jika pembayaran diverifikasi valid, dana akan otomatis dialihkan ke alur pengembalian (refund).</strong>
+                    @elseif ($pembayaran && in_array($pembayaran->status_pembayaran, ['refund_pending', 'refunded']))
+                        <strong class="text-purple-700 block mt-1"><i class="fa-solid fa-hand-holding-dollar mr-1"></i> Pembayaran sebesar Rp {{ number_format($pembayaran->total_refund, 0, ',', '.') }} telah diverifikasi valid dan dalam proses pengembalian dana (refund).</strong>
+                    @endif
                 </p>
             </div>
         </div>
@@ -538,7 +562,7 @@
                                                 <span>Tolak Bukti</span>
                                             </button>
                                         </div>
-                                    @elseif ($trx->status === 'verified' && $peminjaman->status !== 'rejected')
+                                    @elseif ($trx->status === 'verified' && !in_array($peminjaman->status, ['rejected', 'cancelled']))
                                         <div class="pt-2 border-t border-slate-200/60 flex items-center justify-between">
                                             <span class="text-[11px] text-emerald-700 font-bold flex items-center gap-1">
                                                 <i class="fa-solid fa-circle-check"></i> Pembayaran Terverifikasi Benar
@@ -548,6 +572,12 @@
                                                 <i class="fa-solid fa-triangle-exclamation text-[10px]"></i>
                                                 <span>Tolak Pembayaran</span>
                                             </button>
+                                        </div>
+                                    @elseif ($trx->status === 'verified')
+                                        <div class="pt-2 border-t border-slate-200/60 flex items-center justify-between">
+                                            <span class="text-[11px] text-emerald-700 font-bold flex items-center gap-1">
+                                                <i class="fa-solid fa-circle-check"></i> Pembayaran Terverifikasi Benar
+                                            </span>
                                         </div>
                                     @endif
                                 @endif

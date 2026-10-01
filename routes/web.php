@@ -61,6 +61,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/peminjaman/{peminjaman}', [AdminPeminjamanController::class, 'show'])->name('peminjaman.show');
         Route::post('/peminjaman/{peminjaman}/approve', [AdminPeminjamanController::class, 'approve'])->name('peminjaman.approve');
         Route::post('/peminjaman/{peminjaman}/reject', [AdminPeminjamanController::class, 'reject'])->name('peminjaman.reject');
+        Route::post('/peminjaman/{peminjaman}/cancel', [AdminPeminjamanController::class, 'cancel'])->name('peminjaman.cancel');
         Route::post('/peminjaman/{peminjaman}/verifikasi-pembayaran/{detail?}', [AdminPeminjamanController::class, 'verifikasiPembayaran'])->name('peminjaman.verifikasi-pembayaran');
         Route::post('/peminjaman/{peminjaman}/reject-pembayaran', [AdminPeminjamanController::class, 'rejectPembayaran'])->name('peminjaman.reject-pembayaran');
         Route::post('/peminjaman/{peminjaman}/upload-refund', [AdminPeminjamanController::class, 'uploadRefund'])->name('peminjaman.upload-refund');
@@ -86,6 +87,7 @@ Route::middleware('auth')->group(function () {
         // Pengajuan Peminjaman Aula
         Route::get('/peminjaman/buat', [CustomerPanelController::class, 'peminjamanCreate'])->name('peminjaman.create');
         Route::post('/peminjaman', [CustomerPanelController::class, 'peminjamanStore'])->name('peminjaman.store');
+        Route::post('/peminjaman/{peminjaman}/cancel', [CustomerPanelController::class, 'peminjamanCancel'])->name('peminjaman.cancel');
 
         // Pembayaran Aula
         Route::get('/pembayaran/{pembayaran}', [CustomerPanelController::class, 'pembayaranShow'])->name('pembayaran.show');

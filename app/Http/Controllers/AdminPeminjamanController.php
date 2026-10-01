@@ -75,7 +75,8 @@ class AdminPeminjamanController extends Controller
             'total' => Peminjaman::count(),
             'pending' => Peminjaman::where('status', 'pending')->count(),
             'approved' => Peminjaman::whereIn('status', ['approved_1', 'approved_final'])->count(),
-            'rejected' => Peminjaman::where('status', 'rejected')->count(),
+            'rejected' => Peminjaman::whereIn('status', ['rejected', 'cancelled'])->count(),
+            'cancelled' => Peminjaman::where('status', 'cancelled')->count(),
             'refund_pending' => Peminjaman::whereHas('pembayaran', function ($q) {
                 $q->where('status_pembayaran', 'refund_pending');
             })->count(),
@@ -230,7 +231,7 @@ class AdminPeminjamanController extends Controller
 
         // Cek apakah jadwal peminjaman bentrok dengan peminjaman lain yang sudah disetujui
         $conflictingApproved = null;
-        if (! in_array($peminjaman->status, ['approved_1', 'approved_final', 'rejected'])) {
+        if (! in_array($peminjaman->status, ['approved_1', 'approved_final', 'rejected', 'cancelled'])) {
             $conflictingApproved = Peminjaman::query()
                 ->where('id', '!=', $peminjaman->id)
                 ->where(function ($q) {
@@ -239,7 +240,7 @@ class AdminPeminjamanController extends Controller
                             $sq->where('status', 'approved');
                         });
                 })
-                ->where('status', '!=', 'rejected')
+                ->whereNotIn('status', ['rejected', 'cancelled'])
                 ->where(function ($query) use ($peminjaman) {
                     $query->where('tanggal_mulai', '<', $peminjaman->tanggal_selesai)
                         ->where('tanggal_selesai', '>', $peminjaman->tanggal_mulai);
@@ -299,7 +300,7 @@ class AdminPeminjamanController extends Controller
                         $sq->where('status', 'approved');
                     });
             })
-            ->where('status', '!=', 'rejected')
+            ->whereNotIn('status', ['rejected', 'cancelled'])
             ->where(function ($query) use ($peminjaman) {
                 $query->where('tanggal_mulai', '<', $peminjaman->tanggal_selesai)
                     ->where('tanggal_selesai', '>', $peminjaman->tanggal_mulai);
@@ -496,10 +497,51 @@ class AdminPeminjamanController extends Controller
                     'jatuh_tempo_pelunasan' => $tenggatPelunasan,
                 ]);
             }
+
+            // Jika permohonan sudah dibatalkan atau ditolak, tapi pembayaran baru diverifikasi valid oleh admin:
+            // Sesuai ketentuan: jika pembatalan melebihi offset cancelation atau status pembayaran hangus, dana tidak dapat direfund.
+            if (in_array($peminjaman->status, ['cancelled', 'rejected']) && $pembayaran->total_terbayar > 0) {
+                if ($pembayaran->status_pembayaran === 'hangus' || ($peminjaman->status === 'cancelled' && ! $peminjaman->isEligibleForRefund())) {
+                    $pembayaran->update([
+                        'status_pembayaran' => 'hangus',
+                        'total_refund' => 0,
+                        'sisa_tagihan' => 0,
+                        'catatan' => trim(($pembayaran->catatan ? $pembayaran->catatan.' | ' : '').'Pembayaran diverifikasi valid sebesar Rp '.number_format($pembayaran->total_terbayar, 0, ',', '.').', namun tidak dapat direfund karena pembatalan dilakukan melebihi batas offset pembatalan (dana hangus).'),
+                    ]);
+                } else {
+                    $pembayaran->update([
+                        'status_pembayaran' => 'refund_pending',
+                        'total_refund' => $pembayaran->total_terbayar,
+                        'sisa_tagihan' => 0,
+                        'catatan' => 'Pembayaran terverifikasi valid sebesar Rp '.number_format($pembayaran->total_terbayar, 0, ',', '.').' setelah permohonan dibatalkan/ditolak. Status dialihkan ke Refund Pending untuk pengembalian dana pemohon.',
+                    ]);
+
+                    $pembayaran->details()->firstOrCreate(
+                        [
+                            'pembayaran_id' => $pembayaran->id,
+                            'tipe_pembayaran' => 'refund',
+                        ],
+                        [
+                            'kode_transaksi' => 'TRX-RFD-'.date('Ym').'-'.str_pad((string) $pembayaran->id, 3, '0', STR_PAD_LEFT),
+                            'jumlah_bayar' => $pembayaran->total_terbayar,
+                            'metode' => 'transfer',
+                            'status' => 'pending',
+                            'catatan' => 'Menunggu pemohon melengkapi data rekening pengembalian dana (refund).',
+                        ]
+                    );
+                }
+            }
         });
 
+        $isCancelledExceeded = $peminjaman->status === 'cancelled' && ! $peminjaman->isEligibleForRefund();
+        $successMsg = in_array($peminjaman->status, ['cancelled', 'rejected'])
+            ? ($isCancelledExceeded
+                ? 'Bukti pembayaran berhasil diverifikasi valid. Karena pembatalan permohonan melebihi offset cancelation, dana pembayaran tidak dapat direfund (status pembayaran hangus).'
+                : 'Bukti pembayaran berhasil diverifikasi valid. Karena peminjaman telah dibatalkan/ditolak dalam batas waktu yang ditentukan, status pembayaran dialihkan ke Refund Pending untuk memproses pengembalian dana.')
+            : 'Bukti pembayaran berhasil diverifikasi (Status: Benar / Valid). Anda kini dapat melanjutkan proses persetujuan (Approve) atau penolakan (Reject) permohonan.';
+
         return redirect()->route('admin.peminjaman.show', $peminjaman->id)
-            ->with('success', 'Bukti pembayaran berhasil diverifikasi (Status: Benar / Valid). Anda kini dapat melanjutkan proses persetujuan (Approve) atau penolakan (Reject) permohonan.');
+            ->with('success', $successMsg);
     }
 
     /**
@@ -624,5 +666,128 @@ class AdminPeminjamanController extends Controller
 
         return redirect()->route('admin.peminjaman.show', $peminjaman->id)
             ->with('success', 'Bukti transfer pengembalian dana (refund) berhasil diunggah. Menunggu konfirmasi penerimaan dana dari pemohon.');
+    }
+
+    /**
+     * Aksi Pembatalan Pengajuan oleh Admin Aula:
+     * - Admin dapat membatalkan pengajuan atas permintaan pemohon atau alasan operasional.
+     * - Mengikuti aturan: jika pembayaran telah diverifikasi valid, maka dialihkan ke refund_pending.
+     *   Jika belum diverifikasi atau tidak ada pembayaran, refund tidak diproses.
+     */
+    public function cancel(Request $request, Peminjaman $peminjaman): RedirectResponse
+    {
+        if ($request->user()?->isSuperAdmin()) {
+            abort(403, 'Akses ditolak: Super Admin hanya memiliki akses baca pada modul peminjaman.');
+        }
+
+        if (in_array($peminjaman->status, ['cancelled', 'rejected'])) {
+            return back()->with('error', 'Pengajuan peminjaman ini sudah dibatalkan atau ditolak sebelumnya.');
+        }
+
+        $validated = $request->validate([
+            'alasan_pembatalan' => ['required', 'string', 'min:5', 'max:1000'],
+        ], [
+            'alasan_pembatalan.required' => 'Keterangan atau alasan pembatalan pengajuan wajib diisi.',
+            'alasan_pembatalan.min' => 'Alasan pembatalan minimal 5 karakter.',
+        ]);
+
+        $message = DB::transaction(function () use ($peminjaman, $validated) {
+            $peminjaman->update([
+                'status' => 'cancelled',
+                'catatan' => $validated['alasan_pembatalan'],
+            ]);
+
+            Persetujuan::create([
+                'peminjaman_id' => $peminjaman->id,
+                'approver_id' => auth()->id(),
+                'level' => 'admin',
+                'status' => 'rejected',
+                'catatan_approval' => 'Pengajuan dibatalkan oleh admin. Alasan: '.$validated['alasan_pembatalan'],
+                'tanggal_proses' => now(),
+            ]);
+
+            $isEligibleRefund = $peminjaman->isEligibleForRefund();
+            $hMin = $peminjaman->hari_maksimal_cancel;
+
+            $pembayaran = $peminjaman->pembayaran;
+            if (! $pembayaran) {
+                return 'Pengajuan peminjaman aula berhasil dibatalkan.';
+            }
+
+            // Cek nominal pembayaran yang sudah terverifikasi benar (valid)
+            $nominalTerbayar = (float) $pembayaran->total_terbayar;
+            if ($nominalTerbayar <= 0) {
+                $nominalTerbayar = (float) $pembayaran->details()
+                    ->where('status', 'verified')
+                    ->where('tipe_pembayaran', '!=', 'refund')
+                    ->sum('jumlah_bayar');
+            }
+
+            // Jika pembatalan melebihi offset cancelation: dana tidak dapat direfund (hangus)
+            if (! $isEligibleRefund) {
+                $pembayaran->update([
+                    'status_pembayaran' => 'hangus',
+                    'total_refund' => 0,
+                    'sisa_tagihan' => 0,
+                    'catatan' => 'Pengajuan dibatalkan oleh admin melebihi batas offset pembatalan (H-'.$hMin.'). Dana pembayaran tidak dapat direfund (dana hangus). Alasan: '.$validated['alasan_pembatalan'],
+                ]);
+
+                return 'Pengajuan berhasil dibatalkan. Karena pembatalan melebihi offset pembatalan (H-'.$hMin.'), dana pembayaran tidak dapat direfund (status: Hangus).';
+            }
+
+            // Skenario 1: Pembayaran sudah diverifikasi benar dalam batas toleransi -> lanjut ke refund
+            if ($nominalTerbayar > 0) {
+                $pembayaran->update([
+                    'status_pembayaran' => 'refund_pending',
+                    'total_refund' => $nominalTerbayar,
+                    'sisa_tagihan' => 0,
+                    'catatan' => 'Pengajuan dibatalkan oleh admin dalam batas H-'.$hMin.'. Alasan: '.$validated['alasan_pembatalan'].'. Menunggu refund dana sebesar Rp '.number_format($nominalTerbayar, 0, ',', '.'),
+                ]);
+
+                $pembayaran->details()->firstOrCreate(
+                    [
+                        'pembayaran_id' => $pembayaran->id,
+                        'tipe_pembayaran' => 'refund',
+                    ],
+                    [
+                        'kode_transaksi' => 'TRX-RFD-'.date('Ym').'-'.str_pad((string) $pembayaran->id, 3, '0', STR_PAD_LEFT),
+                        'jumlah_bayar' => $nominalTerbayar,
+                        'metode' => 'transfer',
+                        'status' => 'pending',
+                        'catatan' => 'Menunggu pemohon melengkapi data rekening pengembalian dana (refund).',
+                    ]
+                );
+
+                return 'Pengajuan berhasil dibatalkan. Karena pembayaran telah diverifikasi valid sebesar Rp '.number_format($nominalTerbayar, 0, ',', '.').', status pembayaran diubah menjadi Refund Pending untuk melanjutkan pengembalian dana.';
+            }
+
+            // Skenario 2: Terdapat bukti pembayaran yang masih pending verifikasi
+            $hasPending = $pembayaran->details()
+                ->where('status', 'pending')
+                ->where('tipe_pembayaran', '!=', 'refund')
+                ->exists();
+
+            if ($hasPending) {
+                $pembayaran->update([
+                    'sisa_tagihan' => 0,
+                    'catatan' => 'Pengajuan dibatalkan oleh admin. Alasan: '.$validated['alasan_pembatalan'].'. Terdapat bukti pembayaran pending yang perlu diverifikasi sebelum refund diproses.',
+                ]);
+
+                return 'Pengajuan berhasil dibatalkan. Harap verifikasi bukti pembayaran pemohon terlebih dahulu untuk memproses refund jika valid.';
+            }
+
+            // Skenario 3: Belum ada pembayaran
+            $pembayaran->update([
+                'status_pembayaran' => 'rejected',
+                'total_refund' => 0,
+                'sisa_tagihan' => 0,
+                'catatan' => 'Pengajuan dibatalkan oleh admin. Alasan: '.$validated['alasan_pembatalan'],
+            ]);
+
+            return 'Pengajuan peminjaman aula berhasil dibatalkan.';
+        });
+
+        return redirect()->route('admin.peminjaman.show', $peminjaman->id)
+            ->with('success', $message);
     }
 }

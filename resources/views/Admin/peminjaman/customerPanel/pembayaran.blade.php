@@ -99,16 +99,18 @@
         $latestPaymentDetail = $pembayaran->details->where('tipe_pembayaran', '!=', 'refund')->sortByDesc('id')->first();
         $isDetailRejected = $latestPaymentDetail && $latestPaymentDetail->status === 'rejected';
 
+        $isCancelled = $pembayaran->peminjaman?->status === 'cancelled';
+
         // 1. isRefund: Benar-benar ada proses pengembalian dana (status pembayaran refund_pending atau refunded)
         $isRefund = in_array($pembayaran->status_pembayaran, ['refund_pending', 'refunded']);
 
-        // 2. isPeminjamanClosed: Permohonan peminjaman sudah selesai/ditolak/hangus sehingga tidak menerima pembayaran baru
-        $isPeminjamanClosed = $isRefund || $pembayaran->peminjaman?->status === 'rejected' || $pembayaran->status_pembayaran === 'hangus';
+        // 2. isPeminjamanClosed: Permohonan peminjaman sudah selesai/ditolak/dibatalkan/hangus sehingga tidak menerima pembayaran baru
+        $isPeminjamanClosed = $isRefund || $pembayaran->peminjaman?->status === 'rejected' || $isCancelled || $pembayaran->status_pembayaran === 'hangus';
     @endphp
     <div class="bg-white rounded-2xl p-4 md:py-3.5 md:px-5 border border-slate-100 figma-card-shadow flex flex-col md:flex-row md:items-center justify-between gap-4">
         <!-- Info Kiri: Invoice, Paket, Pemohon & Jadwal -->
         <div class="space-y-1">
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 flex-wrap">
                 <span class="px-2.5 py-0.5 bg-slate-100 text-slate-700 rounded-md text-[10px] font-bold tracking-wider uppercase">
                     Invoice {{ $pembayaran->kode_pembayaran }}
                 </span>
@@ -123,6 +125,10 @@
                 @elseif ($pembayaran->status_pembayaran === 'refunded')
                     <span class="px-2.5 py-0.5 bg-slate-100 text-slate-700 border border-slate-200 rounded-md text-[10px] font-bold uppercase">
                         <i class="fa-solid fa-check-double mr-1"></i> Refund Selesai
+                    </span>
+                @elseif ($isCancelled)
+                    <span class="px-2.5 py-0.5 bg-slate-100 text-slate-700 border border-slate-300 rounded-md text-[10px] font-bold uppercase">
+                        <i class="fa-solid fa-ban mr-1"></i> Dibatalkan
                     </span>
                 @elseif ($pembayaran->peminjaman?->status === 'rejected' || $pembayaran->status_pembayaran === 'rejected')
                     <span class="px-2.5 py-0.5 bg-red-50 text-red-700 border border-red-200 rounded-md text-[10px] font-bold uppercase">
@@ -154,6 +160,19 @@
                 Peminjam: <strong class="text-slate-700">{{ $pembayaran->peminjaman?->nama }}</strong> &bull;
                 Jadwal: {{ $pembayaran->peminjaman?->tanggal_mulai?->translatedFormat('d M Y, H:i') }} - {{ $pembayaran->peminjaman?->tanggal_selesai?->translatedFormat('d M Y, H:i') }} WIB
             </p>
+
+            @if ($pembayaran->peminjaman?->canBeCancelled())
+                <div class="pt-2 flex items-center gap-2 flex-wrap">
+                    <button type="button" onclick="openCancelModal()"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl text-xs font-bold transition cursor-pointer">
+                        <i class="fa-solid fa-ban text-[11px]"></i>
+                        <span>Batalkan Pengajuan</span>
+                    </button>
+                    <span class="text-[11px] text-slate-400">
+                        (Maksimal pembatalan H-{{ $pembayaran->peminjaman->hari_maksimal_cancel }}: sampai {{ $pembayaran->peminjaman->batas_pembatalan->translatedFormat('d M Y, H:i') }} WIB)
+                    </span>
+                </div>
+            @endif
         </div>
 
         @if ($isRefund)
@@ -220,25 +239,39 @@
         </div>
     @endif
 
-    <!-- BANNER KEDALUWARSA / PERMOHONAN DIBATALKAN OTOMATIS OLEH SISTEM -->
-    @if ($pembayaran->status_pembayaran === 'hangus' || ($pembayaran->peminjaman?->status === 'rejected' && $pembayaran->status_pembayaran !== 'refund_pending' && $pembayaran->status_pembayaran !== 'refunded'))
-        <div class="bg-slate-100 border-2 border-slate-300 text-slate-800 rounded-2xl p-5 shadow-xs flex items-start gap-4">
-            <div class="w-10 h-10 rounded-xl bg-slate-600 text-white flex items-center justify-center font-bold text-lg flex-shrink-0">
-                <i class="fa-solid fa-ban"></i>
-            </div>
-            <div class="space-y-1 text-xs md:text-sm">
-                <h3 class="font-black text-slate-900 text-sm md:text-base">Permohonan Peminjaman Aula Telah Ditolak / Dibatalkan</h3>
-                <p class="text-slate-600 leading-relaxed">
-                    {{ $pembayaran->catatan ?: 'Permohonan peminjaman aula ini telah ditolak oleh admin atau melewati batas waktu pembayaran yang ditentukan.' }}
-                </p>
-                <div class="pt-2">
-                    <a href="{{ route('customer.paket') }}" class="inline-flex items-center gap-1.5 px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-xl shadow-xs transition">
-                        <i class="fa-solid fa-plus text-[10px]"></i>
-                        <span>Ajukan Permohonan Baru</span>
-                    </a>
+    <!-- BANNER KEDALUWARSA / PERMOHONAN DIBATALKAN OTOMATIS OLEH SISTEM ATAU PEMOHON -->
+    @if ($pembayaran->status_pembayaran === 'hangus' || (($pembayaran->peminjaman?->status === 'rejected' || $isCancelled) && $pembayaran->status_pembayaran !== 'refund_pending' && $pembayaran->status_pembayaran !== 'refunded'))
+        @if ($isCancelled && $latestPaymentDetail && $latestPaymentDetail->status === 'pending')
+            <div class="bg-amber-50/80 border-2 border-amber-300 text-amber-900 rounded-2xl p-5 shadow-xs flex items-start gap-4">
+                <div class="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center font-bold text-lg flex-shrink-0">
+                    <i class="fa-solid fa-hourglass-half"></i>
+                </div>
+                <div class="space-y-1 text-xs md:text-sm">
+                    <h3 class="font-black text-amber-950 text-sm md:text-base">Pengajuan Dibatalkan &bull; Menunggu Verifikasi Pembayaran</h3>
+                    <p class="text-amber-800 leading-relaxed">
+                        Anda telah membatalkan pengajuan ini. Bukti pembayaran yang Anda unggah saat ini sedang diverifikasi oleh admin sekolah. Setelah pembayaran terverifikasi valid, proses pengembalian dana (refund) akan dibuka secara otomatis.
+                    </p>
                 </div>
             </div>
-        </div>
+        @else
+            <div class="bg-slate-100 border-2 border-slate-300 text-slate-800 rounded-2xl p-5 shadow-xs flex items-start gap-4">
+                <div class="w-10 h-10 rounded-xl bg-slate-600 text-white flex items-center justify-center font-bold text-lg flex-shrink-0">
+                    <i class="fa-solid fa-ban"></i>
+                </div>
+                <div class="space-y-1 text-xs md:text-sm">
+                    <h3 class="font-black text-slate-900 text-sm md:text-base">{{ $isCancelled ? 'Permohonan Peminjaman Aula Telah Dibatalkan' : 'Permohonan Peminjaman Aula Telah Ditolak / Dibatalkan' }}</h3>
+                    <p class="text-slate-600 leading-relaxed">
+                        {{ $pembayaran->catatan ?: ($pembayaran->peminjaman?->catatan ?: 'Permohonan peminjaman aula ini telah dibatalkan atau melewati batas waktu pembayaran yang ditentukan.') }}
+                    </p>
+                    <div class="pt-2">
+                        <a href="{{ route('customer.paket') }}" class="inline-flex items-center gap-1.5 px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-xl shadow-xs transition">
+                            <i class="fa-solid fa-plus text-[10px]"></i>
+                            <span>Ajukan Permohonan Baru</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        @endif
     @endif
 
     <!-- MODUL KHUSUS REFUND (JIKA STATUS PEMBAYARAN REFUND_PENDING ATAU REFUNDED) -->
@@ -253,20 +286,21 @@
                         Pengembalian Dana (Refund)
                     </span>
                     <h2 class="text-base md:text-lg font-black text-slate-900 tracking-tight mt-0.5">
-                        Pengajuan Peminjaman Ditolak & Proses Pengembalian Dana
+                        {{ $isCancelled ? 'Pengajuan Dibatalkan & Proses Pengembalian Dana' : 'Pengajuan Peminjaman Ditolak & Proses Pengembalian Dana' }}
                     </h2>
                     <p class="text-xs text-slate-500">
-                        Pihak sekolah mengembalikan dana sebesar <strong class="text-purple-700">Rp {{ number_format($pembayaran->total_refund, 0, ',', '.') }}</strong> yang telah Anda bayarkan.
+                        Pihak sekolah mengembalikan dana sebesar <strong class="text-purple-700">Rp {{ number_format($pembayaran->total_refund ?: $pembayaran->total_terbayar, 0, ',', '.') }}</strong> yang telah Anda bayarkan.
                     </p>
                 </div>
             </div>
 
-            <!-- Catatan Alasan Penolakan dari Admin -->
+            <!-- Catatan Alasan Penolakan dari Admin / Alasan Pembatalan -->
             <div class="p-4 bg-white rounded-2xl border border-purple-100 text-xs md:text-sm space-y-1">
-                <span class="font-bold text-slate-700 block">Keterangan / Alasan Penolakan dari Pihak Sekolah:</span>
+                <span class="font-bold text-slate-700 block">{{ $isCancelled ? 'Alasan Pembatalan Pengajuan:' : 'Keterangan / Alasan Penolakan dari Pihak Sekolah:' }}</span>
                 <p class="text-slate-600 italic">
-                    "{{ $pembayaran->catatan }}"
+                    "{{ $pembayaran->catatan ?: ($pembayaran->peminjaman?->catatan ?: 'Pengajuan dibatalkan oleh pemohon.') }}"
                 </p>
+            </div>
             </div>
 
             @php
@@ -857,6 +891,86 @@
         </div>
     </div>
 </div>
+
+<!-- MODAL BATALKAN PENGAJUAN -->
+@if ($pembayaran->peminjaman?->canBeCancelled())
+<div id="modalCancel" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div id="modalCancelBox" class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 transform transition-all duration-200 scale-95 space-y-4">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center text-lg border border-rose-100 shadow-xs flex-shrink-0">
+                    <i class="fa-solid fa-ban"></i>
+                </div>
+                <div>
+                    <h3 class="font-extrabold text-slate-900 text-base md:text-lg tracking-tight">Batalkan Pengajuan</h3>
+                    <p class="text-slate-500 text-xs">Peminjaman Aula SMKN 2 Kra</p>
+                </div>
+            </div>
+            <button type="button" onclick="closeCancelModal()" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition cursor-pointer" title="Tutup">
+                <i class="fa-solid fa-xmark text-sm"></i>
+            </button>
+        </div>
+
+        <form id="formCancel" action="{{ route('customer.peminjaman.cancel', $pembayaran->peminjaman->id) }}" method="POST" class="space-y-4 m-0">
+            @csrf
+            <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200/70 space-y-2 text-xs">
+                <div class="flex justify-between items-center text-slate-600">
+                    <span class="font-medium">Invoice:</span>
+                    <span class="font-bold font-mono text-slate-900">{{ $pembayaran->kode_pembayaran }}</span>
+                </div>
+                <div class="flex justify-between items-center text-slate-600">
+                    <span class="font-medium">Paket:</span>
+                    <span class="font-bold text-slate-900">{{ $paket?->nama_paket ?: 'Paket Sewa Aula' }}</span>
+                </div>
+                <div class="flex justify-between items-center text-slate-600">
+                    <span class="font-medium">Batas Maks. Batal:</span>
+                    <span class="font-bold text-rose-700">H-{{ $pembayaran->peminjaman->hari_maksimal_cancel }} ({{ $pembayaran->peminjaman->batas_pembatalan->translatedFormat('d M Y, H:i') }} WIB)</span>
+                </div>
+            </div>
+
+            <div class="p-3.5 bg-amber-50/70 border border-amber-200 text-amber-900 rounded-2xl text-[11px] leading-relaxed space-y-1">
+                <div class="font-bold flex items-center gap-1.5 text-amber-800">
+                    <i class="fa-solid fa-circle-info text-xs"></i>
+                    <span>Ketentuan Pembatalan & Pengembalian Dana:</span>
+                </div>
+                <p>
+                    Sesuai ketentuan, pembatalan dapat dilakukan maksimal <strong>H-{{ $pembayaran->peminjaman->hari_maksimal_cancel }}</strong> sebelum pelaksanaan acara dan tidak dapat dibatalkan pada hari H.
+                </p>
+                @if ($pembayaran->total_terbayar > 0)
+                    <div class="font-semibold text-purple-900 pt-1 border-t border-amber-200/60">
+                        Dana pembayaran yang telah terverifikasi sebesar <strong class="text-purple-700">Rp {{ number_format($pembayaran->total_terbayar, 0, ',', '.') }}</strong> akan dikembalikan (refund) oleh pihak admin sekolah setelah pembatalan diproses.
+                    </div>
+                @else
+                    <div class="text-slate-600 pt-1 border-t border-amber-200/60">
+                        Belum ada pembayaran yang terverifikasi untuk pengajuan ini. Pengajuan akan langsung dibatalkan.
+                    </div>
+                @endif
+            </div>
+
+            <div class="space-y-1.5">
+                <label for="alasan_pembatalan" class="block text-xs font-bold text-slate-700">
+                    Alasan Pembatalan (Opsional):
+                </label>
+                <textarea name="alasan_pembatalan" id="alasan_pembatalan" rows="3"
+                          placeholder="Tuliskan alasan pembatalan peminjaman..."
+                          class="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs md:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition"></textarea>
+            </div>
+
+            <div class="flex items-center justify-end gap-2.5 pt-2 border-t border-slate-100">
+                <button type="button" onclick="closeCancelModal()"
+                        class="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 text-xs md:text-sm font-semibold transition cursor-pointer">
+                    Batal
+                </button>
+                <button type="submit"
+                        class="px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs md:text-sm font-bold shadow-xs transition flex items-center gap-2 cursor-pointer">
+                    <i class="fa-solid fa-ban text-xs"></i>
+                    <span>Ya, Batalkan Pengajuan</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+@endif
 @endpush
 
 @push('scripts')
@@ -955,14 +1069,48 @@
         }, 150);
     }
 
+    // MODAL BATALKAN PENGAJUAN
+    function openCancelModal() {
+        const modal = document.getElementById('modalCancel');
+        const box = document.getElementById('modalCancelBox');
+        if (!modal || !box) return;
+        document.body.classList.add('overflow-hidden');
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            box.classList.remove('scale-95');
+            box.classList.add('scale-100');
+        }, 10);
+    }
+
+    function closeCancelModal() {
+        const modal = document.getElementById('modalCancel');
+        const box = document.getElementById('modalCancelBox');
+        if (!modal || !box) return;
+        box.classList.remove('scale-100');
+        box.classList.add('scale-95');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+        }, 150);
+    }
+
     // Tutup modal jika klik di luar box (backdrop) atau tekan tombol ESC
     document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') closeModalKonfirmasiRefund();
+        if (e.key === 'Escape') {
+            closeModalKonfirmasiRefund();
+            closeCancelModal();
+        }
     });
     const modalRefundEl = document.getElementById('modalKonfirmasiRefund');
     if (modalRefundEl) {
         modalRefundEl.addEventListener('click', (e) => {
             if (e.target === modalRefundEl) closeModalKonfirmasiRefund();
+        });
+    }
+    const modalCancelEl = document.getElementById('modalCancel');
+    if (modalCancelEl) {
+        modalCancelEl.addEventListener('click', (e) => {
+            if (e.target === modalCancelEl) closeCancelModal();
         });
     }
 

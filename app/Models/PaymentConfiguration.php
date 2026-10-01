@@ -22,6 +22,7 @@ use Illuminate\Support\Facades\Storage;
     'jatuh_tempo_dp_jam',
     'jatuh_tempo_pelunasan_jam',
     'minimal_hari_booking',
+    'offset_hari_pembatalan',
     'instruksi_pembayaran',
     'is_active',
 ])]
@@ -45,6 +46,7 @@ class PaymentConfiguration extends Model
         'jatuh_tempo_dp_jam' => 'integer',
         'jatuh_tempo_pelunasan_jam' => 'integer',
         'minimal_hari_booking' => 'integer',
+        'offset_hari_pembatalan' => 'integer',
         'is_active' => 'boolean',
     ];
 
@@ -67,6 +69,7 @@ class PaymentConfiguration extends Model
             'jatuh_tempo_dp_jam' => 24,
             'jatuh_tempo_pelunasan_jam' => 48,
             'minimal_hari_booking' => 3,
+            'offset_hari_pembatalan' => 1,
             'instruksi_pembayaran' => 'Silakan lakukan transfer sesuai nominal tagihan sebelum batas waktu jatuh tempo berakhir. Simpan bukti transfer untuk diunggah.',
             'is_active' => true,
         ]);
