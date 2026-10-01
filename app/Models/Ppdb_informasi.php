@@ -11,7 +11,7 @@ class Ppdb_informasi extends Model
     protected $fillable = [
         'judul',
         'keterangan',
-        'persyaratan',
+        'path_file',
         'img',
     ];
 

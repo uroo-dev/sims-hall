@@ -175,12 +175,61 @@
         </div>
     </div>
     {{-- Persyaratan --}}
-    <div class="bg-white rounded-2xl p-6 figma-card-shadow border border-slate-100">
+    <div id="section-persyaratan" class="bg-white rounded-2xl p-6 figma-card-shadow border border-slate-100">
         <span class="text-gray-600 font-semibold text-lg">Persyaratan</span>
-        <form class="flex gap-5 mt-5">
-            <input type="text" class="w-full px-4 py-3 bg-slate-50 text-slate-800 text-sm font-medium rounded-xl border-2 border-slate-200 focus:border-brand-600 focus:ring-4 focus:ring-brand-100 focus:outline-none transition placeholder:text-slate-400">
-            <button class=" px-4 py-3 bg-slate-50 text-slate-800 text-sm font-medium rounded-xl border-2 border-slate-200 focus:border-brand-600 focus:ring-4 focus:ring-brand-100 focus:outline-none transition placeholder:text-slate-400 "><i class="fa-solid fa-plus"></i></button>
+        <div class="flex flex-col mt-5">
+            @foreach ($persyaratan as $syarat)
+                <div class="flex gap-5 mt-2">
+                    <input type="text" value="{{ $syarat->syarat }}" disabled
+                        class="w-full px-4 py-3 bg-slate-50 text-slate-800 text-sm font-medium rounded-xl border-2 border-slate-200 focus:border-brand-600 focus:ring-4 focus:ring-brand-100 focus:outline-none transition placeholder:text-slate-400">
+                    <a href="{{ route('delete.persyaratan.ppdb', $syarat->id) }}"
+                        class="cursor-pointer px-4 py-3 bg-red-50 text-slate-800 text-sm font-medium rounded-xl border-2 border-red-200 focus:border-brand-600 focus:ring-4 focus:ring-brand-100 focus:outline-none transition placeholder:text-slate-400 "><i
+                            class="fa-solid fa-trash"></i></a>
+                </div>
+            @endforeach
+        </div>
+        <form action="{{ route('post.persyaratan.ppdb') }}" method="POST" class="flex gap-5 mt-2">
+            @csrf
+            <input type="text" name="syarat"
+                class="w-full px-4 py-3 bg-slate-50 text-slate-800 text-sm font-medium rounded-xl border-2 border-slate-200 focus:border-brand-600 focus:ring-4 focus:ring-brand-100 focus:outline-none transition placeholder:text-slate-400">
+            <button type="submit"
+                class=" px-4 py-3 bg-slate-50 text-slate-800 text-sm font-medium rounded-xl border-2 border-slate-200 focus:border-brand-600 focus:ring-4 focus:ring-brand-100 focus:outline-none transition placeholder:text-slate-400 "><i
+                    class="fa-solid fa-plus"></i></button>
         </form>
+        {{-- Form Upload File Persyaratan --}}
+        <form action="{{ route('upload.persyaratan.file.ppdb') }}" method="POST" enctype="multipart/form-data" class="flex flex-col mt-5 gap-3">
+            @csrf
+            <label for="path_file" class="text-gray-600 font-medium">Upload file persyaratan</label>
+            @if($informasi && $informasi->path_file)
+                <div class="flex items-center gap-3 text-sm">
+                    <a href="{{ asset('storage/' . $informasi->path_file) }}" target="_blank" class="text-brand-600 hover:text-brand-700 underline truncate max-w-xs">
+                        Lihat file persyaratan saat ini
+                    </a>
+                </div>
+            @endif
+            <div class="flex gap-3 items-center">
+                <input type="file" name="path_file" id="path_file"
+                    class="w-fit px-4 py-3 bg-slate-50 text-slate-800 text-sm font-medium rounded-xl border-2 border-slate-200 focus:border-brand-600 focus:ring-4 focus:ring-brand-100 focus:outline-none transition placeholder:text-slate-400">
+                <button type="submit"
+                    class="px-4 py-3 bg-brand-600 text-white text-sm font-medium rounded-xl border-2 border-brand-600 hover:bg-brand-700 focus:ring-4 focus:ring-brand-100 focus:outline-none transition">
+                    Upload
+                </button>
+            </div>
+            @error('path_file')
+                <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
+            @enderror
+        </form>
+        @if($informasi && $informasi->path_file)
+            <form action="{{ route('delete.persyaratan.file.ppdb') }}" method="POST" class="mt-2">
+                @csrf
+                @method('DELETE')
+                <button type="submit"
+                    class="px-4 py-3 bg-red-50 text-red-700 text-sm font-medium rounded-xl border-2 border-red-200 hover:bg-red-100 focus:ring-4 focus:ring-red-100 focus:outline-none transition"
+                    onclick="return confirm('Yakin ingin menghapus file persyaratan?')">
+                    <i class="fa-solid fa-trash"></i> Hapus File
+                </button>
+            </form>
+        @endif
     </div>
 @endsection
 

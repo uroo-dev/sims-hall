@@ -127,14 +127,13 @@ class PpdbInformasiTest extends TestCase
         $this->assertDatabaseCount('ppdb_informasi', 0);
     }
 
-    public function test_existing_persyaratan_and_img_are_preserved(): void
+    public function test_existing_img_are_preserved(): void
     {
         $this->actingAs($this->admin());
 
         $informasi = Ppdb_informasi::create([
             'judul' => 'Awal',
             'keterangan' => 'Awal',
-            'persyaratan' => 'Fotokopi ijazah',
             'img' => ['ppdb/dokumen.pdf'],
         ]);
 
@@ -142,7 +141,6 @@ class PpdbInformasiTest extends TestCase
 
         $informasi->refresh();
 
-        $this->assertSame('Fotokopi ijazah', $informasi->persyaratan);
         $this->assertSame(['ppdb/dokumen.pdf'], $informasi->img);
     }
 

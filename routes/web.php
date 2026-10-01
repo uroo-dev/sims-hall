@@ -27,8 +27,12 @@ Route::middleware('auth')->group(function () {
         Route::post('/master', [PpdbDashboardController::class, 'masterUpdate'])->name('update.master.ppdb');
         Route::post('/informasi', [PpdbInformasiController::class, 'informasiUpdate'])->name('update.informasi.ppdb');
         Route::post('/tanggal-penting', [PpdbInformasiController::class, 'tanggalPentingPost'])->name('post.tanggal-penting.ppdb');
+        Route::post('/persyaratan', [PpdbInformasiController::class, 'persyaratanPost'])->name('post.persyaratan.ppdb');
+        Route::post('/persyaratan-file', [PpdbInformasiController::class, 'persyaratanFileUpload'])->name('upload.persyaratan.file.ppdb');
         Route::put('/tanggal-penting/{agenda}', [PpdbInformasiController::class, 'tanggalPentingUpdate'])->name('update.tanggal-penting.ppdb');
         Route::delete('/tanggal-penting/{agenda}', [PpdbInformasiController::class, 'tanggalPentingDelete'])->name('delete.tanggal-penting.ppdb');
+        Route::delete('/persyaratan-file', [PpdbInformasiController::class, 'persyaratanFileDelete'])->name('delete.persyaratan.file.ppdb');
+        Route::get('/persyaratan/{id}', [PpdbInformasiController::class, 'persyaratanDelete'])->name('delete.persyaratan.ppdb');
     });
 });
 
