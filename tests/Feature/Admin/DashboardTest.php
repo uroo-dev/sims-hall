@@ -107,4 +107,37 @@ class DashboardTest extends TestCase
         $response->assertSee('Bank Mandiri');
         $response->assertSee('1380009988771');
     }
+
+    public function test_admin_aula_sees_availability_calendar_on_dashboard(): void
+    {
+        $admin = $this->createAdminAula();
+
+        $paket = PaketPeminjaman::create([
+            'nama_paket' => 'Paket Pernikahan Gold',
+            'kategori' => 'unggulan',
+            'harga' => 6000000,
+        ]);
+
+        $tanggalAcara = now()->startOfMonth()->addDays(12);
+
+        $peminjaman = Peminjaman::create([
+            'paket_peminjaman_id' => $paket->id,
+            'nama' => 'Keluarga Budi Santoso',
+            'email_instansi' => 'budi@keluarga.id',
+            'tanggal_mulai' => $tanggalAcara->copy()->setTime(8, 0),
+            'tanggal_selesai' => $tanggalAcara->copy()->setTime(17, 0),
+            'status' => 'approved_final',
+        ]);
+
+        $response = $this->actingAs($admin)->get('/dashboard?month='.$tanggalAcara->month.'&year='.$tanggalAcara->year);
+
+        $response->assertOk();
+        $response->assertViewHas('calendarDate');
+        $response->assertViewHas('bookedDays');
+        $response->assertSee('CEK KETERSEDIAAN AULA');
+        $response->assertSee('Terpakai');
+        $response->assertSee('Tersedia');
+        $response->assertSee('Keluarga Budi Santoso');
+        $response->assertSee('Paket Pernikahan Gold');
+    }
 }
