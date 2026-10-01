@@ -27,9 +27,8 @@ class MergeSmokeTest extends TestCase
     {
         // Kolom profil_dokumentasi NOT NULL, jadi fallback video tidak bisa
         // dipancing dengan mengosongkan kolomnya. Menghapus baris sekolah
-        // membuat controller mengembalikan model kosong, dan `isset()`
-        // pada atribut yang tidak ada bernilai false sehingga blok @else
-        // (video) yang dirender.
+        // membuat controller mengembalikan model kosong, sehingga blok video
+        // (@else) yang dirender.
         Sekolah::query()->delete();
 
         $this->get('/')->assertOk()
@@ -42,13 +41,41 @@ class MergeSmokeTest extends TestCase
 
     public function test_landing_memakai_foto_sekolah_bila_ada(): void
     {
-        Sekolah::query()->update(['profil_dokumentasi' => 'sekolah-profile.png']);
+        // Pakai nama file yang benar-benar ada di public/assets, karena landing
+        // memverifikasi keberadaan file di disk, bukan sekadar nilai kolomnya.
+        Sekolah::query()->update(['profil_dokumentasi' => 'logosmkk.png']);
 
         $html = $this->get('/')->assertOk()->getContent();
 
         // Foto profil sekolah lebih diprioritaskan daripada video fallback.
-        $this->assertStringContainsString('sekolah-profile.png', $html);
+        $this->assertStringContainsString('logosmkk.png', $html);
         $this->assertStringNotContainsString('assets/hero.mp4', $html);
+    }
+
+    public function test_landing_tetap_pakai_video_bila_nama_foto_hilang_dari_disk(): void
+    {
+        // Regresi: `profil_dokumentasi` pernah menunjuk `dokumentasi-3d.png`
+        // yang tidak ada di public/assets. Nilai kolomnya truthy, jadi blok
+        // gambar tetap dirender sebagai <img> 404 dan video tidak pernah
+        // tampil sama sekali.
+        Sekolah::query()->update(['profil_dokumentasi' => 'dokumentasi-3d.png']);
+
+        $html = $this->get('/')->assertOk()->getContent();
+
+        $this->assertStringNotContainsString('dokumentasi-3d.png', $html);
+        $this->assertStringContainsString('assets/hero.mp4', $html);
+        $this->assertStringContainsString('autoplay', $html);
+    }
+
+    public function test_visual_hero_tanpa_bayangan_dan_tanpa_hover(): void
+    {
+        Sekolah::query()->update(['profil_dokumentasi' => 'dokumentasi-3d.png']);
+
+        $html = $this->get('/')->assertOk()->getContent();
+
+        // Visual video harus menyatu dengan layout: tanpa drop-shadow dan
+        // tanpa hover yang mengangkat elemen dari tempatnya.
+        $this->assertStringNotContainsString('drop-shadow-2xl group-hover', $html);
     }
 
     public function test_landing_menampilkan_nama_mitra_lewat_accessor(): void
@@ -128,7 +155,7 @@ class MergeSmokeTest extends TestCase
         }
     }
 
-public function test_layout_admin_tidak_leak_nama_modul_lain(): void
+    public function test_layout_admin_tidak_leak_nama_modul_lain(): void
     {
         $bkk = User::factory()->create(['role' => 'bkk']);
 

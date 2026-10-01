@@ -42,9 +42,7 @@ Route::get('/layanan-peminjaman', function () {
     return view('Public.layanan-peminjaman');
 })->name('layanan-peminjaman');
 
-Route::get('/pkl-bkk', function () {
-    return view('Public.pkl-bkk');
-})->name('pkl-bkk');
+Route::get('/pkl-bkk', [PublicController::class, 'pklBkk'])->name('pkl-bkk');
 
 Route::get('/registrasi', function () {
     return view('Public.registrasi');

@@ -27,23 +27,29 @@
                 </div>
 
                 <!-- Right Visual -->
-                <div class="lg:col-span-6 relative flex justify-center items-center group cursor-pointer">
-                    <div class="w-full max-w-xl relative flex items-center justify-center p-2">
-                        @if(isset($sekolah->profil_dokumentasi) && $sekolah->profil_dokumentasi)
+                <div class="lg:col-span-6 relative flex justify-center items-center">
+                    <div class="w-full max-w-xl flex items-center justify-center">
+                        {{-- Gambar sekolah hanya dipakai kalau filenya benar-benar ada di
+                             disk. Sebelumnya `profil_dokumentasi` menunjuk nama file yang
+                             tidak ada (dokumentasi-3d.png), jadi browser merender <img>
+                             404 dan video fallback tidak pernah tercapai. --}}
+                        @if (! empty($sekolah->profil_dokumentasi) && is_file(public_path('assets/' . $sekolah->profil_dokumentasi)))
                             <img src="{{ asset('assets/' . $sekolah->profil_dokumentasi) }}" alt="Ilustrasi {{ $sekolah->profil_judul }}"
-                                class="w-full h-auto object-contain filter drop-shadow-2xl group-hover:scale-115 group-hover:-translate-y-3 transition-all duration-300 transform-gpu select-none">
+                                class="w-full h-auto object-contain select-none">
                         @else
-                            {{-- Fallback hero: video sekolah, diputar terus-menerus.
+                            {{-- Video ilustrasi sekolah, diputar terus-menerus.
                                  `muted` wajib ada, tanpa itu browser akan memblokir
                                  autoplay. `playsinline` mencegah iOS membuka video
                                  fullscreen. Logo dipakai sebagai poster supaya tidak
-                                 ada ruang kosong selagi video diunduh. --}}
+                                 ada ruang kosong selagi video diunduh. Sengaja tanpa
+                                 drop-shadow dan tanpa hover: visual menyatu dengan
+                                 layout, tidak terlihat seperti kartu yang melayang. --}}
                             <video
                                 src="{{ asset('assets/hero.mp4') }}"
                                 poster="{{ asset('assets/full-jurusan-logo.png') }}"
                                 aria-label="Video ilustrasi SMKN 2 Karanganyar"
-                                class="w-full h-auto object-contain filter drop-shadow-2xl group-hover:scale-115 group-hover:-translate-y-3 transition-all duration-300 transform-gpu select-none"
-                                autoplay loop muted playsinline preload="metadata">
+                                class="w-full h-auto object-contain select-none"
+                                autoplay loop muted playsinline preload="auto">
                                 Browser Anda tidak mendukung pemutaran video.
                             </video>
                         @endif
@@ -136,6 +142,14 @@
                     @empty
                         <div class="col-span-5 text-center py-6 text-slate-500">Data mitra DUDI belum tersedia.</div>
                     @endforelse
+                </div>
+
+                <div class="mt-8 text-center">
+                    <a href="{{ route('pkl-bkk') }}"
+                        class="inline-flex items-center text-brand-blue font-bold text-sm hover:translate-x-1 transition-transform">
+                        Lihat Semua Mitra &amp; Lowongan PKL/BKK
+                        <i class="fa-solid fa-chevron-right text-xs ml-1"></i>
+                    </a>
                 </div>
             </div>
 
@@ -479,7 +493,9 @@
 
                             <div class="md:col-span-5 relative mt-4 md:mt-0 pl-0 sm:pl-2">
                                 <div class="relative rounded-2xl overflow-hidden shadow-md h-80 sm:h-96 w-full bg-slate-200">
-                                    @if($aulas->first() && $aulas->first()->dokumentasi)
+                                    {{-- Sama seperti hero: nama file di DB dicek ke disk,
+                                         kalau tidak ada jatuh ke gambar cadangan. --}}
+                                    @if($aulas->first() && $aulas->first()->dokumentasi && is_file(public_path('assets/' . $aulas->first()->dokumentasi)))
                                         <img src="{{ asset('assets/' . $aulas->first()->dokumentasi) }}" alt="{{ $aulas->first()->nama }}" class="w-full h-full object-cover">
                                     @else
                                         <img src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=800&auto=format&fit=crop&q=80" alt="Gedung Auditorium Aula" class="w-full h-full object-cover">

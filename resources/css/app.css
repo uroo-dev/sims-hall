@@ -14,6 +14,13 @@
     --color-brand-700: #005596;
     --color-brand-800: #004377;
     --color-brand-900: #003159;
+
+    /* Alias semantik yang dipakai seluruh view publik (nav pill, tombol CTA,
+       teks brand). Tanpa dua token ini `bg-brand-blue` ds. tidak menghasilkan
+       CSS sama sekali karena Tailwind hanya menelusuri nama variabel yang
+       terdaftar di @theme. */
+    --color-brand-blue: #006cb8;
+    --color-brand-darkBlue: #004377;
 }
 
 /* Fractal plus texture from landing page Figma artboard */

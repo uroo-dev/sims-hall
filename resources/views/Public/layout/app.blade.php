@@ -4,7 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SMK Negeri 2 Karanganyar - Sekolah Pusat Keunggulan</title>
+    {{-- Default-nya judul utama sekolah supaya halaman yang tidak menentukan
+         `@section('title')` tetap tampil seperti sebelumnya. --}}
+    <title>@yield('title', 'SMK Negeri 2 Karanganyar - Sekolah Pusat Keunggulan')</title>
     <link rel="icon" type="image/x-icon" href="assets/logosmkk.png">
 
     <!-- Tailwind CSS CDN -->

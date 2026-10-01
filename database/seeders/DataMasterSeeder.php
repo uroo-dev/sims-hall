@@ -15,15 +15,17 @@ use App\Models\Sekolah;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 
 class DataMasterSeeder extends Seeder
 {
     public function run(): void
     {
+        $this->bersihkanTabelDataMaster();
+
         // ============================================
         // 1. DATA SEKOLAH
         // ============================================
-        Sekolah::truncate();
         Sekolah::create([
             'judul' => 'Sejarah SMKN 2 KARANGANYAR',
             'dokumentasi' => 'Sejarah.jpg',
@@ -42,7 +44,6 @@ class DataMasterSeeder extends Seeder
         // ============================================
         // 2. DATA JURUSAN
         // ============================================
-        Jurusan::truncate();
         $jurusanData = [
             [
                 'nama' => 'Teknik Pemesinan',
@@ -72,7 +73,6 @@ class DataMasterSeeder extends Seeder
         // ============================================
         // 3. DATA EKSTRAKURIKULER
         // ============================================
-        Ekstrakurikuler::truncate();
         $eskulData = [
             ['nama' => 'OSIS', 'deskripsi' => 'Organisasi Siswa Intra Sekolah'],
             ['nama' => 'PMR', 'deskripsi' => 'Palang Merah Remaja'],
@@ -92,7 +92,6 @@ class DataMasterSeeder extends Seeder
         // ============================================
         // 4. DATA PRESTASI
         // ============================================
-        Prestasi::truncate();
         $prestasiData = [
             [
                 'judul' => 'Juara 1 LKS Bidang CNC Milling 2026',
@@ -173,7 +172,6 @@ class DataMasterSeeder extends Seeder
         // ============================================
         // 6. DATA PRODUK UNGGULAN
         // ============================================
-        ProdukUnggulan::truncate();
         $produkData = [
             [
                 'judul' => 'Teknik Permesinan',
@@ -203,7 +201,6 @@ class DataMasterSeeder extends Seeder
         // ============================================
         // 7. DATA AULA
         // ============================================
-        Aula::truncate();
         Aula::create([
             'nama' => 'Aula Utama SMKN 2 Karanganyar',
             'judul' => 'Aula Serbaguna',
@@ -214,7 +211,6 @@ class DataMasterSeeder extends Seeder
         // ============================================
         // 8. DATA PAKET PEMINJAMAN
         // ============================================
-        PaketPeminjaman::truncate();
         $paketData = [
             [
                 'nama_paket' => 'Unggulan',
@@ -240,7 +236,6 @@ class DataMasterSeeder extends Seeder
         // ============================================
         // 9. DATA PPDB
         // ============================================
-        Ppdb::truncate();
         $ppdb = Ppdb::create([
             'judul' => 'INFORMASI PPDB SMKN 2 KARANGANYAR',
             'deskripsi' => 'Calon Murid Baru yang akan mengikuti PPDB Tahun 2026 diharapkan menyiapkan seluruh dokumen persyaratan sebelum melakukan pengajuan akun. Kelengkapan berkas yang diunggah akan memperlancar proses verifikasi data dan menghindari kendala saat pendaftaran.',
@@ -252,7 +247,6 @@ class DataMasterSeeder extends Seeder
         // ============================================
         // 10. DATA DAYA TAMPUNG (INFORMASI PPDB)
         // ============================================
-        InformasiPpdb::truncate();
         $dayaTampungData = [
             ['ppdb_id' => $ppdb->id, 'nama_agenda' => 'TEKNIK PERMESINAN', 'daya_tampung' => '108', 'keterangan' => 'Tersedia 3 rombel'],
             ['ppdb_id' => $ppdb->id, 'nama_agenda' => 'TEKNIK PEMBUATAN KAIN', 'daya_tampung' => '108', 'keterangan' => 'Tersedia 3 rombel'],
@@ -308,5 +302,43 @@ class DataMasterSeeder extends Seeder
         );
 
         $this->command->info('✅ Data Master berhasil di-seed!');
+    }
+
+    /**
+     * Mengosongkan seluruh tabel Data Master Sekolah.
+     *
+     * Foreign key checks dimatikan sementara karena `produk_unggulans` dan
+     * `informasi_ppdbs` mereferensikan tabel lain (`jurusans` dan `ppdbs`).
+     * MySQL menolak `TRUNCATE` pada tabel yang menjadi target constraint
+     * ("Cannot truncate a table referenced in a foreign key constraint"),
+     * sedangkan SQLite tidak. Dulu setiap tabel di-truncate satu per satu di
+     * dalam bloknya masing-masing, sehingga urutan penghapusan ikut menentukan
+     * berhasil atau tidak. Sekarang semua pembersihan dipusatkan di sini dan
+     * tidak lagi bergantung pada urutan.
+     *
+     * Tabel `dudis` SENGAJA tidak disentuh: tabel itu milik modul PKL & BKK
+     * dan datanya diisi lewat `updateOrCreate` di bawah, bukan di-truncate.
+     */
+    private function bersihkanTabelDataMaster(): void
+    {
+        Schema::disableForeignKeyConstraints();
+
+        try {
+            foreach ([
+                InformasiPpdb::class,
+                ProdukUnggulan::class,
+                Sekolah::class,
+                Jurusan::class,
+                Ekstrakurikuler::class,
+                Prestasi::class,
+                Aula::class,
+                PaketPeminjaman::class,
+                Ppdb::class,
+            ] as $model) {
+                $model::truncate();
+            }
+        } finally {
+            Schema::enableForeignKeyConstraints();
+        }
     }
 }
