@@ -2,21 +2,18 @@
 
     <!-- Breadcrumb Title -->
     <div class="flex items-center space-x-2 text-slate-800 text-sm md:text-base font-bold tracking-tight">
-        <span id="breadcrumb-role" class="uppercase text-slate-900 font-extrabold">{{ strtoupper(str_replace('_', ' ', auth()->user()->role)) }}</span>
+        <span id="breadcrumb-role" class="uppercase text-slate-900 font-extrabold">@yield('breadcrumb-role', strtoupper(str_replace('_', ' ', auth()->user()->role)))</span>
         <span class="text-slate-400 font-normal"><i class="fa-solid fa-chevron-right text-xs"></i></span>
-        <span id="breadcrumb-page" class="text-slate-500 font-medium">Dashboard</span>
+        <span id="breadcrumb-page" class="text-slate-500 font-medium">@yield('breadcrumb-page', 'Dashboard')</span>
     </div>
 
     <!-- Right Action Icons & User Info -->
     <div class="flex items-center space-x-4">
 
         <!-- Quick Role Switcher (Added for Lomba Demo versatility) -->
-        <div class="relative">
-            <select id="role-selector" onchange="switchRole(this.value)" aria-label="Pilih mode demo" class="bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 text-xs font-semibold rounded-xl px-3 py-2 outline-none cursor-pointer">
-                <option value="sapras" selected>Mode: Admin Sapras</option>
-                <option value="pkl_bkk">Mode: Admin PKL &amp; BKK</option>
-            </select>
-        </div>
+        @hasSection('role-switcher')
+            @yield('role-switcher')
+        @endif
 
         <!-- Gear Icon Button -->
         <button title="Pengaturan" class="w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 text-brand-600 flex items-center justify-center transition-colors">

@@ -22,7 +22,10 @@
     <div class="flex min-h-screen w-full relative overflow-x-hidden">
         @include('Admin.layout.sidebar')
 
-        @yield('content')
+        <div class="flex-1 flex flex-col min-w-0">
+            @yield('content')
+            @include('Admin.layout.footer')
+        </div>
     </div>
 
     @vite(['resources/js/app.js'])

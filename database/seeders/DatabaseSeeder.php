@@ -2,7 +2,11 @@
 
 namespace Database\Seeders;
 
+use App\Models\Produk;
 use App\Models\User;
+use Database\Seeders\JurusanSeeder;
+use Database\Seeders\ProdukSeeder;
+use Database\Seeders\UserSeeder;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -20,8 +24,13 @@ class DatabaseSeeder extends Seeder
             'username' => 'admin',
             'email' => 'test@example.com',
             'role' => 'admin',
+            'password' => '1234'
         ]);
 
-        $this->call(UserSeeder::class);
+        $this->call([
+            UserSeeder::class,
+            JurusanSeeder::class,
+            ProdukSeeder::class
+        ]);
     }
 }
