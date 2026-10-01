@@ -21,7 +21,8 @@
     @endif
 
     <div class="bg-white rounded-2xl p-6 figma-card-shadow border border-slate-100">
-        <form action="{{ route('update.informasi.ppdb') }}" method="POST" class="flex flex-col">
+        <span class="text-gray-600 font-semibold text-lg">Header</span>
+        <form action="{{ route('update.informasi.ppdb') }}" method="POST" class="flex flex-col mt-5">
             @csrf
 
 
@@ -54,118 +55,131 @@
     </div>
 
     {{-- ================= TANGGAL PENTING ================= --}}
+    <div class="flex flex-col gap-6 items-stretch bg-white rounded-2xl p-6">
+        <span class="text-gray-600 font-semibold text-lg">Tanggal Penting</span>
+        <div class="flex gap-6">
+            {{-- CARD KALENDER --}}
+            <div class="w-[55%] min-w-0">
+                <div
+                    class="relative isolate bg-white rounded-2xl p-6 figma-card-shadow border border-slate-100 h-full flex flex-col">
 
-    <div class="flex gap-6 items-stretch bg-white rounded-2xl p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <button type="button" id="btnPrev" title="Bulan sebelumnya"
+                            class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 transition">
+                            <i class="fa-solid fa-chevron-left text-xs"></i>
+                        </button>
+                        <span id="calendarTitle"
+                            class="text-sm font-extrabold uppercase tracking-wider text-brand-600"></span>
+                        <button type="button" id="btnNext" title="Bulan berikutnya"
+                            class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 transition">
+                            <i class="fa-solid fa-chevron-right text-xs"></i>
+                        </button>
+                    </div>
 
-        {{-- CARD KALENDER --}}
-        <div class="w-[55%] min-w-0">
-            <div
-                class="relative isolate bg-white rounded-2xl p-6 figma-card-shadow border border-slate-100 h-full flex flex-col">
+                    <div class="grid grid-cols-7 gap-1 mb-1">
+                        @foreach (['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'] as $hari)
+                            <div
+                                class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 text-center py-1">
+                                {{ $hari }}</div>
+                        @endforeach
+                    </div>
 
-                <div class="flex items-center justify-between mb-4">
-                    <button type="button" id="btnPrev" title="Bulan sebelumnya"
-                        class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 transition">
-                        <i class="fa-solid fa-chevron-left text-xs"></i>
-                    </button>
-                    <span id="calendarTitle" class="text-sm font-extrabold uppercase tracking-wider text-brand-600"></span>
-                    <button type="button" id="btnNext" title="Bulan berikutnya"
-                        class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 transition">
-                        <i class="fa-solid fa-chevron-right text-xs"></i>
-                    </button>
-                </div>
+                    <div id="calendarGrid" class="grid grid-cols-7 gap-1"></div>
 
-                <div class="grid grid-cols-7 gap-1 mb-1">
-                    @foreach (['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'] as $hari)
-                        <div class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 text-center py-1">
-                            {{ $hari }}</div>
-                    @endforeach
-                </div>
+                    <div class="flex flex-wrap items-center gap-4 mt-4 text-[10px] font-semibold text-slate-500">
+                        <span class="flex items-center gap-1.5">
+                            <i class="w-3 h-3 rounded bg-brand-600"></i> Tersimpan
+                        </span>
+                        <span class="flex items-center gap-1.5">
+                            <i class="w-3 h-3 rounded bg-brand-100"></i> Dipilih
+                        </span>
+                    </div>
 
-                <div id="calendarGrid" class="grid grid-cols-7 gap-1"></div>
-
-                <div class="flex flex-wrap items-center gap-4 mt-4 text-[10px] font-semibold text-slate-500">
-                    <span class="flex items-center gap-1.5">
-                        <i class="w-3 h-3 rounded bg-brand-600"></i> Tersimpan
-                    </span>
-                    <span class="flex items-center gap-1.5">
-                        <i class="w-3 h-3 rounded bg-brand-100"></i> Dipilih
-                    </span>
-                </div>
-
-                <div id="agendaTooltip"
-                    class="hidden absolute z-50 w-64 p-3 rounded-xl bg-slate-800 text-white text-xs shadow-xl pointer-events-none">
+                    <div id="agendaTooltip"
+                        class="hidden absolute z-50 w-64 p-3 rounded-xl bg-slate-800 text-white text-xs shadow-xl pointer-events-auto">
+                        <div class="pointer-events-auto" data-tooltip-content></div>
+                    </div>
                 </div>
             </div>
+
+            {{-- CARD FORM --}}
+            <form id="agendaForm" action="{{ route('post.tanggal-penting.ppdb') }}" method="POST"
+                class="flex-1 min-w-0 bg-white rounded-2xl p-6 figma-card-shadow border border-slate-100 flex flex-col gap-4">
+                @csrf
+                <div id="agendaMethod"></div>
+
+                <div id="editBanner"
+                    class="hidden p-3 rounded-xl text-xs font-medium bg-blue-50 text-brand-800 border border-brand-100 flex items-center justify-between gap-2">
+                    <span class="flex items-center gap-2 min-w-0">
+                        <i class="fa-solid fa-pen text-xs shrink-0"></i>
+                        <span class="truncate">Mode edit: <strong id="editName"></strong></span>
+                    </span>
+                    <button type="button" onclick="resetForm()" title="Keluar dari mode edit"
+                        class="shrink-0 w-5 h-5 flex items-center justify-center rounded-full hover:bg-brand-100 transition">
+                        <i class="fa-solid fa-xmark text-[10px]"></i>
+                    </button>
+                </div>
+
+                <div class="flex flex-col">
+                    <label for="namaAgenda" class="text-xs font-extrabold uppercase tracking-wider text-brand-600 mb-1">
+                        Nama Agenda
+                    </label>
+                    <input type="text" name="nama_agenda" id="namaAgenda" maxlength="100"
+                        value="{{ old('nama_agenda') }}" placeholder="Contoh: Gelombang 1"
+                        class="w-full px-4 py-3 bg-slate-50 text-slate-800 text-sm font-medium rounded-xl border-2 border-slate-200 focus:border-brand-600 focus:ring-4 focus:ring-brand-100 focus:outline-none transition placeholder:text-slate-400">
+                </div>
+
+                <div class="flex flex-col">
+                    <label for="tanggalMulai" class="text-xs font-extrabold uppercase tracking-wider text-brand-600 mb-1">
+                        Tanggal Mulai
+                    </label>
+                    <input type="date" name="tanggal_mulai" id="tanggalMulai" value="{{ old('tanggal_mulai') }}"
+                        class="w-full px-4 py-3 bg-slate-50 text-slate-800 text-sm font-medium rounded-xl border-2 border-slate-200 focus:border-brand-600 focus:ring-4 focus:ring-brand-100 focus:outline-none transition">
+                </div>
+
+                <div class="flex flex-col">
+                    <label for="tanggalSelesai" class="text-xs font-extrabold uppercase tracking-wider text-brand-600 mb-1">
+                        Tanggal Selesai
+                    </label>
+                    <input type="date" name="tanggal_selesai" id="tanggalSelesai" value="{{ old('tanggal_selesai') }}"
+                        class="w-full px-4 py-3 bg-slate-50 text-slate-800 text-sm font-medium rounded-xl border-2 border-slate-200 focus:border-brand-600 focus:ring-4 focus:ring-brand-100 focus:outline-none transition">
+                </div>
+
+                <div class="flex flex-col">
+                    <label for="keteranganAgenda"
+                        class="text-xs font-extrabold uppercase tracking-wider text-brand-600 mb-1">
+                        Keterangan
+                    </label>
+                    <input type="text" name="keterangan" id="keteranganAgenda" maxlength="150"
+                        value="{{ old('keterangan') }}" placeholder="Contoh: kegiatan rutin hari minggu"
+                        class="w-full px-4 py-3 bg-slate-50 text-slate-800 text-sm font-medium rounded-xl border-2 border-slate-200 focus:border-brand-600 focus:ring-4 focus:ring-brand-100 focus:outline-none transition placeholder:text-slate-400">
+                </div>
+
+                <div class="flex flex-wrap items-center gap-3 mt-1">
+                    <button type="submit"
+                        class="bg-brand-600 hover:bg-brand-700 p-3 rounded-xl text-white text-sm font-medium transition">
+                        <span id="simpanLabel">Simpan Agenda</span>
+                    </button>
+
+                    <button type="button" id="btnClear" onclick="resetForm()"
+                        class="p-3 rounded-xl text-sm font-medium bg-slate-100 hover:bg-slate-200 text-slate-700 transition">
+                        Clear
+                    </button>
+
+                    <button type="button" id="btnHapus" onclick="hapusAgenda()"
+                        class="hidden p-3 rounded-xl text-sm font-medium bg-red-50 hover:bg-red-100 text-red-700 transition">
+                        Hapus
+                    </button>
+                </div>
+            </form>
         </div>
-
-        {{-- CARD FORM --}}
-        <form id="agendaForm" action="{{ route('post.tanggal-penting.ppdb') }}" method="POST"
-            class="flex-1 min-w-0 bg-white rounded-2xl p-6 figma-card-shadow border border-slate-100 flex flex-col gap-4">
-            @csrf
-            <div id="agendaMethod"></div>
-
-            <div id="editBanner"
-                class="hidden p-3 rounded-xl text-xs font-medium bg-blue-50 text-brand-800 border border-brand-100 flex items-center justify-between gap-2">
-                <span class="flex items-center gap-2 min-w-0">
-                    <i class="fa-solid fa-pen text-xs shrink-0"></i>
-                    <span class="truncate">Mode edit: <strong id="editName"></strong></span>
-                </span>
-                <button type="button" onclick="resetForm()" title="Keluar dari mode edit"
-                    class="shrink-0 w-5 h-5 flex items-center justify-center rounded-full hover:bg-brand-100 transition">
-                    <i class="fa-solid fa-xmark text-[10px]"></i>
-                </button>
-            </div>
-
-            <div class="flex flex-col">
-                <label for="namaAgenda" class="text-xs font-extrabold uppercase tracking-wider text-brand-600 mb-1">
-                    Nama Agenda
-                </label>
-                <input type="text" name="nama_agenda" id="namaAgenda" maxlength="100" value="{{ old('nama_agenda') }}"
-                    placeholder="Contoh: Gelombang 1"
-                    class="w-full px-4 py-3 bg-slate-50 text-slate-800 text-sm font-medium rounded-xl border-2 border-slate-200 focus:border-brand-600 focus:ring-4 focus:ring-brand-100 focus:outline-none transition placeholder:text-slate-400">
-            </div>
-
-            <div class="flex flex-col">
-                <label for="tanggalMulai" class="text-xs font-extrabold uppercase tracking-wider text-brand-600 mb-1">
-                    Tanggal Mulai
-                </label>
-                <input type="date" name="tanggal_mulai" id="tanggalMulai" value="{{ old('tanggal_mulai') }}"
-                    class="w-full px-4 py-3 bg-slate-50 text-slate-800 text-sm font-medium rounded-xl border-2 border-slate-200 focus:border-brand-600 focus:ring-4 focus:ring-brand-100 focus:outline-none transition">
-            </div>
-
-            <div class="flex flex-col">
-                <label for="tanggalSelesai" class="text-xs font-extrabold uppercase tracking-wider text-brand-600 mb-1">
-                    Tanggal Selesai
-                </label>
-                <input type="date" name="tanggal_selesai" id="tanggalSelesai" value="{{ old('tanggal_selesai') }}"
-                    class="w-full px-4 py-3 bg-slate-50 text-slate-800 text-sm font-medium rounded-xl border-2 border-slate-200 focus:border-brand-600 focus:ring-4 focus:ring-brand-100 focus:outline-none transition">
-            </div>
-
-            <div class="flex flex-col">
-                <label for="keteranganAgenda" class="text-xs font-extrabold uppercase tracking-wider text-brand-600 mb-1">
-                    Keterangan
-                </label>
-                <input type="text" name="keterangan" id="keteranganAgenda" maxlength="150"
-                    value="{{ old('keterangan') }}" placeholder="Contoh: kegiatan rutin hari minggu"
-                    class="w-full px-4 py-3 bg-slate-50 text-slate-800 text-sm font-medium rounded-xl border-2 border-slate-200 focus:border-brand-600 focus:ring-4 focus:ring-brand-100 focus:outline-none transition placeholder:text-slate-400">
-            </div>
-
-            <div class="flex flex-wrap items-center gap-3 mt-1">
-                <button type="submit"
-                    class="bg-brand-600 hover:bg-brand-700 p-3 rounded-xl text-white text-sm font-medium transition">
-                    <span id="simpanLabel">Simpan Agenda</span>
-                </button>
-
-                <button type="button" id="btnClear" onclick="resetForm()"
-                    class="p-3 rounded-xl text-sm font-medium bg-slate-100 hover:bg-slate-200 text-slate-700 transition">
-                    Clear
-                </button>
-
-                <button type="button" id="btnHapus" onclick="hapusAgenda()"
-                    class="hidden p-3 rounded-xl text-sm font-medium bg-red-50 hover:bg-red-100 text-red-700 transition">
-                    Hapus
-                </button>
-            </div>
+    </div>
+    {{-- Persyaratan --}}
+    <div class="bg-white rounded-2xl p-6 figma-card-shadow border border-slate-100">
+        <span class="text-gray-600 font-semibold text-lg">Persyaratan</span>
+        <form class="flex gap-5 mt-5">
+            <input type="text" class="w-full px-4 py-3 bg-slate-50 text-slate-800 text-sm font-medium rounded-xl border-2 border-slate-200 focus:border-brand-600 focus:ring-4 focus:ring-brand-100 focus:outline-none transition placeholder:text-slate-400">
+            <button class=" px-4 py-3 bg-slate-50 text-slate-800 text-sm font-medium rounded-xl border-2 border-slate-200 focus:border-brand-600 focus:ring-4 focus:ring-brand-100 focus:outline-none transition placeholder:text-slate-400 "><i class="fa-solid fa-plus"></i></button>
         </form>
     </div>
 @endsection
@@ -184,6 +198,10 @@
             const GRID = document.getElementById('calendarGrid');
             const TITLE = document.getElementById('calendarTitle');
             const TOOLTIP = document.getElementById('agendaTooltip');
+            const TOOLTIP_CONTENT = TOOLTIP.querySelector('[data-tooltip-content]');
+            const CAL_CARD = TOOLTIP.parentElement;
+            const SHOW_DELAY = 150;
+            const HIDE_DELAY = 400;
             const BANNER = document.getElementById('editBanner');
             const EDIT_NAME = document.getElementById('editName');
             const BTN_HAPUS = document.getElementById('btnHapus');
@@ -204,6 +222,7 @@
             let end = '';
             let editingId = null;
             let tooltipTimer = null;
+            let hoverRanges = [];
 
             const pad = (n) => String(n).padStart(2, '0');
 
@@ -253,15 +272,19 @@
                 return key >= start && key <= end;
             }
 
-            function selClass(key) {
-                const tersimpan = agendaDiTanggal(key).length > 0;
+            function selClass(key, hoverRangesArr = []) {
+                const tersimpanList = agendaDiTanggal(key);
+                const tersimpan = tersimpanList.length > 0;
                 const draft = adaDraft(key);
+                const inHover = hoverRangesArr.some(r => key >= r[0] && key <= r[1]);
                 const kelas = [
                     'h-9 flex items-center justify-center rounded-lg text-xs font-semibold transition cursor-pointer select-none'
                 ];
 
-                if (tersimpan) {
-                    kelas.push('bg-brand-600 text-white hover:bg-brand-700');
+                if (inHover) {
+                    kelas.push('bg-brand-700 text-white font-extrabold');
+                } else if (tersimpan) {
+                    kelas.push('bg-brand-500/70 text-white hover:bg-brand-600');
                 } else if (draft) {
                     kelas.push('bg-brand-100 text-brand-800 hover:bg-brand-200');
                 } else {
@@ -275,8 +298,18 @@
                 return kelas.join(' ');
             }
 
+            function updateCellClasses() {
+                GRID.querySelectorAll('[data-key]').forEach((sel) => {
+                    const key = sel.dataset.key;
+                    const luarBulan = sel.dataset.luar === '1';
+                    sel.className = selClass(key, hoverRanges) + (luarBulan ? ' opacity-35' : '');
+                });
+            }
+
             function renderCalendar() {
                 TITLE.textContent = BULAN[viewMonth] + ' ' + viewYear;
+                hoverRanges = [];
+                TOOLTIP.classList.add('hidden');
                 GRID.innerHTML = '';
 
                 const pertama = new Date(viewYear, viewMonth, 1);
@@ -292,29 +325,61 @@
 
                     const sel = document.createElement('div');
                     sel.textContent = d.getDate();
-                    sel.className = selClass(key) + (luarBulan ? ' opacity-35' : '');
+                    sel.dataset.key = key;
+                    sel.dataset.luar = luarBulan ? '1' : '0';
+                    sel.className = selClass(key, hoverRanges) + (luarBulan ? ' opacity-35' : '');
 
                     sel.addEventListener('click', () => pilihTanggal(key));
-                    sel.addEventListener('mouseenter', () => tampilTooltip(sel, agendaDiTanggal(key)));
-                    sel.addEventListener('mouseleave', sembunyiTooltip);
+                    sel.addEventListener('mouseenter', () => {
+                        clearTimeout(tooltipTimer);
+                        const list = agendaDiTanggal(key);
+                        hoverRanges = list.map(a => [a.tanggal_mulai, a.tanggal_selesai]);
+                        updateCellClasses();
+                        tampilTooltip(sel, list, key);
+                    });
+                    sel.addEventListener('mouseleave', (e) => {
+                        if (e.relatedTarget && TOOLTIP.contains(e.relatedTarget)) return;
+                        sembunyiTooltip();
+                    });
 
                     GRID.appendChild(sel);
                 }
             }
 
-            function tampilTooltip(anchor, list) {
-                if (!list.length) return;
-
+            function tampilTooltip(anchor, list, key) {
                 clearTimeout(tooltipTimer);
                 tooltipTimer = setTimeout(() => {
-                    TOOLTIP.innerHTML = list.map((a) => {
-                        const judul = rentangLabel(a.tanggal_mulai, a.tanggal_selesai);
-                        return '<div class="mb-2 last:mb-0">' +
-                            '<div class="text-brand-200 font-semibold">' + judul + '</div>' +
-                            '<div class="font-bold">' + a.nama_agenda + '</div>' +
-                            '<div class="text-slate-300">' + a.keterangan + '</div>' +
-                            '</div>';
-                    }).join('');
+                    let html = '';
+
+                    if (list.length) {
+                        html += list.map((a) => {
+                            const judul = rentangLabel(a.tanggal_mulai, a.tanggal_selesai);
+                            return '<div class="mb-2 last:mb-0 flex items-start justify-between gap-2">' +
+                                '<div class="min-w-0">' +
+                                '<div class="text-brand-200 font-semibold truncate">' + judul +
+                                '</div>' +
+                                '<div class="font-bold truncate">' + a.nama_agenda + '</div>' +
+                                '<div class="text-slate-300 truncate">' + a.keterangan + '</div>' +
+                                '</div>' +
+                                '<button type="button" class="shrink-0 text-slate-300 hover:text-white transition" data-action="edit" data-id="' +
+                                a.id + '">' +
+                                '<i class="fa-solid fa-pen text-xs"></i>' +
+                                '</button>' +
+                                '</div>';
+                        }).join('');
+                    }
+
+                    html +=
+                        '<div class="mt-2 pt-2 border-t border-white/10 flex items-center justify-center">' +
+                        '<button type="button" class="flex items-center gap-1.5 text-brand-200 hover:text-white text-xs font-semibold transition" data-action="add" data-key="' +
+                        key + '">' +
+                        '<i class="fa-solid fa-plus"></i>' +
+                        '<span>Tambah agenda</span>' +
+                        '</button>' +
+                        '</div>';
+
+                    TOOLTIP_CONTENT.innerHTML = html;
+                    TOOLTIP.classList.remove('hidden');
 
                     const induk = TOOLTIP.parentElement;
                     const lebarInduk = induk.clientWidth;
@@ -326,24 +391,68 @@
                     let atas = anchor.offsetTop - TOOLTIP.offsetHeight - 8;
                     if (atas < 0) atas = anchor.offsetTop + anchor.offsetHeight + 8;
 
-                    TOOLTIP.classList.remove('hidden');
                     TOOLTIP.style.left = kiri + 'px';
                     TOOLTIP.style.top = atas + 'px';
-                }, 150);
+
+                    TOOLTIP_CONTENT.querySelectorAll('[data-action="edit"]').forEach(btn => {
+                        btn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            const id = parseInt(btn.dataset.id);
+                            const agenda = AGENDAS.find(a => a.id === id);
+                            if (agenda) {
+                                loadAgenda(agenda);
+                                hoverRanges = [];
+                                renderCalendar();
+                                TOOLTIP.classList.add('hidden');
+                            }
+                        });
+                    });
+
+                    TOOLTIP_CONTENT.querySelectorAll('[data-action="add"]').forEach(btn => {
+                        btn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            const keyTanggal = btn.dataset.key;
+                            resetForm();
+                            if (keyTanggal) {
+                                start = keyTanggal;
+                                end = '';
+                                INPUT_MULAI.value = keyTanggal;
+                                INPUT_SELESAI.value = '';
+                            }
+                            hoverRanges = [];
+                            renderCalendar();
+                            TOOLTIP.classList.add('hidden');
+                        });
+                    });
+                }, SHOW_DELAY);
+            }
+
+            function hideTooltipNow() {
+                clearTimeout(tooltipTimer);
+                tooltipTimer = null;
+                TOOLTIP.classList.add('hidden');
+                hoverRanges = [];
+                updateCellClasses();
             }
 
             function sembunyiTooltip() {
                 clearTimeout(tooltipTimer);
-                tooltipTimer = setTimeout(() => TOOLTIP.classList.add('hidden'), 150);
+                tooltipTimer = setTimeout(hideTooltipNow, HIDE_DELAY);
             }
 
             function pilihTanggal(key) {
                 const tersimpan = agendaDiTanggal(key);
 
                 if (tersimpan.length) {
-                    loadAgenda(tersimpan[0]);
-                    renderCalendar();
-                    return;
+                    if (editingId !== null) {
+                        loadAgenda(tersimpan[0]);
+                        renderCalendar();
+                        return;
+                    }
+                }
+
+                if (editingId !== null) {
+                    resetForm();
                 }
 
                 if (!start || end) {
@@ -407,6 +516,27 @@
                 METHOD_SLOT.innerHTML = '<input type="hidden" name="_method" value="DELETE">';
                 FORM.submit();
             }
+
+            GRID.addEventListener('mouseleave', (e) => {
+                if (e.relatedTarget && TOOLTIP.contains(e.relatedTarget)) return;
+                sembunyiTooltip();
+            });
+
+            TOOLTIP.addEventListener('mouseenter', () => {
+                clearTimeout(tooltipTimer);
+            });
+
+            TOOLTIP.addEventListener('mouseleave', (e) => {
+                if (e.relatedTarget && (GRID.contains(e.relatedTarget) || CAL_CARD.contains(e.relatedTarget))) {
+                    if (e.relatedTarget.closest && e.relatedTarget.closest('[data-key]')) return;
+                }
+                sembunyiTooltip();
+            });
+
+            CAL_CARD.addEventListener('mouseleave', (e) => {
+                if (e.relatedTarget && TOOLTIP.contains(e.relatedTarget)) return;
+                sembunyiTooltip();
+            });
 
             document.getElementById('btnPrev').addEventListener('click', () => {
                 viewMonth--;

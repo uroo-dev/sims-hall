@@ -100,6 +100,42 @@ class PpdbTanggalPentingTest extends TestCase
         $this->assertDatabaseCount('ppdb_tanggal_penting', 0);
     }
 
+    public function test_agenda_dates_are_serialized_as_yyyy_mm_dd(): void
+    {
+        $agenda = $this->buatAgenda('2026-06-13', '2026-06-15');
+
+        $array = $agenda->toArray();
+
+        $this->assertSame('2026-06-13', $array['tanggal_mulai']);
+        $this->assertSame('2026-06-15', $array['tanggal_selesai']);
+    }
+
+    public function test_agenda_date_range_is_string_comparable_for_calendar(): void
+    {
+        $agenda = $this->buatAgenda('2026-06-13', '2026-06-15');
+
+        $mulai = $agenda->toArray()['tanggal_mulai'];
+        $selesai = $agenda->toArray()['tanggal_selesai'];
+
+        $sesuai = array_values(array_filter(
+            ['2026-06-12', '2026-06-13', '2026-06-14', '2026-06-15', '2026-06-16'],
+            fn ($key) => $key >= $mulai && $key <= $selesai
+        ));
+
+        $this->assertSame(['2026-06-13', '2026-06-14', '2026-06-15'], $sesuai);
+    }
+
+    public function test_single_day_agenda_is_string_comparable(): void
+    {
+        $agenda = $this->buatAgenda('2026-06-13', '2026-06-13');
+
+        $array = $agenda->toArray();
+
+        $this->assertSame('2026-06-13', $array['tanggal_mulai']);
+        $this->assertSame('2026-06-13', $array['tanggal_selesai']);
+        $this->assertTrue($array['tanggal_mulai'] <= '2026-06-13' && $array['tanggal_selesai'] >= '2026-06-13');
+    }
+
     public function test_agenda_can_be_updated(): void
     {
         $this->actingAs($this->admin());
