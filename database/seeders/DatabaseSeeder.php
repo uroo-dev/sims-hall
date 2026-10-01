@@ -28,6 +28,9 @@ class DatabaseSeeder extends Seeder
             FasilitasSeeder::class,
             PaketPeminjamanSeeder::class,
             PaymentConfigurationSeeder::class,
+            BkkSeeder::class,
+            ChatbotKnowledgeSeeder::class,
+            DataMasterSeeder::class,
         ]);
     }
 }

@@ -1,17 +1,18 @@
 <!-- TOP NAVBAR / HEADER CONTAINER -->
 <header
     class="sticky top-3 z-40 bg-white/95 backdrop-blur-md rounded-2xl px-5 py-3 shadow-sm border border-gray-100 flex items-center justify-between transition-all">
+    
     <div class="flex items-center gap-3">
-        <button type="button" onclick="toggleSidebar()"
-            class="lg:hidden text-gray-600 hover:text-brand-600 focus:outline-none p-1"
-            aria-label="Toggle Menu">
+        <button onclick="toggleSidebar()"
+            class="lg:hidden text-gray-600 hover:text-brand-600 focus:outline-none p-1">
             <i class="fa-solid fa-bars text-lg"></i>
         </button>
         <!-- BREADCRUMB -->
         <div class="text-xs md:text-sm font-semibold tracking-wide text-gray-700">
             <span class="text-gray-900 font-bold uppercase">{{ (auth()->user() && auth()->user()->role === 'pelanggan') || request()->routeIs('customer.*') ? 'PEMINJAMAN' : (auth()->user() ? strtoupper(str_replace('_', ' ', auth()->user()->role)) : 'ADMIN') }}</span>
+
             <span class="mx-1 text-gray-400">&gt;</span>
-            <span class="text-gray-600">@yield('page_title', 'Dashboard')</span>
+            <span class="text-gray-600">@yield('title', 'Dashboard')</span>
         </div>
     </div>
 
@@ -24,7 +25,7 @@
         </a>
 
         <div class="relative group">
-            <button type="button"
+            <button
                 class="flex items-center gap-2.5 bg-gray-50 border border-gray-200 rounded-full py-1 px-3 hover:bg-gray-100 transition">
                 <div
                     class="w-6 h-6 rounded-full bg-blue-100 text-[#0073c6] flex items-center justify-center text-xs font-bold">
@@ -47,13 +48,11 @@
                     <i class="fa-solid fa-sliders mr-2"></i> Pengaturan
                 </a>
                 <hr class="my-1 border-gray-100">
-                <form action="{{ route('logout') }}" method="POST">
-                    @csrf
-                    <button type="submit" onclick="return confirm('Apakah Anda yakin ingin keluar dari sistem admin?')"
-                        class="w-full text-left block px-4 py-2 text-xs text-red-600 hover:bg-red-50">
-                        <i class="fa-solid fa-arrow-right-from-bracket mr-2"></i> Keluar
-                    </button>
-                </form>
+                <!-- Logout di Dropdown: Mengirim form logout yang ada di sidebar secara otomatis -->
+                <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form-sidebar').submit();"
+                    class="block px-4 py-2 text-xs text-red-600 hover:bg-red-50">
+                    <i class="fa-solid fa-arrow-right-from-bracket mr-2"></i> Keluar
+                </a>
             </div>
         </div>
     </div>

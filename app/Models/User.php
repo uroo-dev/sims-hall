@@ -68,5 +68,6 @@ class User extends Authenticatable
         }
 
         return $this->fitur?->nama_fitur === $fiturName;
+
     }
 }

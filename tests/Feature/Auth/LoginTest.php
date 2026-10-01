@@ -59,6 +59,69 @@ class LoginTest extends TestCase
         $this->assertGuest();
     }
 
+    public function test_users_with_role_bkk_are_redirected_to_pkl_bkk_dashboard(): void
+    {
+        $user = User::factory()->create(['role' => 'bkk']);
+
+        $this->post('/login', [
+            'username' => $user->username,
+            'password' => 'password',
+        ])->assertRedirect('/dashboard/pkl-bkk');
+    }
+
+    public function test_admin_role_can_access_pkl_bkk_dashboard(): void
+    {
+        $user = User::factory()->create(['role' => 'admin']);
+
+        $this->actingAs($user)
+            ->get('/dashboard/pkl-bkk')
+            ->assertOk()
+            ->assertSee('BKK');
+    }
+
+    public function test_admin_can_access_all_pkl_bkk_pages(): void
+    {
+        $user = User::factory()->create(['role' => 'admin']);
+
+        $pages = [
+            '/dashboard/pkl-bkk/dudi' => 'Data DUDI',
+            '/dashboard/pkl-bkk/lowongan' => 'Lowongan Kerja',
+            '/dashboard/pkl-bkk/lowongan/tambah' => 'Tambah Lowongan Kerja',
+            '/dashboard/pkl-bkk/siswa' => 'Data Siswa PKL',
+            '/dashboard/pkl-bkk/penempatan' => 'Penempatan PKL',
+            '/dashboard/pkl-bkk/pengajuan/create' => 'Buat Pengajuan PKL',
+        ];
+
+        foreach ($pages as $url => $label) {
+            $this->actingAs($user)
+                ->get($url)
+                ->assertOk()
+                ->assertSee($label);
+        }
+    }
+
+    public function test_non_admin_cannot_access_pkl_bkk_pages(): void
+    {
+        $user = User::factory()->create(['role' => 'guru']);
+
+        $this->actingAs($user)
+            ->get('/dashboard/pkl-bkk/penempatan')
+            ->assertForbidden();
+    }
+
+    public function test_guests_cannot_access_pkl_bkk_dashboard(): void
+    {
+        $this->get('/dashboard/pkl-bkk')->assertRedirect('/login');
+    }
+
+    public function test_landing_page_is_served_at_root(): void
+    {
+        $this->get('/')
+            ->assertOk()
+            ->assertSee('SMKN 2')
+            ->assertSee('Peminjaman Aula');
+    }
+
     public function test_login_requires_username_and_password(): void
     {
         $response = $this->from('/login')->post('/login', [

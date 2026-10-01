@@ -18,6 +18,7 @@ return new class extends Migration
             $table->decimal('harga', 12, 2); // Diubah dari varchar ke decimal untuk kemudahan kalkulasi
             $table->decimal('harga_dp', 12, 2)->nullable(); // Diubah dari varchar ke decimal untuk kemudahan kalkulasi
             $table->text('deskripsi')->nullable();
+            $table->string('durasi', 50)->default('4 Jam');
             $table->timestamps();
         });
     }

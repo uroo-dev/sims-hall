@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['nama_paket', 'kategori', 'harga', 'harga_dp', 'deskripsi'])]
+
 class PaketPeminjaman extends Model
 {
     use HasFactory;
@@ -52,4 +52,6 @@ class PaketPeminjaman extends Model
     {
         return $this->nama_paket ?: 'Paket '.ucwords($this->kategori);
     }
+
+    protected $fillable = ['nama_paket', 'harga', 'kategori', 'durasi', 'fasilitas', 'deskripsi'];
 }

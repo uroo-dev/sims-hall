@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -50,6 +51,9 @@ class AuthController extends Controller
 
         if (Auth::user()?->role === 'kepala_sekolah') {
             return redirect()->intended(route('kepala-sekolah.dashboard'));
+        }
+        if (Auth::user()?->role === 'bkk') {
+            return redirect()->intended(route('pkl.dashboard'));
         }
 
         return redirect()->intended(route('dashboard'));
