@@ -242,96 +242,202 @@
             <!-- KOLOM KANAN (SPAN 1): PILIHAN PAKET & RINGKASAN BIAYA -->
             <div class="space-y-6">
 
-                <!-- CARD PAKET TERPILIH -->
-                <div class="bg-white rounded-2xl p-6 figma-card-shadow border-2 border-brand-500 space-y-4 relative overflow-hidden">
+                <!-- CARD PILIHAN PAKET & MODE -->
+                <div class="bg-white rounded-2xl p-6 figma-card-shadow border-2 border-brand-500 space-y-5 relative overflow-hidden">
                     <div class="flex items-center justify-between pb-3 border-b border-slate-100">
                         <span class="text-xs font-bold text-brand-600 uppercase tracking-wider flex items-center gap-1.5">
                             <i class="fa-solid fa-cube"></i>
-                            Pilihan Paket Aula
+                            Jenis Paket Aula
                         </span>
                         <a href="{{ route('customer.paket') }}" class="text-[11px] font-semibold text-brand-600 hover:underline">
-                            Ganti Paket
+                            Katalog Paket
                         </a>
                     </div>
 
-                    <!-- Dropdown Pemilihan Paket -->
-                    <div>
-                        <label for="paket_peminjaman_id" class="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wide">
-                            Pilih Paket Peminjaman <span class="text-red-500">*</span>
+                    <!-- TOGGLE PILIHAN PAKET: STANDAR VS CUSTOM -->
+                    <div class="space-y-1.5">
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide">
+                            Pilihan Pengajuan <span class="text-red-500">*</span>
                         </label>
-                        <select name="paket_peminjaman_id" id="paket_peminjaman_id" required onchange="updateSelectedPaket(this.value)"
-                            class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs md:text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-600/20 focus:border-brand-600 transition">
-                            @foreach ($pakets as $p)
-                                <option value="{{ $p->id }}" {{ (old('paket_peminjaman_id', $selectedPaket?->id) == $p->id) ? 'selected' : '' }}>
-                                    {{ $p->nama_paket ?: ucfirst($p->kategori) }} - Rp {{ number_format($p->harga, 0, ',', '.') }}
-                                </option>
-                            @endforeach
-                        </select>
+                        <div class="grid grid-cols-2 gap-2 p-1.5 bg-slate-100 rounded-xl text-xs font-bold">
+                            <button type="button" id="btnModeStandar" onclick="switchPackageMode(false)"
+                                class="py-2 px-3 rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer bg-white text-brand-700 shadow-xs">
+                                <i class="fa-solid fa-box"></i>
+                                <span>Paket Pilihan</span>
+                            </button>
+                            <button type="button" id="btnModeCustom" onclick="switchPackageMode(true)"
+                                class="py-2 px-3 rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer text-slate-600 hover:text-slate-900">
+                                <i class="fa-solid fa-sliders"></i>
+                                <span>Paket Custom</span>
+                            </button>
+                        </div>
+                        <input type="hidden" name="is_custom" id="is_custom" value="{{ old('is_custom', $isCustom ? '1' : '0') }}">
                     </div>
 
-                    <!-- Ringkasan Biaya Paket Dinamis -->
-                    <div class="p-4 bg-gradient-to-br from-blue-50/70 to-slate-50 border border-blue-100 rounded-xl space-y-3">
-                        <div class="flex items-center justify-between">
-                            <span class="text-xs text-slate-600 font-medium">Harga Sewa Paket:</span>
-                            <span class="text-base md:text-lg font-black text-brand-700" id="summaryHarga">
-                                Rp {{ number_format($selectedPaket?->harga ?? 0, 0, ',', '.') }}
-                            </span>
-                        </div>
-                        <div class="flex items-center justify-between text-xs pt-2 border-t border-blue-100">
-                            <span class="text-slate-600 font-medium flex items-center gap-1">
-                                <i class="fa-solid fa-shield-halved text-emerald-600"></i>
-                                Minimal DP (Uang Muka):
-                            </span>
-                            <span class="font-extrabold text-emerald-600" id="summaryDp">
-                                @if ($selectedPaket && $selectedPaket->harga_dp)
-                                    Rp {{ number_format($selectedPaket->harga_dp, 0, ',', '.') }}
-                                @else
-                                    Rp {{ number_format(($selectedPaket?->harga ?? 0) * 0.3, 0, ',', '.') }}
-                                @endif
-                            </span>
-                        </div>
-                    </div>
-
-                    <!-- Fasilitas Paket -->
-                    <div class="space-y-2">
-                        <span class="block text-xs font-bold text-slate-700 uppercase tracking-wide">
-                            Fasilitas yang Termasuk:
-                        </span>
-                        <div id="summaryFacilities" class="space-y-1.5 max-h-40 overflow-y-auto pr-1 text-xs text-slate-600">
-                            @if ($selectedPaket && $selectedPaket->facilities->isNotEmpty())
-                                @foreach ($selectedPaket->facilities as $fac)
-                                    <div class="flex items-center gap-2">
-                                        <i class="fa-solid fa-circle-check text-brand-600 text-xs flex-shrink-0"></i>
-                                        <span>{{ $fac->judul }}</span>
-                                    </div>
+                    <!-- SECTION 1: DROPDOWN PAKET STANDAR (Aktif jika BUKAN Custom) -->
+                    <div id="sectionPaketStandar" class="space-y-4">
+                        <div>
+                            <label for="paket_peminjaman_id" class="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wide">
+                                Pilih Paket Peminjaman <span class="text-red-500">*</span>
+                            </label>
+                            <select name="paket_peminjaman_id" id="paket_peminjaman_id" onchange="updateSelectedPaket(this.value)"
+                                class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs md:text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-600/20 focus:border-brand-600 transition">
+                                @foreach ($pakets as $p)
+                                    <option value="{{ $p->id }}" {{ (old('paket_peminjaman_id', $selectedPaket?->id) == $p->id) ? 'selected' : '' }}>
+                                        {{ $p->nama_paket ?: ucfirst($p->kategori) }} - Rp {{ number_format($p->harga, 0, ',', '.') }}
+                                    </option>
                                 @endforeach
-                            @else
-                                <div class="text-slate-400 italic">Termasuk fasilitas standar aula SMK Negeri 2 Karanganyar.</div>
-                            @endif
+                            </select>
+                        </div>
+
+                        <!-- Ringkasan Biaya Paket Standar Dinamis -->
+                        <div class="p-4 bg-gradient-to-br from-blue-50/70 to-slate-50 border border-blue-100 rounded-xl space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs text-slate-600 font-medium">Harga Sewa Paket:</span>
+                                <span class="text-base md:text-lg font-black text-brand-700" id="summaryHarga">
+                                    Rp {{ number_format($selectedPaket?->harga ?? 0, 0, ',', '.') }}
+                                </span>
+                            </div>
+                            <div class="flex items-center justify-between text-xs pt-2 border-t border-blue-100">
+                                <span class="text-slate-600 font-medium flex items-center gap-1">
+                                    <i class="fa-solid fa-shield-halved text-emerald-600"></i>
+                                    Minimal DP (Uang Muka):
+                                </span>
+                                <span class="font-extrabold text-emerald-600" id="summaryDp">
+                                    @if ($selectedPaket && $selectedPaket->harga_dp)
+                                        Rp {{ number_format($selectedPaket->harga_dp, 0, ',', '.') }}
+                                    @else
+                                        Rp {{ number_format(($selectedPaket?->harga ?? 0) * 0.3, 0, ',', '.') }}
+                                    @endif
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Fasilitas Paket Standar -->
+                        <div class="space-y-2">
+                            <span class="block text-xs font-bold text-slate-700 uppercase tracking-wide">
+                                Fasilitas yang Termasuk:
+                            </span>
+                            <div id="summaryFacilities" class="space-y-1.5 max-h-40 overflow-y-auto pr-1 text-xs text-slate-600">
+                                @if ($selectedPaket && $selectedPaket->facilities->isNotEmpty())
+                                    @foreach ($selectedPaket->facilities as $fac)
+                                        <div class="flex items-center gap-2">
+                                            <i class="fa-solid fa-circle-check text-brand-600 text-xs flex-shrink-0"></i>
+                                            <span>{{ $fac->judul }}</span>
+                                        </div>
+                                    @endforeach
+                                @else
+                                    <div class="text-slate-400 italic">Termasuk fasilitas standar aula SMK Negeri 2 Karanganyar.</div>
+                                @endif
+                            </div>
                         </div>
                     </div>
+
+                    <!-- SECTION 2: PILIHAN FASILITAS CUSTOM (Aktif jika CUSTOM) -->
+                    <div id="sectionPaketCustom" class="space-y-4 hidden">
+                        <div class="p-3 bg-purple-50/70 border border-purple-200/80 rounded-xl space-y-1">
+                            <div class="flex items-center gap-2 font-bold text-xs text-purple-900">
+                                <i class="fa-solid fa-wand-magic-sparkles text-purple-600"></i>
+                                <span>Kustomisasi Fasilitas Mandiri</span>
+                            </div>
+                            <p class="text-[11px] text-purple-700 leading-relaxed">
+                                Pilih fasilitas aula yang Anda butuhkan di bawah ini. Admin Aula akan memverifikasi ketersediaan dan menetapkan total harga sewa.
+                            </p>
+                        </div>
+
+                        <!-- Checkbox Multi-Select Fasilitas -->
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between">
+                                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide">
+                                    Pilih Fasilitas yang Dibutuhkan <span class="text-red-500">*</span>
+                                </label>
+                                <div class="flex items-center gap-2 text-[11px]">
+                                    <button type="button" onclick="toggleAllFacilities(true)" class="text-brand-600 font-bold hover:underline">Semua</button>
+                                    <span class="text-slate-300">|</span>
+                                    <button type="button" onclick="toggleAllFacilities(false)" class="text-slate-500 font-bold hover:underline">Kosongkan</button>
+                                </div>
+                            </div>
+
+                            <div class="max-h-60 overflow-y-auto space-y-2 pr-1 border border-slate-200 p-2.5 rounded-xl bg-slate-50/50">
+                                @forelse ($facilities as $facility)
+                                    <label class="facility-checkbox-card flex items-start gap-2.5 p-2 rounded-lg border border-slate-200 bg-white hover:border-brand-400 cursor-pointer transition select-none">
+                                        <input type="checkbox" name="facility_ids[]" value="{{ $facility->id }}"
+                                            onchange="updateCustomFacilityCount()"
+                                            class="facility-input mt-1 w-4 h-4 text-brand-600 border-slate-300 rounded focus:ring-brand-500"
+                                            {{ in_array($facility->id, old('facility_ids', [])) ? 'checked' : '' }}>
+                                        <div class="min-w-0 flex-1">
+                                            <span class="block text-xs font-bold text-slate-800 leading-tight">
+                                                {{ $facility->judul }}
+                                            </span>
+                                            @if(!empty($facility->deskripsi))
+                                                <p class="text-[11px] text-slate-500 line-clamp-1 mt-0.5">{{ $facility->deskripsi }}</p>
+                                            @endif
+                                        </div>
+                                    </label>
+                                @empty
+                                    <div class="text-center py-4 text-xs text-slate-400 italic">
+                                        Belum ada data fasilitas aula yang tersedia.
+                                    </div>
+                                @endforelse
+                            </div>
+                            <div class="text-[11px] text-slate-500 flex items-center justify-between pt-1">
+                                <span>Jumlah fasilitas terpilih:</span>
+                                <strong id="customFacilityCount" class="text-brand-700 font-bold">0 Fasilitas</strong>
+                            </div>
+                        </div>
+
+                        <!-- Ringkasan Biaya Paket Custom Dinamis -->
+                        <div class="p-4 bg-gradient-to-br from-amber-50/70 to-slate-50 border border-amber-200 rounded-xl space-y-2.5">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs text-slate-600 font-medium">Harga Sewa:</span>
+                                <span class="px-2.5 py-1 rounded-md text-[11px] font-bold bg-amber-100 text-amber-900 border border-amber-200">
+                                    <i class="fa-solid fa-clock-rotate-left mr-1"></i> Ditentukan Admin Aula
+                                </span>
+                            </div>
+                            <div class="flex items-center justify-between text-xs pt-2 border-t border-amber-100">
+                                <span class="text-slate-600 font-medium flex items-center gap-1">
+                                    <i class="fa-solid fa-shield-halved text-emerald-600"></i>
+                                    Minimal Uang Muka (DP):
+                                </span>
+                                <span class="font-bold text-slate-500 text-[11px]">
+                                    Mengikuti Harga Admin
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
 
                 <!-- INFO TENGGAT WAKTU & KEBIJAKAN -->
                 <div class="bg-amber-50/80 border border-amber-200 rounded-2xl p-5 space-y-2 text-xs text-amber-900 leading-relaxed shadow-sm">
                     <div class="flex items-center gap-2 font-bold text-amber-800">
                         <i class="fa-solid fa-circle-exclamation text-sm"></i>
-                        <span>Informasi Pembayaran Sekolah</span>
+                        <span>Informasi Alur Pengajuan</span>
                     </div>
-                    <p>
-                        Setelah formulir disimpan, tagihan pembayaran otomatis dibuat. Anda akan diberi batas waktu transfer DP selama <strong>{{ $paymentConfig->jatuh_tempo_dp_jam }} Jam</strong>.
-                    </p>
-                    <p class="text-[11px] text-amber-700">
-                        Anda dapat langsung membayar uang muka (DP) atau langsung melunasi tagihan sewa.
-                    </p>
+                    <div id="infoAlurStandar">
+                        <p>
+                            Setelah formulir disimpan, tagihan pembayaran otomatis dibuat. Anda akan diberi batas waktu transfer DP selama <strong>{{ $paymentConfig->jatuh_tempo_dp_jam }} Jam</strong>.
+                        </p>
+                        <p class="text-[11px] text-amber-700 mt-1">
+                            Anda dapat langsung membayar uang muka (DP) atau langsung melunasi tagihan sewa.
+                        </p>
+                    </div>
+                    <div id="infoAlurCustom" class="hidden">
+                        <p>
+                            Setelah pengajuan custom terkirim, Admin Aula akan memverifikasi ketersediaan fasilitas dan menetapkan nominal biaya sewa.
+                        </p>
+                        <p class="text-[11px] text-amber-700 mt-1">
+                            Setelah harga ditetapkan oleh admin, Anda akan menerima tagihan resmi dan dapat melanjutkan ke pembayaran DP/Lunas.
+                        </p>
+                    </div>
                 </div>
 
                 <!-- TOMBOL SUBMIT -->
                 <div class="space-y-2.5">
-                    <button type="submit"
+                    <button type="submit" id="btnSubmitForm"
                         class="w-full py-3.5 px-4 bg-brand-600 hover:bg-brand-700 active:scale-95 text-white font-bold rounded-xl text-sm shadow-md transition flex items-center justify-center gap-2">
-                        <span>Lanjut ke Pembayaran</span>
-                        <i class="fa-solid fa-arrow-right text-xs"></i>
+                        <span id="txtSubmit">Lanjut ke Pembayaran</span>
+                        <i id="iconSubmit" class="fa-solid fa-arrow-right text-xs"></i>
                     </button>
                     <a href="{{ route('customer.paket') }}"
                         class="w-full py-2.5 px-4 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs font-semibold text-center block transition">
@@ -376,5 +482,65 @@
             facilitiesContainer.innerHTML = '<div class="text-slate-400 italic">Termasuk fasilitas standar aula SMK Negeri 2 Karanganyar.</div>';
         }
     }
+
+    function switchPackageMode(isCustom) {
+        document.getElementById('is_custom').value = isCustom ? '1' : '0';
+
+        const btnStandar = document.getElementById('btnModeStandar');
+        const btnCustom = document.getElementById('btnModeCustom');
+        const secStandar = document.getElementById('sectionPaketStandar');
+        const secCustom = document.getElementById('sectionPaketCustom');
+        const infoStandar = document.getElementById('infoAlurStandar');
+        const infoCustom = document.getElementById('infoAlurCustom');
+        const txtSubmit = document.getElementById('txtSubmit');
+        const iconSubmit = document.getElementById('iconSubmit');
+        const paketSelect = document.getElementById('paket_peminjaman_id');
+
+        if (isCustom) {
+            btnStandar.className = 'py-2 px-3 rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer text-slate-600 hover:text-slate-900';
+            btnCustom.className = 'py-2 px-3 rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer bg-white text-purple-700 shadow-xs';
+            secStandar.classList.add('hidden');
+            secCustom.classList.remove('hidden');
+            infoStandar.classList.add('hidden');
+            infoCustom.classList.remove('hidden');
+            txtSubmit.innerText = 'Kirim Pengajuan Paket Custom';
+            iconSubmit.className = 'fa-solid fa-paper-plane text-xs';
+            paketSelect.removeAttribute('required');
+            updateCustomFacilityCount();
+        } else {
+            btnStandar.className = 'py-2 px-3 rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer bg-white text-brand-700 shadow-xs';
+            btnCustom.className = 'py-2 px-3 rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer text-slate-600 hover:text-slate-900';
+            secStandar.classList.remove('hidden');
+            secCustom.classList.add('hidden');
+            infoStandar.classList.remove('hidden');
+            infoCustom.classList.add('hidden');
+            txtSubmit.innerText = 'Lanjut ke Pembayaran';
+            iconSubmit.className = 'fa-solid fa-arrow-right text-xs';
+            paketSelect.setAttribute('required', 'required');
+        }
+    }
+
+    function toggleAllFacilities(checked) {
+        const checkboxes = document.querySelectorAll('.facility-input');
+        checkboxes.forEach(cb => {
+            cb.checked = checked;
+        });
+        updateCustomFacilityCount();
+    }
+
+    function updateCustomFacilityCount() {
+        const checkedBoxes = document.querySelectorAll('.facility-input:checked');
+        const count = checkedBoxes.length;
+        const countEl = document.getElementById('customFacilityCount');
+        if (countEl) {
+            countEl.innerText = count + ' Fasilitas Dipilih';
+        }
+    }
+
+    // Inisialisasi awal saat halaman dimuat
+    document.addEventListener('DOMContentLoaded', () => {
+        const isCustomInit = document.getElementById('is_custom').value === '1';
+        switchPackageMode(isCustomInit);
+    });
 </script>
 @endpush

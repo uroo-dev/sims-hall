@@ -189,8 +189,9 @@
                         @php
                             $pembayaran = $item->pembayaran;
                             $kode = $pembayaran?->kode_pembayaran ?: 'INV-' . str_pad($item->id, 4, '0', STR_PAD_LEFT);
-                            $namaPaket = $item->paketPeminjaman?->nama_paket ?: 'Paket Aula';
-                            $totalTagihan = $pembayaran?->total_tagihan ?? ($item->paketPeminjaman?->harga ?? 0);
+                            $isCustom = (bool) $item->is_custom;
+                            $namaPaket = $item->nama_paket ?? ($item->paketPeminjaman?->nama_paket ?: 'Paket Aula');
+                            $totalTagihan = $pembayaran?->total_tagihan ?? ($item->harga_custom ?? ($item->paketPeminjaman?->harga ?? 0));
                         @endphp
                         <tr class="hover:bg-slate-50/70 transition">
                             <!-- Invoice / ID -->
@@ -214,10 +215,23 @@
 
                             <!-- Paket Sewa -->
                             <td class="py-4 px-4">
-                                <div class="font-semibold text-slate-800">{{ $namaPaket }}</div>
-                                <div class="text-xs text-emerald-600 font-bold mt-0.5">
-                                    Rp {{ number_format($totalTagihan, 0, ',', '.') }}
+                                <div class="flex items-center gap-1.5 flex-wrap">
+                                    <span class="font-semibold text-slate-800">{{ $namaPaket }}</span>
+                                    @if ($isCustom)
+                                        <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-purple-100 text-purple-800 border border-purple-200">
+                                            Custom
+                                        </span>
+                                    @endif
                                 </div>
+                                @if ($isCustom && (float) $totalTagihan <= 0)
+                                    <div class="text-xs text-amber-600 font-bold mt-0.5 flex items-center gap-1">
+                                        <i class="fa-solid fa-hourglass-half text-[10px]"></i> Menunggu Harga
+                                    </div>
+                                @else
+                                    <div class="text-xs text-emerald-600 font-bold mt-0.5">
+                                        Rp {{ number_format($totalTagihan, 0, ',', '.') }}
+                                    </div>
+                                @endif
                             </td>
 
                             <!-- Jadwal Acara -->

@@ -20,6 +20,28 @@
             </div>
         </div>
     @else
+        <!-- BANNER / CARD PAKET CUSTOM -->
+        <div class="relative overflow-hidden rounded-2xl bg-white border-2 border-[#0070ba] figma-card-shadow p-6 md:p-8 transition-all hover:shadow-md">
+            <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                <div class="space-y-2 max-w-3xl">
+                    <h2 class="text-xl md:text-2xl font-black tracking-tight text-gray-900">
+                        Butuh Paket Sesuai Kebutuhan Acara Anda?
+                    </h2>
+                    <p class="text-xs md:text-sm text-gray-600 leading-relaxed">
+                        Pilih sendiri fasilitas aula yang Anda butuhkan (sound system, AC, videotron/proyektor, panggung, kursi tambahan, dll). Kirimkan pengajuan kustom Anda, Admin Aula akan memverifikasi ketersediaan fasilitas dan menetapkan harga sewa terbaik untuk Anda.
+                    </p>
+                </div>
+                <div class="flex-shrink-0 w-full md:w-auto">
+                    <a href="{{ route('customer.peminjaman.create', ['custom' => 1]) }}"
+                       class="inline-flex items-center justify-center gap-2.5 w-full md:w-auto px-6 py-3 rounded-xl bg-[#0070ba] hover:bg-[#005a96] active:scale-95 text-white font-bold text-xs md:text-sm shadow transition-colors">
+                        <i class="fa-solid fa-sliders"></i>
+                        <span>Buat Paket Custom Sekarang</span>
+                        <i class="fa-solid fa-arrow-right text-xs"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
         <!-- Container Grid Paket Peminjaman -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch pt-3">
 

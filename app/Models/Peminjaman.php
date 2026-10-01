@@ -7,12 +7,15 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Facades\Storage;
 
 #[Fillable([
     'paket_peminjaman_id',
+    'is_custom',
+    'harga_custom',
     'nama',
     'email_instansi',
     'tanggal_mulai',
@@ -40,6 +43,8 @@ class Peminjaman extends Model
     protected function casts(): array
     {
         return [
+            'is_custom' => 'boolean',
+            'harga_custom' => 'decimal:2',
             'tanggal_mulai' => 'datetime',
             'tanggal_selesai' => 'datetime',
         ];
@@ -51,6 +56,39 @@ class Peminjaman extends Model
     public function paketPeminjaman(): BelongsTo
     {
         return $this->belongsTo(PaketPeminjaman::class, 'paket_peminjaman_id');
+    }
+
+    /**
+     * Relasi many-to-many ke fasilitas kustom yang dipilih pemohon (peminjaman custom).
+     */
+    public function facilities(): BelongsToMany
+    {
+        return $this->belongsToMany(Facility::class, 'peminjaman_facilities', 'peminjaman_id', 'facility_id')
+            ->withTimestamps();
+    }
+
+    /**
+     * Nama paket peminjaman yang adaptif (custom maupun paket reguler).
+     */
+    public function getNamaPaketAttribute(): string
+    {
+        if ($this->is_custom) {
+            return 'Paket Custom';
+        }
+
+        return $this->paketPeminjaman?->nama_paket ?: ($this->paketPeminjaman ? 'Paket '.ucfirst($this->paketPeminjaman->kategori) : 'Paket Aula');
+    }
+
+    /**
+     * Mengambil daftar fasilitas baik dari paket terpilih maupun kustom pilihan user.
+     */
+    public function getDaftarFasilitasAttribute()
+    {
+        if ($this->is_custom) {
+            return $this->facilities;
+        }
+
+        return $this->paketPeminjaman ? $this->paketPeminjaman->facilities : collect();
     }
 
     /**
@@ -194,5 +232,19 @@ class Peminjaman extends Model
                 'catatan' => trim(($pembayaran->catatan ? $pembayaran->catatan.' | ' : '').'Peminjaman otomatis ditolak sistem karena melewati tenggat waktu pembayaran.'),
             ]);
         }
+    }
+
+    /**
+     * Cek apakah peminjaman sudah memiliki pembayaran yang terverifikasi oleh admin.
+     */
+    public function hasVerifiedPayment(): bool
+    {
+        if (! $this->pembayaran) {
+            return false;
+        }
+
+        return (float) $this->pembayaran->total_terbayar > 0
+            || in_array($this->pembayaran->status_pembayaran, ['partial', 'lunas'])
+            || $this->pembayaran->details()->where('status', 'verified')->exists();
     }
 }

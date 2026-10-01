@@ -38,8 +38,9 @@
                     @forelse ($peminjamans as $item)
                         @php
                             $kode = $item->pembayaran?->kode_pembayaran ?: 'ORD-' . str_pad($item->id, 3, '0', STR_PAD_LEFT);
-                            $namaPaket = $item->paketPeminjaman?->nama_paket ?: 'Paket Aula';
-                            $harga = $item->pembayaran?->total_tagihan ?? ($item->paketPeminjaman?->harga ?? 0);
+                            $namaPaket = $item->nama_paket;
+                            $harga = $item->pembayaran?->total_tagihan ?? ($item->harga_custom ?? ($item->paketPeminjaman?->harga ?? 0));
+                            $isMenungguHargaCustom = $item->is_custom && (float)$harga <= 0;
                             $tanggal = \Carbon\Carbon::parse($item->tanggal_mulai)->format('Y-m-d');
 
                             // Tahap 1: Approval Admin
@@ -59,10 +60,23 @@
                                 {{ $kode }}
                             </td>
                             <td class="py-4 px-3 font-medium">
-                                {{ $namaPaket }}
+                                <div class="flex items-center gap-1.5 flex-wrap">
+                                    <span>{{ $namaPaket }}</span>
+                                    @if ($item->is_custom)
+                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                                            Custom
+                                        </span>
+                                    @endif
+                                </div>
                             </td>
-                            <td class="py-4 px-3">
-                                Rp.{{ number_format($harga, 0, ',', '.') }}
+                            <td class="py-4 px-3 font-medium">
+                                @if ($isMenungguHargaCustom)
+                                    <span class="inline-flex items-center gap-1 text-xs font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                                        <i class="fa-solid fa-clock-rotate-left text-[10px]"></i> Menunggu Harga
+                                    </span>
+                                @else
+                                    Rp.{{ number_format($harga, 0, ',', '.') }}
+                                @endif
                             </td>
                             <td class="py-4 px-3 text-gray-600">
                                 {{ $tanggal }}
@@ -123,6 +137,10 @@
                                             Dibatalkan
                                         </span>
                                     @endif
+                                @elseif ($isMenungguHargaCustom)
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-semibold bg-amber-50 text-amber-800 border border-amber-300">
+                                        <i class="fa-solid fa-hourglass-half text-[10px]"></i> Menunggu Harga
+                                    </span>
                                 @elseif ($isTerbayar)
                                     <span class="inline-flex items-center gap-1 px-3 py-1 rounded-md text-[11px] font-semibold bg-[#00a844] text-white">
                                         <i class="fa-regular fa-circle-check text-[10px]"></i> Terbayar
@@ -164,10 +182,10 @@
                                     </button>
                                     @if ($item->pembayaran && !in_array($item->status, ['cancelled', 'rejected']))
                                         <a href="{{ route('customer.pembayaran.show', $item->pembayaran->id) }}"
-                                           class="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-700 hover:bg-slate-800 text-white text-xs font-semibold rounded-md shadow-xs transition-colors"
-                                           title="Buka Rincian Tagihan & Pembayaran">
-                                            <i class="fa-solid fa-receipt text-[10px]"></i>
-                                            <span>Bayar</span>
+                                           class="inline-flex items-center gap-1 px-2.5 py-1 {{ $isMenungguHargaCustom ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-slate-700 hover:bg-slate-800' }} text-white text-xs font-semibold rounded-md shadow-xs transition-colors"
+                                           title="{{ $isMenungguHargaCustom ? 'Pantau Status Verifikasi Paket Custom' : 'Buka Rincian Tagihan & Pembayaran' }}">
+                                            <i class="fa-solid {{ $isMenungguHargaCustom ? 'fa-clock-rotate-left' : 'fa-receipt' }} text-[10px]"></i>
+                                            <span>{{ $isMenungguHargaCustom ? 'Status' : 'Bayar' }}</span>
                                         </a>
                                     @elseif ($item->pembayaran && in_array($statusBayar, ['refund_pending', 'refunded']))
                                         <a href="{{ route('customer.pembayaran.show', $item->pembayaran->id) }}"

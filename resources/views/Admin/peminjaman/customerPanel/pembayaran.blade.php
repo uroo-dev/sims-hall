@@ -90,6 +90,8 @@
     <!-- CARD TENGGAT WAKTU & STATUS (PUTIH SOLID, COMPACT/TIPIS, HIGHLIGHT COUNTDOWN SAJA) -->
     @php
         $refund = $refundDetail ?? $pembayaran->details->firstWhere('tipe_pembayaran', 'refund');
+        $isCustom = (bool) ($pembayaran->peminjaman?->is_custom);
+        $isWaitingAdminPrice = $isCustom && ((float) $pembayaran->total_tagihan <= 0);
         $isPartial = $pembayaran->status_pembayaran === 'partial' || ($pembayaran->total_terbayar > 0 && $pembayaran->sisa_tagihan > 0);
         $targetDeadline = $isPartial
             ? ($pembayaran->jatuh_tempo_pelunasan ?: ($pembayaran->peminjaman?->tanggal_mulai ? \Carbon\Carbon::parse($pembayaran->peminjaman->tanggal_mulai)->subHours((int) ($config->jatuh_tempo_pelunasan_jam ?? 24)) : now()->addHours(48)))
@@ -114,7 +116,11 @@
                 <span class="px-2.5 py-0.5 bg-slate-100 text-slate-700 rounded-md text-[10px] font-bold tracking-wider uppercase">
                     Invoice {{ $pembayaran->kode_pembayaran }}
                 </span>
-                @if ($pembayaran->status_pembayaran === 'lunas')
+                @if ($isWaitingAdminPrice)
+                    <span class="px-2.5 py-0.5 bg-amber-50 text-amber-900 border border-amber-300 rounded-md text-[10px] font-bold uppercase">
+                        <i class="fa-solid fa-hourglass-half mr-1"></i> Menunggu Verifikasi & Harga Admin
+                    </span>
+                @elseif ($pembayaran->status_pembayaran === 'lunas')
                     <span class="px-2.5 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-md text-[10px] font-bold uppercase">
                         <i class="fa-solid fa-check mr-1"></i> Lunas
                     </span>
@@ -154,7 +160,7 @@
             </div>
 
             <h1 class="text-base md:text-lg font-black text-slate-800 tracking-tight leading-snug">
-                {{ $paket?->nama_paket ?: 'Paket Sewa Aula' }}
+                {{ $pembayaran->peminjaman?->nama_paket ?? ($paket?->nama_paket ?: 'Paket Sewa Aula') }}
             </h1>
             <p class="text-xs text-slate-500">
                 Peminjam: <strong class="text-slate-700">{{ $pembayaran->peminjaman?->nama }}</strong> &bull;
@@ -199,6 +205,19 @@
                 </div>
                 <div class="text-[11px] font-medium text-slate-500">
                     {{ $pembayaran->status_pembayaran === 'hangus' ? 'Batas waktu transfer telah berakhir' : 'Pengajuan ditolak oleh admin' }}
+                </div>
+            </div>
+        @elseif ($isWaitingAdminPrice)
+            <!-- Info Kanan Saat Paket Custom Menunggu Penetapan Harga Admin -->
+            <div class="flex flex-col md:items-end justify-center pt-2 md:pt-0 border-t md:border-t-0 border-slate-100">
+                <span class="text-[10px] font-bold text-amber-700 uppercase tracking-wider flex items-center gap-1">
+                    <i class="fa-solid fa-hourglass-half text-amber-500"></i> Status Paket Custom
+                </span>
+                <div class="text-base md:text-lg font-black text-slate-800 mt-0.5">
+                    Menunggu Penetapan Harga
+                </div>
+                <div class="text-[11px] font-medium text-slate-500">
+                    Countdown DP aktif setelah harga ditetapkan
                 </div>
             </div>
         @else
@@ -430,8 +449,73 @@
         <!-- KOLOM KIRI (SPAN 2): FORMULIR KONFIRMASI PEMBAYARAN & RIWAYAT -->
         <div class="lg:col-span-2 space-y-6">
 
-            <!-- 1. FORMULIR KONFIRMASI PEMBAYARAN (HANYA MUNCUL JIKA STATUS BUKAN LUNAS, BUKAN REFUND, DAN BUKAN HANGUS) -->
-            @if (!in_array($pembayaran->status_pembayaran, ['lunas', 'refund_pending', 'refunded', 'hangus']) && $pembayaran->peminjaman?->status !== 'rejected')
+            <!-- 1. FORMULIR KONFIRMASI PEMBAYARAN / STATE MENUNGGU HARGA ADMIN -->
+            @if ($isWaitingAdminPrice)
+                <!-- TAMPILAN STATE: MENUNGGU VERIFIKASI & PENETAPAN HARGA OLEH ADMIN AULA -->
+                <div class="bg-white rounded-2xl p-6 md:p-8 figma-card-shadow border border-amber-200 space-y-6">
+                    <div class="flex items-center gap-3.5 pb-4 border-b border-slate-100">
+                        <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-xl flex-shrink-0 border border-amber-200">
+                            <i class="fa-solid fa-sliders"></i>
+                        </div>
+                        <div>
+                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 uppercase tracking-wider">
+                                Paket Custom Peminjaman Aula
+                            </span>
+                            <h2 class="text-base md:text-lg font-black text-slate-900 tracking-tight mt-0.5">
+                                Menunggu Verifikasi & Penetapan Harga oleh Admin Aula
+                            </h2>
+                            <p class="text-xs text-slate-500">
+                                Permohonan paket custom Anda telah tersimpan dan saat ini sedang ditinjau oleh Admin Aula.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="p-4 bg-amber-50/60 rounded-2xl border border-amber-200/80 space-y-2 text-xs md:text-sm text-amber-950">
+                        <p class="font-bold flex items-center gap-2">
+                            <i class="fa-solid fa-circle-info text-amber-600"></i>
+                            <span>Langkah Selanjutnya:</span>
+                        </p>
+                        <p class="text-amber-800 leading-relaxed text-xs">
+                            Admin Aula SMKN 2 Karanganyar akan memverifikasi ketersediaan seluruh fasilitas yang Anda ajukan dan menetapkan total harga sewa aula. Setelah admin menetapkan harga, formulir pembayaran (DP / Lunas) dan countdown tenggat waktu pembayaran akan otomatis aktif di halaman ini.
+                        </p>
+                    </div>
+
+                    <!-- FASILITAS YANG DIAJUKAN -->
+                    <div class="space-y-3 pt-1">
+                        <span class="block text-xs font-bold text-slate-700 uppercase tracking-wide">
+                            Fasilitas yang Anda Ajukan:
+                        </span>
+                        @php
+                            $facilitiesList = $pembayaran->peminjaman?->daftar_fasilitas ?? collect();
+                        @endphp
+                        @if ($facilitiesList->isNotEmpty())
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                                @foreach ($facilitiesList as $fac)
+                                    <div class="flex items-center gap-2.5 p-3 rounded-xl bg-slate-50 border border-slate-200/80 text-xs text-slate-700">
+                                        <div class="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center flex-shrink-0 text-[10px]">
+                                            <i class="fa-solid fa-check"></i>
+                                        </div>
+                                        <span class="font-semibold">{{ $fac->judul }}</span>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @else
+                            <p class="text-xs text-slate-400 italic">Tidak ada fasilitas spesifik yang terdata.</p>
+                        @endif
+                    </div>
+
+                    <div class="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
+                        <a href="{{ route('customer.pembayaran.show', $pembayaran->id) }}"
+                           class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition">
+                            <i class="fa-solid fa-rotate text-xs"></i>
+                            <span>Muat Ulang Halaman</span>
+                        </a>
+                        <span class="text-xs text-slate-400 italic">
+                            * Halaman akan otomatis memperbarui tagihan setelah harga ditentukan admin.
+                        </span>
+                    </div>
+                </div>
+            @elseif (!in_array($pembayaran->status_pembayaran, ['lunas', 'refund_pending', 'refunded', 'hangus']) && $pembayaran->peminjaman?->status !== 'rejected')
                 <div class="bg-white rounded-2xl p-6 md:p-8 figma-card-shadow border border-slate-100 space-y-7">
                     <!-- Header Card -->
                     <div class="flex items-center gap-3 pb-4 border-b border-slate-100">
@@ -726,23 +810,52 @@
                 </span>
 
                 <div class="space-y-2.5 text-xs text-slate-600">
-                    <div class="flex items-center justify-between pb-2 border-b border-slate-100">
-                        <span>Total Biaya Paket:</span>
-                        <strong class="font-extrabold text-slate-800">Rp {{ number_format($pembayaran->total_tagihan, 0, ',', '.') }}</strong>
-                    </div>
-                    <div class="flex items-center justify-between pb-2 border-b border-slate-100">
-                        <span>Total Terverifikasi:</span>
-                        <strong class="font-extrabold text-emerald-600">Rp {{ number_format($pembayaran->total_terbayar, 0, ',', '.') }}</strong>
-                    </div>
-                    <div class="flex items-center justify-between pt-1">
-                        <span class="text-sm font-bold text-slate-800">Sisa Tagihan:</span>
-                        <span class="text-lg font-black {{ $isPeminjamanClosed ? 'text-slate-500' : 'text-brand-700' }}">
-                            Rp {{ number_format($isPeminjamanClosed ? 0 : $pembayaran->sisa_tagihan, 0, ',', '.') }}
-                        </span>
-                    </div>
+                    @if ($isWaitingAdminPrice)
+                        <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+                            <span>Total Biaya Paket:</span>
+                            <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-amber-100 text-amber-900 border border-amber-200">
+                                Menunggu Admin
+                            </span>
+                        </div>
+                        <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+                            <span>Total Terverifikasi:</span>
+                            <strong class="font-extrabold text-slate-400">Rp 0</strong>
+                        </div>
+                        <div class="flex items-center justify-between pt-1">
+                            <span class="text-sm font-bold text-slate-800">Sisa Tagihan:</span>
+                            <span class="text-xs font-bold text-slate-400 italic">
+                                Belum Diterbitkan
+                            </span>
+                        </div>
+                    @else
+                        <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+                            <span>Total Biaya Paket:</span>
+                            <strong class="font-extrabold text-slate-800">Rp {{ number_format($pembayaran->total_tagihan, 0, ',', '.') }}</strong>
+                        </div>
+                        <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+                            <span>Total Terverifikasi:</span>
+                            <strong class="font-extrabold text-emerald-600">Rp {{ number_format($pembayaran->total_terbayar, 0, ',', '.') }}</strong>
+                        </div>
+                        <div class="flex items-center justify-between pt-1">
+                            <span class="text-sm font-bold text-slate-800">Sisa Tagihan:</span>
+                            <span class="text-lg font-black {{ $isPeminjamanClosed ? 'text-slate-500' : 'text-brand-700' }}">
+                                Rp {{ number_format($isPeminjamanClosed ? 0 : $pembayaran->sisa_tagihan, 0, ',', '.') }}
+                            </span>
+                        </div>
+                    @endif
                 </div>
 
-                @if (!$isPeminjamanClosed)
+                @if ($isWaitingAdminPrice)
+                    <div class="p-3 bg-amber-50/70 border border-amber-200 rounded-xl space-y-1 text-xs">
+                        <div class="flex items-center justify-between text-amber-900 font-bold">
+                            <span>Status Biaya:</span>
+                            <span>Verifikasi Admin</span>
+                        </div>
+                        <div class="text-[11px] text-amber-700 leading-relaxed">
+                            Admin Aula akan menetapkan nominal tagihan sewa setelah memeriksa ketersediaan fasilitas yang dipilih.
+                        </div>
+                    </div>
+                @elseif (!$isPeminjamanClosed)
                     <div class="p-3 bg-blue-50/70 border border-blue-100 rounded-xl space-y-1 text-xs">
                         <div class="flex items-center justify-between text-slate-700">
                             <span>Minimal DP:</span>
@@ -781,14 +894,17 @@
                     <span class="text-xs font-bold text-slate-700 uppercase tracking-wider">
                         Detail Fasilitas Paket
                     </span>
-                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-brand-700">
-                        {{ $paket?->kategori }}
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold {{ $isCustom ? 'bg-purple-100 text-purple-700' : 'bg-blue-50 text-brand-700' }}">
+                        {{ $isCustom ? 'Paket Custom' : ($paket?->kategori ?: 'Reguler') }}
                     </span>
                 </div>
 
+                @php
+                    $detailFacilities = $pembayaran->peminjaman?->daftar_fasilitas ?? collect();
+                @endphp
                 <div class="space-y-2 max-h-56 overflow-y-auto pr-1 text-xs text-slate-600">
-                    @if ($paket && $paket->facilities->isNotEmpty())
-                        @foreach ($paket->facilities as $fac)
+                    @if ($detailFacilities->isNotEmpty())
+                        @foreach ($detailFacilities as $fac)
                             <div class="flex items-center gap-2">
                                 <i class="fa-solid fa-circle-check text-brand-600 text-xs flex-shrink-0"></i>
                                 <span>{{ $fac->judul }}</span>

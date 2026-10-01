@@ -65,6 +65,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/peminjaman/{peminjaman}/verifikasi-pembayaran/{detail?}', [AdminPeminjamanController::class, 'verifikasiPembayaran'])->name('peminjaman.verifikasi-pembayaran');
         Route::post('/peminjaman/{peminjaman}/reject-pembayaran', [AdminPeminjamanController::class, 'rejectPembayaran'])->name('peminjaman.reject-pembayaran');
         Route::post('/peminjaman/{peminjaman}/upload-refund', [AdminPeminjamanController::class, 'uploadRefund'])->name('peminjaman.upload-refund');
+        Route::post('/peminjaman/{peminjaman}/set-harga-custom', [AdminPeminjamanController::class, 'setHargaCustom'])->name('peminjaman.set-harga-custom');
 
         // Laporan Rekapitulasi Pemasukan Aula (Admin Aula)
         Route::get('/laporan-pemasukan', [LaporanPemasukanController::class, 'index'])->name('laporan.index');

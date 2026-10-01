@@ -32,6 +32,7 @@ class AdminPeminjamanController extends Controller
         // 2. Query data dengan eager loading bebas N+1
         $query = Peminjaman::with([
             'paketPeminjaman.facilities',
+            'facilities',
             'pembayaran.details.diverifikasiOleh',
             'persetujuans.approver',
         ])->latest();
@@ -206,6 +207,7 @@ class AdminPeminjamanController extends Controller
         // Eager load lengkap bebas N+1 query
         $peminjaman->load([
             'paketPeminjaman.facilities',
+            'facilities',
             'pembayaran.details.diverifikasiOleh',
             'persetujuans.approver',
         ]);
@@ -789,5 +791,82 @@ class AdminPeminjamanController extends Controller
 
         return redirect()->route('admin.peminjaman.show', $peminjaman->id)
             ->with('success', $message);
+    }
+
+    /**
+     * Aksi Admin Aula Menetapkan Harga untuk Pengajuan Paket Custom:
+     * - Menentukan nominal harga sewa total yang harus dibayar pemohon.
+     * - Mengaktifkan tagihan pembayaran dan menghitung jatuh tempo DP serta pelunasan.
+     */
+    public function setHargaCustom(Request $request, Peminjaman $peminjaman): RedirectResponse
+    {
+        if ($request->user()?->isSuperAdmin()) {
+            abort(403, 'Akses ditolak: Super Admin hanya memiliki akses baca pada modul peminjaman.');
+        }
+
+        if (! $peminjaman->is_custom) {
+            return back()->with('error', 'Aksi ini hanya dapat dilakukan untuk pengajuan paket custom.');
+        }
+
+        if ($peminjaman->hasVerifiedPayment()) {
+            return back()->with('error', 'Harga paket custom tidak dapat diubah karena sudah ada pembayaran yang terverifikasi.');
+        }
+
+        $validated = $request->validate([
+            'harga' => ['required', 'numeric', 'min:10000'],
+            'harga_dp' => ['nullable', 'numeric', 'min:0', 'lte:harga'],
+            'catatan_harga' => ['nullable', 'string', 'max:1000'],
+        ], [
+            'harga.required' => 'Nominal total harga sewa paket custom wajib diisi.',
+            'harga.numeric' => 'Nominal harga harus berupa angka.',
+            'harga.min' => 'Nominal harga minimal Rp 10.000.',
+            'harga_dp.lte' => 'Nominal DP tidak boleh melebihi total harga sewa.',
+        ]);
+
+        $harga = (float) $validated['harga'];
+        $hargaDp = isset($validated['harga_dp']) && $validated['harga_dp'] > 0 ? (float) $validated['harga_dp'] : null;
+
+        DB::transaction(function () use ($peminjaman, $harga, $hargaDp, $validated) {
+            $config = PaymentConfiguration::current();
+
+            $peminjaman->update([
+                'harga_custom' => $harga,
+            ]);
+
+            $pembayaran = $peminjaman->pembayaran;
+            if (! $pembayaran) {
+                $pembayaran = Pembayaran::create([
+                    'peminjaman_id' => $peminjaman->id,
+                    'kode_pembayaran' => 'INV-'.date('Ym').'-'.str_pad((string) $peminjaman->id, 4, '0', STR_PAD_LEFT),
+                    'total_tagihan' => $harga,
+                    'total_terbayar' => 0,
+                    'total_refund' => 0,
+                    'sisa_tagihan' => $harga,
+                    'status_pembayaran' => 'pending',
+                ]);
+            }
+
+            $terbayar = (float) $pembayaran->total_terbayar;
+            $sisaTagihan = max(0, $harga - $terbayar);
+
+            $jatuhTempoDp = now()->addHours((int) ($config->jatuh_tempo_dp_jam ?? 24));
+            $jatuhTempoPelunasan = Carbon::parse($peminjaman->tanggal_mulai)->subHours((int) ($config->jatuh_tempo_pelunasan_jam ?? 24));
+
+            $catatanText = 'Harga paket custom ditetapkan oleh admin sebesar Rp '.number_format($harga, 0, ',', '.').'.';
+            if (! empty($validated['catatan_harga'])) {
+                $catatanText .= ' Catatan: '.$validated['catatan_harga'];
+            }
+
+            $pembayaran->update([
+                'total_tagihan' => $harga,
+                'sisa_tagihan' => $sisaTagihan,
+                'jatuh_tempo_dp' => $pembayaran->jatuh_tempo_dp ?: $jatuhTempoDp,
+                'jatuh_tempo_pelunasan' => $jatuhTempoPelunasan,
+                'catatan' => $catatanText,
+            ]);
+        });
+
+        return redirect()->route('admin.peminjaman.show', $peminjaman->id)
+            ->with('success', 'Harga paket custom berhasil ditetapkan sebesar Rp '.number_format($harga, 0, ',', '.').'. Tagihan pembayaran telah diterbitkan ke pemohon.');
     }
 }

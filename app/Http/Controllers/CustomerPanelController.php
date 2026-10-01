@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\DetailPembayaran;
+use App\Models\Facility;
 use App\Models\PaketPeminjaman;
 use App\Models\PaymentConfiguration;
 use App\Models\Pembayaran;
@@ -165,12 +166,17 @@ class CustomerPanelController extends Controller
             ->take(6)
             ->get();
 
+        $facilities = Facility::orderBy('judul', 'asc')->get();
+        $isCustom = $request->query('custom') == '1' || $request->query('paket_id') === 'custom';
+
         return view('Admin.peminjaman.customerPanel.pengajuan', compact(
             'user',
             'pakets',
             'selectedPaket',
             'paymentConfig',
-            'approvedBookings'
+            'approvedBookings',
+            'facilities',
+            'isCustom'
         ));
     }
 
@@ -184,18 +190,32 @@ class CustomerPanelController extends Controller
     public function peminjamanStore(Request $request): RedirectResponse
     {
         $user = $this->getCurrentUser();
+        $isCustom = $request->boolean('is_custom') || $request->input('is_custom') === '1' || $request->input('paket_peminjaman_id') === 'custom';
 
-        $validated = $request->validate([
-            'paket_peminjaman_id' => ['required', 'exists:paket_peminjamans,id'],
+        $rules = [
             'nama' => ['required', 'string', 'max:150'],
             'email_instansi' => ['required', 'email', 'max:150'],
             'tanggal_mulai' => ['required', 'date', 'after_or_equal:today'],
             'tanggal_selesai' => ['required', 'date', 'after:tanggal_mulai'],
             'catatan' => ['nullable', 'string', 'max:2000'],
             'surat_pengantar' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png,doc,docx', 'max:5120'],
-        ], [
+        ];
+
+        if ($isCustom) {
+            $rules['facility_ids'] = ['required', 'array', 'min:1'];
+            $rules['facility_ids.*'] = ['exists:facilities,id'];
+            $rules['paket_peminjaman_id'] = ['nullable'];
+        } else {
+            $rules['paket_peminjaman_id'] = ['required', 'exists:paket_peminjamans,id'];
+            $rules['facility_ids'] = ['nullable', 'array'];
+        }
+
+        $validated = $request->validate($rules, [
             'paket_peminjaman_id.required' => 'Pilih salah satu paket peminjaman aula.',
             'paket_peminjaman_id.exists' => 'Paket peminjaman yang dipilih tidak valid.',
+            'facility_ids.required' => 'Pilih minimal satu fasilitas aula untuk paket custom.',
+            'facility_ids.min' => 'Pilih minimal satu fasilitas aula untuk paket custom.',
+            'facility_ids.*.exists' => 'Fasilitas aula yang dipilih tidak valid.',
             'nama.required' => 'Nama pemohon atau penanggung jawab wajib diisi.',
             'email_instansi.required' => 'Email instansi pemohon wajib diisi.',
             'tanggal_mulai.required' => 'Waktu mulai peminjaman aula wajib diisi.',
@@ -256,11 +276,47 @@ class CustomerPanelController extends Controller
             $suratPath = $request->file('surat_pengantar')->store('surat_pengantar', 'public');
         }
 
-        $pembayaran = DB::transaction(function () use ($validated, $suratPath) {
+        $pembayaran = DB::transaction(function () use ($validated, $suratPath, $isCustom, $config) {
+            $jatuhTempoPelunasan = Carbon::parse($validated['tanggal_mulai'])->subHours((int) $config->jatuh_tempo_pelunasan_jam);
+
+            if ($isCustom) {
+                $peminjaman = Peminjaman::create([
+                    'paket_peminjaman_id' => null,
+                    'is_custom' => true,
+                    'harga_custom' => null,
+                    'nama' => $validated['nama'],
+                    'email_instansi' => $validated['email_instansi'],
+                    'tanggal_mulai' => $validated['tanggal_mulai'],
+                    'tanggal_selesai' => $validated['tanggal_selesai'],
+                    'catatan' => $validated['catatan'] ?? null,
+                    'surat_pengantar' => $suratPath,
+                    'status' => 'pending',
+                ]);
+
+                if (! empty($validated['facility_ids'])) {
+                    $peminjaman->facilities()->sync($validated['facility_ids']);
+                }
+
+                return Pembayaran::create([
+                    'peminjaman_id' => $peminjaman->id,
+                    'kode_pembayaran' => 'INV-'.date('Ym').'-'.str_pad((string) $peminjaman->id, 4, '0', STR_PAD_LEFT),
+                    'total_tagihan' => 0,
+                    'total_terbayar' => 0,
+                    'total_refund' => 0,
+                    'sisa_tagihan' => 0,
+                    'status_pembayaran' => 'pending',
+                    'jatuh_tempo_dp' => null,
+                    'jatuh_tempo_pelunasan' => $jatuhTempoPelunasan,
+                    'catatan' => 'Pengajuan Paket Custom - Menunggu verifikasi fasilitas & penetapan harga oleh Admin Aula',
+                ]);
+            }
+
             $paket = PaketPeminjaman::findOrFail($validated['paket_peminjaman_id']);
 
             $peminjaman = Peminjaman::create([
                 'paket_peminjaman_id' => $paket->id,
+                'is_custom' => false,
+                'harga_custom' => null,
                 'nama' => $validated['nama'],
                 'email_instansi' => $validated['email_instansi'],
                 'tanggal_mulai' => $validated['tanggal_mulai'],
@@ -270,9 +326,7 @@ class CustomerPanelController extends Controller
                 'status' => 'pending',
             ]);
 
-            $config = PaymentConfiguration::current();
             $jatuhTempoDp = now()->addHours($config->jatuh_tempo_dp_jam);
-            $jatuhTempoPelunasan = Carbon::parse($validated['tanggal_mulai'])->subHours((int) $config->jatuh_tempo_pelunasan_jam);
 
             return Pembayaran::create([
                 'peminjaman_id' => $peminjaman->id,
@@ -288,8 +342,12 @@ class CustomerPanelController extends Controller
             ]);
         });
 
+        $successMsg = $isCustom
+            ? 'Formulir pengajuan peminjaman aula dengan Paket Custom berhasil diajukan! Admin Aula akan segera memverifikasi fasilitas dan menetapkan harga yang harus dibayar.'
+            : 'Formulir pengajuan peminjaman aula berhasil diajukan. Silakan lakukan pembayaran uang muka (DP) atau pembayaran lunas.';
+
         return redirect()->route('customer.pembayaran.show', $pembayaran->id)
-            ->with('success', 'Formulir pengajuan peminjaman aula berhasil diajukan. Silakan lakukan pembayaran uang muka (DP) atau pembayaran lunas.');
+            ->with('success', $successMsg);
     }
 
     /**
@@ -317,12 +375,20 @@ class CustomerPanelController extends Controller
         // Eager load seluruh relasi terkait (mencegah N+1 query)
         $pembayaran->load([
             'peminjaman.paketPeminjaman.facilities',
+            'peminjaman.facilities',
             'details.diverifikasiOleh',
         ]);
 
         $config = PaymentConfiguration::current();
+        $isCustom = (bool) $pembayaran->peminjaman?->is_custom;
         $paket = $pembayaran->peminjaman?->paketPeminjaman;
-        $nominalDp = ($paket && $paket->harga_dp > 0) ? (float) $paket->harga_dp : ((float) $pembayaran->total_tagihan * 0.3);
+        
+        $nominalDp = 0;
+        if ($isCustom) {
+            $nominalDp = (float) $pembayaran->total_tagihan > 0 ? ((float) $pembayaran->total_tagihan * 0.3) : 0;
+        } else {
+            $nominalDp = ($paket && $paket->harga_dp > 0) ? (float) $paket->harga_dp : ((float) $pembayaran->total_tagihan * 0.3);
+        }
         $refundDetail = $pembayaran->details->firstWhere('tipe_pembayaran', 'refund');
 
         // Pastikan sisa_tagihan bernilai 0 jika peminjaman ditolak, dibatalkan, atau berstatus refund
@@ -354,6 +420,10 @@ class CustomerPanelController extends Controller
             if ($pembayaran->peminjaman && $pembayaran->peminjaman->email_instansi !== $user->email && $pembayaran->peminjaman->nama !== $user->name) {
                 abort(403, 'Akses ditolak.');
             }
+        }
+
+        if ($pembayaran->peminjaman?->is_custom && (float) $pembayaran->total_tagihan <= 0) {
+            return back()->with('error', 'Tagihan untuk paket custom ini belum ditetapkan oleh Admin Aula. Silakan tunggu hingga admin memverifikasi fasilitas dan menetapkan harga.');
         }
 
         $validated = $request->validate([
@@ -445,6 +515,7 @@ class CustomerPanelController extends Controller
 
         $query = Peminjaman::with([
             'paketPeminjaman.facilities',
+            'facilities',
             'persetujuans.approver',
             'pembayaran.details.diverifikasiOleh',
         ])->latest();
