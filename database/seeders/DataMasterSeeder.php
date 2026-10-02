@@ -74,12 +74,12 @@ class DataMasterSeeder extends Seeder
         // 3. DATA EKSTRAKURIKULER
         // ============================================
         $eskulData = [
-            ['nama' => 'OSIS', 'deskripsi' => 'Organisasi Siswa Intra Sekolah'],
-            ['nama' => 'PMR', 'deskripsi' => 'Palang Merah Remaja'],
-            ['nama' => 'PKS', 'deskripsi' => 'Patroli Keamanan Sekolah'],
-            ['nama' => 'Pramuka', 'deskripsi' => 'Praja Muda Karana'],
-            ['nama' => 'ROHIS', 'deskripsi' => 'Rohani Islam'],
-            ['nama' => 'Jurnalistik', 'deskripsi' => 'Klub jurnalistik sekolah'],
+            ['nama' => 'OSIS', 'deskripsi' => 'Organisasi Siswa Intra Sekolah', 'logo' => 'assets/organisasi/osis.png'],
+            ['nama' => 'PMR', 'deskripsi' => 'Palang Merah Remaja', 'logo' => 'assets/organisasi/pmr.png'],
+            ['nama' => 'PKS', 'deskripsi' => 'Patroli Keamanan Sekolah', 'logo' => 'assets/organisasi/pbb.png'],
+            ['nama' => 'Pramuka', 'deskripsi' => 'Praja Muda Karana', 'logo' => 'assets/organisasi/ambalan.png'],
+            ['nama' => 'ROHIS', 'deskripsi' => 'Rohani Islam', 'logo' => 'assets/organisasi/rohis.png'],
+            ['nama' => 'Jurnalistik', 'deskripsi' => 'Klub jurnalistik sekolah', 'logo' => 'assets/organisasi/jurnalistik.png'],
             ['nama' => 'Futsal', 'deskripsi' => 'Tim futsal sekolah'],
             ['nama' => 'Basket', 'deskripsi' => 'Tim basket sekolah'],
             ['nama' => 'Coding Club', 'deskripsi' => 'Klub pemrograman dan teknologi'],
@@ -97,36 +97,43 @@ class DataMasterSeeder extends Seeder
                 'judul' => 'Juara 1 LKS Bidang CNC Milling 2026',
                 'kategori' => 'akademik',
                 'deskripsi' => 'Siswa SMKN 2 Karanganyar berhasil meraih Juara 1 Lomba Kompetensi Siswa (LKS) Bidang CNC Milling tingkat Provinsi Jawa Tengah tahun 2026.',
+                'dokumentasi' => 'assets/prestasi/prestasi_6.png',
             ],
             [
                 'judul' => 'Lolos SNBT UNS 2026 - Nofal Mita Hulhaq',
                 'kategori' => 'akademik',
                 'deskripsi' => 'Nofal Mita Hulhaq dari kelas 12 MA berhasil lolos SNBT dan diterima di Program Studi Teknik Mesin Universitas Sebelas Maret (UNS).',
+                'dokumentasi' => 'assets/prestasi/prestasi_2.png',
             ],
             [
                 'judul' => 'Lolos SNBT UNS 2026 - Raras Putri Febriana',
                 'kategori' => 'akademik',
                 'deskripsi' => 'Raras Putri Febriana dari kelas 12 RB berhasil lolos SNBT dan diterima di Program Studi PTIK Universitas Sebelas Maret (UNS).',
+                'dokumentasi' => 'assets/prestasi/prestasi_2.png',
             ],
             [
                 'judul' => 'Lolos SNBT UNS 2026 - Davin Wahyu Amanta',
                 'kategori' => 'akademik',
                 'deskripsi' => 'Davin Wahyu Amanta dari kelas 12 RB berhasil lolos SNBT dan diterima di Program Studi PTIK Universitas Sebelas Maret (UNS).',
+                'dokumentasi' => 'assets/prestasi/prestasi_2.png',
             ],
             [
                 'judul' => 'Lolos SNBT UNS 2026 - M. Faiz Bayu Nur A.',
                 'kategori' => 'akademik',
                 'deskripsi' => 'M. Faiz Bayu Nur A. dari kelas 12 RA berhasil lolos SNBT dan diterima di Program Studi Manajemen Universitas Sebelas Maret (UNS).',
+                'dokumentasi' => 'assets/prestasi/prestasi_2.png',
             ],
             [
                 'judul' => 'Juara 2 LKBB-PB Tingkat Provinsi Jawa Tengah',
                 'kategori' => 'non-akademik',
                 'deskripsi' => 'Tim Paskibra SMKN 2 Karanganyar meraih Juara 2 Lomba Keterampilan Baris-Berbaris Pengibar Bendera tingkat Provinsi Jawa Tengah.',
+                'dokumentasi' => 'assets/prestasi/prestasi_1.png',
             ],
             [
                 'judul' => 'Juara 1 Futsal Pelajar Kabupaten Karanganyar 2026',
                 'kategori' => 'non-akademik',
                 'deskripsi' => 'Tim Futsal SMKN 2 Karanganyar berhasil meraih Juara 1 pada turnamen futsal pelajar tingkat Kabupaten Karanganyar.',
+                'dokumentasi' => 'assets/prestasi/prestasi_5.png',
             ],
         ];
         foreach ($prestasiData as $p) {

@@ -125,15 +125,44 @@
                     <div class="h-[3px] bg-slate-200 flex-1 rounded-full"></div>
                 </div>
 
-                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8 items-center justify-items-center">
-                    @foreach (config('sekolah.mitra') as $mitra)
-                        <div class="flex flex-col items-center justify-center w-full h-20 text-center hover:scale-105 transition-transform duration-300">
-                            <span class="font-black text-lg sm:text-xl text-slate-700 tracking-tight leading-tight">{{ $mitra['nama'] }}</span>
-                            @if ($mitra['keterangan'])
-                                <span class="text-[10px] font-bold text-slate-500 tracking-widest uppercase">{{ $mitra['keterangan'] }}</span>
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6 lg:gap-8 items-center justify-items-center">
+                    @forelse ($dudis as $dudi)
+                        <a href="{{ route('pkl-bkk') }}#dudi-{{ $dudi->id }}"
+                            title="Mitra DUDI: {{ $dudi->nama }} - Lihat detail di PKL & BKK"
+                            class="flex flex-col items-center justify-center w-full h-24 p-3 rounded-2xl border border-slate-100/80 bg-slate-50/50 hover:bg-white hover:border-brand-blue/30 hover:shadow-md transition-all duration-300 group hover:-translate-y-1">
+                            @if ($dudi->logo)
+                                <img src="{{ asset('assets/' . $dudi->logo) }}" alt="Logo {{ $dudi->nama }}"
+                                    class="h-14 md:h-16 w-auto max-w-[120px] object-contain filter drop-shadow-sm select-none group-hover:scale-105 transition-transform">
+                            @else
+                                <div class="font-black text-sm md:text-base text-blue-800 tracking-tight px-3 py-1.5 rounded-lg bg-blue-50 text-center line-clamp-2">
+                                    {{ $dudi->nama }}
+                                </div>
                             @endif
-                        </div>
-                    @endforeach
+                            <span class="mt-2 text-[10px] font-semibold text-slate-400 group-hover:text-brand-blue transition-colors flex items-center gap-1">
+                                <span>Lihat di BKK</span>
+                                <i class="fa-solid fa-arrow-up-right-from-square text-[8px]"></i>
+                            </span>
+                        </a>
+                    @empty
+                        @foreach (config('sekolah.mitra') as $mitra)
+                            <a href="{{ route('pkl-bkk') }}#mitra"
+                                class="flex flex-col items-center justify-center w-full h-20 text-center hover:scale-105 transition-transform duration-300">
+                                <span class="font-black text-lg sm:text-xl text-slate-700 tracking-tight leading-tight">{{ $mitra['nama'] }}</span>
+                                @if ($mitra['keterangan'])
+                                    <span class="text-[10px] font-bold text-slate-500 tracking-widest uppercase">{{ $mitra['keterangan'] }}</span>
+                                @endif
+                            </a>
+                        @endforeach
+                    @endforelse
+                </div>
+
+                <div class="mt-8 text-center pt-2">
+                    <a href="{{ route('pkl-bkk') }}#mitra"
+                        class="inline-flex items-center gap-2 px-6 py-3 bg-[#0066C4] hover:bg-blue-700 text-white font-bold text-xs sm:text-sm rounded-xl shadow-md shadow-blue-500/20 transition-all transform active:scale-95">
+                        <i class="fa-solid fa-handshake"></i>
+                        <span>Lihat Semua Mitra DUDI &amp; Info Penempatan PKL / BKK</span>
+                        <i class="fa-solid fa-arrow-right text-xs ml-1"></i>
+                    </a>
                 </div>
             </div>
 

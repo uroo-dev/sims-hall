@@ -9,18 +9,22 @@ use App\Http\Controllers\ChatbotController;
 use App\Http\Controllers\CustomerPanelController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DataMasterDashboardController;
+use App\Http\Controllers\EkstrakurikulerController;
 use App\Http\Controllers\FasilitasController;
 use App\Http\Controllers\KategoriArtikelController;
 use App\Http\Controllers\KepalaSekolahController;
+use App\Http\Controllers\KesiswaanController;
 use App\Http\Controllers\LaporanPemasukanController;
 use App\Http\Controllers\PaketPeminjamanController;
 use App\Http\Controllers\PaymentConfigurationController;
 use App\Http\Controllers\PklController;
-use App\Http\Controllers\PublicController;
-use App\Models\Sekolah;
 use App\Http\Controllers\ProdukController;
 use App\Http\Controllers\ProdukUnggulanController;
 use App\Http\Controllers\Public\ProdukUnggulanController as PublicProdukUnggulanController;
+use App\Http\Controllers\PublicController;
+use App\Http\Controllers\PublicKesiswaanController;
+use App\Http\Controllers\TataTertibController;
+use App\Models\Sekolah;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -43,13 +47,9 @@ Route::get('/ppdb', function () {
     return view('Public.ppdb');
 })->name('ppdb');
 
-Route::get('/kesiswaan', function () {
-    return view('Public.kesiswaan');
-})->name('kesiswaan');
-
-Route::get('/produk-unggulan', function () {
-    return view('Public.produk-unggulan');
-})->name('produk-unggulan');
+Route::get('/kesiswaan', [PublicKesiswaanController::class, 'index'])->name('kesiswaan');
+Route::get('/kesiswaan/buku-saku/pdf', [PublicKesiswaanController::class, 'downloadBukuSakuPdf'])->name('kesiswaan.buku-saku.pdf');
+Route::get('/kesiswaan/tata-tertib/{id}/pdf', [PublicKesiswaanController::class, 'downloadTataTertibPdf'])->name('kesiswaan.tata-tertib.pdf');
 
 Route::get('/layanan-peminjaman', [PublicController::class, 'layananPeminjaman'])->name('layanan-peminjaman');
 
@@ -162,6 +162,26 @@ Route::middleware('auth')->group(function () {
         Route::get('/artikel/{id}/edit', [ArtikelController::class, 'edit'])->name('artikel.edit');
         Route::put('/artikel/{id}', [ArtikelController::class, 'update'])->name('artikel.update');
         Route::delete('/artikel/{id}', [ArtikelController::class, 'destroy'])->name('artikel.destroy');
+    });
+
+    // Admin Kesiswaan / Super Admin: Dashboard, Ekstrakurikuler, Tata Tertib
+    Route::middleware('role:admin_kesiswaan,super_admin,super_duper_admin')->prefix('admin/kesiswaan')->name('admin.kesiswaan.')->group(function () {
+        Route::get('/', [KesiswaanController::class, 'index'])->name('index');
+        Route::put('/', [KesiswaanController::class, 'update'])->name('update');
+
+        // Ekstrakurikuler
+        Route::get('/ekstrakurikuler', [EkstrakurikulerController::class, 'index'])->name('ekstrakurikuler.index');
+        Route::post('/ekstrakurikuler', [EkstrakurikulerController::class, 'store'])->name('ekstrakurikuler.store');
+        Route::put('/ekstrakurikuler/{id}', [EkstrakurikulerController::class, 'update'])->name('ekstrakurikuler.update');
+        Route::delete('/ekstrakurikuler/{id}', [EkstrakurikulerController::class, 'destroy'])->name('ekstrakurikuler.destroy');
+
+        // Tata Tertib
+        Route::get('/tata-tertib', [TataTertibController::class, 'index'])->name('tata-tertib.index');
+        Route::get('/tata-tertib/export-all-pdf', [TataTertibController::class, 'exportAllPdf'])->name('tata-tertib.export-all-pdf');
+        Route::get('/tata-tertib/{id}/pdf', [TataTertibController::class, 'exportPdf'])->name('tata-tertib.pdf');
+        Route::post('/tata-tertib', [TataTertibController::class, 'store'])->name('tata-tertib.store');
+        Route::put('/tata-tertib/{id}', [TataTertibController::class, 'update'])->name('tata-tertib.update');
+        Route::delete('/tata-tertib/{id}', [TataTertibController::class, 'destroy'])->name('tata-tertib.destroy');
     });
 
     // Kepala Sekolah: Dashboard & Persetujuan Final Peminjaman Aula
@@ -315,10 +335,9 @@ Route::middleware('auth')->group(function () {
     });
 });
 
-Route::get('/produk-unggulan', [PublicProdukUnggulanController::class, 'index'])->name('home');
+Route::get('/produk-unggulan', [PublicProdukUnggulanController::class, 'index'])->name('produk-unggulan');
 Route::get('/produk-unggulan-publik', [PublicProdukUnggulanController::class, 'index'])
     ->name('public.produk-unggulan');
-
 
 Route::middleware(['auth', 'role:admin,admin_produk,admin_produk_unggulan,super_admin,super_duper_admin'])->prefix('admin/produk-unggulan')->group(function () {
     Route::get('/', [ProdukUnggulanController::class, 'index'])->name('produk-unggulan.index');

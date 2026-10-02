@@ -162,13 +162,19 @@
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
 
-            <div class="mb-12">
-                <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 mb-2">
-                    Kesiswaan
-                </h2>
-                <p class="text-slate-600 text-base">
-                    Membentuk karakter, kedisiplinan, dan potensi non-akademik.
-                </p>
+            <div class="mb-12 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+                <div>
+                    <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 mb-2">
+                        Kesiswaan
+                    </h2>
+                    <p class="text-slate-600 text-base">
+                        Membentuk karakter, kedisiplinan, dan potensi non-akademik.
+                    </p>
+                </div>
+                <a href="{{ route('kesiswaan') }}" class="inline-flex items-center gap-1.5 text-sm font-bold text-brand-blue hover:text-brand-darkBlue transition">
+                    <span>Halaman Kesiswaan Lengkap</span>
+                    <i class="fa-solid fa-arrow-right text-xs"></i>
+                </a>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-16">
@@ -226,7 +232,7 @@
                             @endforelse
                         </ul>
                     </div>
-                    <a href="#"
+                    <a href="{{ route('kesiswaan') }}#ekstrakurikuler"
                         class="inline-flex items-center text-brand-blue font-bold text-sm hover:translate-x-1 transition-transform">
                         Lihat Semua Eskul <i class="fa-solid fa-chevron-right text-xs ml-1"></i>
                     </a>
@@ -243,9 +249,9 @@
                             Pedoman kedisiplinan siswa untuk membentuk etos kerja profesional.
                         </p>
                     </div>
-                    <a href="#"
+                    <a href="{{ route('kesiswaan') }}#tata-tertib"
                         class="bg-white/20 hover:bg-white/30 text-white font-semibold text-xs py-2.5 px-4 rounded-lg w-fit transition-colors">
-                        Unduh PDF
+                        Lihat Tata Tertib
                     </a>
                 </div>
 
@@ -300,14 +306,19 @@
     <section id="produk" class="py-16 bg-white relative">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-            <div class="text-center max-w-3xl mx-auto mb-16">
-                <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 mb-4">
-                    Produk Unggulan
-                </h2>
-                <p class="text-slate-600 text-base sm:text-lg">
-                    Beragam produk unggulan berbasis teknologi dan industri yang mencerminkan keterampilan siswa sesuai
-                    kebutuhan dunia kerja.
-                </p>
+            <div class="mb-12 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+                <div>
+                    <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 mb-2">
+                        Produk Unggulan
+                    </h2>
+                    <p class="text-slate-600 text-base">
+                        Beragam produk unggulan berbasis teknologi dan industri yang mencerminkan keterampilan siswa sesuai kebutuhan dunia kerja.
+                    </p>
+                </div>
+                <a href="{{ route('produk-unggulan') }}" class="inline-flex items-center gap-1.5 text-sm font-bold text-brand-blue hover:text-brand-darkBlue transition">
+                    <span>Katalog Semua Produk</span>
+                    <i class="fa-solid fa-arrow-right text-xs"></i>
+                </a>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -322,8 +333,8 @@
                         DIPROSES MENGGUNAKAN MESIN MODERN YANG MENGHASILKAN PRODUK DENGAN KUALITAS TINGGI, PRESISI,
                         DAN HASIL YANG KONSISTEN.
                     </p>
-                    <a href="#"
-                    class="bg-slate-900 text-white text-xs font-bold px-5 py-2.5 rounded-lg uppercase tracking-wider hover:bg-slate-800 transition-colors">
+                    <a href="{{ route('produk-unggulan') }}"
+                    class="bg-slate-900 text-white text-xs font-bold px-5 py-2.5 rounded-lg uppercase tracking-wider hover:bg-slate-800 transition-colors inline-block">
                     SEMUA PRODUK
                 </a>
                 </div>
@@ -342,8 +353,8 @@
                         class="text-slate-700 text-xs sm:text-sm uppercase tracking-wide leading-relaxed mb-6 font-semibold">
                         DARI KAIN BATIK, TENUN, HINGGA KAIN ECOPRINT SEMUA DIPRODUKSI OLEH SISWA JURUSAN TEKSTIL.
                     </p>
-                    <a href="#"
-                    class="bg-slate-900 text-white text-xs font-bold px-5 py-2.5 rounded-lg uppercase tracking-wider hover:bg-slate-800 transition-colors">
+                    <a href="{{ route('produk-unggulan') }}"
+                    class="bg-slate-900 text-white text-xs font-bold px-5 py-2.5 rounded-lg uppercase tracking-wider hover:bg-slate-800 transition-colors inline-block">
                     SEMUA PRODUK
                 </a>
                   
@@ -363,8 +374,8 @@
                         class="text-slate-700 text-xs sm:text-sm uppercase tracking-wide leading-relaxed mb-6 font-semibold">
                         DARI COMPANY PROFILE, E-COMMERCE, HINGGA APLIKASI ONLINE
                     </p>
-                    <a href="#"
-                    class="bg-slate-900 text-white text-xs font-bold px-5 py-2.5 rounded-lg uppercase tracking-wider hover:bg-slate-800 transition-colors">
+                    <a href="{{ route('produk-unggulan') }}"
+                    class="bg-slate-900 text-white text-xs font-bold px-5 py-2.5 rounded-lg uppercase tracking-wider hover:bg-slate-800 transition-colors inline-block">
                     SEMUA PRODUK
                 </a>
                 </div>
@@ -384,8 +395,8 @@
                         TEKNOLOGI OTOTRONIK MODERN DALAM PERAWATAN DAN PERBAIKAN KENDARAAN UNTUK MENGHASILKAN
                         PERFORMA YANG OPTIMAL DAN BERKUALITAS.
                     </p>
-                    <a href="#"
-                        class="bg-slate-900 text-white text-xs font-bold px-5 py-2.5 rounded-lg uppercase tracking-wider hover:bg-slate-800 transition-colors">
+                    <a href="{{ route('produk-unggulan') }}"
+                        class="bg-slate-900 text-white text-xs font-bold px-5 py-2.5 rounded-lg uppercase tracking-wider hover:bg-slate-800 transition-colors inline-block">
                         SEMUA PRODUK
                     </a>
                 </div>
@@ -577,10 +588,10 @@
                         </p>
                     @endif
                     <div class="pt-2">
-                        <button onclick="openModal('Portal Resmi PPDB', 'Mengarahkan ke portal resmi pendaftaran online.')"
-                            class="bg-brand-blue hover:bg-brand-darkBlue text-white font-semibold px-6 py-2.5 rounded-xl text-sm transition-colors shadow-md">
+                        <a href="{{ route('ppdb') }}"
+                            class="bg-brand-blue hover:bg-brand-darkBlue text-white font-semibold px-6 py-2.5 rounded-xl text-sm transition-colors shadow-md inline-block">
                             Lihat Selengkapnya
-                        </button>
+                        </a>
                     </div>
                 </div>
             </div>

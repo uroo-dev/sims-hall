@@ -15,12 +15,14 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        User::factory()->create([
-            'name' => 'Admin Aula',
-            'username' => 'admin',
-            'email' => 'admin@example.com',
-            'role' => 'admin_aula',
-        ]);
+        if (! User::where('username', 'admin')->exists()) {
+            User::factory()->create([
+                'name' => 'Admin Aula',
+                'username' => 'admin',
+                'email' => 'admin@example.com',
+                'role' => 'admin_aula',
+            ]);
+        }
 
         $this->call([
             UserSeeder::class,
@@ -34,6 +36,7 @@ class DatabaseSeeder extends Seeder
             JurusanSeeder::class,
             ProdukSeeder::class,
             ProdukUnggulanSeeder::class,
+            KesiswaanSeeder::class,
         ]);
     }
 }
