@@ -52,6 +52,9 @@ Route::get('/layanan-peminjaman', [PublicController::class, 'layananPeminjaman']
 
 Route::get('/pkl-bkk', [PublicController::class, 'pklBkk'])->name('pkl-bkk');
 
+Route::get('/informasi', [PublicController::class, 'informasi'])->name('informasi');
+Route::get('/informasi/{slug}', [PublicController::class, 'informasiDetail'])->name('informasi.show');
+
 /*
 |--------------------------------------------------------------------------
  | Chatbot "Nanya AI"

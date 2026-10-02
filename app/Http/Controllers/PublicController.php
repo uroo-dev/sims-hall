@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Artikel;
 use App\Models\Aula;
 use App\Models\Dudi;
 use App\Models\Ekstrakurikuler;
 use App\Models\Facility;
 use App\Models\InformasiPpdb;
 use App\Models\Jurusan;
+use App\Models\KategoriArtikel;
 use App\Models\Lowongan;
 use App\Models\PaketPeminjaman;
 use App\Models\PaymentConfiguration;
@@ -19,6 +21,7 @@ use App\Models\ProdukUnggulan;
 use App\Models\Sekolah;
 use App\Models\Siswa;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 
 class PublicController extends Controller
 {
@@ -142,5 +145,59 @@ class PublicController extends Controller
             'paymentConfig',
             'bookedDates'
         ));
+    }
+
+    /**
+     * Halaman publik daftar artikel & informasi sekolah.
+     */
+    public function informasi(Request $request)
+    {
+        $search = $request->query('search') ?? $request->query('q');
+        $currentKategori = $request->query('kategori');
+
+        $query = Artikel::with(['kategori', 'author'])
+            ->where('status', 'published');
+
+        if ($currentKategori) {
+            $query->whereHas('kategori', function ($q) use ($currentKategori) {
+                $q->where('slug', $currentKategori);
+            });
+        }
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('judul', 'like', "%{$search}%")
+                    ->orWhere('ringkasan', 'like', "%{$search}%")
+                    ->orWhere('konten', 'like', "%{$search}%");
+            });
+        }
+
+        $artikels = $query->latest('published_at')->paginate(9)->withQueryString();
+        $kategoris = KategoriArtikel::orderBy('nama')->get();
+
+        return view('Public.informasi', compact('artikels', 'kategoris', 'currentKategori', 'search'));
+    }
+
+    /**
+     * Halaman publik detail artikel/berita.
+     */
+    public function informasiDetail(string $slug)
+    {
+        $artikel = Artikel::with(['kategori', 'author'])
+            ->where('status', 'published')
+            ->where('slug', $slug)
+            ->firstOrFail();
+
+        // Increment total views
+        $artikel->increment('views');
+
+        // Artikel populer / berita lainnya untuk sidebar
+        $artikelPopulers = Artikel::where('status', 'published')
+            ->where('id', '!=', $artikel->id)
+            ->orderByDesc('views')
+            ->take(3)
+            ->get();
+
+        return view('Public.informasi-detail', compact('artikel', 'artikelPopulers'));
     }
 }

@@ -79,6 +79,15 @@
                 </div>
             </div>
 
+            {{-- LINK: INFORMASI --}}
+            <a href="{{ route('informasi') }}"
+                class="px-3 py-1 text-sm transition-colors
+                {{ request()->routeIs('informasi*') 
+                    ? 'font-semibold bg-white/20 rounded-full' 
+                    : 'font-medium hover:text-blue-200' }}">
+                Informasi
+            </a>
+
             <a href="#" class="px-3 py-1 text-sm font-medium hover:text-blue-200 transition-colors">PPDB</a>
         </nav>
 
@@ -111,6 +120,13 @@
                 Peminjaman Aula
             </a>
             <a href="{{ route('pkl-bkk') }}" class="hover:text-brand-blue py-1">PKL & BKK</a>
+            <a href="{{ route('informasi') }}" 
+                class="py-1 transition-colors
+                {{ request()->routeIs('informasi*') 
+                    ? 'text-brand-blue font-bold' 
+                    : 'hover:text-brand-blue' }}">
+                Informasi
+            </a>
             <a href="#" class="hover:text-brand-blue py-1">PPDB 2026</a>
         </div>
     </div>
