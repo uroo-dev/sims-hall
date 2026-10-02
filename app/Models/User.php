@@ -62,15 +62,15 @@ class User extends Authenticatable
     public function dashboardRoute(): string
     {
         return match ($this->role) {
-            'pelanggan'                        => route('customer.dashboard'),
-            'kepala_sekolah'                   => route('kepala-sekolah.dashboard'),
-            'bkk', 'admin_pklbkk'             => route('pkl.dashboard'),
+            'pelanggan' => route('customer.dashboard'),
+            'kepala_sekolah' => route('kepala-sekolah.dashboard'),
+            'bkk', 'admin_pklbkk' => route('pkl.dashboard'),
             'admin_produk', 'admin_produk_unggulan' => route('produk-unggulan.index'),
-            'admin_ppdb'                       => route('index.dashboard.ppdb'),
-            'admin_kesiswaan'                  => route('admin.kesiswaan.index'),
-            'admin_master'                     => route('datamaster.index'),
-            'admin_sekolah'                    => route('admin.artikel.index'),
-            default                            => route('admin.peminjaman.dashboard'),
+            'admin_ppdb' => route('index.dashboard.ppdb'),
+            'admin_kesiswaan' => route('admin.kesiswaan.index'),
+            'admin_master' => route('datamaster.index'),
+            'admin_sekolah' => route('admin.artikel.index'),
+            default => route('admin.peminjaman.dashboard'),
         };
     }
 
