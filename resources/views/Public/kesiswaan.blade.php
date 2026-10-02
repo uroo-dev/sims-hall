@@ -22,12 +22,11 @@
                         SMK 2 Karanganyar – Sekolah Pusat Keunggulan
                     </span>
                     <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-[1.1]">
-                        Kesiswaan<br />
-                        <span class="text-brand-blue">SMKN 2 Karanganyar</span>
+                        {{ $kesiswaan->judul ?: 'Kesiswaan SMKN 2 Karanganyar' }}
                     </h1>
                     
                     <p class="text-slate-600 text-base sm:text-lg leading-relaxed max-w-xl">
-                        Membangun karakter unggul melalui integrasi nilai moral dan penguasaan teknologi. Kami berdedikasi untuk membina potensi setiap siswa dalam lingkungan yang inklusif, inovatif, dan disiplin.
+                        {{ $kesiswaan->deskripsi ?: 'Membangun karakter unggul melalui integrasi nilai moral dan penguasaan teknologi. Kami berdedikasi untuk membina potensi setiap siswa dalam lingkungan yang inklusif, inovatif, dan disiplin.' }}
                     </p>
 
                     <div class="flex flex-wrap gap-4 pt-4">
@@ -42,38 +41,55 @@
                     </div>
                 </div>
 
-                <!-- RIGHT: Visual Composition (Collage of News) -->
+                <!-- RIGHT: Visual Composition (Collage of News / Dokumentasi) -->
                 <div class="lg:col-span-6 relative mt-12 lg:mt-0 flex justify-center lg:justify-end">
                     <div class="relative w-full max-w-[500px] aspect-[4/3]">
-                        
-                        <!-- Main Card 1: Berita Hari Ini -->
-                        <div class="absolute top-0 right-0 w-[80%] bg-gradient-to-br from-blue-900 to-indigo-900 rounded-2xl overflow-hidden shadow-2xl z-10 p-5 text-white border-4 border-white">
-                            <span class="inline-block bg-blue-600 text-white text-[10px] font-bold px-2.5 py-1 rounded mb-3 uppercase tracking-wider">
-                                BERITA HARI INI
-                            </span>
-                            <h4 class="text-sm sm:text-base font-bold leading-snug mb-2">
-                                SMKN 2 KARANGANYAR SIAP PERTAHANKAN GELAR JATENG DI LKBB-PB NASIONAL
-                            </h4>
-                            <div class="h-24 bg-slate-800 rounded-lg mt-2 overflow-hidden">
-                                <img src="https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=400&auto=format&fit=crop&q=80" alt="News" class="w-full h-full object-cover opacity-80">
-                            </div>
-                        </div>
+                        @php
+                            $heroDocs = $kesiswaan->dokumentasi_urls;
+                        @endphp
 
-                        <!-- Main Card 2: Selamat dan Sukses -->
-                        <div class="absolute bottom-0 left-0 w-[70%] bg-gradient-to-br from-emerald-800 to-teal-900 rounded-2xl overflow-hidden shadow-2xl z-20 p-5 text-white border-4 border-white">
-                            <div class="text-[10px] font-semibold text-emerald-300 mb-1">SMKN 2 KARANGANYAR MENGUCAPKAN</div>
-                            <h4 class="text-xl sm:text-2xl font-black italic tracking-wide text-amber-300 mb-2">
-                                SELAMAT DAN SUKSES !
-                            </h4>
-                            <div class="h-20 bg-slate-800 rounded-lg overflow-hidden">
-                                <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=400&auto=format&fit=crop&q=80" alt="Sukses" class="w-full h-full object-cover opacity-80">
+                        @if (count($heroDocs) >= 2)
+                            <!-- Main Card 1 -->
+                            <div class="absolute top-0 right-0 w-[80%] rounded-2xl overflow-hidden shadow-2xl z-10 p-2 bg-white border-4 border-white">
+                                <img src="{{ $heroDocs[0] }}" alt="Dokumentasi 1" class="w-full h-44 object-cover rounded-xl">
                             </div>
-                        </div>
+
+                            <!-- Main Card 2 -->
+                            <div class="absolute bottom-0 left-0 w-[70%] rounded-2xl overflow-hidden shadow-2xl z-20 p-2 bg-white border-4 border-white">
+                                <img src="{{ $heroDocs[1] }}" alt="Dokumentasi 2" class="w-full h-36 object-cover rounded-xl">
+                            </div>
+                        @elseif (count($heroDocs) == 1)
+                            <div class="absolute inset-0 rounded-2xl overflow-hidden shadow-2xl z-10 p-2 bg-white border-4 border-white">
+                                <img src="{{ $heroDocs[0] }}" alt="Dokumentasi" class="w-full h-full object-cover rounded-xl">
+                            </div>
+                        @else
+                            <!-- Default Fallback Cards -->
+                            <div class="absolute top-0 right-0 w-[80%] bg-gradient-to-br from-blue-900 to-indigo-900 rounded-2xl overflow-hidden shadow-2xl z-10 p-5 text-white border-4 border-white">
+                                <span class="inline-block bg-blue-600 text-white text-[10px] font-bold px-2.5 py-1 rounded mb-3 uppercase tracking-wider">
+                                    BERITA HARI INI
+                                </span>
+                                <h4 class="text-sm sm:text-base font-bold leading-snug mb-2">
+                                    SMKN 2 KARANGANYAR SIAP PERTAHANKAN GELAR JATENG DI LKBB-PB NASIONAL
+                                </h4>
+                                <div class="h-24 bg-slate-800 rounded-lg mt-2 overflow-hidden">
+                                    <img src="https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=400&auto=format&fit=crop&q=80" alt="News" class="w-full h-full object-cover opacity-80">
+                                </div>
+                            </div>
+
+                            <div class="absolute bottom-0 left-0 w-[70%] bg-gradient-to-br from-emerald-800 to-teal-900 rounded-2xl overflow-hidden shadow-2xl z-20 p-5 text-white border-4 border-white">
+                                <div class="text-[10px] font-semibold text-emerald-300 mb-1">SMKN 2 KARANGANYAR MENGUCAPKAN</div>
+                                <h4 class="text-xl sm:text-2xl font-black italic tracking-wide text-amber-300 mb-2">
+                                    SELAMAT DAN SUKSES !
+                                </h4>
+                                <div class="h-20 bg-slate-800 rounded-lg overflow-hidden">
+                                    <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=400&auto=format&fit=crop&q=80" alt="Sukses" class="w-full h-full object-cover opacity-80">
+                                </div>
+                            </div>
+                        @endif
 
                         <!-- Abstract decorative shapes -->
                         <div class="absolute -top-6 -left-6 w-24 h-24 dot-pattern opacity-50 z-0"></div>
                         <div class="absolute -bottom-8 -right-8 w-32 h-32 border-[16px] border-brand-blue rounded-full opacity-20 z-0"></div>
-
                     </div>
                 </div>
 
@@ -99,11 +115,17 @@
 
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
                 
-                <!-- LEFT: Text & Download Card -->
+                <!-- LEFT: Text & Download Card (Buku Saku) -->
                 <div class="lg:col-span-5 space-y-6">
                     <p class="text-slate-600 text-base leading-relaxed">
                         Kedisiplinan adalah kunci kesuksesan. Kami menerapkan aturan yang bertujuan membentuk integritas dan profesionalisme siswa sebelum terjun ke dunia industri.
                     </p>
+
+                    @php
+                        $bukuSaku = $tataTertibs->first(function ($t) {
+                            return str_contains(strtolower($t->judul ?? ''), 'buku saku') || !empty($t->file_pdf);
+                        });
+                    @endphp
 
                     <!-- Download Card -->
                     <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm card-shadow">
@@ -112,53 +134,66 @@
                                 <i class="fa-regular fa-file-pdf"></i>
                             </div>
                             <div>
-                                <h3 class="text-lg font-bold text-slate-900">Buku Saku Siswa</h3>
-                                <p class="text-xs text-slate-500">Unduh panduan lengkap peraturan sekolah format PDF untuk referensi di rumah.</p>
+                                <h3 class="text-lg font-bold text-slate-900">{{ $bukuSaku ? $bukuSaku->judul : 'Buku Saku Siswa' }}</h3>
+                                <p class="text-xs text-slate-500">
+                                    {{ $bukuSaku && $bukuSaku->deskripsi ? Str::limit($bukuSaku->deskripsi, 90) : 'Unduh panduan lengkap peraturan sekolah format PDF untuk referensi di rumah.' }}
+                                </p>
                             </div>
                         </div>
-                        <button onclick="openModal('Download Buku Saku', 'Mengunduh Buku Saku Siswa SMKN 2 Karanganyar...')"
-                            class="w-full bg-brand-blue hover:bg-brand-darkBlue text-white font-bold text-sm py-3 rounded-xl transition-all shadow-md flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-download"></i> Download PDF
-                        </button>
+
+                        <!-- Download Button (PDF Utama yang mencakup semua tata tertib) -->
+                        <a href="{{ route('kesiswaan.buku-saku.pdf') }}"
+                            class="w-full bg-brand-blue hover:bg-brand-darkBlue text-white font-bold text-sm py-3.5 rounded-xl transition-all shadow-md flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-download"></i> Download PDF Tata Tertib
+                        </a>
                     </div>
                 </div>
 
-                <!-- RIGHT: Accordions -->
+                <!-- RIGHT: Accordions / Dropdown (Daftar Tata Tertib Dinamis - Tanpa tombol download per butir) -->
                 <div class="lg:col-span-7 space-y-4">
-                    
-                    <!-- Accordion 1 -->
-                    <details class="group bg-brand-blue text-white rounded-2xl overflow-hidden shadow-md transition-all">
-                        <summary class="flex items-center justify-between p-5 cursor-pointer font-bold text-lg">
-                            <span>Aturan Seragam</span>
-                            <i class="fa-solid fa-chevron-down transition-transform group-open:rotate-180"></i>
-                        </summary>
-                        <div class="px-5 pb-5 text-blue-100 text-sm leading-relaxed">
-                            Siswa wajib mengenakan seragam lengkap sesuai jadwal yang ditentukan, termasuk atribut sekolah, sepatu hitam, dan rambut yang rapi. Pelanggaran terhadap aturan seragam akan dikenakan sanksi sesuai tata tertib sekolah.
-                        </div>
-                    </details>
-
-                    <!-- Accordion 2 -->
-                    <details class="group bg-brand-blue text-white rounded-2xl overflow-hidden shadow-md transition-all">
-                        <summary class="flex items-center justify-between p-5 cursor-pointer font-bold text-lg">
-                            <span>Kehadiran & Jam Belajar</span>
-                            <i class="fa-solid fa-chevron-down transition-transform group-open:rotate-180"></i>
-                        </summary>
-                        <div class="px-5 pb-5 text-blue-100 text-sm leading-relaxed">
-                            Siswa diharapkan hadir 15 menit sebelum bel masuk berbunyi. Keterlambatan dan absensi tanpa keterangan akan dicatat dan mempengaruhi penilaian sikap serta kedisiplinan.
-                        </div>
-                    </details>
-
-                    <!-- Accordion 3 -->
-                    <details class="group bg-brand-blue text-white rounded-2xl overflow-hidden shadow-md transition-all">
-                        <summary class="flex items-center justify-between p-5 cursor-pointer font-bold text-lg">
-                            <span>Penggunaan Gadget</span>
-                            <i class="fa-solid fa-chevron-down transition-transform group-open:rotate-180"></i>
-                        </summary>
-                        <div class="px-5 pb-5 text-blue-100 text-sm leading-relaxed">
-                            Penggunaan gadget diperbolehkan hanya untuk keperluan pembelajaran di dalam kelas dengan izin guru. Dilarang menggunakan gadget untuk bermain game atau media sosial selama jam pelajaran berlangsung.
-                        </div>
-                    </details>
-
+                    @forelse ($tataTertibs as $item)
+                        @if ($bukuSaku && $item->tata_tertibID === $bukuSaku->tata_tertibID && $tataTertibs->count() > 1)
+                            @continue
+                        @endif
+                        <details class="group bg-brand-blue text-white rounded-2xl overflow-hidden shadow-md transition-all">
+                            <summary class="flex items-center justify-between p-5 cursor-pointer font-bold text-lg">
+                                <span>{{ $item->judul }}</span>
+                                <i class="fa-solid fa-chevron-down transition-transform group-open:rotate-180"></i>
+                            </summary>
+                            <div class="px-5 pb-5 text-blue-100 text-sm leading-relaxed whitespace-pre-line">
+                                {{ $item->deskripsi }}
+                            </div>
+                        </details>
+                    @empty
+                        <!-- Default Accordions jika belum ada data -->
+                        <details class="group bg-brand-blue text-white rounded-2xl overflow-hidden shadow-md transition-all">
+                            <summary class="flex items-center justify-between p-5 cursor-pointer font-bold text-lg">
+                                <span>Aturan Seragam</span>
+                                <i class="fa-solid fa-chevron-down transition-transform group-open:rotate-180"></i>
+                            </summary>
+                            <div class="px-5 pb-5 text-blue-100 text-sm leading-relaxed">
+                                Siswa wajib mengenakan seragam lengkap sesuai jadwal yang ditentukan, termasuk atribut sekolah, sepatu hitam, dan kerapian.
+                            </div>
+                        </details>
+                        <details class="group bg-brand-blue text-white rounded-2xl overflow-hidden shadow-md transition-all">
+                            <summary class="flex items-center justify-between p-5 cursor-pointer font-bold text-lg">
+                                <span>Kehadiran & Jam Belajar</span>
+                                <i class="fa-solid fa-chevron-down transition-transform group-open:rotate-180"></i>
+                            </summary>
+                            <div class="px-5 pb-5 text-blue-100 text-sm leading-relaxed">
+                                Siswa diharapkan hadir 15 menit sebelum bel masuk berbunyi. Keterlambatan dan absensi tanpa keterangan akan dicatat dalam buku kedisiplinan.
+                            </div>
+                        </details>
+                        <details class="group bg-brand-blue text-white rounded-2xl overflow-hidden shadow-md transition-all">
+                            <summary class="flex items-center justify-between p-5 cursor-pointer font-bold text-lg">
+                                <span>Penggunaan Gadget</span>
+                                <i class="fa-solid fa-chevron-down transition-transform group-open:rotate-180"></i>
+                            </summary>
+                            <div class="px-5 pb-5 text-blue-100 text-sm leading-relaxed">
+                                Penggunaan gadget diperbolehkan hanya untuk keperluan pembelajaran di dalam kelas dengan izin guru pengampu.
+                            </div>
+                        </details>
+                    @endforelse
                 </div>
 
             </div>
@@ -166,141 +201,95 @@
     </section>
 
     <!-- ============================================================
-         KONTEN: EKSTRAKURIKULER
+         KONTEN: EKSTRAKURIKULER & ORGANISASI (SEPERTI FIGMA DESIGN)
          ============================================================ -->
-    <section id="ekstrakurikuler" class="py-16 bg-white relative overflow-hidden">
-        <!-- Dot Pattern Bottom Left -->
-        <div class="absolute bottom-10 left-10 w-32 h-32 dot-pattern opacity-40 pointer-events-none"></div>
+    <section id="ekstrakurikuler" class="py-16 bg-[#FAFCFF] relative overflow-hidden">
+        <!-- Plus Pattern Top Right -->
+        <div class="absolute top-4 right-4 sm:top-8 sm:right-8 w-32 h-32 sm:w-40 sm:h-40 plus-tex opacity-70 pointer-events-none z-0"></div>
+        <!-- Plus Pattern Bottom Left -->
+        <div class="absolute bottom-4 left-4 sm:bottom-8 sm:left-8 w-32 h-32 sm:w-40 sm:h-40 plus-tex opacity-70 pointer-events-none z-0"></div>
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             
             <!-- Header -->
             <div class="text-center max-w-3xl mx-auto mb-14">
                 <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 mb-3 tracking-tight">
-                    Ekstrakurikuler
+                    Ekstrakurikuler & Organisasi
                 </h2>
                 <p class="text-slate-500 text-sm sm:text-base leading-relaxed">
-                    Pilih organisasi yang sesuai dengan minat dan bakatmu untuk mengasah soft-skill dan jaringan pertemanan.
+                    Pilih organisasi yang sesuai dengan minat dan bakatmu untuk mengasah soft-skill, kepemimpinan, dan jejaring pertemanan.
                 </p>
             </div>
 
-            <!-- Grid Ekstrakurikuler -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                
-                <!-- Card 1: OSIS -->
-                <div class="bg-white border border-slate-200 rounded-3xl p-6 flex flex-col justify-between shadow-sm hover:shadow-lg transition-shadow">
-                    <div class="flex items-start gap-4 mb-4">
-                        <div class="w-16 h-16 rounded-full bg-yellow-100 flex items-center justify-center shrink-0 border-2 border-yellow-400 overflow-hidden p-1">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Logo_OSIS.png/600px-Logo_OSIS.png" alt="Logo OSIS" class="w-full h-full object-contain">
+            <!-- Grid Organisasi (Layout Panjang-Pendek Asimetris Sesuai Mockup Template) -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-7 items-stretch">
+                @forelse ($ekstrakurikulers as $eskul)
+                    @php
+                        $rowIndex = floor($loop->index / 2);
+                        $isEvenRow = ($rowIndex % 2) === 0;
+                        $isFirstInRow = ($loop->index % 2) === 0;
+
+                        // Pola Panjang - Pendek (Sesuai Foto Mockup):
+                        // Baris 1: Kartu Kiri PANJANG (col-span-7), Kartu Kanan PENDEK (col-span-5)
+                        // Baris 2: Kartu Kiri PENDEK (col-span-5), Kartu Kanan PANJANG (col-span-7)
+                        // Baris 3: Kartu Kiri PANJANG (col-span-7), Kartu Kanan PENDEK (col-span-5)
+                        $colSpan = $isEvenRow 
+                            ? ($isFirstInRow ? 'lg:col-span-7' : 'lg:col-span-5')
+                            : ($isFirstInRow ? 'lg:col-span-5' : 'lg:col-span-7');
+
+                        // Posisi Logo:
+                        // Baris 1 & 3: Logo di KIRI (sm:flex-row)
+                        // Baris 2: Logo di KANAN (sm:flex-row-reverse)
+                        $isReversed = ! $isEvenRow;
+
+                        $namaRaw = $eskul->nama;
+                        $isOrganisasiPrefix = str_starts_with(strtolower($namaRaw), 'organisasi ');
+                        $prefix = $isOrganisasiPrefix ? 'Organisasi ' : '';
+                        $highlightName = $isOrganisasiPrefix ? substr($namaRaw, 11) : $namaRaw;
+                    @endphp
+                    <div class="{{ $colSpan }} bg-white rounded-2xl p-5 sm:p-6 shadow-[0_4px_25px_rgba(0,0,0,0.06)] border border-slate-100/90 flex flex-col {{ $isReversed ? 'sm:flex-row-reverse' : 'sm:flex-row' }} items-center justify-between gap-5 sm:gap-6 hover:shadow-xl transition-all duration-300">
+                        <!-- Logo Organisasi -->
+                        <div class="{{ str_contains($colSpan, 'col-span-7') ? 'w-28 h-28 sm:w-34 sm:h-34' : 'w-24 h-24 sm:w-28 sm:h-28' }} shrink-0 flex items-center justify-center p-1.5">
+                            @if ($eskul->logoUrl())
+                                <img src="{{ $eskul->logoUrl() }}" alt="Logo {{ $eskul->nama }}" class="max-w-full max-h-full object-contain drop-shadow-sm">
+                            @else
+                                <div class="w-20 h-20 rounded-full bg-blue-50 flex items-center justify-center text-[#0066C4] text-2xl">
+                                    <i class="fa-solid fa-users"></i>
+                                </div>
+                            @endif
                         </div>
-                        <div>
-                            <h3 class="text-lg font-extrabold text-slate-900">Organisasi OSIS</h3>
-                            <p class="text-xs font-semibold text-brand-blue">SMKN 2 Karanganyar</p>
+
+                        <!-- Informasi Organisasi -->
+                        <div class="flex-1 flex flex-col justify-between self-stretch text-left">
+                            <div>
+                                <h3 class="text-base sm:text-lg font-bold text-slate-900 tracking-tight leading-snug">
+                                    {{ $prefix }}<span class="text-[#0066C4] font-black">{{ $highlightName }}</span>
+                                </h3>
+                                <p class="text-[11px] sm:text-xs font-semibold text-slate-800 mt-0.5 mb-2">
+                                    {{ $eskul->sekolah ?: 'SMKN 2 Karanganyar' }}
+                                </p>
+                                <p class="text-xs sm:text-[13px] text-slate-500 leading-relaxed line-clamp-3">
+                                    {{ $eskul->deskripsi }}
+                                </p>
+                            </div>
+                            <div class="pt-4">
+                                <button onclick="showDetailEskulDynamic({{ json_encode([
+                                    'nama' => $eskul->nama,
+                                    'sekolah' => $eskul->sekolah,
+                                    'deskripsi' => $eskul->deskripsi,
+                                    'logo' => $eskul->logoUrl(),
+                                    'dokumentasi' => $eskul->dokumentasiUrl()
+                                ]) }})" class="bg-[#0066C4] hover:bg-blue-700 text-white font-semibold text-xs px-5 py-2.5 rounded-lg shadow-sm transition-all transform active:scale-95 w-fit">
+                                    Selengkapnya
+                                </button>
+                            </div>
                         </div>
                     </div>
-                    <p class="text-slate-500 text-sm leading-relaxed mb-6 flex-grow">
-                        Organisasi Siswa Intra Sekolah SMK N 2 KARANGANYAR adalah Organisasi satu-satunya yang ada disekolah yang berada dibawah Waka Kesiswaan.
-                    </p>
-                    <button onclick="openDetailEskul('OSIS')" class="bg-brand-blue hover:bg-brand-darkBlue text-white text-xs font-bold px-5 py-2.5 rounded-lg w-fit transition-colors">
-                        Selengkapnya
-                    </button>
-                </div>
-
-                <!-- Card 2: PMR -->
-                <div class="bg-white border border-slate-200 rounded-3xl p-6 flex flex-col justify-between shadow-sm hover:shadow-lg transition-shadow">
-                    <div class="flex items-start gap-4 mb-4">
-                        <div class="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center shrink-0 border-2 border-red-400 overflow-hidden p-2">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Logo_PMR.png/600px-Logo_PMR.png" alt="Logo PMR" class="w-full h-full object-contain">
-                        </div>
-                        <div>
-                            <h3 class="text-lg font-extrabold text-slate-900">Organisasi PMR</h3>
-                            <p class="text-xs font-semibold text-brand-blue">SMKN 2 Karanganyar</p>
-                        </div>
+                @empty
+                    <div class="col-span-full py-12 text-center text-slate-500 text-sm bg-white rounded-2xl border border-slate-200">
+                        Belum ada data organisasi atau ekstrakurikuler yang ditambahkan.
                     </div>
-                    <p class="text-slate-500 text-sm leading-relaxed mb-6 flex-grow">
-                        PMR Wira SMK Negeri 2 Karanganyar merupakan salah satu organisasi di lingkungan sekolah.
-                    </p>
-                    <button onclick="openDetailEskul('PMR')" class="bg-brand-blue hover:bg-brand-darkBlue text-white text-xs font-bold px-5 py-2.5 rounded-lg w-fit transition-colors">
-                        Selengkapnya
-                    </button>
-                </div>
-
-                <!-- Card 3: AMBALAN -->
-                <div class="bg-white border border-slate-200 rounded-3xl p-6 flex flex-col justify-between shadow-sm hover:shadow-lg transition-shadow">
-                    <div class="flex items-start gap-4 mb-4">
-                        <div class="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center shrink-0 border-2 border-blue-400 overflow-hidden p-1">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Logo_Pramuka.png/600px-Logo_Pramuka.png" alt="Logo Ambalan" class="w-full h-full object-contain">
-                        </div>
-                        <div>
-                            <h3 class="text-lg font-extrabold text-slate-900">Organisasi AMBALAN</h3>
-                            <p class="text-xs font-semibold text-brand-blue">SMKN 2 Karanganyar</p>
-                        </div>
-                    </div>
-                    <p class="text-slate-500 text-sm leading-relaxed mb-6 flex-grow">
-                        Fasilitas sekolah dengan kapasitas luas untuk berbagai kebutuhan.
-                    </p>
-                    <button onclick="openDetailEskul('AMBALAN')" class="bg-brand-blue hover:bg-brand-darkBlue text-white text-xs font-bold px-5 py-2.5 rounded-lg w-fit transition-colors">
-                        Selengkapnya
-                    </button>
-                </div>
-
-                <!-- Card 4: PBB -->
-                <div class="bg-white border border-slate-200 rounded-3xl p-6 flex flex-col justify-between shadow-sm hover:shadow-lg transition-shadow">
-                    <div class="flex items-start gap-4 mb-4">
-                        <div class="w-16 h-16 rounded-full bg-slate-800 flex items-center justify-center shrink-0 border-2 border-slate-600 overflow-hidden p-1">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Logo_Paskibraka.png/600px-Logo_Paskibraka.png" alt="Logo PBB" class="w-full h-full object-contain">
-                        </div>
-                        <div>
-                            <h3 class="text-lg font-extrabold text-slate-900">Organisasi PBB</h3>
-                            <p class="text-xs font-semibold text-brand-blue">SMKN 2 Karanganyar</p>
-                        </div>
-                    </div>
-                    <p class="text-slate-500 text-sm leading-relaxed mb-6 flex-grow">
-                        Fasilitas sekolah dengan kapasitas luas untuk berbagai kebutuhan acara institusi, perusahaan, dan masyarakat umum.
-                    </p>
-                    <button onclick="openDetailEskul('PBB')" class="bg-brand-blue hover:bg-brand-darkBlue text-white text-xs font-bold px-5 py-2.5 rounded-lg w-fit transition-colors">
-                        Selengkapnya
-                    </button>
-                </div>
-
-                <!-- Card 5: ROHIS -->
-                <div class="bg-white border border-slate-200 rounded-3xl p-6 flex flex-col justify-between shadow-sm hover:shadow-lg transition-shadow">
-                    <div class="flex items-start gap-4 mb-4">
-                        <div class="w-16 h-16 rounded-full bg-yellow-100 flex items-center justify-center shrink-0 border-2 border-yellow-400 overflow-hidden p-1">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Logo_Rohis.png/600px-Logo_Rohis.png" alt="Logo Rohis" class="w-full h-full object-contain">
-                        </div>
-                        <div>
-                            <h3 class="text-lg font-extrabold text-slate-900">Organisasi ROHIS</h3>
-                            <p class="text-xs font-semibold text-brand-blue">SMKN 2 Karanganyar</p>
-                        </div>
-                    </div>
-                    <p class="text-slate-500 text-sm leading-relaxed mb-6 flex-grow">
-                        Rohani Islam (disingkat Rohis) adalah sebuah organisasi memperdalam dan memperkuat ajaran Islam.
-                    </p>
-                    <button onclick="openDetailEskul('ROHIS')" class="bg-brand-blue hover:bg-brand-darkBlue text-white text-xs font-bold px-5 py-2.5 rounded-lg w-fit transition-colors">
-                        Selengkapnya
-                    </button>
-                </div>
-
-                <!-- Card 6: JURNALISTIK -->
-                <div class="bg-white border border-slate-200 rounded-3xl p-6 flex flex-col justify-between shadow-sm hover:shadow-lg transition-shadow">
-                    <div class="flex items-start gap-4 mb-4">
-                        <div class="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center shrink-0 border-2 border-red-400 overflow-hidden p-1">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Logo_Jurnalistik.png/600px-Logo_Jurnalistik.png" alt="Logo Jurnalistik" class="w-full h-full object-contain">
-                        </div>
-                        <div>
-                            <h3 class="text-lg font-extrabold text-slate-900">Organisasi JURNALISTIK</h3>
-                            <p class="text-xs font-semibold text-brand-blue">SMKN 2 Karanganyar</p>
-                        </div>
-                    </div>
-                    <p class="text-slate-500 text-sm leading-relaxed mb-6 flex-grow">
-                        Jurnalistik secara bahasa adalah kewartawanan atau kepenulisan.
-                    </p>
-                    <button onclick="openDetailEskul('JURNALISTIK')" class="bg-brand-blue hover:bg-brand-darkBlue text-white text-xs font-bold px-5 py-2.5 rounded-lg w-fit transition-colors">
-                        Selengkapnya
-                    </button>
-                </div>
-
+                @endforelse
             </div>
         </div>
     </section>
@@ -309,13 +298,14 @@
          KONTEN: PRESTASI
          ============================================================ -->
     <section id="prestasi" class="py-16 bg-[#F8FAFC] relative overflow-hidden">
-        <!-- Dot Pattern Bottom Left -->
-        <div class="absolute bottom-10 left-10 w-32 h-32 dot-pattern opacity-40 pointer-events-none"></div>
+        <!-- Plus Texture Clusters (Figma style) -->
+        <div class="absolute right-0 top-[260px] w-24 h-44 plus-tex opacity-50 pointer-events-none hidden sm:block"></div>
+        <div class="absolute -left-2 bottom-12 w-28 h-36 plus-tex opacity-50 pointer-events-none hidden sm:block"></div>
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             
-            <!-- Header with Badge -->
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-6">
+            <!-- Header with Badge (Hardcoded 100+) -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-6">
                 <div>
                     <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 mb-3 tracking-tight">
                         Semua Prestasi
@@ -324,178 +314,99 @@
                         Dedikasi dan kerja keras siswa-siswi terbaik kami dalam mengharumkan nama sekolah di kancah nasional maupun internasional.
                     </p>
                 </div>
-                <!-- Badge -->
-                <div class="bg-blue-50 border border-blue-100 rounded-2xl p-4 flex flex-col items-center justify-center text-center shadow-sm min-w-[140px]">
-                    <i class="fa-solid fa-trophy text-brand-blue text-xl mb-1"></i>
-                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Prestasi</span>
-                    <span class="text-2xl font-black text-brand-blue">100+</span>
+                <!-- Badge Hardcoded 100+ -->
+                <div class="bg-[#B9D5F9] border border-[#9AC5F4] rounded-2xl px-5 py-3 flex items-center gap-3.5 shadow-sm min-w-[130px] self-start md:self-auto">
+                    <i class="fa-solid fa-trophy text-[#0066C4] text-2xl"></i>
+                    <div class="text-left">
+                        <span class="block text-[10px] font-bold text-slate-600 tracking-wider leading-none mb-1 uppercase">PRESTASI</span>
+                        <span class="block text-2xl font-black text-[#0066C4] leading-none">100+</span>
+                    </div>
                 </div>
             </div>
 
-            <!-- Prestasi Terbaru (Slider Mockup) -->
-            <div class="bg-white rounded-2xl p-6 sm:p-8 card-shadow border border-slate-100 relative mb-10">
-                <div class="mb-6">
-                    <h4 class="text-lg font-bold text-slate-800 border-b-2 border-brand-blue inline-block pb-1">Prestasi Terbaru</h4>
+            <!-- ============================================================
+                 CONTAINER: PRESTASI TERBARU (CAROUSEL BANNER)
+                 ============================================================ -->
+            <div class="bg-white rounded-3xl p-6 sm:p-7 shadow-sm border border-slate-100 relative mb-12">
+                <!-- Tab Heading -->
+                <div class="mb-5">
+                    <span class="text-sm sm:text-base font-bold text-slate-800 border-b-2 border-brand-blue pb-1 inline-block tracking-tight">
+                        Prestasi Terbaru
+                    </span>
                 </div>
 
-                <div class="relative">
-                    <div id="news-container" class="grid grid-cols-1 md:grid-cols-2 gap-6 transition-all duration-300">
-                        <!-- Card News 1 -->
-                        <div class="bg-gradient-to-r from-blue-900 to-indigo-900 rounded-xl overflow-hidden p-6 text-white relative group h-48 flex flex-col justify-center">
-                            <span class="inline-block bg-blue-600 text-white text-[10px] font-bold px-2.5 py-1 rounded mb-3 uppercase w-fit">
-                                BERITA HARI INI
-                            </span>
-                            <h4 class="text-lg sm:text-xl font-bold leading-snug mb-2 group-hover:text-blue-200 transition-colors">
-                                SMKN 2 KARANGANYAR SIAP PERTAHANKAN GELAR JATENG DI LKBB-PB NASIONAL
-                            </h4>
+                <!-- Slider wrapper with relative arrow buttons -->
+                <div class="relative flex items-center">
+                    <!-- Prev Button -->
+                    <button onclick="scrollPrestasiBanner(-1)" type="button" aria-label="Sebelumnya"
+                        class="absolute -left-3 sm:-left-4 z-20 w-8 h-8 rounded-full bg-slate-200/90 hover:bg-slate-300 text-slate-600 flex items-center justify-center shadow-md transition-all active:scale-95">
+                        <i class="fa-solid fa-chevron-left text-xs"></i>
+                    </button>
+
+                    <!-- Slider Content -->
+                    <div id="prestasi-banner-slider" class="w-full flex gap-4 sm:gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory scrollbar-none py-1">
+                        <!-- Banner 1: LKBB-PB Nasional -->
+                        <div class="min-w-[280px] sm:min-w-[420px] md:min-w-[calc(50%-12px)] flex-1 snap-start rounded-2xl overflow-hidden shadow-sm bg-gradient-to-r from-[#0a1a44] via-[#0f2a6b] to-[#0a183d] flex items-center justify-center cursor-pointer group"
+                             onclick="openModal('SMKN 2 KARANGANYAR SIAP PERTAHANKAN GELAR JATENG DI LKBB-PB NASIONAL', 'SMK Negeri 2 Karanganyar siap mempertahankan gelar juara Jawa Tengah di ajang LKBB-PB Nasional dengan persiapan matang dan dedikasi tim terbaik.', '{{ asset('assets/prestasi/banner_terbaru_1.png') }}')">
+                            <img src="{{ asset('assets/prestasi/banner_terbaru_1.png') }}" alt="Banner LKBB-PB" class="w-full h-auto object-cover rounded-xl transition-transform duration-300 group-hover:scale-[1.02]">
                         </div>
 
-                        <!-- Card News 2 -->
-                        <div class="bg-gradient-to-r from-emerald-800 to-teal-900 rounded-xl overflow-hidden p-6 text-white relative group h-48 flex flex-col justify-center">
-                            <div class="text-xs font-semibold text-emerald-300 mb-1">SMKN 2 KARANGANYAR MENGUCAPKAN
-                            </div>
-                            <h4 class="text-2xl sm:text-3xl font-black italic tracking-wide text-amber-300 group-hover:scale-105 transition-transform">
-                                SELAMAT DAN SUKSES !
-                            </h4>
-                            <p class="text-xs text-emerald-100 mt-2">Juara 1 Lomba Kompetensi Siswa (LKS) Bidang CNC Milling 2026</p>
+                        <!-- Banner 2: Selamat dan Sukses -->
+                        <div class="min-w-[280px] sm:min-w-[420px] md:min-w-[calc(50%-12px)] flex-1 snap-start rounded-2xl overflow-hidden shadow-sm bg-gradient-to-r from-[#1c384a] via-[#244b63] to-[#162f3f] flex items-center justify-center cursor-pointer group"
+                             onclick="openModal('SMKN 2 KARANGANYAR MENGUCAPKAN SELAMAT DAN SUKSES !', 'Apresiasi setinggi-tingginya kepada seluruh civitas akademika dan siswa-siswi berprestasi atas dedikasi dan kontribusi luar biasa untuk sekolah tercinta.', '{{ asset('assets/prestasi/banner_terbaru_2.png') }}')">
+                            <img src="{{ asset('assets/prestasi/banner_terbaru_2.png') }}" alt="Banner Selamat dan Sukses" class="w-full h-auto object-cover rounded-xl transition-transform duration-300 group-hover:scale-[1.02]">
                         </div>
                     </div>
 
-                    <!-- Slider Arrows Controls -->
-                    <button id="prev-news" class="absolute -left-4 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white shadow-md border border-slate-200 flex items-center justify-center text-slate-700 hover:text-brand-blue transition-colors">
-                        <i class="fa-solid fa-chevron-left text-xs"></i>
-                    </button>
-                    <button id="next-news" class="absolute -right-4 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white shadow-md border border-slate-200 flex items-center justify-center text-slate-700 hover:text-brand-blue transition-colors">
+                    <!-- Next Button -->
+                    <button onclick="scrollPrestasiBanner(1)" type="button" aria-label="Selanjutnya"
+                        class="absolute -right-3 sm:-right-4 z-20 w-8 h-8 rounded-full bg-slate-200/90 hover:bg-slate-300 text-slate-600 flex items-center justify-center shadow-md transition-all active:scale-95">
                         <i class="fa-solid fa-chevron-right text-xs"></i>
                     </button>
                 </div>
             </div>
 
-            <!-- Grid Prestasi -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-                
-                <!-- Card 1 -->
-                <div class="bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-100 hover:shadow-lg transition-shadow flex flex-col">
-                    <div class="h-40 bg-slate-200 relative">
-                        <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=400&auto=format&fit=crop&q=80" alt="Prestasi" class="w-full h-full object-cover">
-                        <span class="absolute top-2 left-2 bg-brand-blue text-white text-[10px] font-bold px-2 py-1 rounded">JUARA 1</span>
+            <!-- Grid Prestasi (4 Kolom per Baris) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12 relative z-10">
+                @forelse ($prestasis as $item)
+                    @php
+                        $prestasiImg = $item->dokumentasiUrl() ?: asset('assets/prestasi/prestasi_' . (($loop->index % 8) + 1) . '.png');
+                    @endphp
+                    <div class="bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-100 hover:shadow-lg transition-all duration-300 flex flex-col group">
+                        <div class="h-44 bg-slate-100 relative overflow-hidden flex items-center justify-center">
+                            <img src="{{ $prestasiImg }}" alt="{{ $item->judul }}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
+                        </div>
+                        <div class="p-4 flex flex-col flex-grow justify-between">
+                            <p class="text-[11px] sm:text-xs text-slate-600 leading-relaxed mb-4 flex-grow line-clamp-4">
+                                {{ $item->deskripsi }}
+                            </p>
+                            <div class="flex justify-end pt-1">
+                                @if (Str::contains(strtolower($item->deskripsi), 'snbt'))
+                                    <button onclick="openModal('{{ addslashes($item->judul) }}', '{{ addslashes($item->deskripsi) }}', '{{ $prestasiImg }}')" 
+                                        class="bg-[#0066C4] hover:bg-blue-700 text-white text-[10px] font-bold px-3.5 py-1 rounded-full uppercase tracking-wider transition-colors shadow-sm">
+                                        Selanjutnya
+                                    </button>
+                                @else
+                                    <button onclick="openModal('{{ addslashes($item->judul) }}', '{{ addslashes($item->deskripsi) }}', '{{ $prestasiImg }}')" 
+                                        class="bg-[#374151] hover:bg-slate-900 text-white text-[10px] font-bold px-3.5 py-1 rounded-full uppercase tracking-wider transition-colors shadow-sm">
+                                        Lihat Detail
+                                    </button>
+                                @endif
+                            </div>
+                        </div>
                     </div>
-                    <div class="p-4 flex flex-col flex-grow">
-                        <h5 class="text-sm font-bold text-slate-900 mb-2 leading-tight">SMKN 2 KARANGANYAR SIAP PERTAHANKAN GELAR JATENG DI LKBB-PB NASIONAL</h5>
-                        <p class="text-xs text-slate-500 leading-relaxed flex-grow">Siswa SMK Negeri 2 Karanganyar sukses meraih Juara 1 Lomba Keterampilan Baris-Berbaris (LKBB) Piala Bergilir.</p>
-                        <button onclick="openModal('Detail Prestasi', 'Informasi lengkap mengenai prestasi LKBB-PB Nasional.')" class="mt-4 text-brand-blue text-xs font-bold hover:underline text-left w-fit">Selengkapnya</button>
+                @empty
+                    <div class="col-span-full py-10 text-center text-slate-500 text-sm bg-white rounded-2xl border border-slate-200">
+                        Belum ada prestasi yang ditambahkan.
                     </div>
-                </div>
-
-                <!-- Card 2 -->
-                <div class="bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-100 hover:shadow-lg transition-shadow flex flex-col">
-                    <div class="h-40 bg-slate-200 relative">
-                        <img src="https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=400&auto=format&fit=crop&q=80" alt="Prestasi" class="w-full h-full object-cover">
-                        <span class="absolute top-2 left-2 bg-brand-blue text-white text-[10px] font-bold px-2 py-1 rounded">JUARA 1</span>
-                    </div>
-                    <div class="p-4 flex flex-col flex-grow">
-                        <h5 class="text-sm font-bold text-slate-900 mb-2 leading-tight">SMKN 2 KARANGANYAR MENGUCAPKAN SELAMAT DAN SUKSES</h5>
-                        <p class="text-xs text-slate-500 leading-relaxed flex-grow">Tim SMK Negeri 2 Karanganyar berhasil meraih Juara 1 dalam Lomba Kompetensi Siswa (LKS) Bidang CNC Milling Tingkat Provinsi.</p>
-                        <button onclick="openModal('Detail Prestasi', 'Informasi lengkap mengenai prestasi LKS CNC Milling.')" class="mt-4 text-brand-blue text-xs font-bold hover:underline text-left w-fit">Selengkapnya</button>
-                    </div>
-                </div>
-
-                <!-- Card 3 -->
-                <div class="bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-100 hover:shadow-lg transition-shadow flex flex-col">
-                    <div class="h-40 bg-slate-200 relative">
-                        <img src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=400&auto=format&fit=crop&q=80" alt="Prestasi" class="w-full h-full object-cover">
-                        <span class="absolute top-2 left-2 bg-brand-blue text-white text-[10px] font-bold px-2 py-1 rounded">JUARA 2</span>
-                    </div>
-                    <div class="p-4 flex flex-col flex-grow">
-                        <h5 class="text-sm font-bold text-slate-900 mb-2 leading-tight">Selamat kepada Anindya Dwi Rahmawati</h5>
-                        <p class="text-xs text-slate-500 leading-relaxed flex-grow">Siswa berprestasi dari jurusan Teknologi Informasi dan Komunikasi ini berhasil mengharumkan nama sekolah.</p>
-                        <button onclick="openModal('Detail Prestasi', 'Informasi lengkap mengenai prestasi Anindya Dwi Rahmawati.')" class="mt-4 text-brand-blue text-xs font-bold hover:underline text-left w-fit">Selengkapnya</button>
-                    </div>
-                </div>
-
-                <!-- Card 4 -->
-                <div class="bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-100 hover:shadow-lg transition-shadow flex flex-col">
-                    <div class="h-40 bg-slate-200 relative">
-                        <img src="https://images.unsplash.com/photo-1531403009284-440f080d1e12?w=400&auto=format&fit=crop&q=80" alt="Prestasi" class="w-full h-full object-cover">
-                        <span class="absolute top-2 left-2 bg-brand-blue text-white text-[10px] font-bold px-2 py-1 rounded">JUARA 3</span>
-                    </div>
-                    <div class="p-4 flex flex-col flex-grow">
-                        <h5 class="text-sm font-bold text-slate-900 mb-2 leading-tight">Selamat kepada Muhammad Ainul Yaqin</h5>
-                        <p class="text-xs text-slate-500 leading-relaxed flex-grow">Prestasi membanggakan diraih oleh siswa yang mengikuti lomba di bidang teknologi tingkat kabupaten.</p>
-                        <button onclick="openModal('Detail Prestasi', 'Informasi lengkap mengenai prestasi Muhammad Ainul Yaqin.')" class="mt-4 text-brand-blue text-xs font-bold hover:underline text-left w-fit">Selengkapnya</button>
-                    </div>
-                </div>
-
-                <!-- Card 5 -->
-                <div class="bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-100 hover:shadow-lg transition-shadow flex flex-col">
-                    <div class="h-40 bg-slate-200 relative">
-                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&auto=format&fit=crop&q=80" alt="Prestasi" class="w-full h-full object-cover">
-                        <span class="absolute top-2 left-2 bg-brand-blue text-white text-[10px] font-bold px-2 py-1 rounded">JUARA 1</span>
-                    </div>
-                    <div class="p-4 flex flex-col flex-grow">
-                        <h5 class="text-sm font-bold text-slate-900 mb-2 leading-tight">Selamat kepada M. ILHAM</h5>
-                        <p class="text-xs text-slate-500 leading-relaxed flex-grow">Siswa kelas XI ini berhasil meraih Juara 1 dalam ajang kompetisi keahlian tingkat kabupaten.</p>
-                        <button onclick="openModal('Detail Prestasi', 'Informasi lengkap mengenai prestasi M. ILHAM.')" class="mt-4 text-brand-blue text-xs font-bold hover:underline text-left w-fit">Selengkapnya</button>
-                    </div>
-                </div>
-
-                <!-- Card 6 -->
-                <div class="bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-100 hover:shadow-lg transition-shadow flex flex-col">
-                    <div class="h-40 bg-slate-200 relative">
-                        <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&auto=format&fit=crop&q=80" alt="Prestasi" class="w-full h-full object-cover">
-                        <span class="absolute top-2 left-2 bg-brand-blue text-white text-[10px] font-bold px-2 py-1 rounded">JUARA 2</span>
-                    </div>
-                    <div class="p-4 flex flex-col flex-grow">
-                        <h5 class="text-sm font-bold text-slate-900 mb-2 leading-tight">Selamat kepada BINTU MUHAMMAD</h5>
-                        <p class="text-xs text-slate-500 leading-relaxed flex-grow">Meraih Juara 2 dalam Lomba Kompetensi Siswa (LKS) bidang keahlian Teknologi Informasi.</p>
-                        <button onclick="openModal('Detail Prestasi', 'Informasi lengkap mengenai prestasi BINTU MUHAMMAD.')" class="mt-4 text-brand-blue text-xs font-bold hover:underline text-left w-fit">Selengkapnya</button>
-                    </div>
-                </div>
-
-                <!-- Card 7 -->
-                <div class="bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-100 hover:shadow-lg transition-shadow flex flex-col">
-                    <div class="h-40 bg-slate-200 relative">
-                        <img src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=400&auto=format&fit=crop&q=80" alt="Prestasi" class="w-full h-full object-cover">
-                        <span class="absolute top-2 left-2 bg-brand-blue text-white text-[10px] font-bold px-2 py-1 rounded">JUARA 1</span>
-                    </div>
-                    <div class="p-4 flex flex-col flex-grow">
-                        <h5 class="text-sm font-bold text-slate-900 mb-2 leading-tight">Selamat kepada Zainal Abidin</h5>
-                        <p class="text-xs text-slate-500 leading-relaxed flex-grow">Siswa berprestasi yang berhasil meraih Juara 1 di bidang CNC Milling tingkat kabupaten.</p>
-                        <button onclick="openModal('Detail Prestasi', 'Informasi lengkap mengenai prestasi Zainal Abidin.')" class="mt-4 text-brand-blue text-xs font-bold hover:underline text-left w-fit">Selengkapnya</button>
-                    </div>
-                </div>
-
-                <!-- Card 8 -->
-                <div class="bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-100 hover:shadow-lg transition-shadow flex flex-col">
-                    <div class="h-40 bg-slate-200 relative">
-                        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80" alt="Prestasi" class="w-full h-full object-cover">
-                        <span class="absolute top-2 left-2 bg-brand-blue text-white text-[10px] font-bold px-2 py-1 rounded">JUARA 2</span>
-                    </div>
-                    <div class="p-4 flex flex-col flex-grow">
-                        <h5 class="text-sm font-bold text-slate-900 mb-2 leading-tight">Selamat kepada Muhammad Ainul Yaqin</h5>
-                        <p class="text-xs text-slate-500 leading-relaxed flex-grow">Meraih Juara 2 dalam Lomba CNC Milling Tingkat Kabupaten Karanganyar.</p>
-                        <button onclick="openModal('Detail Prestasi', 'Informasi lengkap mengenai prestasi Muhammad Ainul Yaqin.')" class="mt-4 text-brand-blue text-xs font-bold hover:underline text-left w-fit">Selengkapnya</button>
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- Pagination -->
-            <div class="flex justify-center items-center gap-2 mt-8">
-                <button class="w-8 h-8 rounded-lg bg-slate-200 text-slate-500 flex items-center justify-center text-xs hover:bg-slate-300 transition-colors"><i class="fa-solid fa-chevron-left"></i></button>
-                <button class="w-8 h-8 rounded-lg bg-brand-blue text-white flex items-center justify-center text-xs font-bold">1</button>
-                <button class="w-8 h-8 rounded-lg bg-white border border-slate-200 text-slate-600 flex items-center justify-center text-xs font-bold hover:bg-slate-50 transition-colors">2</button>
-                <span class="px-2 text-slate-400 text-xs">...</span>
-                <button class="w-8 h-8 rounded-lg bg-white border border-slate-200 text-slate-600 flex items-center justify-center text-xs font-bold hover:bg-slate-50 transition-colors">9</button>
-                <button class="w-8 h-8 rounded-lg bg-white border border-slate-200 text-slate-600 flex items-center justify-center text-xs font-bold hover:bg-slate-50 transition-colors">10</button>
-                <button class="w-8 h-8 rounded-lg bg-slate-200 text-slate-500 flex items-center justify-center text-xs hover:bg-slate-300 transition-colors"><i class="fa-solid fa-chevron-right"></i></button>
+                @endforelse
             </div>
 
         </div>
     </section>
 
     <!-- ============================================================
-         MODAL DETAIL EKSTRAKURIKULER (Berdasarkan Gambar 4)
+         MODAL DETAIL EKSTRAKURIKULER
          ============================================================ -->
     <div id="detail-eskul-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
         <div class="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl relative transform transition-all scale-95 opacity-0" id="detail-eskul-content">
@@ -510,167 +421,123 @@
 
             <!-- Modal Body -->
             <div class="p-6 sm:p-8">
-                
-                <!-- Top Section: Logo & Deskripsi -->
-                <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-start mb-10">
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-start mb-8">
                     <!-- Logo & Title -->
                     <div class="md:col-span-4 flex flex-col items-center text-center">
-                        <div class="w-32 h-32 rounded-full bg-yellow-100 flex items-center justify-center border-4 border-yellow-400 p-2 mb-4 shadow-lg">
-                            <img id="detail-eskul-logo" src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Logo_OSIS.png/600px-Logo_OSIS.png" alt="Logo Eskul" class="w-full h-full object-contain">
+                        <div id="modalLogoWrap" class="w-32 h-32 rounded-full bg-slate-50 flex items-center justify-center border-4 border-brand-blue/30 p-2 mb-4 shadow-lg overflow-hidden">
+                            <img id="detail-eskul-logo" src="" alt="Logo Eskul" class="w-full h-full object-contain">
                         </div>
-                        <h2 id="detail-eskul-title" class="text-2xl font-black text-slate-900 mb-1">Organisasi OSIS</h2>
-                        <p class="text-sm font-semibold text-brand-blue">SMKN 2 Karanganyar</p>
+                        <h2 id="detail-eskul-title" class="text-2xl font-black text-slate-900 mb-1"></h2>
+                        <p id="detail-eskul-school" class="text-sm font-semibold text-brand-blue">SMKN 2 Karanganyar</p>
                     </div>
 
                     <!-- Deskripsi -->
                     <div class="md:col-span-8">
                         <h3 class="text-lg font-bold text-slate-800 mb-3 border-b-2 border-brand-blue inline-block pb-1">Deskripsi</h3>
-                        <div id="detail-eskul-desc" class="text-slate-600 text-sm leading-relaxed space-y-3">
-                            <p>Organisasi Siswa Intra Sekolah SMK N 2 KARANGANYAR adalah Organisasi satu-satunya yang ada disekolah yang berada dibawah Waka Kesiswaan yang bertugas membantu kegiatan sekolah yang berhubungan dengan siswa.</p>
-                            <p>Banyak kegiatan yang sudah terlaksana antara lain Lomba jeda semester, Upacara, Dies Natalis, Anjangsana dengan Pengurus OSIS SMK lain, dan masih banyak lagi. Di OSIS kita juga bergabung dengan forum - forum seperti forum OSIS Kabupaten, dan forum OSIS Provinsi.</p>
-                            <p>Adapun tujuan OSIS adalah membantu pihak sekolah dalam melaksanakan kegiatan, mengadakan lomba untuk mengasah kreativitas siswa, serta menampung ide dari guru maupun siswa siswi SMK N 2 KARANGANYAR.</p>
-                            <div class="mt-4 pt-4 border-t border-slate-100">
-                                <p class="text-slate-800 font-bold text-xs uppercase tracking-wider mb-1">Visi</p>
-                                <p class="text-slate-600 text-sm">Berkarakter, Berprestasi dan Berbudaya lingkungan</p>
-                                <p class="text-slate-800 font-bold text-xs uppercase tracking-wider mt-3 mb-1">Misi</p>
-                                <ul class="list-disc list-inside text-slate-600 text-sm space-y-1">
-                                    <li>Menanamkan Keimanan dan Ketakwaan kepada Tuhan Yang Maha Esa</li>
-                                    <li>Menyelenggarakan Pendidikan dan Pelatihan yang Berkualitas dan Berbudaya Lingkungan</li>
-                                </ul>
-                            </div>
-                        </div>
+                        <div id="detail-eskul-desc" class="text-slate-600 text-sm leading-relaxed space-y-3 whitespace-pre-line"></div>
                     </div>
                 </div>
 
-                <!-- Bottom Section: Dokumentasi Kegiatan -->
-                <div>
+                <!-- Dokumentasi Foto -->
+                <div id="detail-eskul-doc-wrap">
                     <h3 class="text-lg font-bold text-slate-800 mb-4">Dokumentasi Kegiatan</h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div class="rounded-xl overflow-hidden shadow-md h-48 bg-slate-200">
-                            <img src="https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=600&auto=format&fit=crop&q=80" alt="Dokumentasi 1" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
-                        </div>
-                        <div class="rounded-xl overflow-hidden shadow-md h-48 bg-slate-200">
-                            <img src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=600&auto=format&fit=crop&q=80" alt="Dokumentasi 2" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
-                        </div>
-                        <div class="rounded-xl overflow-hidden shadow-md h-48 bg-slate-200">
-                            <img src="https://images.unsplash.com/photo-1531403009284-440f080d1e12?w=600&auto=format&fit=crop&q=80" alt="Dokumentasi 3" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
-                        </div>
-                        <div class="rounded-xl overflow-hidden shadow-md h-48 bg-slate-200">
-                            <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=600&auto=format&fit=crop&q=80" alt="Dokumentasi 4" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
-                        </div>
+                    <div class="rounded-2xl overflow-hidden shadow-md max-h-72 bg-slate-100">
+                        <img id="detail-eskul-doc" src="" alt="Dokumentasi Kegiatan" class="w-full h-full object-cover">
                     </div>
                 </div>
-
             </div>
         </div>
     </div>
 
-    <!-- ============================================================
-         FOOTER & PETA LOKASI
-         ============================================================ -->
+    <!-- GLOBAL INFO / PRESTASI MODAL -->
+    <div id="global-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl relative text-left transform transition-all">
+            <button onclick="closeModal()" type="button" aria-label="Tutup"
+                class="absolute top-3 right-3 z-20 w-8 h-8 rounded-full bg-slate-900/60 hover:bg-slate-900 text-white flex items-center justify-center transition shadow">
+                <i class="fa-solid fa-xmark text-sm"></i>
+            </button>
+            <div id="global-modal-img-wrap" class="h-60 sm:h-64 bg-slate-100 hidden relative overflow-hidden flex items-center justify-center">
+                <img id="global-modal-img" src="" alt="Prestasi" class="w-full h-full object-cover">
+            </div>
+            <div class="p-6">
+                <h4 id="global-modal-title" class="text-base sm:text-lg font-bold text-slate-900 mb-2 leading-snug"></h4>
+                <p id="global-modal-body" class="text-xs sm:text-sm text-slate-600 leading-relaxed mb-6"></p>
+                <div class="flex justify-end">
+                    <button onclick="closeModal()" class="px-5 py-2 bg-brand-blue hover:bg-brand-darkBlue text-white font-bold rounded-xl text-xs transition shadow-sm">
+                        Tutup
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 @endsection
 
 @push('scripts')
     <script>
-        // ============================================================
-        // DETAIL EKSTRAKURIKULER MODAL LOGIC
-        // ============================================================
-        const detailEskulModal = document.getElementById('detail-eskul-modal');
-        const detailEskulContent = document.getElementById('detail-eskul-content');
-        const detailEskulTitle = document.getElementById('detail-eskul-title');
-        const detailEskulLogo = document.getElementById('detail-eskul-logo');
-        const detailEskulDesc = document.getElementById('detail-eskul-desc');
+        function showDetailEskulDynamic(item) {
+            document.getElementById('detail-eskul-title').textContent = item.nama;
+            document.getElementById('detail-eskul-school').textContent = item.sekolah || 'SMKN 2 Karanganyar';
+            document.getElementById('detail-eskul-desc').textContent = item.deskripsi || 'Belum ada deskripsi untuk ekstrakurikuler ini.';
 
-        const eskulData = {
-            'OSIS': {
-                title: 'Organisasi OSIS',
-                logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Logo_OSIS.png/600px-Logo_OSIS.png',
-                desc: `
-                    <p>Organisasi Siswa Intra Sekolah SMK N 2 KARANGANYAR adalah Organisasi satu-satunya yang ada disekolah yang berada dibawah Waka Kesiswaan yang bertugas membantu kegiatan sekolah yang berhubungan dengan siswa.</p>
-                    <p>Banyak kegiatan yang sudah terlaksana antara lain Lomba jeda semester, Upacara, Dies Natalis, Anjangsana dengan Pengurus OSIS SMK lain, dan masih banyak lagi. Di OSIS kita juga bergabung dengan forum - forum seperti forum OSIS Kabupaten, dan forum OSIS Provinsi.</p>
-                    <p>Adapun tujuan OSIS adalah membantu pihak sekolah dalam melaksanakan kegiatan, mengadakan lomba untuk mengasah kreativitas siswa, serta menampung ide dari guru maupun siswa siswi SMK N 2 KARANGANYAR.</p>
-                    <div class="mt-4 pt-4 border-t border-slate-100">
-                        <p class="text-slate-800 font-bold text-xs uppercase tracking-wider mb-1">Visi</p>
-                        <p class="text-slate-600 text-sm">Berkarakter, Berprestasi dan Berbudaya lingkungan</p>
-                        <p class="text-slate-800 font-bold text-xs uppercase tracking-wider mt-3 mb-1">Misi</p>
-                        <ul class="list-disc list-inside text-slate-600 text-sm space-y-1">
-                            <li>Menanamkan Keimanan dan Ketakwaan kepada Tuhan Yang Maha Esa</li>
-                            <li>Menyelenggarakan Pendidikan dan Pelatihan yang Berkualitas dan Berbudaya Lingkungan</li>
-                        </ul>
-                    </div>
-                `
-            },
-            'PMR': {
-                title: 'Organisasi PMR',
-                logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Logo_PMR.png/600px-Logo_PMR.png',
-                desc: `
-                    <p>PMR Wira SMK Negeri 2 Karanganyar merupakan salah satu organisasi di lingkungan sekolah yang bergerak di bidang kemanusiaan dan kesehatan.</p>
-                    <p>Kegiatan rutin meliputi pelatihan pertolongan pertama, donor darah, dan bakti sosial. Tujuan utama adalah membentuk siswa yang peduli terhadap sesama dan siap membantu dalam situasi darurat.</p>
-                `
-            },
-            'AMBALAN': {
-                title: 'Organisasi AMBALAN',
-                logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Logo_Pramuka.png/600px-Logo_Pramuka.png',
-                desc: `
-                    <p>Ambalan adalah organisasi kepramukaan di tingkat penegak yang ada di SMKN 2 Karanganyar.</p>
-                    <p>Kegiatan meliputi perkemahan, penjelajahan, dan pelatihan kepemimpinan. Melalui Ambalan, siswa dilatih untuk mandiri, disiplin, dan memiliki jiwa korsa yang tinggi.</p>
-                `
-            },
-            'PBB': {
-                title: 'Organisasi PBB',
-                logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Logo_Paskibraka.png/600px-Logo_Paskibraka.png',
-                desc: `
-                    <p>Pasukan Baris-Berbaris (PBB) adalah ekstrakurikuler yang fokus pada kedisiplinan, ketegasan, dan kekompakan.</p>
-                    <p>Anggota PBB sering menjadi petugas upacara bendera di sekolah maupun di tingkat kabupaten. Latihan rutin dilakukan untuk meningkatkan ketahanan fisik dan mental siswa.</p>
-                `
-            },
-            'ROHIS': {
-                title: 'Organisasi ROHIS',
-                logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Logo_Rohis.png/600px-Logo_Rohis.png',
-                desc: `
-                    <p>Rohani Islam (Rohis) adalah organisasi yang bergerak di bidang keagamaan Islam.</p>
-                    <p>Kegiatan meliputi kajian rutin, peringatan hari besar Islam, dan bimbingan membaca Al-Qur'an. Tujuan utamanya adalah memperdalam dan memperkuat ajaran Islam di kalangan siswa.</p>
-                `
-            },
-            'JURNALISTIK': {
-                title: 'Organisasi JURNALISTIK',
-                logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Logo_Jurnalistik.png/600px-Logo_Jurnalistik.png',
-                desc: `
-                    <p>Jurnalistik secara bahasa adalah kewartawanan atau kepenulisan.</p>
-                    <p>Ekstrakurikuler ini melatih siswa dalam menulis berita, fotografi, dan desain grafis untuk majalah dinding atau media sosial sekolah. Siswa diajarkan untuk berpikir kritis dan menyampaikan informasi dengan benar.</p>
-                `
+            const logo = document.getElementById('detail-eskul-logo');
+            if (item.logo) {
+                logo.src = item.logo;
+                document.getElementById('modalLogoWrap').classList.remove('hidden');
+            } else {
+                document.getElementById('modalLogoWrap').classList.add('hidden');
             }
-        };
 
-        function openDetailEskul(nama) {
-            const data = eskulData[nama];
-            if (data) {
-                detailEskulTitle.innerText = data.title;
-                detailEskulLogo.src = data.logo;
-                detailEskulDesc.innerHTML = data.desc;
-                
-                detailEskulModal.classList.remove('hidden');
-                setTimeout(() => {
-                    detailEskulContent.classList.remove('scale-95', 'opacity-0');
-                    detailEskulContent.classList.add('scale-100', 'opacity-100');
-                }, 10);
+            const docWrap = document.getElementById('detail-eskul-doc-wrap');
+            const doc = document.getElementById('detail-eskul-doc');
+            if (item.dokumentasi) {
+                doc.src = item.dokumentasi;
+                docWrap.classList.remove('hidden');
+            } else {
+                docWrap.classList.add('hidden');
             }
+
+            const modal = document.getElementById('detail-eskul-modal');
+            const content = document.getElementById('detail-eskul-content');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                content.classList.remove('scale-95', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            }, 10);
         }
 
         function closeDetailEskul() {
-            detailEskulContent.classList.remove('scale-100', 'opacity-100');
-            detailEskulContent.classList.add('scale-95', 'opacity-0');
+            const modal = document.getElementById('detail-eskul-modal');
+            const content = document.getElementById('detail-eskul-content');
+            content.classList.remove('scale-100', 'opacity-100');
+            content.classList.add('scale-95', 'opacity-0');
             setTimeout(() => {
-                detailEskulModal.classList.add('hidden');
+                modal.classList.add('hidden');
             }, 200);
         }
 
-        // Close modal when clicking outside
-        detailEskulModal.addEventListener('click', (e) => {
-            if (e.target === detailEskulModal) {
-                closeDetailEskul();
+        function openModal(title, body, imageUrl = null) {
+            document.getElementById('global-modal-title').textContent = title;
+            document.getElementById('global-modal-body').textContent = body;
+            const imgWrap = document.getElementById('global-modal-img-wrap');
+            const imgEl = document.getElementById('global-modal-img');
+            const finalImage = imageUrl || "{{ asset('assets/prestasi/prestasi_1.png') }}";
+            if (imgWrap && imgEl) {
+                imgEl.src = finalImage;
+                imgWrap.classList.remove('hidden');
             }
-        });
+            document.getElementById('global-modal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('global-modal').classList.add('hidden');
+        }
+
+        function scrollPrestasiBanner(direction) {
+            const slider = document.getElementById('prestasi-banner-slider');
+            if (!slider) return;
+            const scrollAmount = slider.clientWidth * 0.75;
+            slider.scrollBy({ left: direction * scrollAmount, behavior: 'smooth' });
+        }
     </script>
 @endpush

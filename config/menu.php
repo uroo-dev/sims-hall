@@ -96,10 +96,9 @@ return [
             'icon' => 'fa-users',
             'roles' => ['admin_kesiswaan', 'super_admin', 'super_duper_admin'],
             'children' => [
-                ['label' => 'Dashboard K', 'icon' => 'fa-gauge-high', 'route' => null],
-                ['label' => 'Data Prestasi', 'icon' => 'fa-trophy', 'route' => null],
-                ['label' => 'Data Ekstrakulikuler', 'icon' => 'fa-icons', 'route' => null],
-                ['label' => 'Data Tata Tertib', 'icon' => 'fa-book-bookmark', 'route' => null],
+                ['label' => 'Dashboard Kesiswaan', 'icon' => 'fa-users', 'route' => 'admin.kesiswaan.index'],
+                ['label' => 'Data Ekstrakulikuler', 'icon' => 'fa-icons', 'route' => 'admin.kesiswaan.ekstrakurikuler.index'],
+                ['label' => 'Data Tata Tertib', 'icon' => 'fa-book-bookmark', 'route' => 'admin.kesiswaan.tata-tertib.index'],
             ],
         ],
 

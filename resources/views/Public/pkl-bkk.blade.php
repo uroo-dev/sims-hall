@@ -136,7 +136,7 @@
             </div>
 
             @forelse ($dudis as $dudi)
-                <div class="bg-white border border-slate-200/80 rounded-2xl p-8 md:p-10 shadow-md mb-6">
+                <div id="dudi-{{ $dudi->id }}" class="bg-white border border-slate-200/80 rounded-2xl p-8 md:p-10 shadow-md mb-6 scroll-mt-28">
                     <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
                         {{-- Logo --}}
                         <div class="md:col-span-2 flex md:justify-center items-start">

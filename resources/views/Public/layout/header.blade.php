@@ -124,7 +124,7 @@
 
             <a href="{{ route('ppdb') }}"
                 class="px-3 py-1 text-sm transition-colors
-                {{ request()->routeIs('ppdb') 
+                {{ request()->routeIs('ppdb*') 
                     ? 'font-semibold bg-white/20 rounded-full' 
                     : 'font-medium hover:text-blue-200' }}">
                 PPDB
@@ -158,7 +158,7 @@
                 Profile
             </a>
 
-            <a href="#" class="hover:text-brand-blue py-1">Kesiswaan</a>
+            <a href="{{ route('kesiswaan') }}" class="hover:text-brand-blue py-1 {{ request()->routeIs('kesiswaan') ? 'text-brand-blue font-bold' : '' }}">Kesiswaan</a>
             <a href="{{ route('produk-unggulan') }}" 
                 class="py-1 transition-colors
                 {{ request()->routeIs('produk-unggulan*') 

@@ -177,6 +177,34 @@
                     class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('index.informasi.ppdb') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
                     <i class="fa-solid fa-file-lines text-base w-5 text-center"></i>
                     <span>Informasi & Persyaratan</span>
+            @elseif($userRole === 'admin_kesiswaan')
+                <!-- SECTION: KESISWAAN -->
+                <div class="pt-1 pb-1">
+                    <div class="flex items-center justify-between text-[11px] font-bold text-blue-100/80 tracking-wider uppercase px-2 mb-2">
+                        <span>Kesiswaan</span>
+                        <span class="w-12 h-[1px] bg-white/30"></span>
+                    </div>
+                </div>
+
+                <!-- 1. DASHBOARD KESISWAAN -->
+                <a href="{{ route('admin.kesiswaan.index') }}"
+                    class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('admin.kesiswaan.index') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
+                    <i class="fa-solid fa-users text-base w-5 text-center"></i>
+                    <span>Dashboard Kesiswaan</span>
+                </a>
+
+                <!-- 3. DATA EKSTRAKURIKULER -->
+                <a href="{{ route('admin.kesiswaan.ekstrakurikuler.index') }}"
+                    class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('admin.kesiswaan.ekstrakurikuler.*') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
+                    <i class="fa-solid fa-icons text-base w-5 text-center"></i>
+                    <span>Data Ekstrakulikuler</span>
+                </a>
+
+                <!-- 4. DATA TATA TERTIB -->
+                <a href="{{ route('admin.kesiswaan.tata-tertib.index') }}"
+                    class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('admin.kesiswaan.tata-tertib.*') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
+                    <i class="fa-solid fa-book-bookmark text-base w-5 text-center"></i>
+                    <span>Data Tata Tertib</span>
                 </a>
 
             @else
@@ -397,6 +425,34 @@
                         class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('produk.*') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
                         <i class="fa-solid fa-basket-shopping text-base w-5 text-center"></i>
                         <span>Data Produk</span>
+                    </a>
+                @endif
+
+                @if(in_array($userRole, ['super_admin', 'super_duper_admin']))
+                    <!-- SECTION: KESISWAAN -->
+                    <div class="pt-3 pb-1">
+                        <div class="flex items-center justify-between text-[11px] font-bold text-blue-100/80 tracking-wider uppercase px-2 mb-2">
+                            <span>Kesiswaan</span>
+                            <span class="w-12 h-[1px] bg-white/30"></span>
+                        </div>
+                    </div>
+
+                    <a href="{{ route('admin.kesiswaan.index') }}"
+                        class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('admin.kesiswaan.index') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
+                        <i class="fa-solid fa-users text-base w-5 text-center"></i>
+                        <span>Dashboard Kesiswaan</span>
+                    </a>
+
+                    <a href="{{ route('admin.kesiswaan.ekstrakurikuler.index') }}"
+                        class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('admin.kesiswaan.ekstrakurikuler.*') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
+                        <i class="fa-solid fa-icons text-base w-5 text-center"></i>
+                        <span>Data Ekstrakulikuler</span>
+                    </a>
+
+                    <a href="{{ route('admin.kesiswaan.tata-tertib.index') }}"
+                        class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('admin.kesiswaan.tata-tertib.*') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
+                        <i class="fa-solid fa-book-bookmark text-base w-5 text-center"></i>
+                        <span>Data Tata Tertib</span>
                     </a>
                 @endif
             @endif
