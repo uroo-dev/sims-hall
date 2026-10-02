@@ -93,6 +93,36 @@
     <!-- MODAL STACK -->
     @stack('modals')
 
+    <!-- MODAL: KONFIRMASI LOGOUT -->
+    <div id="modalLogout" class="fixed inset-0 !m-0 z-[100] hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl border border-slate-100 overflow-hidden transform transition-all scale-95 duration-200" id="modalLogoutBox">
+            <div class="p-6 text-center space-y-4">
+                <div class="w-14 h-14 mx-auto rounded-2xl bg-red-50 text-red-600 border border-red-100/80 flex items-center justify-center text-2xl shadow-xs">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                </div>
+                <div>
+                    <h3 class="font-extrabold text-slate-900 text-lg tracking-tight">Konfirmasi Keluar</h3>
+                    <p class="text-xs text-slate-500 mt-1">
+                        Apakah Anda yakin ingin keluar dari portal admin? Sesi aktif Anda akan segera diakhiri.
+                    </p>
+                </div>
+
+                <form id="logoutFormModal" action="{{ route('logout') }}" method="POST" class="pt-2 flex items-center justify-center gap-3">
+                    @csrf
+                    <button type="button" onclick="closeLogoutModal()"
+                        class="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 text-xs md:text-sm font-semibold transition cursor-pointer">
+                        Batal
+                    </button>
+                    <button type="submit"
+                        class="flex-1 px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 active:scale-95 text-white text-xs md:text-sm font-bold shadow-sm transition flex items-center justify-center gap-2 cursor-pointer">
+                        <i class="fa-solid fa-arrow-right-from-bracket text-xs"></i>
+                        <span>Ya, Keluar</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
     @vite(['resources/js/app.js'])
 
     <script>
@@ -110,12 +140,48 @@
             }
         }
 
-        // Simulated Logout button handler
-        function handleLogout() {
-            const confirmLogout = confirm("Apakah Anda yakin ingin keluar dari sistem admin?");
-            if (confirmLogout) {
-                alert("Anda telah berhasil logout.");
+        // Modal Logout Handlers
+        function openLogoutModal() {
+            const modal = document.getElementById('modalLogout');
+            const box = document.getElementById('modalLogoutBox');
+            if (!modal || !box) return;
+
+            document.body.classList.add('overflow-hidden');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                box.classList.remove('scale-95');
+                box.classList.add('scale-100');
+            }, 10);
+        }
+
+        function closeLogoutModal() {
+            const modal = document.getElementById('modalLogout');
+            const box = document.getElementById('modalLogoutBox');
+            if (!modal || !box) return;
+
+            box.classList.remove('scale-100');
+            box.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                document.body.classList.remove('overflow-hidden');
+            }, 150);
+        }
+
+        // Close logout modal on escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeLogoutModal();
             }
+        });
+
+        // Close logout modal on click outside box
+        const modalLogoutEl = document.getElementById('modalLogout');
+        if (modalLogoutEl) {
+            modalLogoutEl.addEventListener('click', function(event) {
+                if (event.target === modalLogoutEl) {
+                    closeLogoutModal();
+                }
+            });
         }
 
         // Inisialisasi grafik batang

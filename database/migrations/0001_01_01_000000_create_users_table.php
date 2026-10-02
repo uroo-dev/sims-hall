@@ -15,16 +15,16 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->enum('role', [
-                'admin', 
-                'super_admin', 
-                'super_duper_admin', 
-                'user', 
-                'guru', 
-                'kepala_sekolah', 
-                'organisasi', 
-                'instansi_luar_terikat', 
-                'instansi_luar', 
-                'pelanggan'
+                'admin',
+                'super_admin',
+                'super_duper_admin',
+                'user',
+                'guru',
+                'kepala_sekolah',
+                'organisasi',
+                'instansi_luar_terikat',
+                'instansi_luar',
+                'pelanggan',
             ]);
             $table->string('password');
             $table->rememberToken();

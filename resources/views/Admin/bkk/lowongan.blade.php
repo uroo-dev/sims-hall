@@ -134,16 +134,12 @@
                             <i @class(['fa-solid fa-toggle-on text-emerald-600' => $l->is_active, 'fa-solid fa-toggle-off' => ! $l->is_active])></i>
                         </button>
                     </form>
-                    <form method="POST" action="{{ route('pkl.lowongan.destroy', $l) }}"
-                        onsubmit="return confirm('Hapus lowongan &quot;{{ $l->posisi }}&quot;?')">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit"
-                            class="w-9 h-9 inline-flex items-center justify-center text-xs bg-red-50 hover:bg-red-100 text-red-600 rounded-lg transition"
-                            title="Hapus">
-                            <i class="fa-solid fa-trash"></i>
-                        </button>
-                    </form>
+                    <button type="button"
+                        onclick="openDeleteLowonganModal(@js($l->posisi), '{{ route('pkl.lowongan.destroy', $l) }}')"
+                        class="w-9 h-9 inline-flex items-center justify-center text-xs bg-red-50 hover:bg-red-100 text-red-600 rounded-lg transition"
+                        title="Hapus">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
                 </div>
 
             </div>
@@ -156,3 +152,89 @@
     </div>
 
 @endsection
+
+@push('modals')
+<!-- ==================== MODAL HAPUS LOWONGAN ==================== -->
+<div id="modalDeleteLowongan" class="fixed inset-0 !m-0 z-[100] hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity">
+    <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl border border-slate-100 overflow-hidden transform transition-all scale-95 duration-200" id="modalDeleteLowonganBox">
+        <div class="p-6 text-center space-y-4">
+            <div class="w-14 h-14 mx-auto rounded-2xl bg-red-50 text-red-600 border border-red-100/80 flex items-center justify-center text-2xl shadow-xs">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <div>
+                <h3 class="font-extrabold text-slate-900 text-lg tracking-tight">Konfirmasi Hapus Lowongan</h3>
+                <p class="text-xs text-slate-500 mt-1">
+                    Apakah Anda yakin ingin menghapus lowongan kerja:
+                </p>
+                <div id="delete_lowongan_title" class="font-bold text-slate-800 text-sm mt-2 bg-slate-50 py-2.5 px-3 rounded-xl border border-slate-200">
+                    -
+                </div>
+                <p class="text-[11px] text-red-500 mt-2 font-medium">
+                    Tindakan ini tidak dapat dibatalkan.
+                </p>
+            </div>
+
+            <form id="formDeleteLowongan" method="POST" class="pt-2 flex items-center justify-center gap-3">
+                @csrf
+                @method('DELETE')
+                <button type="button" onclick="closeDeleteLowonganModal()"
+                    class="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 text-xs md:text-sm font-semibold transition cursor-pointer">
+                    Batal
+                </button>
+                <button type="submit"
+                    class="flex-1 px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 active:scale-95 text-white text-xs md:text-sm font-bold shadow-sm transition flex items-center justify-center gap-1.5 cursor-pointer">
+                    <i class="fa-regular fa-trash-can text-xs"></i>
+                    <span>Ya, Hapus</span>
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+@endpush
+
+@push('scripts')
+<script>
+    function openDeleteLowonganModal(title, deleteUrl) {
+        const modal = document.getElementById('modalDeleteLowongan');
+        const box = document.getElementById('modalDeleteLowonganBox');
+        const form = document.getElementById('formDeleteLowongan');
+        if (!modal || !box || !form) return;
+
+        form.action = deleteUrl;
+        document.getElementById('delete_lowongan_title').innerText = title;
+
+        document.body.classList.add('overflow-hidden');
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            box.classList.remove('scale-95');
+            box.classList.add('scale-100');
+        }, 10);
+    }
+
+    function closeDeleteLowonganModal() {
+        const modal = document.getElementById('modalDeleteLowongan');
+        const box = document.getElementById('modalDeleteLowonganBox');
+        if (!modal || !box) return;
+
+        box.classList.remove('scale-100');
+        box.classList.add('scale-95');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+        }, 150);
+    }
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeDeleteLowonganModal();
+        }
+    });
+
+    const modalDeleteLowonganEl = document.getElementById('modalDeleteLowongan');
+    if (modalDeleteLowonganEl) {
+        modalDeleteLowonganEl.addEventListener('click', function(e) {
+            if (e.target === this) closeDeleteLowonganModal();
+        });
+    }
+</script>
+@endpush

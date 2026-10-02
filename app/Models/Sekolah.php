@@ -10,17 +10,17 @@ class Sekolah extends Model
     use HasFactory;
 
     protected $fillable = [
-        'judul', 
-        'dokumentasi', 
+        'judul',
+        'dokumentasi',
         'sejarah',
-        'profil_judul', 
-        'profil_deskripsi', 
+        'profil_judul',
+        'profil_deskripsi',
         'profil_dokumentasi',
-        'visi', 
-        'misi', 
-        'sambutan_kepsek', 
-        'nama_kepsek', 
-        'foto_kepsek', 
-        'yel_yel'
+        'visi',
+        'misi',
+        'sambutan_kepsek',
+        'nama_kepsek',
+        'foto_kepsek',
+        'yel_yel',
     ];
 }

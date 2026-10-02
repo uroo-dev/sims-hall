@@ -2,12 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-
 
 class PaketPeminjaman extends Model
 {
@@ -53,5 +51,5 @@ class PaketPeminjaman extends Model
         return $this->nama_paket ?: 'Paket '.ucwords($this->kategori);
     }
 
-    protected $fillable = ['nama_paket', 'harga', 'kategori', 'durasi', 'fasilitas', 'deskripsi'];
+    protected $fillable = ['nama_paket', 'harga', 'harga_dp', 'kategori', 'durasi', 'fasilitas', 'deskripsi'];
 }

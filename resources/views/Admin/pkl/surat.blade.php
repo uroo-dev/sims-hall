@@ -88,16 +88,11 @@
                     </a>
                 @endif
 
-                <form method="POST" action="{{ route('pkl.surat.regenerate', $surat) }}"
-                    onsubmit="return confirm('Generate ulang PDF surat ini?')">
-                    @csrf
-                    @method('POST')
-                    <button type="submit"
-                        class="text-sm font-semibold bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2.5 rounded-lg transition">
-                        <i class="fa-solid fa-rotate mr-1.5"></i>
-                        {{ $surat->file_pdf_path ? 'Generate Ulang' : 'Generate PDF' }}
-                    </button>
-                </form>
+                <button type="button" onclick="openRegenerateModal()"
+                    class="text-sm font-semibold bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2.5 rounded-lg transition cursor-pointer">
+                    <i class="fa-solid fa-rotate mr-1.5"></i>
+                    {{ $surat->file_pdf_path ? 'Generate Ulang' : 'Generate PDF' }}
+                </button>
             </div>
         </div>
 
@@ -175,3 +170,80 @@
     </div>
 
 @endsection
+
+@push('modals')
+<!-- ==================== MODAL REGENERATE PDF ==================== -->
+<div id="modalRegeneratePdf" class="fixed inset-0 !m-0 z-[100] hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity">
+    <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl border border-slate-100 overflow-hidden transform transition-all scale-95 duration-200" id="modalRegeneratePdfBox">
+        <div class="p-6 text-center space-y-4">
+            <div class="w-14 h-14 mx-auto rounded-2xl bg-blue-50 text-brand-600 border border-blue-100/80 flex items-center justify-center text-2xl shadow-xs">
+                <i class="fa-solid fa-file-pdf"></i>
+            </div>
+            <div>
+                <h3 class="font-extrabold text-slate-900 text-lg tracking-tight">Konfirmasi Generate PDF</h3>
+                <p class="text-xs text-slate-500 mt-1">
+                    {{ $surat->file_pdf_path ? 'Dokumen PDF yang sudah ada akan dibuat ulang dengan data penempatan terbaru.' : 'Sistem akan membuat berkas PDF surat pengajuan PKL ini.' }}
+                </p>
+                <div class="mt-3 p-3 bg-slate-50 border border-slate-200 rounded-xl text-left space-y-1 text-xs">
+                    <div><span class="text-slate-400 font-medium">Nomor Surat:</span> <span class="font-bold text-slate-800">{{ $surat->nomor_surat }}</span></div>
+                    <div><span class="text-slate-400 font-medium">Tujuan DUDI:</span> <span class="font-bold text-slate-800">{{ $surat->dudi?->nama_dudi ?? '-' }}</span></div>
+                </div>
+            </div>
+
+            <form action="{{ route('pkl.surat.regenerate', $surat) }}" method="POST" class="pt-2 flex items-center justify-center gap-3">
+                @csrf
+                <button type="button" onclick="closeRegenerateModal()"
+                    class="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 text-xs md:text-sm font-semibold transition cursor-pointer">
+                    Batal
+                </button>
+                <button type="submit"
+                    class="flex-1 px-4 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 active:scale-95 text-white text-xs md:text-sm font-bold shadow-sm transition flex items-center justify-center gap-2 cursor-pointer">
+                    <i class="fa-solid fa-rotate text-xs"></i>
+                    <span>Proses Sekarang</span>
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+@endpush
+
+@push('scripts')
+<script>
+    function openRegenerateModal() {
+        const modal = document.getElementById('modalRegeneratePdf');
+        const box = document.getElementById('modalRegeneratePdfBox');
+        if (!modal || !box) return;
+
+        document.body.classList.add('overflow-hidden');
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            box.classList.remove('scale-95');
+            box.classList.add('scale-100');
+        }, 10);
+    }
+
+    function closeRegenerateModal() {
+        const modal = document.getElementById('modalRegeneratePdf');
+        const box = document.getElementById('modalRegeneratePdfBox');
+        if (!modal || !box) return;
+
+        box.classList.remove('scale-100');
+        box.classList.add('scale-95');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+        }, 150);
+    }
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeRegenerateModal();
+    });
+
+    const modalRegeneratePdfEl = document.getElementById('modalRegeneratePdf');
+    if (modalRegeneratePdfEl) {
+        modalRegeneratePdfEl.addEventListener('click', function(e) {
+            if (e.target === this) closeRegenerateModal();
+        });
+    }
+</script>
+@endpush

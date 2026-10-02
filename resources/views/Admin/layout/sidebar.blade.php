@@ -1,21 +1,18 @@
 {{--
     SIDEBAR CONTAINER
 
-    Tampilan mengikuti desain branch `dapin` (biru #0073c6, kategori dengan
-    garis pemisah, logout pill). Data menu & pembatasan role mengikuti
-    config/menu.php + App\Support\Menu supaya modul PKL & BKK milik branch
-    `uroo` tetap muncul hanya untuk role yang berhak.
-
-    Item dengan route null (modul belum punya halaman) dirender sebagai
-    `href="#"` dengan teks redup — sama seperti desain aslinya, tapi jelas
-    terbaca sebagai "belum tersedia".
+    Tampilan mengikuti desain brand (biru #0073c6, rounded-tr-[40px], pill rounded-full).
+    Navigasi diatur menggunakan Blade if-else berdasarkan role user autentikasi:
+    - Pelanggan (customer panel)
+    - Kepala Sekolah
+    - BKK & PKL
+    - Admin Aula & Super Admin
 --}}
 <aside id="sidebar"
     class="fixed top-0 bottom-0 left-0 z-50 w-[270px] bg-white flex flex-col transition-transform duration-300 -translate-x-full lg:translate-x-0 border-r border-gray-100">
 
     @php
-        $role = auth()->user()?->role;
-        $modules = App\Support\Menu::forRole($role);
+        $userRole = auth()->user()?->role;
     @endphp
 
     <!-- BRAND / LOGO HEADER (Latar Belakang Putih) -->
@@ -33,8 +30,7 @@
         <!-- MENU NAVIGATION SCROLLABLE AREA -->
         <div class="flex-1 overflow-y-auto sidebar-scroll pr-1 space-y-2">
 
-
-            @if((auth()->user() && auth()->user()->role === 'pelanggan') || request()->routeIs('customer.*'))
+            @if(($userRole === 'pelanggan') || request()->routeIs('customer.*'))
                 <!-- 1. DASHBOARD CUSTOMER -->
                 <a href="{{ route('customer.dashboard') }}"
                     class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('customer.dashboard') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
@@ -69,7 +65,8 @@
                     <i class="fa-solid fa-user-group text-base w-5 text-center"></i>
                     <span>Profil</span>
                 </a>
-            @elseif(auth()->user() && auth()->user()->role === 'kepala_sekolah')
+
+            @elseif($userRole === 'kepala_sekolah')
                 <!-- 1. DASHBOARD KEPALA SEKOLAH -->
                 <a href="{{ route('kepala-sekolah.dashboard') }}"
                     class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('kepala-sekolah.dashboard') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
@@ -100,60 +97,58 @@
                     <i class="fa-solid fa-file-invoice-dollar text-base w-5 text-center"></i>
                     <span>Laporan Pemasukan</span>
                 </a>
-            @elseif(auth()->user()?->role === 'bkk')
-                @foreach ($modules as $module)
-                @php
-                    $moduleRoute = $module['route'] ?? null;
-                    $moduleUrl = App\Support\Menu::url($moduleRoute, $role);
-                    $moduleActive = App\Support\Menu::isActive($moduleRoute, $role);
-                @endphp
 
-                {{-- Modul tanpa kategori anak, mis. Dashboard --}}
-                @if (empty($module['children']))
-                    <a href="{{ $moduleUrl ?? '#' }}"
-                        @if ($moduleUrl === null) aria-disabled="true" @endif
-                        @class([
-                            'flex items-center gap-3 px-5 py-3.5 rounded-full font-bold text-sm shadow-sm transition transform active:scale-95',
-                            'bg-white text-[#0073c6]' => $moduleActive,
-                            'text-white hover:bg-white/10' => ! $moduleActive && $moduleUrl !== null,
-                            'text-white/40 cursor-default' => $moduleUrl === null,
-                        ])>
-                        <i class="fa-solid {{ $module['icon'] }} text-base"></i>
-                        <span>{{ $module['label'] }}</span>
-                    </a>
-                @else
-                    {{-- Modul berkategori --}}
-                    <div class="space-y-3">
-                        <div
-                            class="flex items-center justify-between text-[12px] font-medium text-blue-100/90 tracking-wide">
-                            <span>{{ $module['label'] }}</span>
-                            <span class="w-12 h-[1px] bg-white/30"></span>
-                        </div>
-                        <div class="space-y-2.5 pl-1">
-                            @foreach ($module['children'] as $child)
-                                @php
-                                    $childUrl = App\Support\Menu::url($child['route'] ?? null, $role);
-                                    $childActive = App\Support\Menu::isActive($child['route'] ?? null, $role);
-                                @endphp
-                                <a href="{{ $childUrl ?? '#' }}"
-                                    @if ($childUrl === null) aria-disabled="true" @endif
-                                    @class([
-                                        'flex items-center gap-3 py-1.5 font-medium text-sm transition',
-                                        // Aktif: putih solid + tebal
-                                        'text-white font-semibold' => $childActive,
-                                        // Tersedia tapi tidak aktif
-                                        'text-white/90 hover:text-blue-100' => ! $childActive && $childUrl !== null,
-                                        // Belum ada halamannya
-                                        'text-white/40 cursor-default' => $childUrl === null,
-                                    ])>
-                                    <i class="fa-solid {{ $child['icon'] }} w-5 text-center text-base"></i>
-                                    <span>{{ $child['label'] }}</span>
-                                </a>
-                            @endforeach
-                        </div>
+            @elseif($userRole === 'bkk')
+                <!-- 1. DASHBOARD BKK -->
+                <a href="{{ route('pkl.dashboard') }}"
+                    class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('pkl.dashboard') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
+                    <i class="fa-solid fa-chart-pie text-base w-5 text-center"></i>
+                    <span>Dashboard BKK</span>
+                </a>
+
+                <!-- SECTION: PKL & BKK -->
+                <div class="pt-3 pb-1">
+                    <div class="flex items-center justify-between text-[11px] font-bold text-blue-100/80 tracking-wider uppercase px-2 mb-2">
+                        <span>{{ 'MODUL PKL & BKK' }}</span>
+                        <span class="w-12 h-[1px] bg-white/30"></span>
                     </div>
-                @endif
-            @endforeach
+                </div>
+
+                <!-- 2. DATA DUDI -->
+                <a href="{{ route('pkl.dudi.index') }}"
+                    class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('pkl.dudi.*') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
+                    <i class="fa-solid fa-building text-base w-5 text-center"></i>
+                    <span>Data DUDI</span>
+                </a>
+
+                <!-- 3. LOWONGAN KERJA -->
+                <a href="{{ route('pkl.lowongan.index') }}"
+                    class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('pkl.lowongan.*') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
+                    <i class="fa-solid fa-laptop-code text-base w-5 text-center"></i>
+                    <span>Lowongan Kerja</span>
+                </a>
+
+                <!-- 4. DATA SISWA PKL -->
+                <a href="{{ route('pkl.siswa.index') }}"
+                    class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('pkl.siswa.*') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
+                    <i class="fa-solid fa-user-graduate text-base w-5 text-center"></i>
+                    <span>Data Siswa PKL</span>
+                </a>
+
+                <!-- 5. PENEMPATAN PKL -->
+                <a href="{{ route('pkl.index') }}"
+                    class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('pkl.index') || request()->routeIs('pkl.penempatan.*') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
+                    <i class="fa-solid fa-address-card text-base w-5 text-center"></i>
+                    <span>Penempatan PKL</span>
+                </a>
+
+                <!-- 6. BUAT PENGAJUAN -->
+                <a href="{{ route('pkl.create') }}"
+                    class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('pkl.create') || request()->routeIs('pkl.store') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
+                    <i class="fa-solid fa-file-signature text-base w-5 text-center"></i>
+                    <span>Buat Pengajuan</span>
+                </a>
+
             @else
                 <!-- 1. DASHBOARD ADMIN -->
                 <a href="{{ route('dashboard') }}"
@@ -190,34 +185,81 @@
                     <span>Laporan Pemasukan</span>
                 </a>
 
-                @if(in_array(auth()->user()?->role, ['super_admin', 'super_duper_admin']))
-                    <!-- 6. KONFIGURASI PEMINJAMAN (SUPER ADMIN) -->
-                     <a href="{{ route('datamaster.index') }}"
-                        class="flex items-center gap-3 py-1.5 px-3 rounded-full text-sm transition 
-                        {{ request()->routeIs('datamaster.index') ? 'bg-white/20 text-white font-bold' : 'text-white hover:text-blue-100 font-medium' }}">
-                        <i class="fa-solid fa-graduation-cap w-5 text-center text-base"></i>
+                @if(in_array($userRole, ['admin', 'super_admin', 'super_duper_admin']))
+                    <!-- SECTION: DATA MASTER SEKOLAH -->
+                    <div class="pt-3 pb-1">
+                        <div class="flex items-center justify-between text-[11px] font-bold text-blue-100/80 tracking-wider uppercase px-2 mb-2">
+                            <span>Data Master Sekolah</span>
+                            <span class="w-12 h-[1px] bg-white/30"></span>
+                        </div>
+                    </div>
+
+                    <a href="{{ route('datamaster.index') }}"
+                        class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('datamaster.index') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
+                        <i class="fa-solid fa-graduation-cap text-base w-5 text-center"></i>
                         <span>Dashboard Master</span>
                     </a>
-                    
-                    <!-- Data Sekolah -->
+
                     <a href="{{ route('datamaster.sekolah.edit') }}"
-                        class="flex items-center gap-3 py-1.5 px-3 rounded-full text-sm transition 
-                        {{ request()->routeIs('datamaster.sekolah.*') ? 'bg-white/20 text-white font-bold' : 'text-white hover:text-blue-100 font-medium' }}">
-                        <i class="fa-regular fa-comment-dots w-5 text-center text-base"></i>
+                        class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('datamaster.sekolah.*') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
+                        <i class="fa-solid fa-school text-base w-5 text-center"></i>
                         <span>Data Sekolah</span>
                     </a>
-                    
-                    <!-- Users -->
+
                     <a href="{{ route('datamaster.users') }}"
-                        class="flex items-center gap-3 py-1.5 px-3 rounded-full text-sm transition 
-                        {{ request()->routeIs('datamaster.users*') ? 'bg-white/20 text-white font-bold' : 'text-white hover:text-blue-100 font-medium' }}">
-                        <i class="fa-solid fa-users-gear w-5 text-center text-base"></i>
-                        <span>Users</span>
+                        class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('datamaster.users*') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
+                        <i class="fa-solid fa-users-gear text-base w-5 text-center"></i>
+                        <span>Data Users</span>
                     </a>
+
                     <a href="{{ route('admin.payment-configuration.index') }}"
                         class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('admin.payment-configuration.*') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
                         <i class="fa-solid fa-sliders text-base w-5 text-center"></i>
                         <span>Konfigurasi Peminjaman</span>
+                    </a>
+
+                    <!-- SECTION: PKL & BKK -->
+                    <div class="pt-3 pb-1">
+                        <div class="flex items-center justify-between text-[11px] font-bold text-blue-100/80 tracking-wider uppercase px-2 mb-2">
+                            <span>{{ 'PKL & BKK' }}</span>
+                            <span class="w-12 h-[1px] bg-white/30"></span>
+                        </div>
+                    </div>
+
+                    <a href="{{ route('pkl.dashboard') }}"
+                        class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('pkl.dashboard') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
+                        <i class="fa-solid fa-chart-pie text-base w-5 text-center"></i>
+                        <span>Dashboard BKK</span>
+                    </a>
+
+                    <a href="{{ route('pkl.dudi.index') }}"
+                        class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('pkl.dudi.*') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
+                        <i class="fa-solid fa-building text-base w-5 text-center"></i>
+                        <span>Data DUDI</span>
+                    </a>
+
+                    <a href="{{ route('pkl.lowongan.index') }}"
+                        class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('pkl.lowongan.*') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
+                        <i class="fa-solid fa-laptop-code text-base w-5 text-center"></i>
+                        <span>Lowongan Kerja</span>
+                    </a>
+
+                    <a href="{{ route('pkl.siswa.index') }}"
+                        class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('pkl.siswa.*') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
+                        <i class="fa-solid fa-user-graduate text-base w-5 text-center"></i>
+                        <span>Data Siswa PKL</span>
+                    </a>
+
+                    <a href="{{ route('pkl.index') }}"
+                        class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('pkl.index') || request()->routeIs('pkl.penempatan.*') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
+                        <i class="fa-solid fa-address-card text-base w-5 text-center"></i>
+                        <span>Penempatan PKL</span>
+                    </a>
+
+                    <a href="{{ route('pkl.create') }}"
+                        class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('pkl.create') || request()->routeIs('pkl.store') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
+                        <i class="fa-solid fa-file-signature text-base w-5 text-center"></i>
+                        <span>Buat Pengajuan</span>
                     </a>
                 @endif
             @endif
@@ -225,13 +267,11 @@
 
         <!-- LOGOUT BUTTON CONTAINER -->
         <div class="pt-4 mt-2">
-         <form action="{{ route('logout') }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin keluar dari portal admin?')">
-             @csrf
-            <button name="logout"
-                class="w-full bg-white text-[#0073c6] hover:bg-gray-100 transition font-bold py-3 px-4 rounded-full text-sm shadow-sm flex items-center justify-center">
+            <button type="button" onclick="openLogoutModal()"
+                class="w-full bg-white text-[#0073c6] hover:bg-gray-100 active:scale-95 transition font-bold py-3 px-4 rounded-full text-sm shadow-sm flex items-center justify-center gap-2 cursor-pointer">
+                <i class="fa-solid fa-arrow-right-from-bracket text-sm"></i>
                 <span>Logout</span>
             </button>
-         </form>
         </div>
 
     </div>

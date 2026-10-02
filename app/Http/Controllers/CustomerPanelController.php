@@ -382,7 +382,7 @@ class CustomerPanelController extends Controller
         $config = PaymentConfiguration::current();
         $isCustom = (bool) $pembayaran->peminjaman?->is_custom;
         $paket = $pembayaran->peminjaman?->paketPeminjaman;
-        
+
         $nominalDp = 0;
         if ($isCustom) {
             $nominalDp = (float) $pembayaran->total_tagihan > 0 ? ((float) $pembayaran->total_tagihan * 0.3) : 0;

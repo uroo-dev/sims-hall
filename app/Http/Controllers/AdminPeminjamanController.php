@@ -826,7 +826,7 @@ class AdminPeminjamanController extends Controller
         $harga = (float) $validated['harga'];
         $hargaDp = isset($validated['harga_dp']) && $validated['harga_dp'] > 0 ? (float) $validated['harga_dp'] : null;
 
-        DB::transaction(function () use ($peminjaman, $harga, $hargaDp, $validated) {
+        DB::transaction(function () use ($peminjaman, $harga, $validated) {
             $config = PaymentConfiguration::current();
 
             $peminjaman->update([

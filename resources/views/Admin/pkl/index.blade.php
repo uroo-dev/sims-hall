@@ -126,28 +126,18 @@
                                 <div class="flex items-center justify-center gap-1.5">
                                     @if ($p->status_penempatan === \App\Models\PenempatanPkl::STATUS_PENGAJUAN)
                                         {{-- Tombol FIX --}}
-                                        <form method="POST" action="{{ route('pkl.penempatan.status', $p) }}"
-                                            onsubmit="return confirm('Konfirmasi DUDI {{ $p->dudi?->nama_dudi }} menerima {{ $p->siswa?->nama }}? Status menjadi FIX.')">
-                                            @csrf
-                                            @method('PATCH')
-                                            <input type="hidden" name="status_penempatan" value="FIX">
-                                            <button type="submit" title="DUDI Menerima (FIX)"
-                                                class="w-8 h-8 inline-flex items-center justify-center text-xs bg-emerald-50 hover:bg-emerald-100 text-emerald-600 rounded-lg transition">
-                                                <i class="fa-solid fa-check"></i>
-                                            </button>
-                                        </form>
+                                        <button type="button" title="DUDI Menerima (FIX)"
+                                            onclick="openStatusModal('{{ route('pkl.penempatan.status', $p) }}', @js($p->dudi?->nama_dudi ?? '-'), @js($p->siswa?->nama ?? '-'), 'FIX')"
+                                            class="w-8 h-8 inline-flex items-center justify-center text-xs bg-emerald-50 hover:bg-emerald-100 text-emerald-600 rounded-lg transition cursor-pointer">
+                                            <i class="fa-solid fa-check"></i>
+                                        </button>
 
                                         {{-- Tombol Ditolak --}}
-                                        <form method="POST" action="{{ route('pkl.penempatan.status', $p) }}"
-                                            onsubmit="return confirm('Konfirmasi DUDI {{ $p->dudi?->nama_dudi }} menolak {{ $p->siswa?->nama }}?')">
-                                            @csrf
-                                            @method('PATCH')
-                                            <input type="hidden" name="status_penempatan" value="ditolak">
-                                            <button type="submit" title="DUDI Menolak"
-                                                class="w-8 h-8 inline-flex items-center justify-center text-xs bg-red-50 hover:bg-red-100 text-red-600 rounded-lg transition">
-                                                <i class="fa-solid fa-xmark"></i>
-                                            </button>
-                                        </form>
+                                        <button type="button" title="DUDI Menolak"
+                                            onclick="openStatusModal('{{ route('pkl.penempatan.status', $p) }}', @js($p->dudi?->nama_dudi ?? '-'), @js($p->siswa?->nama ?? '-'), 'ditolak')"
+                                            class="w-8 h-8 inline-flex items-center justify-center text-xs bg-red-50 hover:bg-red-100 text-red-600 rounded-lg transition cursor-pointer">
+                                            <i class="fa-solid fa-xmark"></i>
+                                        </button>
                                     @else
                                         <span class="text-[10px] text-gray-400">Selesai</span>
                                     @endif
@@ -168,3 +158,113 @@
     </div>
 
 @endsection
+
+@push('modals')
+<!-- ==================== MODAL KONFIRMASI STATUS ==================== -->
+<div id="modalConfirmStatus" class="fixed inset-0 !m-0 z-[100] hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity">
+    <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl border border-slate-100 overflow-hidden transform transition-all scale-95 duration-200" id="modalConfirmStatusBox">
+        <div class="p-6 text-center space-y-4">
+            <div id="statusModalIcon" class="w-14 h-14 mx-auto rounded-2xl bg-blue-50 text-blue-600 border border-blue-100/80 flex items-center justify-center text-2xl shadow-xs">
+                <i class="fa-solid fa-question"></i>
+            </div>
+            <div>
+                <h3 id="statusModalTitle" class="font-extrabold text-slate-900 text-lg tracking-tight">Konfirmasi Status Penempatan</h3>
+                <p id="statusModalDesc" class="text-xs text-slate-500 mt-1">
+                    Pastikan keputusan respon dari DUDI sudah sesuai:
+                </p>
+                <div class="mt-3 p-3 bg-slate-50 border border-slate-200 rounded-xl text-left space-y-1 text-xs">
+                    <div><span class="text-slate-400 font-medium">Siswa:</span> <span id="statusSiswaText" class="font-bold text-slate-800"></span></div>
+                    <div><span class="text-slate-400 font-medium">DUDI:</span> <span id="statusDudiText" class="font-bold text-slate-800"></span></div>
+                    <div><span class="text-slate-400 font-medium">Status Baru:</span> <span id="statusBaruText" class="font-bold"></span></div>
+                </div>
+            </div>
+
+            <form id="formConfirmStatus" method="POST" class="pt-2 flex items-center justify-center gap-3">
+                @csrf
+                @method('PATCH')
+                <input type="hidden" name="status_penempatan" id="inputStatusPenempatan" value="">
+                <button type="button" onclick="closeStatusModal()"
+                    class="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 text-xs md:text-sm font-semibold transition cursor-pointer">
+                    Batal
+                </button>
+                <button type="submit" id="btnSubmitStatus"
+                    class="flex-1 px-4 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 active:scale-95 text-white text-xs md:text-sm font-bold shadow-sm transition flex items-center justify-center gap-1.5 cursor-pointer">
+                    <span>Konfirmasi</span>
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+@endpush
+
+@push('scripts')
+<script>
+    function openStatusModal(actionUrl, dudiName, siswaName, status) {
+        const modal = document.getElementById('modalConfirmStatus');
+        const box = document.getElementById('modalConfirmStatusBox');
+        const form = document.getElementById('formConfirmStatus');
+        const icon = document.getElementById('statusModalIcon');
+        const title = document.getElementById('statusModalTitle');
+        const siswa = document.getElementById('statusSiswaText');
+        const dudi = document.getElementById('statusDudiText');
+        const statusBaru = document.getElementById('statusBaruText');
+        const inputStatus = document.getElementById('inputStatusPenempatan');
+        const btnSubmit = document.getElementById('btnSubmitStatus');
+        if (!modal || !box || !form) return;
+
+        form.action = actionUrl;
+        inputStatus.value = status;
+        siswa.innerText = siswaName;
+        dudi.innerText = dudiName;
+
+        if (status === 'FIX') {
+            title.innerText = 'Konfirmasi DUDI Menerima';
+            icon.className = 'w-14 h-14 mx-auto rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-100/80 flex items-center justify-center text-2xl shadow-xs';
+            icon.innerHTML = '<i class="fa-solid fa-check"></i>';
+            statusBaru.innerText = 'DITERIMA (FIX)';
+            statusBaru.className = 'font-bold text-emerald-600';
+            btnSubmit.className = 'flex-1 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-xs md:text-sm font-bold shadow-sm transition flex items-center justify-center gap-1.5 cursor-pointer';
+            btnSubmit.innerHTML = '<span>Ya, Setujui (FIX)</span>';
+        } else {
+            title.innerText = 'Konfirmasi DUDI Menolak';
+            icon.className = 'w-14 h-14 mx-auto rounded-2xl bg-red-50 text-red-600 border border-red-100/80 flex items-center justify-center text-2xl shadow-xs';
+            icon.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+            statusBaru.innerText = 'DITOLAK';
+            statusBaru.className = 'font-bold text-red-600';
+            btnSubmit.className = 'flex-1 px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 active:scale-95 text-white text-xs md:text-sm font-bold shadow-sm transition flex items-center justify-center gap-1.5 cursor-pointer';
+            btnSubmit.innerHTML = '<span>Ya, Tolak</span>';
+        }
+
+        document.body.classList.add('overflow-hidden');
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            box.classList.remove('scale-95');
+            box.classList.add('scale-100');
+        }, 10);
+    }
+
+    function closeStatusModal() {
+        const modal = document.getElementById('modalConfirmStatus');
+        const box = document.getElementById('modalConfirmStatusBox');
+        if (!modal || !box) return;
+
+        box.classList.remove('scale-100');
+        box.classList.add('scale-95');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+        }, 150);
+    }
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeStatusModal();
+    });
+
+    const modalConfirmStatusEl = document.getElementById('modalConfirmStatus');
+    if (modalConfirmStatusEl) {
+        modalConfirmStatusEl.addEventListener('click', function(e) {
+            if (e.target === this) closeStatusModal();
+        });
+    }
+</script>
+@endpush

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\DetailPembayaran;
 use App\Models\Facility;
 use App\Models\Fitur;
 use App\Models\PaymentConfiguration;
@@ -304,7 +305,7 @@ class CustomPaketPeminjamanTest extends TestCase
             'status_pembayaran' => 'partial',
         ]);
 
-        \App\Models\DetailPembayaran::create([
+        DetailPembayaran::create([
             'pembayaran_id' => $pembayaran->id,
             'kode_transaksi' => 'TRX-DP-202610-001',
             'tipe_pembayaran' => 'dp',

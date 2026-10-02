@@ -2,16 +2,16 @@
 
 use App\Http\Controllers\AdminPeminjamanController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BkkController;
+use App\Http\Controllers\ChatbotController;
 use App\Http\Controllers\CustomerPanelController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DataMasterDashboardController;
 use App\Http\Controllers\FasilitasController;
 use App\Http\Controllers\KepalaSekolahController;
 use App\Http\Controllers\LaporanPemasukanController;
 use App\Http\Controllers\PaketPeminjamanController;
 use App\Http\Controllers\PaymentConfigurationController;
-use App\Http\Controllers\BkkController;
-use App\Http\Controllers\ChatbotController;
-use App\Http\Controllers\DataMasterDashboardController;
 use App\Http\Controllers\PklController;
 use App\Http\Controllers\PublicController;
 use App\Models\Sekolah;

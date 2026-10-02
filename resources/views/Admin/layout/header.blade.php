@@ -48,11 +48,11 @@
                     <i class="fa-solid fa-sliders mr-2"></i> Pengaturan
                 </a>
                 <hr class="my-1 border-gray-100">
-                <!-- Logout di Dropdown: Mengirim form logout yang ada di sidebar secara otomatis -->
-                <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form-sidebar').submit();"
-                    class="block px-4 py-2 text-xs text-red-600 hover:bg-red-50">
+                <!-- Logout di Dropdown: Memicu Modal Konfirmasi Logout -->
+                <button type="button" onclick="openLogoutModal()"
+                    class="w-full text-left px-4 py-2 text-xs text-red-600 hover:bg-red-50 flex items-center transition cursor-pointer">
                     <i class="fa-solid fa-arrow-right-from-bracket mr-2"></i> Keluar
-                </a>
+                </button>
             </div>
         </div>
     </div>

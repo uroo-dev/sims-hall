@@ -96,15 +96,12 @@
                                 </button>
                                 
                                 <!-- Tombol Hapus -->
-                                <form action="{{ route('datamaster.users.destroy', $user->id) }}" method="POST" 
-                                    onsubmit="return confirm('Apakah Anda yakin ingin menghapus user {{ $user->username }}?');" class="inline">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" 
-                                        class="w-8 h-8 flex items-center justify-center text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition text-base">
-                                        <i class="fa-regular fa-trash-can"></i>
-                                    </button>
-                                </form>
+                                <button type="button" 
+                                    onclick="openDeleteUserModal({{ $user->id }}, @js($user->username), '{{ route('datamaster.users.destroy', $user->id) }}')"
+                                    class="w-8 h-8 flex items-center justify-center text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition text-base"
+                                    title="Hapus User">
+                                    <i class="fa-regular fa-trash-can"></i>
+                                </button>
                             </div>
                         </td>
                     </tr>
@@ -122,250 +119,385 @@
             </table>
         </div>
     </div>
+@endsection
 
-    <!-- ==================== MODAL TAMBAH USER ==================== -->
-    <div id="addUserModal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden items-center justify-center p-4">
-        <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center mb-4 border-b border-gray-100 pb-3">
-                <div class="flex items-center gap-2">
-                    <i class="fa-solid fa-user-plus text-brand-600"></i>
-                    <h3 class="text-lg font-bold text-gray-800">Tambah User Baru</h3>
+@push('modals')
+<!-- ==================== MODAL TAMBAH USER ==================== -->
+<div id="addUserModal" class="fixed inset-0 !m-0 z-[100] hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity">
+    <div class="bg-white rounded-3xl w-full max-w-2xl shadow-2xl border border-slate-100 overflow-hidden transform transition-all scale-95 duration-200 max-h-[90vh] flex flex-col" id="addUserModalBox">
+        <!-- HEADER -->
+        <div class="p-5 md:p-6 pb-2 md:pb-3 bg-white flex items-center justify-between flex-shrink-0">
+            <div class="flex items-center gap-3.5">
+                <div class="w-11 h-11 rounded-2xl bg-blue-50 text-brand-600 flex items-center justify-center text-lg border border-blue-100/80 shadow-xs flex-shrink-0">
+                    <i class="fa-solid fa-user-plus"></i>
                 </div>
-                <button onclick="closeAddModal()" class="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
+                <div>
+                    <h3 class="font-extrabold text-slate-900 text-base md:text-lg tracking-tight">Tambah User Baru</h3>
+                    <p class="text-slate-500 text-xs mt-0.5">Daftarkan akun pengguna atau pengelola baru ke sistem</p>
+                </div>
             </div>
-            
-            <form action="{{ route('datamaster.users.store') }}" method="POST">
+            <button type="button" onclick="closeAddModal()" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition cursor-pointer" title="Tutup Modal">
+                <i class="fa-solid fa-xmark text-sm"></i>
+            </button>
+        </div>
+        
+        <form action="{{ route('datamaster.users.store') }}" method="POST" class="p-5 md:p-6 space-y-4 overflow-y-auto">
+            @csrf
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wide">Username <span class="text-red-500">*</span></label>
+                    <input type="text" name="username" value="{{ old('username') }}" required placeholder="Contoh: guru_teknik"
+                        class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs md:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-600/20 focus:border-brand-600 transition">
+                    @error('username') <span class="text-red-500 text-xs font-medium mt-1 block">{{ $message }}</span> @enderror
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wide">Nama Lengkap <span class="text-red-500">*</span></label>
+                    <input type="text" name="name" value="{{ old('name') }}" required placeholder="Contoh: Budi Santoso, S.Kom."
+                        class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs md:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-600/20 focus:border-brand-600 transition">
+                    @error('name') <span class="text-red-500 text-xs font-medium mt-1 block">{{ $message }}</span> @enderror
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wide">Email <span class="text-red-500">*</span></label>
+                    <input type="email" name="email" value="{{ old('email') }}" required placeholder="contoh@smkn2kra.sch.id"
+                        class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs md:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-600/20 focus:border-brand-600 transition">
+                    @error('email') <span class="text-red-500 text-xs font-medium mt-1 block">{{ $message }}</span> @enderror
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wide">Role (Hak Akses) <span class="text-red-500">*</span></label>
+                    <select name="role" required
+                        class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs md:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-600/20 focus:border-brand-600 transition">
+                        <option value="" disabled {{ old('role') ? '' : 'selected' }}>-- Pilih Role --</option>
+                        <optgroup label="Admin Sistem">
+                            <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Admin</option>
+                            <option value="super_admin" {{ old('role') == 'super_admin' ? 'selected' : '' }}>Super Admin</option>
+                            <option value="super_duper_admin" {{ old('role') == 'super_duper_admin' ? 'selected' : '' }}>Super Duper Admin</option>
+                        </optgroup>
+                        <optgroup label="Internal Sekolah">
+                            <option value="guru" {{ old('role') == 'guru' ? 'selected' : '' }}>Guru</option>
+                            <option value="kepala_sekolah" {{ old('role') == 'kepala_sekolah' ? 'selected' : '' }}>Kepala Sekolah</option>
+                            <option value="bkk" {{ old('role') == 'bkk' ? 'selected' : '' }}>BKK & PKL</option>
+                        </optgroup>
+                        <optgroup label="Instansi & Mitra">
+                            <option value="organisasi" {{ old('role') == 'organisasi' ? 'selected' : '' }}>Organisasi</option>
+                            <option value="instansi_luar_terikat" {{ old('role') == 'instansi_luar_terikat' ? 'selected' : '' }}>Instansi Luar Terikat</option>
+                            <option value="instansi_luar" {{ old('role') == 'instansi_luar' ? 'selected' : '' }}>Instansi Luar</option>
+                        </optgroup>
+                        <optgroup label="Lainnya">
+                            <option value="user" {{ old('role') == 'user' ? 'selected' : '' }}>User</option>
+                            <option value="pelanggan" {{ old('role') == 'pelanggan' ? 'selected' : '' }}>Pelanggan</option>
+                        </optgroup>
+                    </select>
+                    @error('role') <span class="text-red-500 text-xs font-medium mt-1 block">{{ $message }}</span> @enderror
+                </div>
+            </div>
+
+            <div class="pt-3 border-t border-slate-100 flex items-center justify-end gap-2.5">
+                <button type="button" onclick="closeAddModal()" 
+                    class="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 text-xs md:text-sm font-semibold transition cursor-pointer">
+                    Batal
+                </button>
+                <button type="submit" 
+                    class="px-5 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 active:scale-95 text-white text-xs md:text-sm font-bold shadow-sm transition flex items-center gap-2 cursor-pointer">
+                    <i class="fa-solid fa-plus text-xs"></i>
+                    <span>Simpan User Baru</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ==================== MODAL EDIT USER ==================== -->
+<div id="editUserModal" class="fixed inset-0 !m-0 z-[100] hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity">
+    <div class="bg-white rounded-3xl w-full max-w-2xl shadow-2xl border border-slate-100 overflow-hidden transform transition-all scale-95 duration-200 max-h-[90vh] flex flex-col" id="editUserModalBox">
+        <!-- HEADER -->
+        <div class="p-5 md:p-6 pb-2 md:pb-3 bg-white flex items-center justify-between flex-shrink-0">
+            <div class="flex items-center gap-3.5">
+                <div class="w-11 h-11 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-lg border border-amber-100/80 shadow-xs flex-shrink-0">
+                    <i class="fa-regular fa-pen-to-square"></i>
+                </div>
+                <div>
+                    <h3 class="font-extrabold text-slate-900 text-base md:text-lg tracking-tight">Edit Data User</h3>
+                    <p class="text-slate-500 text-xs mt-0.5">Perbarui informasi profil atau hak akses akun pengguna</p>
+                </div>
+            </div>
+            <button type="button" onclick="closeEditModal()" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition cursor-pointer" title="Tutup Modal">
+                <i class="fa-solid fa-xmark text-sm"></i>
+            </button>
+        </div>
+        
+        <form id="editUserForm" method="POST" class="p-5 md:p-6 space-y-4 overflow-y-auto">
+            @csrf
+            @method('PUT')
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wide">Username <span class="text-red-500">*</span></label>
+                    <input type="text" name="username" id="edit_username" required
+                        class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs md:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wide">Nama Lengkap <span class="text-red-500">*</span></label>
+                    <input type="text" name="name" id="edit_name" required
+                        class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs md:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wide">Email <span class="text-red-500">*</span></label>
+                    <input type="email" name="email" id="edit_email" required
+                        class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs md:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wide">Role (Hak Akses) <span class="text-red-500">*</span></label>
+                    <select name="role" id="edit_role" required
+                        class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs md:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition">
+                        <option value="" disabled>-- Pilih Role --</option>
+                        <optgroup label="Admin Sistem">
+                            <option value="admin">Admin</option>
+                            <option value="super_admin">Super Admin</option>
+                            <option value="super_duper_admin">Super Duper Admin</option>
+                        </optgroup>
+                        <optgroup label="Internal Sekolah">
+                            <option value="guru">Guru</option>
+                            <option value="kepala_sekolah">Kepala Sekolah</option>
+                            <option value="bkk">BKK & PKL</option>
+                        </optgroup>
+                        <optgroup label="Instansi & Mitra">
+                            <option value="organisasi">Organisasi</option>
+                            <option value="instansi_luar_terikat">Instansi Luar Terikat</option>
+                            <option value="instansi_luar">Instansi Luar</option>
+                        </optgroup>
+                        <optgroup label="Lainnya">
+                            <option value="user">User</option>
+                            <option value="pelanggan">Pelanggan</option>
+                        </optgroup>
+                    </select>
+                </div>
+            </div>
+
+            <div class="pt-3 border-t border-slate-100 flex items-center justify-end gap-2.5">
+                <button type="button" onclick="closeEditModal()" 
+                    class="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 text-xs md:text-sm font-semibold transition cursor-pointer">
+                    Batal
+                </button>
+                <button type="submit" 
+                    class="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 active:scale-95 text-white text-xs md:text-sm font-bold shadow-sm transition flex items-center gap-2 cursor-pointer">
+                    <i class="fa-solid fa-floppy-disk text-xs"></i>
+                    <span>Simpan Perubahan</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ==================== MODAL HAPUS USER ==================== -->
+<div id="modalDeleteUser" class="fixed inset-0 !m-0 z-[100] hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity">
+    <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl border border-slate-100 overflow-hidden transform transition-all scale-95 duration-200" id="modalDeleteUserBox">
+        <div class="p-6 text-center space-y-4">
+            <div class="w-14 h-14 mx-auto rounded-2xl bg-red-50 text-red-600 border border-red-100/80 flex items-center justify-center text-2xl shadow-xs">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <div>
+                <h3 class="font-extrabold text-slate-900 text-lg tracking-tight">Konfirmasi Hapus User</h3>
+                <p class="text-xs text-slate-500 mt-1">
+                    Apakah Anda yakin ingin menghapus akun user:
+                </p>
+                <div id="delete_username_text" class="font-bold text-slate-800 text-sm mt-2 bg-slate-50 py-2.5 px-3 rounded-xl border border-slate-200 font-mono">
+                    -
+                </div>
+                <p class="text-[11px] text-red-500 mt-2 font-medium">
+                    Tindakan ini tidak dapat dibatalkan. Seluruh data terkait akun ini akan terhapus.
+                </p>
+            </div>
+
+            <form id="formDeleteUser" method="POST" class="pt-2 flex items-center justify-center gap-3">
                 @csrf
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-700 mb-1">Username</label>
-                        <input type="text" name="username" value="{{ old('username') }}" required placeholder="Masukkan username"
-                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-500 transition shadow-sm">
-                        @error('username') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-700 mb-1">Nama</label>
-                        <input type="text" name="name" value="{{ old('name') }}" required placeholder="Contoh: PT Toyota Motor"
-                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-500 transition shadow-sm">
-                        @error('name') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-700 mb-1">Email</label>
-                        <input type="email" name="email" value="{{ old('email') }}" required placeholder="contoh@smkn2kra.sch.id"
-                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-500 transition shadow-sm">
-                        @error('email') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-700 mb-1">Role (Akses)</label>
-                        <select name="role" required
-                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-500 transition shadow-sm text-gray-700">
-                            <option value="">Pilih Role</option>
-                            <optgroup label="Admin Sistem">
-                                <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Admin</option>
-                                <option value="super_admin" {{ old('role') == 'super_admin' ? 'selected' : '' }}>Super Admin</option>
-                                <option value="super_duper_admin" {{ old('role') == 'super_duper_admin' ? 'selected' : '' }}>Super Duper Admin</option>
-                            </optgroup>
-                            <optgroup label="Internal Sekolah">
-                                <option value="guru" {{ old('role') == 'guru' ? 'selected' : '' }}>Guru</option>
-                                <option value="kepala_sekolah" {{ old('role') == 'kepala_sekolah' ? 'selected' : '' }}>Kepala Sekolah</option>
-                            </optgroup>
-                            <optgroup label="Instansi">
-                                <option value="organisasi" {{ old('role') == 'organisasi' ? 'selected' : '' }}>Organisasi</option>
-                                <option value="instansi_luar_terikat" {{ old('role') == 'instansi_luar_terikat' ? 'selected' : '' }}>Instansi Luar Terikat</option>
-                                <option value="instansi_luar" {{ old('role') == 'instansi_luar' ? 'selected' : '' }}>Instansi Luar</option>
-                            </optgroup>
-                            <optgroup label="Lainnya">
-                                <option value="user" {{ old('role') == 'user' ? 'selected' : '' }}>User</option>
-                                <option value="pelanggan" {{ old('role') == 'pelanggan' ? 'selected' : '' }}>Pelanggan</option>
-                            </optgroup>
-                        </select>
-                        @error('role') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
-                    </div>
-                </div>
-                <div class="mt-6 flex justify-end gap-2">
-                    <button type="button" onclick="closeAddModal()" 
-                        class="bg-gray-200 hover:bg-gray-300 text-gray-700 text-xs font-semibold px-4 py-2 rounded-lg transition">Batal</button>
-                    <button type="submit" 
-                        class="bg-[#0073c6] hover:bg-brand-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition shadow-md flex items-center gap-2">
-                        <i class="fa-solid fa-plus"></i> Tambah User
-                    </button>
-                </div>
+                @method('DELETE')
+                <button type="button" onclick="closeDeleteUserModal()"
+                    class="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 text-xs md:text-sm font-semibold transition cursor-pointer">
+                    Batal
+                </button>
+                <button type="submit"
+                    class="flex-1 px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 active:scale-95 text-white text-xs md:text-sm font-bold shadow-sm transition flex items-center justify-center gap-1.5 cursor-pointer">
+                    <i class="fa-regular fa-trash-can text-xs"></i>
+                    <span>Ya, Hapus</span>
+                </button>
             </form>
         </div>
     </div>
+</div>
+@endpush
 
-    <!-- ==================== MODAL EDIT USER ==================== -->
-    <div id="editUserModal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden items-center justify-center p-4">
-        <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center mb-4 border-b border-gray-100 pb-3">
-                <div class="flex items-center gap-2">
-                    <i class="fa-regular fa-pen-to-square text-brand-600"></i>
-                    <h3 class="text-lg font-bold text-gray-800">Edit User</h3>
-                </div>
-                <button onclick="closeEditModal()" class="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
-            </div>
+@push('scripts')
+<script>
+    // ========== MODAL TAMBAH USER ==========
+    function openAddModal() {
+        const modal = document.getElementById('addUserModal');
+        const box = document.getElementById('addUserModalBox');
+        if (!modal || !box) return;
+
+        document.body.classList.add('overflow-hidden');
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            box.classList.remove('scale-95');
+            box.classList.add('scale-100');
+        }, 10);
+    }
+
+    function closeAddModal() {
+        const modal = document.getElementById('addUserModal');
+        const box = document.getElementById('addUserModalBox');
+        if (!modal || !box) return;
+
+        box.classList.remove('scale-100');
+        box.classList.add('scale-95');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+        }, 150);
+    }
+
+    // ========== MODAL EDIT USER ==========
+    function openEditModal(user) {
+        const modal = document.getElementById('editUserModal');
+        const box = document.getElementById('editUserModalBox');
+        if (!modal || !box) return;
+
+        document.getElementById('edit_username').value = user.username;
+        document.getElementById('edit_name').value = user.name;
+        document.getElementById('edit_email').value = user.email;
+        document.getElementById('edit_role').value = user.role;
+
+        const updateRoute = "{{ route('datamaster.users.update', ':id') }}";
+        document.getElementById('editUserForm').action = updateRoute.replace(':id', user.id);
+
+        document.body.classList.add('overflow-hidden');
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            box.classList.remove('scale-95');
+            box.classList.add('scale-100');
+        }, 10);
+    }
+
+    function closeEditModal() {
+        const modal = document.getElementById('editUserModal');
+        const box = document.getElementById('editUserModalBox');
+        if (!modal || !box) return;
+
+        box.classList.remove('scale-100');
+        box.classList.add('scale-95');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+        }, 150);
+    }
+
+    // ========== MODAL HAPUS USER ==========
+    function openDeleteUserModal(id, username, deleteUrl) {
+        const modal = document.getElementById('modalDeleteUser');
+        const box = document.getElementById('modalDeleteUserBox');
+        const form = document.getElementById('formDeleteUser');
+        if (!modal || !box || !form) return;
+
+        form.action = deleteUrl;
+        document.getElementById('delete_username_text').innerText = username;
+
+        document.body.classList.add('overflow-hidden');
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            box.classList.remove('scale-95');
+            box.classList.add('scale-100');
+        }, 10);
+    }
+
+    function closeDeleteUserModal() {
+        const modal = document.getElementById('modalDeleteUser');
+        const box = document.getElementById('modalDeleteUserBox');
+        if (!modal || !box) return;
+
+        box.classList.remove('scale-100');
+        box.classList.add('scale-95');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+        }, 150);
+    }
+
+    // ========== FITUR FILTER OTOMATIS ==========
+    function filterUsers() {
+        const keyword = document.getElementById('searchInput').value.toLowerCase().trim();
+        const roleFilter = document.getElementById('roleFilter').value.toLowerCase();
+        const rows = document.querySelectorAll('.user-row');
+        let visibleCount = 0;
+
+        rows.forEach(row => {
+            const username = row.dataset.username || '';
+            const name = row.dataset.name || '';
+            const email = row.dataset.email || '';
+            const role = row.dataset.role || '';
+
+            const matchKeyword = !keyword || 
+                username.includes(keyword) || 
+                name.includes(keyword) || 
+                email.includes(keyword);
             
-            <form id="editUserForm" method="POST">
-                @csrf
-                @method('PUT')
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-700 mb-1">Username</label>
-                        <input type="text" name="username" id="edit_username" required
-                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-500 transition shadow-sm">
-                    </div>
+            const matchRole = !roleFilter || role === roleFilter;
 
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-700 mb-1">Nama</label>
-                        <input type="text" name="name" id="edit_name" required
-                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-500 transition shadow-sm">
-                    </div>
+            if (matchKeyword && matchRole) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
 
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-700 mb-1">Email</label>
-                        <input type="email" name="email" id="edit_email" required
-                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-500 transition shadow-sm">
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-700 mb-1">Role (Akses)</label>
-                        <select name="role" id="edit_role" required
-                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-500 transition shadow-sm text-gray-700">
-                            <option value="">Pilih Role</option>
-                            <optgroup label="Admin Sistem">
-                                <option value="admin">Admin</option>
-                                <option value="super_admin">Super Admin</option>
-                                <option value="super_duper_admin">Super Duper Admin</option>
-                            </optgroup>
-                            <optgroup label="Internal Sekolah">
-                                <option value="guru">Guru</option>
-                                <option value="kepala_sekolah">Kepala Sekolah</option>
-                            </optgroup>
-                            <optgroup label="Instansi">
-                                <option value="organisasi">Organisasi</option>
-                                <option value="instansi_luar_terikat">Instansi Luar Terikat</option>
-                                <option value="instansi_luar">Instansi Luar</option>
-                            </optgroup>
-                            <optgroup label="Lainnya">
-                                <option value="user">User</option>
-                                <option value="pelanggan">Pelanggan</option>
-                            </optgroup>
-                        </select>
-                    </div>
-                </div>
-                <div class="mt-6 flex justify-end gap-2">
-                    <button type="button" onclick="closeEditModal()" 
-                        class="bg-gray-200 hover:bg-gray-300 text-gray-700 text-xs font-semibold px-4 py-2 rounded-lg transition">Batal</button>
-                    <button type="submit" 
-                        class="bg-[#0073c6] hover:bg-brand-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition shadow-md flex items-center gap-2">
-                        <i class="fa-solid fa-floppy-disk"></i> Simpan Perubahan
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- ==================== JAVASCRIPT ==================== -->
-    <script>
-        // ========== MODAL TAMBAH ==========
-        function openAddModal() {
-            document.getElementById('addUserModal').classList.remove('hidden');
-            document.getElementById('addUserModal').classList.add('flex');
+        const noResult = document.getElementById('noResultRow');
+        const emptyRow = document.getElementById('emptyRow');
+        
+        if (rows.length > 0 && visibleCount === 0) {
+            noResult.classList.remove('hidden');
+        } else {
+            noResult.classList.add('hidden');
         }
 
-        function closeAddModal() {
-            document.getElementById('addUserModal').classList.add('hidden');
-            document.getElementById('addUserModal').classList.remove('flex');
+        if (emptyRow) {
+            if (rows.length > 0) {
+                emptyRow.classList.add('hidden');
+            } else {
+                emptyRow.classList.remove('hidden');
+            }
         }
+    }
 
-        // ========== MODAL EDIT ==========
-        function openEditModal(user) {
-            document.getElementById('edit_username').value = user.username;
-            document.getElementById('edit_name').value = user.name;
-            document.getElementById('edit_email').value = user.email;
-            document.getElementById('edit_role').value = user.role;
-
-            const updateRoute = "{{ route('datamaster.users.update', ':id') }}";
-            document.getElementById('editUserForm').action = updateRoute.replace(':id', user.id);
-
-            document.getElementById('editUserModal').classList.remove('hidden');
-            document.getElementById('editUserModal').classList.add('flex');
+    // ========== TUTUP MODAL DENGAN ESCAPE ==========
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeAddModal();
+            closeEditModal();
+            closeDeleteUserModal();
         }
+    });
 
-        function closeEditModal() {
-            document.getElementById('editUserModal').classList.add('hidden');
-            document.getElementById('editUserModal').classList.remove('flex');
-        }
-
-        // ========== FITUR FILTER OTOMATIS ==========
-        function filterUsers() {
-            const keyword = document.getElementById('searchInput').value.toLowerCase().trim();
-            const roleFilter = document.getElementById('roleFilter').value.toLowerCase();
-            const rows = document.querySelectorAll('.user-row');
-            let visibleCount = 0;
-
-            rows.forEach(row => {
-                const username = row.dataset.username || '';
-                const name = row.dataset.name || '';
-                const email = row.dataset.email || '';
-                const role = row.dataset.role || '';
-
-                const matchKeyword = !keyword || 
-                    username.includes(keyword) || 
-                    name.includes(keyword) || 
-                    email.includes(keyword);
-                
-                const matchRole = !roleFilter || role === roleFilter;
-
-                if (matchKeyword && matchRole) {
-                    row.style.display = '';
-                    visibleCount++;
-                } else {
-                    row.style.display = 'none';
+    // ========== KLIK AREA LUAR MODAL UNTUK MENUTUP ==========
+    ['addUserModal', 'editUserModal', 'modalDeleteUser'].forEach(modalId => {
+        const el = document.getElementById(modalId);
+        if (el) {
+            el.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    if (modalId === 'addUserModal') closeAddModal();
+                    if (modalId === 'editUserModal') closeEditModal();
+                    if (modalId === 'modalDeleteUser') closeDeleteUserModal();
                 }
             });
-
-            const noResult = document.getElementById('noResultRow');
-            const emptyRow = document.getElementById('emptyRow');
-            
-            if (rows.length > 0 && visibleCount === 0) {
-                noResult.classList.remove('hidden');
-            } else {
-                noResult.classList.add('hidden');
-            }
-
-            if (emptyRow) {
-                if (rows.length > 0) {
-                    emptyRow.classList.add('hidden');
-                } else {
-                    emptyRow.classList.remove('hidden');
-                }
-            }
         }
+    });
 
-        // ========== TUTUP MODAL DENGAN ESCAPE ==========
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                closeAddModal();
-                closeEditModal();
-            }
-        });
-
-        // ========== KLIK AREA LUAR MODAL UNTUK MENUTUP ==========
-        document.getElementById('addUserModal').addEventListener('click', function(e) {
-            if (e.target === this) closeAddModal();
-        });
-
-        document.getElementById('editUserModal').addEventListener('click', function(e) {
-            if (e.target === this) closeEditModal();
-        });
-
-        // ========== AUTO OPEN MODAL JIKA ADA ERROR VALIDASI ==========
-        @if($errors->any())
-            openAddModal();
-        @endif
-    </script>
-@endsection
+    // ========== AUTO OPEN MODAL JIKA ADA ERROR VALIDASI ==========
+    @if($errors->any())
+        openAddModal();
+    @endif
+</script>
+@endpush

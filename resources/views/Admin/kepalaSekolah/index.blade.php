@@ -258,29 +258,29 @@
 
 <!-- MODAL EKSPOR PDF DAFTAR PEMINJAMAN (KEPALA SEKOLAH) -->
 @push('modals')
-<div id="exportPdfModal" class="fixed inset-0 z-50 hidden overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 space-y-5 animate-in fade-in zoom-in-95 duration-200">
-        <!-- Modal Header -->
-        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center text-lg">
+<div id="exportPdfModal" class="fixed inset-0 !m-0 z-[100] hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity">
+    <div class="bg-white rounded-3xl w-full max-w-lg shadow-2xl border border-slate-100 overflow-hidden transform transition-all scale-95 duration-200" id="exportPdfModalBox">
+        <!-- HEADER -->
+        <div class="p-5 md:p-6 pb-2 md:pb-3 bg-white flex items-center justify-between flex-shrink-0">
+            <div class="flex items-center gap-3.5">
+                <div class="w-11 h-11 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center text-lg border border-red-100/80 shadow-xs flex-shrink-0">
                     <i class="fa-solid fa-file-pdf"></i>
                 </div>
                 <div>
-                    <h4 class="font-black text-slate-800 text-base">Ekspor PDF Daftar Peminjaman</h4>
-                    <p class="text-xs text-slate-400">Pilih periode tanggal rekapan peminjaman aula</p>
+                    <h3 class="font-extrabold text-slate-900 text-base md:text-lg tracking-tight">Ekspor PDF Daftar Peminjaman</h3>
+                    <p class="text-slate-500 text-xs mt-0.5">Pilih periode tanggal rekapan peminjaman aula</p>
                 </div>
             </div>
-            <button type="button" onclick="closeExportModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition cursor-pointer">
+            <button type="button" onclick="closeExportModal()" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition cursor-pointer" title="Tutup Modal">
                 <i class="fa-solid fa-xmark text-sm"></i>
             </button>
         </div>
 
         <!-- Form Ekspor PDF -->
-        <form action="{{ route('kepala-sekolah.peminjaman.export-pdf') }}" method="GET" target="_blank" class="space-y-4">
+        <form action="{{ route('kepala-sekolah.peminjaman.export-pdf') }}" method="GET" target="_blank" class="p-5 md:p-6 space-y-4">
             <!-- Quick Preset Buttons -->
             <div>
-                <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Preset Periode Waktu</label>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-2">Preset Periode Waktu</label>
                 <div class="grid grid-cols-5 gap-1.5 text-center text-xs">
                     <button type="button" onclick="setExportPreset('hari_ini')"
                         class="py-2 px-1.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 font-semibold transition cursor-pointer">
@@ -308,23 +308,23 @@
             <!-- Date Inputs -->
             <div class="grid grid-cols-2 gap-3">
                 <div class="space-y-1">
-                    <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider">Tanggal Dari</label>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide">Tanggal Dari</label>
                     <input type="date" id="modal_tanggal_dari" name="tanggal_dari"
                         value="{{ request('tanggal_dari', now()->startOfMonth()->toDateString()) }}"
-                        class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500 font-medium">
+                        class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs md:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-600/20 focus:border-brand-600 font-medium transition">
                 </div>
                 <div class="space-y-1">
-                    <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider">Hingga Tanggal</label>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide">Hingga Tanggal</label>
                     <input type="date" id="modal_tanggal_sampai" name="tanggal_sampai"
                         value="{{ request('tanggal_sampai', now()->endOfMonth()->toDateString()) }}"
-                        class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500 font-medium">
+                        class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs md:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-600/20 focus:border-brand-600 font-medium transition">
                 </div>
             </div>
 
             <!-- Status Permohonan -->
             <div class="space-y-1">
-                <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider">Status Permohonan</label>
-                <select name="status" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500 font-medium">
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide">Status Permohonan</label>
+                <select name="status" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs md:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-600/20 focus:border-brand-600 font-medium transition">
                     <option value="">Semua Status Pengajuan</option>
                     <option value="approved_1" {{ request('status') === 'approved_1' ? 'selected' : '' }}>Menunggu Persetujuan Final</option>
                     <option value="approved_final" {{ request('status') === 'approved_final' ? 'selected' : '' }}>Disetujui Final</option>
@@ -334,13 +334,13 @@
             </div>
 
             <!-- Modal Action Buttons -->
-            <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100">
+            <div class="pt-3 border-t border-slate-100 flex items-center justify-end gap-2.5">
                 <button type="button" onclick="closeExportModal()"
-                    class="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 font-semibold text-xs transition cursor-pointer">
+                    class="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 font-semibold text-xs md:text-sm transition cursor-pointer">
                     Batal
                 </button>
                 <button type="submit"
-                    class="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs shadow-xs transition flex items-center gap-2 cursor-pointer transform active:scale-95">
+                    class="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 active:scale-95 text-white font-bold text-xs md:text-sm shadow-sm transition flex items-center gap-2 cursor-pointer">
                     <i class="fa-solid fa-file-pdf"></i>
                     <span>Unduh Dokumen PDF</span>
                 </button>
@@ -354,12 +354,39 @@
 <script>
     function openExportModal() {
         const modal = document.getElementById('exportPdfModal');
-        if (modal) modal.classList.remove('hidden');
+        const box = document.getElementById('exportPdfModalBox');
+        if (!modal || !box) return;
+
+        document.body.classList.add('overflow-hidden');
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            box.classList.remove('scale-95');
+            box.classList.add('scale-100');
+        }, 10);
     }
 
     function closeExportModal() {
         const modal = document.getElementById('exportPdfModal');
-        if (modal) modal.classList.add('hidden');
+        const box = document.getElementById('exportPdfModalBox');
+        if (!modal || !box) return;
+
+        box.classList.remove('scale-100');
+        box.classList.add('scale-95');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+        }, 150);
+    }
+
+    // Close on escape & backdrop click
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') closeExportModal();
+    });
+    const exportPdfModalEl = document.getElementById('exportPdfModal');
+    if (exportPdfModalEl) {
+        exportPdfModalEl.addEventListener('click', function(e) {
+            if (e.target === exportPdfModalEl) closeExportModal();
+        });
     }
 
     function setExportPreset(preset) {

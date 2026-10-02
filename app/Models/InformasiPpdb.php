@@ -11,7 +11,7 @@ class InformasiPpdb extends Model
 
     protected $fillable = [
         'ppdb_id', 'nama_agenda', 'tanggal_mulai', 'tanggal_akhir',
-        'keterangan', 'persyaratan', 'daya_tampung', 'dokumentasi'
+        'keterangan', 'persyaratan', 'daya_tampung', 'dokumentasi',
     ];
 
     public function ppdb()
