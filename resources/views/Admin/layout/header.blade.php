@@ -18,6 +18,10 @@
 
     <!-- USER PROFILE RIGHT -->
     <div class="flex items-center gap-3">
+        @hasSection('role-switcher')
+            @yield('role-switcher')
+        @endif
+
         <a href="{{ (auth()->user() && auth()->user()->role === 'pelanggan') ? route('customer.profil') : '#' }}"
             class="w-8 h-8 rounded-lg bg-blue-50 text-brand-600 flex items-center justify-center hover:bg-blue-100 transition"
             title="Pengaturan">

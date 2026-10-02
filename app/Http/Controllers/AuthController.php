@@ -100,11 +100,14 @@ class AuthController extends Controller
         if (Auth::user()?->role === 'kepala_sekolah') {
             return redirect()->intended(route('kepala-sekolah.dashboard'));
         }
-        if (Auth::user()?->role === 'bkk') {
+        if (in_array(Auth::user()?->role, ['bkk', 'admin_pklbkk'], true)) {
             return redirect()->intended(route('pkl.dashboard'));
         }
-
+        if (in_array(Auth::user()?->role, ['admin_produk', 'admin_produk_unggulan'], true)) {
+            return redirect()->intended(route('produk-unggulan.index'));
+        }
         return redirect()->intended(route('dashboard'));
+
     }
 
     /**

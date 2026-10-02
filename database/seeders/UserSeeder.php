@@ -22,6 +22,15 @@ class UserSeeder extends Seeder
             ]
         );
         User::firstOrCreate(
+            ['username' => 'admin_produk'],
+            [
+                'name' => 'produk',
+                'email' => 'produk@gmail.com',
+                'role' => 'admin_produk',
+                'password' => '1234',
+            ]
+        );
+        User::firstOrCreate(
             ['username' => 'dwika'],
             [
                 'name' => 'dwika',

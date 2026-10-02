@@ -18,6 +18,9 @@ use App\Http\Controllers\PaymentConfigurationController;
 use App\Http\Controllers\PklController;
 use App\Http\Controllers\PublicController;
 use App\Models\Sekolah;
+use App\Http\Controllers\ProdukController;
+use App\Http\Controllers\ProdukUnggulanController;
+use App\Http\Controllers\Public\ProdukUnggulanController as PublicProdukUnggulanController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -310,4 +313,21 @@ Route::middleware('auth')->group(function () {
             ->middleware('role:admin_master,admin_sekolah,super_admin,super_duper_admin')
             ->name('datamaster.siswa.destroy');
     });
+});
+
+Route::get('/produk-unggulan', [PublicProdukUnggulanController::class, 'index'])->name('home');
+Route::get('/produk-unggulan-publik', [PublicProdukUnggulanController::class, 'index'])
+    ->name('public.produk-unggulan');
+
+
+Route::middleware(['auth', 'role:admin,admin_produk,admin_produk_unggulan,super_admin,super_duper_admin'])->prefix('admin/produk-unggulan')->group(function () {
+    Route::get('/', [ProdukUnggulanController::class, 'index'])->name('produk-unggulan.index');
+    Route::put('/', [ProdukUnggulanController::class, 'update'])->name('produk-unggulan.update');
+    Route::delete('/', [ProdukUnggulanController::class, 'destroy'])->name('produk-unggulan.destroy');
+
+    Route::get('/produk', [ProdukController::class, 'index'])->name('produk.index');
+    Route::post('/produk', [ProdukController::class, 'store'])->name('produk.store');
+    Route::get('/produk/{produk}/edit', [ProdukController::class, 'edit'])->name('produk.edit');
+    Route::put('/produk/{produk}', [ProdukController::class, 'update'])->name('produk.update');
+    Route::delete('/produk/{produk}', [ProdukController::class, 'destroy'])->name('produk.destroy');
 });

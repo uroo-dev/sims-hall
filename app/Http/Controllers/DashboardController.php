@@ -26,6 +26,14 @@ class DashboardController extends Controller
             return redirect()->route('kepala-sekolah.dashboard');
         }
 
+        if (in_array($request->user()?->role, ['bkk', 'admin_pklbkk'], true)) {
+            return redirect()->route('pkl.dashboard');
+        }
+
+        if (in_array($request->user()?->role, ['admin_produk', 'admin_produk_unggulan'], true)) {
+            return redirect()->route('produk-unggulan.index');
+        }
+
         Peminjaman::syncExpiredDeadlines();
 
         $isSuperAdmin = in_array($request->user()?->role, ['super_admin', 'super_duper_admin'], true);

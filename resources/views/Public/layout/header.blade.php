@@ -1,3 +1,7 @@
+@php
+    $navJurusan = $navJurusan ?? collect();
+@endphp
+
 <!-- HEADER & NAVIGATION -->
 <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-md transition-all duration-300 border-b border-slate-100">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
@@ -5,8 +9,12 @@
         <a href="{{ url('/') }}" class="flex items-center gap-3 group">
             <div class="w-12 h-12 flex items-center justify-center rounded-lg p-1 group-hover:scale-105 transition-transform">
                 <div class="relative w-full h-full flex items-center justify-center transform-gpu translate-z-10 transition-transform duration-300 group-hover:scale-105">
-                    <img src="{{ asset('assets/logosmkk.png') }}" alt="Ilustrasi SMKN 2 Karanganyar"
-                        class="w-full h-full object-contain filter drop-shadow-xl select-none">
+                    @if (file_exists(public_path('assets/logosmkk.png')))
+                        <img src="{{ asset('assets/logosmkk.png') }}" alt="Logo SMK Negeri 2 Karanganyar"
+                            class="w-full h-full object-contain filter drop-shadow-xl select-none">
+                    @else
+                        <span class="w-full h-full rounded-full bg-brand-blue text-white flex items-center justify-center font-black text-sm">N2</span>
+                    @endif
                 </div>
             </div>
             <div>
@@ -44,11 +52,18 @@
                 <button class="dropdown-toggle px-3 py-1 text-sm font-medium hover:text-blue-200 transition-colors inline-flex items-center gap-1">
                     Produk Unggulan <i class="fa-solid fa-chevron-down text-xs transition-transform duration-200"></i>
                 </button>
-                <div class="dropdown-menu hidden absolute left-0 mt-2 w-52 bg-white text-slate-800 rounded-xl shadow-xl py-2 border border-slate-100 z-50">
-                    <a href="#" class="block px-4 py-2 text-xs font-semibold hover:bg-slate-50 hover:text-brand-blue">Teknik Permesinan</a>
-                    <a href="#" class="block px-4 py-2 text-xs font-semibold hover:bg-slate-50 hover:text-brand-blue">Teknik Pembuatan Kain</a>
-                    <a href="#" class="block px-4 py-2 text-xs font-semibold hover:bg-slate-50 hover:text-brand-blue">Teknik Ototronik</a>
-                    <a href="#" class="block px-4 py-2 text-xs font-semibold hover:bg-slate-50 hover:text-brand-blue">Rekayasa Perangkat Lunak</a>
+                <div class="dropdown-menu hidden absolute left-0 mt-2 w-56 bg-white text-slate-800 rounded-xl shadow-xl py-2 border border-slate-100 z-50">
+                    @forelse ($navJurusan as $jurusan)
+                        <a href="{{ url('/') }}#jurusan-{{ $jurusan->jurusanID }}"
+                            class="block px-4 py-2 text-xs font-semibold hover:bg-slate-50 hover:text-brand-blue">
+                            {{ $jurusan->nama }}
+                        </a>
+                    @empty
+                        <a href="#" class="block px-4 py-2 text-xs font-semibold hover:bg-slate-50 hover:text-brand-blue">Teknik Permesinan</a>
+                        <a href="#" class="block px-4 py-2 text-xs font-semibold hover:bg-slate-50 hover:text-brand-blue">Teknik Pembuatan Kain</a>
+                        <a href="#" class="block px-4 py-2 text-xs font-semibold hover:bg-slate-50 hover:text-brand-blue">Teknik Ototronik</a>
+                        <a href="#" class="block px-4 py-2 text-xs font-semibold hover:bg-slate-50 hover:text-brand-blue">Rekayasa Perangkat Lunak</a>
+                    @endforelse
                 </div>
             </div>
 
@@ -88,11 +103,12 @@
                 Informasi
             </a>
 
-            <a href="#" class="px-3 py-1 text-sm font-medium hover:text-blue-200 transition-colors">PPDB</a>
+            <a href="{{ url('/#ppdb') }}" class="px-3 py-1 text-sm font-medium hover:text-blue-200 transition-colors">PPDB</a>
         </nav>
 
         <!-- Mobile Hamburger Menu Button -->
-        <button id="mobile-menu-btn" class="lg:hidden text-slate-700 hover:text-brand-blue text-2xl p-2 focus:outline-none">
+        <button id="mobile-menu-btn" type="button" aria-controls="mobile-menu" aria-expanded="false"
+            class="lg:hidden text-slate-700 hover:text-brand-blue text-2xl p-2 focus:outline-none">
             <i class="fa-solid fa-bars"></i>
         </button>
     </div>
@@ -111,7 +127,14 @@
             </a>
 
             <a href="#" class="hover:text-brand-blue py-1">Kesiswaan</a>
-            <a href="#" class="hover:text-brand-blue py-1">Produk Unggulan</a>
+            <a href="{{ url('/#produk') }}" class="hover:text-brand-blue py-1">Produk Unggulan</a>
+            @if ($navJurusan->isNotEmpty())
+                <div class="pl-4 flex flex-col gap-1 text-sm font-normal text-slate-600">
+                    @foreach ($navJurusan as $jurusan)
+                        <a href="{{ url('/') }}#jurusan-{{ $jurusan->jurusanID }}" class="hover:text-brand-blue py-0.5">{{ $jurusan->nama }}</a>
+                    @endforeach
+                </div>
+            @endif
             <a href="{{ route('layanan-peminjaman') }}" 
                 class="py-1 transition-colors
                 {{ request()->routeIs('layanan-peminjaman') 
@@ -127,7 +150,7 @@
                     : 'hover:text-brand-blue' }}">
                 Informasi
             </a>
-            <a href="#" class="hover:text-brand-blue py-1">PPDB 2026</a>
+            <a href="{{ url('/#ppdb') }}" class="hover:text-brand-blue py-1">PPDB 2026</a>
         </div>
     </div>
 </header>

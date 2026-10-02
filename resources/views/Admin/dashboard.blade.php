@@ -2,6 +2,15 @@
 
 @section('title', 'Dashboard Admin - SMK Negeri 2 Karanganyar')
 
+@section('role-switcher')
+    <div class="relative">
+        <select id="role-selector" onchange="switchRole(this.value)" aria-label="Pilih mode demo" class="bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 text-xs font-semibold rounded-xl px-3 py-2 outline-none cursor-pointer">
+            <option value="sapras" selected>Mode: Admin Sapras</option>
+            <option value="pkl_bkk">Mode: Admin PKL &amp; BKK</option>
+        </select>
+    </div>
+@endsection
+
 @section('content')
 
 

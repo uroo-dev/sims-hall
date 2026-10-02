@@ -149,13 +149,30 @@
                     <span>Buat Pengajuan</span>
                 </a>
 
-            @else
-                <!-- 1. DASHBOARD ADMIN -->
-                <a href="{{ route('dashboard') }}"
-                    class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('dashboard') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
-                    <i class="fa-solid fa-table-cells-large text-base w-5 text-center"></i>
-                    <span>Dashboard</span>
+            @elseif(in_array($userRole, ['admin_produk', 'admin_produk_unggulan']))
+                <!-- 1. DASHBOARD PRODUK -->
+                <a href="{{ route('produk-unggulan.index') }}"
+                    class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('produk-unggulan.*') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
+                    <i class="fa-solid fa-store text-base w-5 text-center"></i>
+                    <span>Dashboard Produk</span>
                 </a>
+
+                <!-- 2. DATA PRODUK -->
+                <a href="{{ route('produk.index') }}"
+                    class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('produk.*') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
+                    <i class="fa-solid fa-basket-shopping text-base w-5 text-center"></i>
+                    <span>Data Produk</span>
+                </a>
+
+            @else
+                @if(in_array($userRole, ['admin', 'admin_aula', 'super_admin', 'super_duper_admin']))
+                    <!-- 1. DASHBOARD ADMIN (AULA) -->
+                    <a href="{{ route('dashboard') }}"
+                        class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('dashboard') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
+                        <i class="fa-solid fa-table-cells-large text-base w-5 text-center"></i>
+                        <span>Dashboard</span>
+                    </a>
+                @endif
 
                 @if(in_array($userRole, ['admin_aula', 'super_admin', 'super_duper_admin']))
                     <!-- SECTION: PEMINJAMAN AULA -->
@@ -321,6 +338,28 @@
                         class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('pkl.create') || request()->routeIs('pkl.store') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
                         <i class="fa-solid fa-file-signature text-base w-5 text-center"></i>
                         <span>Buat Pengajuan</span>
+                    </a>
+                @endif
+
+                @if(in_array($userRole, ['super_admin', 'super_duper_admin']))
+                    <!-- SECTION: PRODUK UNGGULAN -->
+                    <div class="pt-3 pb-1">
+                        <div class="flex items-center justify-between text-[11px] font-bold text-blue-100/80 tracking-wider uppercase px-2 mb-2">
+                            <span>Produk Unggulan</span>
+                            <span class="w-12 h-[1px] bg-white/30"></span>
+                        </div>
+                    </div>
+
+                    <a href="{{ route('produk-unggulan.index') }}"
+                        class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('produk-unggulan.*') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
+                        <i class="fa-solid fa-store text-base w-5 text-center"></i>
+                        <span>Dashboard Produk</span>
+                    </a>
+
+                    <a href="{{ route('produk.index') }}"
+                        class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('produk.*') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
+                        <i class="fa-solid fa-basket-shopping text-base w-5 text-center"></i>
+                        <span>Data Produk</span>
                     </a>
                 @endif
             @endif
