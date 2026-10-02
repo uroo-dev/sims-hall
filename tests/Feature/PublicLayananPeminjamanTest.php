@@ -87,4 +87,47 @@ class PublicLayananPeminjamanTest extends TestCase
         $response->assertSee('Sound System 10000W');
         $response->assertSee($bookedStart);
     }
+
+    public function test_landing_and_layanan_pages_fallback_to_logo_if_dokumentasi_is_empty(): void
+    {
+        Sekolah::create([
+            'judul' => 'SMK Negeri 2 Karanganyar',
+            'sejarah' => 'Sejarah singkat',
+            'profil_judul' => 'Profil',
+            'profil_deskripsi' => 'Deskripsi',
+            'profil_dokumentasi' => 'default.jpg',
+            'visi' => 'Visi',
+            'misi' => 'Misi',
+        ]);
+
+        Aula::create([
+            'nama' => 'Aula Sasana Krida',
+            'judul' => 'Sewa Aula Bagus',
+            'deskripsi' => 'Deskripsi',
+            'dokumentasi' => null,
+            'dokumentasi_2' => null,
+        ]);
+
+        $responseLanding = $this->get(route('landing'));
+        $responseLanding->assertStatus(200);
+        $responseLanding->assertSee('logosmkk.png');
+
+        $responseLayanan = $this->get(route('layanan-peminjaman'));
+        $responseLayanan->assertStatus(200);
+        $responseLayanan->assertSee('logosmkk.png');
+    }
+
+    public function test_aula_model_resolves_image_urls_correctly(): void
+    {
+        $aula = new Aula([
+            'nama' => 'Aula 1',
+            'dokumentasi' => 'https://example.com/foto1.jpg',
+            'dokumentasi_2' => null,
+        ]);
+
+        $this->assertSame('https://example.com/foto1.jpg', $aula->foto_dokumentasi_url);
+        $this->assertStringContainsString('logosmkk.png', $aula->foto_dokumentasi_2_url);
+        $this->assertTrue($aula->has_custom_dokumentasi);
+        $this->assertFalse($aula->has_custom_dokumentasi_2);
+    }
 }

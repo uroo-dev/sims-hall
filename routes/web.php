@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminPeminjamanController;
+use App\Http\Controllers\AulaController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BkkController;
 use App\Http\Controllers\ChatbotController;
@@ -154,8 +155,12 @@ Route::middleware('auth')->group(function () {
         Route::get('/laporan-pemasukan/pdf', [LaporanPemasukanController::class, 'exportPdf'])->name('laporan.pdf');
     });
 
-    // Admin Aula: CRUD Fasilitas, Paket Peminjaman, & Manajemen Peminjaman
+    // Admin Aula: Konfigurasi Aula, CRUD Fasilitas, Paket Peminjaman, & Manajemen Peminjaman
     Route::middleware('adminFitur:aula')->prefix('admin')->name('admin.')->group(function () {
+        // Konfigurasi Profil & Informasi Aula
+        Route::get('/aula', [AulaController::class, 'index'])->name('aula.index');
+        Route::put('/aula', [AulaController::class, 'update'])->name('aula.update');
+
         Route::resource('fasilitas', FasilitasController::class)
             ->parameters(['fasilitas' => 'facility'])
             ->except(['create', 'edit', 'show']);

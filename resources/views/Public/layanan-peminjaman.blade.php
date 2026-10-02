@@ -121,26 +121,34 @@
                         <!-- Aksen Lingkaran Biru Besar (Background) -->
                         <div class="absolute -bottom-8 -right-8 w-64 h-64 border-[20px] border-brand-blue rounded-full opacity-20 z-0"></div>
                         
-                        <!-- Gambar Utama: Auditorium -->
-                        <div class="absolute top-0 right-0 w-[85%] h-[80%] rounded-3xl overflow-hidden shadow-2xl z-10 bg-slate-100">
-                            @if($aula->dokumentasi)
-                                <img src="{{ asset('assets/' . $aula->dokumentasi) }}"
-                                    alt="Auditorium Aula" class="w-full h-full object-cover">
+                        <!-- Gambar Utama: Auditorium (Dokumentasi 1) -->
+                        <div class="absolute top-0 right-0 w-[85%] h-[80%] rounded-3xl overflow-hidden shadow-2xl z-10 border border-slate-100 {{ $aula->has_custom_dokumentasi ? 'bg-slate-100' : 'bg-gradient-to-br from-blue-50 to-slate-100 flex items-center justify-center p-6' }}">
+                            @if($aula->has_custom_dokumentasi)
+                                <img src="{{ $aula->foto_dokumentasi_url }}"
+                                    alt="{{ $aula->nama }}" class="w-full h-full object-cover">
                             @else
-                                <img src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=800&auto=format&fit=crop&q=80"
-                                    alt="Auditorium Aula" class="w-full h-full object-cover">
+                                <div class="flex flex-col items-center justify-center text-center p-4">
+                                    <img src="{{ $aula->foto_dokumentasi_url }}" alt="Logo SMK" class="w-24 h-24 object-contain mb-3 drop-shadow-sm">
+                                    <span class="text-xs font-bold text-slate-700 uppercase tracking-wider">{{ $aula->nama }}</span>
+                                    <span class="text-[10px] text-slate-500 mt-0.5">Gedung Pertemuan &amp; Serbaguna</span>
+                                </div>
                             @endif
-                            <div class="absolute top-0 right-0 w-24 h-24 bg-brand-blue rounded-bl-[3rem] opacity-90"></div>
+                            <div class="absolute top-0 right-0 w-24 h-24 bg-brand-blue rounded-bl-[3rem] opacity-90 pointer-events-none"></div>
                         </div>
 
-                        <!-- Gambar Overlay: Dashboard / Mockup Reservasi -->
+                        <!-- Gambar Overlay: Mockup Reservasi / Dokumentasi 2 -->
                         <div class="absolute bottom-0 left-0 w-[55%] sm:w-[60%] rounded-2xl overflow-hidden shadow-2xl border-4 border-white bg-white z-20 transition-transform duration-300 hover:scale-105">
-                            @if($aula->dokumentasi_2)
-                                <img src="{{ asset('assets/' . $aula->dokumentasi_2) }}"
-                                    alt="Reservasi Aula" class="w-full h-auto object-cover">
+                            @if($aula->has_custom_dokumentasi_2)
+                                <img src="{{ $aula->foto_dokumentasi_2_url }}"
+                                    alt="Interior {{ $aula->nama }}" class="w-full h-auto object-cover">
                             @else
-                                <img src="https://images.unsplash.com/photo-1531403009284-440f080d1e12?w=500&auto=format&fit=crop&q=80"
-                                    alt="Dashboard Peminjaman" class="w-full h-auto object-cover">
+                                <div class="p-3 bg-blue-50/80 flex items-center gap-2.5">
+                                    <img src="{{ $aula->foto_dokumentasi_2_url }}" alt="Logo Alternatif" class="w-9 h-9 object-contain">
+                                    <div class="text-left">
+                                        <span class="block text-[11px] font-bold text-slate-800 leading-tight">Fasilitas Resmi</span>
+                                        <span class="block text-[9px] text-slate-500">SMK Negeri 2 Kra</span>
+                                    </div>
+                                </div>
                             @endif
                         </div>
 
@@ -222,20 +230,33 @@
                                 </div>
                             </div>
 
-                            <!-- Images (Overlapping) -->
+                            <!-- Images (Overlapping Dokumentasi 1 & 2) -->
                             <div class="md:col-span-6 relative mt-4 md:mt-0 pl-0 sm:pl-2">
-                                <div class="relative rounded-2xl overflow-hidden shadow-md h-64 sm:h-80 w-full bg-slate-200">
-                                    @if($aula->dokumentasi)
-                                        <img src="{{ asset('assets/' . $aula->dokumentasi) }}"
-                                            alt="Gedung Auditorium Aula" class="w-full h-full object-cover">
+                                <div class="relative rounded-2xl overflow-hidden shadow-md h-64 sm:h-80 w-full border border-slate-100 {{ $aula->has_custom_dokumentasi ? 'bg-slate-200' : 'bg-gradient-to-br from-blue-50 to-slate-100 flex items-center justify-center p-6' }}">
+                                    @if($aula->has_custom_dokumentasi)
+                                        <img src="{{ $aula->foto_dokumentasi_url }}"
+                                            alt="{{ $aula->nama }}" class="w-full h-full object-cover">
                                     @else
-                                        <img src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=800&auto=format&fit=crop&q=80"
-                                            alt="Gedung Auditorium Aula" class="w-full h-full object-cover">
+                                        <div class="flex flex-col items-center justify-center text-center p-4">
+                                            <img src="{{ $aula->foto_dokumentasi_url }}" alt="Logo SMK" class="w-20 h-20 object-contain mb-2 drop-shadow-sm">
+                                            <span class="text-xs font-bold text-slate-700 uppercase tracking-wider">{{ $aula->nama }}</span>
+                                            <span class="text-[10px] text-slate-500">Peminjaman Aula Terpadu</span>
+                                        </div>
                                     @endif
                                 </div>
                                 <div class="absolute -bottom-3 -left-3 sm:-left-6 w-32 sm:w-44 rounded-xl overflow-hidden shadow-2xl border-2 border-white bg-white transition-transform duration-300 hover:scale-105 hidden sm:block z-20">
-                                    <img src="https://images.unsplash.com/photo-1531403009284-440f080d1e12?w=500&auto=format&fit=crop&q=80"
-                                        alt="Reservasi Online" class="w-full h-auto object-cover">
+                                    @if($aula->has_custom_dokumentasi_2)
+                                        <img src="{{ $aula->foto_dokumentasi_2_url }}"
+                                            alt="Interior Aula" class="w-full h-auto object-cover">
+                                    @else
+                                        <div class="p-2.5 bg-blue-50 flex items-center gap-2">
+                                            <img src="{{ $aula->foto_dokumentasi_2_url }}" alt="Logo SMK" class="w-8 h-8 object-contain">
+                                            <div class="text-left">
+                                                <span class="block text-[9px] font-bold text-slate-800 leading-tight">Fasilitas</span>
+                                                <span class="block text-[7px] text-slate-500">SMKN 2 Kra</span>
+                                            </div>
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
                         </div>

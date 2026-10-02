@@ -168,7 +168,14 @@
                         </div>
                     @endif
 
-                    <!-- 2. FASILITAS -->
+                    <!-- 2. KONFIGURASI AULA -->
+                    <a href="{{ route('admin.aula.index') }}"
+                        class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('admin.aula.*') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
+                        <i class="fa-solid fa-hotel text-base w-5 text-center"></i>
+                        <span>Konfigurasi Aula</span>
+                    </a>
+
+                    <!-- 3. FASILITAS -->
                     <a href="{{ route('admin.fasilitas.index') }}"
                         class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('admin.fasilitas.*') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
                         <i class="fa-solid fa-box text-base w-5 text-center"></i>

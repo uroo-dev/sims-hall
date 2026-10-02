@@ -59,6 +59,7 @@ return [
             'roles' => ['admin_aula', 'super_admin', 'super_duper_admin'],
             'children' => [
                 ['label' => 'Dashboard Aula', 'icon' => 'fa-gauge-high', 'route' => null],
+                ['label' => 'Konfigurasi Aula', 'icon' => 'fa-hotel', 'route' => 'admin.aula.index'],
                 ['label' => 'Fasilitas', 'icon' => 'fa-box', 'route' => 'admin.fasilitas.index'],
                 ['label' => 'Paket Peminjaman', 'icon' => 'fa-boxes-packing', 'route' => 'admin.paket.index'],
                 ['label' => 'Persetujuan 1', 'icon' => 'fa-cart-shopping', 'route' => 'admin.peminjaman.index'],
