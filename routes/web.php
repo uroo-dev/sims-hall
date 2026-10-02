@@ -47,9 +47,7 @@ Route::get('/kesiswaan', function () {
     return view('Public.kesiswaan');
 })->name('kesiswaan');
 
-Route::get('/produk-unggulan', function () {
-    return view('Public.produk-unggulan');
-})->name('produk-unggulan');
+Route::get('/produk-unggulan', [PublicProdukUnggulanController::class, 'index'])->name('produk-unggulan');
 
 Route::get('/layanan-peminjaman', [PublicController::class, 'layananPeminjaman'])->name('layanan-peminjaman');
 
@@ -86,7 +84,7 @@ Route::middleware('guest')->group(function () {
 
     Route::get('/registrasi', [AuthController::class, 'register'])->name('registrasi');
     Route::post('/registrasi', [AuthController::class, 'registerStore'])->name('registrasi.store')->middleware('throttle:6,1');
-    Route::get('/register', fn () => redirect()->route('registrasi'))->name('register');
+    Route::get('/register', fn() => redirect()->route('registrasi'))->name('register');
 });
 
 /*
@@ -315,7 +313,6 @@ Route::middleware('auth')->group(function () {
     });
 });
 
-Route::get('/produk-unggulan', [PublicProdukUnggulanController::class, 'index'])->name('home');
 Route::get('/produk-unggulan-publik', [PublicProdukUnggulanController::class, 'index'])
     ->name('public.produk-unggulan');
 

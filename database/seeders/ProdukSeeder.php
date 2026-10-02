@@ -17,7 +17,7 @@ class ProdukSeeder extends Seeder
      * @var array<string, list<array<string, string>>>
      */
     protected array $produk = [
-        'Permesinan' => [
+        'Teknik Pemesinan' => [
             [
                 'nama' => 'Jemuran Pakaian Stainless Steel',
                 'foto' => 'photo-1584622650111-993a426fbf0a',
@@ -40,7 +40,7 @@ class ProdukSeeder extends Seeder
             ],
         ],
 
-        'Ototronik' => [
+        'Teknik Ototronik' => [
             [
                 'nama' => 'Servis & Perawatan Sistem Elektronik Otomotif',
                 'foto' => 'photo-1486262715619-67b85e0b08d3',

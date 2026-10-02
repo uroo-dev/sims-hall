@@ -18,11 +18,11 @@ class JurusanSeeder extends Seeder
             'deskripsi' => 'Karya perangkat lunak, aplikasi, dan sistem digital karya siswa RPL.',
         ],
         [
-            'nama' => 'Ototronik',
+            'nama' => 'Teknik Ototronik',
             'deskripsi' => 'Karya teknik dan produk elektronik berbasis sensor.',
         ],
         [
-            'nama' => 'Permesinan',
+            'nama' => 'Teknik Pemesinan',
             'deskripsi' => 'Karya hasil rekayasa mesin dan manufaktur precision.',
         ],
         [
