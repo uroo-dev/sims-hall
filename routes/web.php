@@ -45,9 +45,7 @@ Route::get('/produk-unggulan', function () {
     return view('Public.produk-unggulan');
 })->name('produk-unggulan');
 
-Route::get('/layanan-peminjaman', function () {
-    return view('Public.layanan-peminjaman');
-})->name('layanan-peminjaman');
+Route::get('/layanan-peminjaman', [PublicController::class, 'layananPeminjaman'])->name('layanan-peminjaman');
 
 Route::get('/pkl-bkk', [PublicController::class, 'pklBkk'])->name('pkl-bkk');
 

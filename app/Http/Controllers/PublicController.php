@@ -5,16 +5,20 @@ namespace App\Http\Controllers;
 use App\Models\Aula;
 use App\Models\Dudi;
 use App\Models\Ekstrakurikuler;
+use App\Models\Facility;
 use App\Models\InformasiPpdb;
 use App\Models\Jurusan;
 use App\Models\Lowongan;
 use App\Models\PaketPeminjaman;
+use App\Models\PaymentConfiguration;
+use App\Models\Peminjaman;
 use App\Models\PenempatanPkl;
 use App\Models\Ppdb;
 use App\Models\Prestasi;
 use App\Models\ProdukUnggulan;
 use App\Models\Sekolah;
 use App\Models\Siswa;
+use Carbon\Carbon;
 
 class PublicController extends Controller
 {
@@ -96,6 +100,47 @@ class PublicController extends Controller
             'rekap',
             'totalKuota',
             'kuotaTerpakai',
+        ));
+    }
+
+    /**
+     * Halaman publik Layanan Peminjaman Aula.
+     */
+    public function layananPeminjaman()
+    {
+        $sekolah = Sekolah::first() ?? new Sekolah;
+        $aula = Aula::first() ?? new Aula;
+        $paketPeminjamans = PaketPeminjaman::with('facilities')->get();
+        $facilities = Facility::all();
+        $paymentConfig = PaymentConfiguration::current();
+
+        $peminjamans = Peminjaman::whereNotIn('status', ['rejected', 'cancelled'])
+            ->get(['id', 'nama', 'tanggal_mulai', 'tanggal_selesai', 'status']);
+
+        $bookedDates = [];
+        foreach ($peminjamans as $peminjaman) {
+            if ($peminjaman->tanggal_mulai && $peminjaman->tanggal_selesai) {
+                $start = Carbon::parse($peminjaman->tanggal_mulai)->startOfDay();
+                $end = Carbon::parse($peminjaman->tanggal_selesai)->startOfDay();
+
+                while ($start->lte($end)) {
+                    $key = $start->format('Y-m-d');
+                    $bookedDates[$key] = [
+                        'status' => $peminjaman->status,
+                        'nama' => $peminjaman->nama,
+                    ];
+                    $start->addDay();
+                }
+            }
+        }
+
+        return view('Public.layanan-peminjaman', compact(
+            'sekolah',
+            'aula',
+            'paketPeminjamans',
+            'facilities',
+            'paymentConfig',
+            'bookedDates'
         ));
     }
 }
