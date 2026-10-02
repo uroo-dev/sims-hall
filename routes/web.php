@@ -48,6 +48,12 @@ Route::get('/produk-unggulan', function () {
 
 Route::get('/layanan-peminjaman', [PublicController::class, 'layananPeminjaman'])->name('layanan-peminjaman');
 
+Route::get('/pkl', [PublicController::class, 'pkl'])->name('pkl');
+Route::get('/pkl/mitra/{dudi}', [PublicController::class, 'pklDetail'])->name('pkl.detail');
+
+Route::get('/bkk', [PublicController::class, 'bkk'])->name('bkk');
+Route::get('/bkk/lowongan/{lowongan}', [PublicController::class, 'bkkDetail'])->name('bkk.detail');
+
 Route::get('/pkl-bkk', [PublicController::class, 'pklBkk'])->name('pkl-bkk');
 
 /*
@@ -97,6 +103,7 @@ Route::middleware(['auth', 'role:bkk,admin_pklbkk,super_admin,super_duper_admin'
         Route::get('/', [BkkController::class, 'index'])->name('dashboard');
 
         Route::get('/dudi', [BkkController::class, 'dudi'])->name('dudi.index');
+        Route::post('/dudi', [BkkController::class, 'storeDudi'])->name('dudi.store');
         Route::patch('/dudi/{dudi}', [BkkController::class, 'updateDudi'])->name('dudi.update');
 
         Route::get('/lowongan', [BkkController::class, 'lowongan'])->name('lowongan.index');

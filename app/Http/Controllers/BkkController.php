@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\LowonganRequest;
+use App\Http\Requests\StoreDudiRequest;
 use App\Http\Requests\UpdateDudiRequest;
 use App\Models\Dudi;
 use App\Models\Lowongan;
@@ -10,6 +11,7 @@ use App\Models\PenempatanPkl;
 use App\Models\Siswa;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 /**
@@ -123,27 +125,74 @@ class BkkController extends Controller
     }
 
     /**
-     * ACC / batal-ACC DUDI untuk tampil di Landing Page.
-     * Bila dinonaktifkan, siswa FIX di DUDI ini otomatis hilang dari landing.
+     * Tambah mitra DUDI baru beserta logo (opsional).
+     */
+    public function storeDudi(StoreDudiRequest $request): RedirectResponse
+    {
+        $data = $request->validated();
+
+        if ($request->hasFile('logo')) {
+            $data['logo'] = $request->file('logo')->store('dudi-logo', 'public');
+        }
+
+        $dudi = Dudi::create([
+            'nama_dudi' => $data['nama_dudi'],
+            'alamat' => $data['alamat'],
+            'kota' => $data['kota'],
+            'bidang_usaha' => $data['bidang_usaha'],
+            'kontak_person' => $data['kontak_person'] ?? null,
+            'no_hp' => $data['no_hp'] ?? null,
+            'kuota_maksimal' => (int) ($data['kuota_maksimal'] ?? 0),
+            'deskripsi' => $data['deskripsi'] ?? null,
+            'is_mitra_resmi' => $request->boolean('is_mitra_resmi', false),
+            'tampil_di_landing' => $request->boolean('tampil_di_landing', false),
+            'logo' => $data['logo'] ?? null,
+        ]);
+
+        return back()->with('success', "Mitra DUDI \"{$dudi->nama_dudi}\" berhasil ditambahkan.");
+    }
+
+    /**
+     * Update data DUDI (profil, kuota, logo, atau status ACC Landing Page).
      */
     public function updateDudi(UpdateDudiRequest $request, Dudi $dudi): RedirectResponse
     {
         $data = $request->validated();
 
-        $dudi->fill([
-            'tampil_di_landing' => (bool) $data['tampil_di_landing'],
-            'is_mitra_resmi' => array_key_exists('is_mitra_resmi', $data)
-                ? (bool) $data['is_mitra_resmi']
-                : $dudi->is_mitra_resmi,
-            'kuota_maksimal' => array_key_exists('kuota_maksimal', $data) && $data['kuota_maksimal'] !== null
-                ? (int) $data['kuota_maksimal']
-                : $dudi->kuota_maksimal,
-        ])->save();
+        if ($request->hasFile('logo')) {
+            if ($dudi->logo && Storage::disk('public')->exists($dudi->logo)) {
+                Storage::disk('public')->delete($dudi->logo);
+            }
+            $data['logo'] = $request->file('logo')->store('dudi-logo', 'public');
+        } elseif ($request->boolean('hapus_logo')) {
+            if ($dudi->logo && Storage::disk('public')->exists($dudi->logo)) {
+                Storage::disk('public')->delete($dudi->logo);
+            }
+            $data['logo'] = null;
+        }
+
+        $fields = [];
+        foreach (['nama_dudi', 'alamat', 'kota', 'bidang_usaha', 'kontak_person', 'no_hp', 'kuota_maksimal', 'deskripsi', 'logo'] as $col) {
+            if (array_key_exists($col, $data)) {
+                $fields[$col] = $data[$col];
+            }
+        }
+
+        if (array_key_exists('is_mitra_resmi', $data)) {
+            $fields['is_mitra_resmi'] = (bool) $data['is_mitra_resmi'];
+        }
+
+        if (array_key_exists('tampil_di_landing', $data)) {
+            $fields['tampil_di_landing'] = (bool) $data['tampil_di_landing'];
+        }
+
+        if (! empty($fields)) {
+            $dudi->fill($fields)->save();
+        }
 
         return back()->with('success', sprintf(
-            'DUDI "%s" berhasil %s untuk Landing Page.',
-            $dudi->nama_dudi,
-            $dudi->tampil_di_landing ? 'di-ACC' : 'dinonaktifkan dari'
+            'DUDI "%s" berhasil diperbarui.',
+            $dudi->nama_dudi
         ));
     }
 
@@ -203,7 +252,13 @@ class BkkController extends Controller
 
     public function storeLowongan(LowonganRequest $request): RedirectResponse
     {
-        $lowongan = Lowongan::create($request->validated());
+        $data = $request->validated();
+
+        if ($request->hasFile('logo')) {
+            $data['logo'] = $request->file('logo')->store('lowongan-logo', 'public');
+        }
+
+        $lowongan = Lowongan::create($data);
 
         return redirect()
             ->route('pkl.lowongan.index')
@@ -212,7 +267,21 @@ class BkkController extends Controller
 
     public function updateLowongan(LowonganRequest $request, Lowongan $lowongan): RedirectResponse
     {
-        $lowongan->update($request->validated());
+        $data = $request->validated();
+
+        if ($request->hasFile('logo')) {
+            if ($lowongan->logo && Storage::disk('public')->exists($lowongan->logo)) {
+                Storage::disk('public')->delete($lowongan->logo);
+            }
+            $data['logo'] = $request->file('logo')->store('lowongan-logo', 'public');
+        } elseif ($request->boolean('hapus_logo')) {
+            if ($lowongan->logo && Storage::disk('public')->exists($lowongan->logo)) {
+                Storage::disk('public')->delete($lowongan->logo);
+            }
+            $data['logo'] = null;
+        }
+
+        $lowongan->update($data);
 
         return redirect()
             ->route('pkl.lowongan.index')
@@ -236,6 +305,9 @@ class BkkController extends Controller
     public function destroyLowongan(Lowongan $lowongan): RedirectResponse
     {
         $posisi = $lowongan->posisi;
+        if ($lowongan->logo && Storage::disk('public')->exists($lowongan->logo)) {
+            Storage::disk('public')->delete($lowongan->logo);
+        }
         $lowongan->delete();
 
         return redirect()

@@ -70,12 +70,15 @@
 
             <!-- Dropdown PKL & BKK -->
             <div class="relative dropdown">
-                <button class="dropdown-toggle px-3 py-1 text-sm font-medium hover:text-blue-200 transition-colors inline-flex items-center gap-1">
+                <button class="dropdown-toggle px-3 py-1 text-sm transition-colors inline-flex items-center gap-1
+                    {{ request()->routeIs('pkl', 'pkl.detail', 'bkk', 'bkk.detail', 'pkl-bkk') 
+                        ? 'font-semibold bg-white/20 rounded-full' 
+                        : 'font-medium hover:text-blue-200' }}">
                     PKL & BKK <i class="fa-solid fa-chevron-down text-xs transition-transform duration-200"></i>
                 </button>
                 <div class="dropdown-menu hidden absolute left-0 mt-2 w-48 bg-white text-slate-800 rounded-xl shadow-xl py-2 border border-slate-100 z-50">
-                    <a href="{{ route('pkl-bkk') }}#mitra" class="block px-4 py-2 text-xs font-semibold hover:bg-slate-50 hover:text-brand-blue">Mitra DUDI</a>
-                    <a href="{{ route('pkl-bkk') }}#lowongan" class="block px-4 py-2 text-xs font-semibold hover:bg-slate-50 hover:text-brand-blue">Lowongan Pekerjaan</a>
+                    <a href="{{ route('pkl') }}" class="block px-4 py-2 text-xs font-semibold hover:bg-slate-50 hover:text-brand-blue">PKL</a>
+                    <a href="{{ route('bkk') }}" class="block px-4 py-2 text-xs font-semibold hover:bg-slate-50 hover:text-brand-blue">Lowongan Kerja</a>
                 </div>
             </div>
 
@@ -110,7 +113,20 @@
                     : 'hover:text-brand-blue' }}">
                 Peminjaman Aula
             </a>
-            <a href="{{ route('pkl-bkk') }}" class="hover:text-brand-blue py-1">PKL & BKK</a>
+            <a href="{{ route('pkl') }}" 
+                class="py-1 transition-colors
+                {{ request()->routeIs('pkl', 'pkl.detail') 
+                    ? 'text-brand-blue font-bold' 
+                    : 'hover:text-brand-blue' }}">
+                PKL
+            </a>
+            <a href="{{ route('bkk') }}" 
+                class="py-1 transition-colors
+                {{ request()->routeIs('bkk', 'bkk.detail') 
+                    ? 'text-brand-blue font-bold' 
+                    : 'hover:text-brand-blue' }}">
+                Lowongan Kerja
+            </a>
             <a href="#" class="hover:text-brand-blue py-1">PPDB 2026</a>
         </div>
     </div>

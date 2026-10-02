@@ -28,6 +28,8 @@ class LowonganRequest extends FormRequest
             'link_daftar' => ['required', 'url', 'max:1000'],
             'deadline' => ['required', 'date', 'after_or_equal:today'],
             'is_active' => ['nullable', 'boolean'],
+            'logo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp,svg', 'max:2048'],
+            'hapus_logo' => ['nullable', 'boolean'],
         ];
     }
 

@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'dudi_id',
     'nama_perusahaan',
     'posisi',
+    'logo',
     'tipe',
     'jurusan_sesuai',
     'deskripsi',
@@ -115,5 +116,27 @@ class Lowongan extends Model
     public function getSudahLewatAttribute(): bool
     {
         return $this->deadline->isPast();
+    }
+
+    /**
+     * URL logo/gambar lowongan (dengan fallback ke logo DUDI terkait jika ada).
+     */
+    public function getLogoUrlAttribute(): ?string
+    {
+        if (! empty($this->logo)) {
+            if (file_exists(public_path('assets/'.$this->logo))) {
+                return asset('assets/'.$this->logo);
+            }
+            if (file_exists(public_path('storage/'.$this->logo))) {
+                return asset('storage/'.$this->logo);
+            }
+            if (str_starts_with($this->logo, 'http://') || str_starts_with($this->logo, 'https://')) {
+                return $this->logo;
+            }
+
+            return asset('storage/'.$this->logo);
+        }
+
+        return $this->dudi?->logo_url;
     }
 }
