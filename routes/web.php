@@ -18,8 +18,8 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'destroy'])->name('logout');
 
-    Route::get('/dashboard', [DashboardController::class, 'index'])
-        ->middleware('role:admin,super_admin,super_duper_admin')
+    Route::get('/produk', [DashboardController::class, 'index'])
+        ->middleware('role:admin_produk,super_admin,super_duper_admin')
         ->name('dashboard');
 });
 
@@ -32,7 +32,7 @@ Route::middleware('auth')->group(function () {
 | tabel `fiturs` (admin super perlu baris fitur agar tidak 403).
 */
 
-Route::middleware(['auth', 'role:admin,super_admin,super_duper_admin'])->prefix('produk-unggulan')->group(function () {
+Route::middleware(['auth', 'role:admin_produk,super_admin,super_duper_admin'])->prefix('produk-unggulan')->group(function () {
     Route::get('/', [ProdukUnggulanController::class, 'index'])->name('produk-unggulan.index');
     Route::put('/', [ProdukUnggulanController::class, 'update'])->name('produk-unggulan.update');
     Route::delete('/', [ProdukUnggulanController::class, 'destroy'])->name('produk-unggulan.destroy');
