@@ -24,8 +24,13 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             UserSeeder::class,
+            AdminAula::class,
+            FasilitasSeeder::class,
+            PaketPeminjamanSeeder::class,
+            PaymentConfigurationSeeder::class,
             BkkSeeder::class,
             ChatbotKnowledgeSeeder::class,
+            DataMasterSeeder::class,
         ]);
     }
 }

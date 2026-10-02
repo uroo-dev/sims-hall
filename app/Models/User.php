@@ -19,6 +19,13 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     /**
+     * The relationships that should always be loaded.
+     *
+     * @var array<int, string>
+     */
+    protected $with = ['fitur'];
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
@@ -32,10 +39,35 @@ class User extends Authenticatable
     }
 
     /**
-     * Fitur (portal) yang dikelola oleh user.
+     * Relasi ke Fitur yang ditugaskan kepada user (terutama role admin).
      */
     public function fitur(): HasOne
     {
-        return $this->hasOne(Fitur::class, 'user_id');
+        return $this->hasOne(Fitur::class);
+    }
+
+    /**
+     * Cek apakah user adalah super admin.
+     */
+    public function isSuperAdmin(): bool
+    {
+        return in_array($this->role, ['super_admin', 'super_duper_admin'], true);
+    }
+
+    /**
+     * Cek apakah user memiliki akses ke fitur tertentu.
+     */
+    public function hasFitur(string $fiturName): bool
+    {
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
+        if ($this->role !== 'admin') {
+            return false;
+        }
+
+        return $this->fitur?->nama_fitur === $fiturName;
+
     }
 }

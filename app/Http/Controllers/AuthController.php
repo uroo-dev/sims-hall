@@ -45,20 +45,18 @@ class AuthController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended($this->dashboardFor($request->user()));
-    }
+        if (Auth::user()?->role === 'pelanggan') {
+            return redirect()->intended(route('customer.dashboard'));
+        }
 
-    /**
-     * Tentukan dashboard tujuan sesuai role user.
-     *
-     * User dengan role `bkk` langsung masuk ke modul PKL & BKK, sedangkan
-     * role admin/super admin masuk ke dashboard utama.
-     */
-    private function dashboardFor(User $user): string
-    {
-        return $user->role === 'bkk'
-            ? route('pkl.dashboard')
-            : route('dashboard');
+        if (Auth::user()?->role === 'kepala_sekolah') {
+            return redirect()->intended(route('kepala-sekolah.dashboard'));
+        }
+        if (Auth::user()?->role === 'bkk') {
+            return redirect()->intended(route('pkl.dashboard'));
+        }
+
+        return redirect()->intended(route('dashboard'));
     }
 
     /**

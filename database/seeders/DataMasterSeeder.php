@@ -209,31 +209,6 @@ class DataMasterSeeder extends Seeder
         ]);
 
         // ============================================
-        // 8. DATA PAKET PEMINJAMAN
-        // ============================================
-        $paketData = [
-            [
-                'nama_paket' => 'Unggulan',
-                'harga' => 6000000,
-                'kategori' => 'unggulan',
-                'durasi' => '12 Jam',
-                'fasilitas' => 'Sound System Medium, Mic 4, 500 Kursi + Cover, Proyektor 2',
-                'deskripsi' => 'Paket unggulan dengan fasilitas lengkap untuk acara besar.',
-            ],
-            [
-                'nama_paket' => 'Terjangkau',
-                'harga' => 1500000,
-                'kategori' => 'terjangkau',
-                'durasi' => '4 Jam',
-                'fasilitas' => 'Sound System Standar, Mic 2, 100 Kursi, Proyektor 1',
-                'deskripsi' => 'Paket terjangkau untuk acara kecil dan rapat.',
-            ],
-        ];
-        foreach ($paketData as $pk) {
-            PaketPeminjaman::create($pk);
-        }
-
-        // ============================================
         // 9. DATA PPDB
         // ============================================
         $ppdb = Ppdb::create([

@@ -1,10 +1,17 @@
 <?php
 
+use App\Http\Controllers\AdminPeminjamanController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BkkController;
 use App\Http\Controllers\ChatbotController;
+use App\Http\Controllers\CustomerPanelController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DataMasterDashboardController;
+use App\Http\Controllers\FasilitasController;
+use App\Http\Controllers\KepalaSekolahController;
+use App\Http\Controllers\LaporanPemasukanController;
+use App\Http\Controllers\PaketPeminjamanController;
+use App\Http\Controllers\PaymentConfigurationController;
 use App\Http\Controllers\PklController;
 use App\Http\Controllers\PublicController;
 use App\Models\Sekolah;
@@ -124,12 +131,88 @@ Route::middleware(['auth', 'role:bkk,admin,super_admin,super_duper_admin'])
 |--------------------------------------------------------------------------
 */
 Route::middleware('auth')->group(function () {
-    Route::post('/logout', [AuthController::class, 'destroy'])->name('logout');
+    Route::match(['get', 'post'], '/logout', [AuthController::class, 'destroy'])->name('logout');
 
     // --- DASHBOARD UTAMA ---
     Route::get('/dashboard', [DashboardController::class, 'index'])
-        ->middleware('role:admin,super_admin,super_duper_admin')
+        ->middleware('role:admin,super_admin,super_duper_admin,pelanggan,kepala_sekolah')
         ->name('dashboard');
+
+    // Kepala Sekolah: Dashboard & Persetujuan Final Peminjaman Aula
+    Route::middleware('role:kepala_sekolah,super_admin,super_duper_admin')->prefix('kepala-sekolah')->name('kepala-sekolah.')->group(function () {
+        Route::get('/dashboard', [KepalaSekolahController::class, 'dashboard'])->name('dashboard');
+        Route::get('/peminjaman', [KepalaSekolahController::class, 'index'])->name('peminjaman.index');
+        Route::get('/peminjaman/export/pdf', [KepalaSekolahController::class, 'exportPdf'])->name('peminjaman.export-pdf');
+        Route::get('/peminjaman/{peminjaman}', [KepalaSekolahController::class, 'show'])->name('peminjaman.show');
+        Route::post('/peminjaman/{peminjaman}/approve', [KepalaSekolahController::class, 'approve'])
+            ->middleware('role:kepala_sekolah')
+            ->name('peminjaman.approve');
+        Route::post('/peminjaman/{peminjaman}/reject', [KepalaSekolahController::class, 'reject'])
+            ->middleware('role:kepala_sekolah')
+            ->name('peminjaman.reject');
+
+        // Laporan Rekapitulasi Pemasukan Aula (Kepala Sekolah)
+        Route::get('/laporan-pemasukan', [LaporanPemasukanController::class, 'index'])->name('laporan.index');
+        Route::get('/laporan-pemasukan/pdf', [LaporanPemasukanController::class, 'exportPdf'])->name('laporan.pdf');
+    });
+
+    // Admin Aula: CRUD Fasilitas, Paket Peminjaman, & Manajemen Peminjaman
+    Route::middleware('adminFitur:aula')->prefix('admin')->name('admin.')->group(function () {
+        Route::resource('fasilitas', FasilitasController::class)
+            ->parameters(['fasilitas' => 'facility'])
+            ->except(['create', 'edit', 'show']);
+
+        Route::resource('paket', PaketPeminjamanController::class)
+            ->parameters(['paket' => 'paket'])
+            ->except(['create', 'edit', 'show']);
+
+        // Manajemen Peminjaman Aula
+        Route::get('/peminjaman', [AdminPeminjamanController::class, 'index'])->name('peminjaman.index');
+        Route::get('/peminjaman/export/pdf', [AdminPeminjamanController::class, 'exportPdf'])->name('peminjaman.export-pdf');
+        Route::get('/peminjaman/{peminjaman}', [AdminPeminjamanController::class, 'show'])->name('peminjaman.show');
+        Route::post('/peminjaman/{peminjaman}/approve', [AdminPeminjamanController::class, 'approve'])->name('peminjaman.approve');
+        Route::post('/peminjaman/{peminjaman}/reject', [AdminPeminjamanController::class, 'reject'])->name('peminjaman.reject');
+        Route::post('/peminjaman/{peminjaman}/cancel', [AdminPeminjamanController::class, 'cancel'])->name('peminjaman.cancel');
+        Route::post('/peminjaman/{peminjaman}/verifikasi-pembayaran/{detail?}', [AdminPeminjamanController::class, 'verifikasiPembayaran'])->name('peminjaman.verifikasi-pembayaran');
+        Route::post('/peminjaman/{peminjaman}/reject-pembayaran', [AdminPeminjamanController::class, 'rejectPembayaran'])->name('peminjaman.reject-pembayaran');
+        Route::post('/peminjaman/{peminjaman}/upload-refund', [AdminPeminjamanController::class, 'uploadRefund'])->name('peminjaman.upload-refund');
+        Route::post('/peminjaman/{peminjaman}/set-harga-custom', [AdminPeminjamanController::class, 'setHargaCustom'])->name('peminjaman.set-harga-custom');
+
+        // Laporan Rekapitulasi Pemasukan Aula (Admin Aula)
+        Route::get('/laporan-pemasukan', [LaporanPemasukanController::class, 'index'])->name('laporan.index');
+        Route::get('/laporan-pemasukan/pdf', [LaporanPemasukanController::class, 'exportPdf'])->name('laporan.pdf');
+    });
+
+    // Super Admin: Konfigurasi Pembayaran Sekolah
+    Route::middleware('role:super_admin,super_duper_admin')->prefix('admin')->name('admin.')->group(function () {
+        Route::get('/payment-configuration', [PaymentConfigurationController::class, 'index'])->name('payment-configuration.index');
+        Route::put('/payment-configuration', [PaymentConfigurationController::class, 'update'])->name('payment-configuration.update');
+    });
+
+    Route::prefix('customer')->name('customer.')->group(function () {
+        Route::get('/', function () {
+            return redirect()->route('customer.dashboard');
+        });
+        Route::get('/dashboard', [CustomerPanelController::class, 'dashboard'])->name('dashboard');
+        Route::get('/paket', [CustomerPanelController::class, 'paket'])->name('paket');
+
+        // Pengajuan Peminjaman Aula
+        Route::get('/peminjaman/buat', [CustomerPanelController::class, 'peminjamanCreate'])->name('peminjaman.create');
+        Route::post('/peminjaman', [CustomerPanelController::class, 'peminjamanStore'])->name('peminjaman.store');
+        Route::post('/peminjaman/{peminjaman}/cancel', [CustomerPanelController::class, 'peminjamanCancel'])->name('peminjaman.cancel');
+
+        // Pembayaran Aula
+        Route::get('/pembayaran/{pembayaran}', [CustomerPanelController::class, 'pembayaranShow'])->name('pembayaran.show');
+        Route::post('/pembayaran/{pembayaran}', [CustomerPanelController::class, 'pembayaranBayar'])->name('pembayaran.bayar');
+
+        // Alur Pengembalian Dana (Refund)
+        Route::post('/pembayaran/{pembayaran}/rekening-refund', [CustomerPanelController::class, 'simpanRekeningRefund'])->name('pembayaran.rekening-refund');
+        Route::post('/pembayaran/{pembayaran}/konfirmasi-refund', [CustomerPanelController::class, 'konfirmasiRefund'])->name('pembayaran.konfirmasi-refund');
+
+        Route::get('/cek-peminjaman', [CustomerPanelController::class, 'riwayat'])->name('cek-peminjaman');
+        Route::get('/riwayat', [CustomerPanelController::class, 'riwayat'])->name('riwayat');
+        Route::get('/profil', [CustomerPanelController::class, 'profil'])->name('profil');
+    });
 
     /*
     |----------------------------------------------------------------------

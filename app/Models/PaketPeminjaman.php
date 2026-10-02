@@ -4,13 +4,52 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class PaketPeminjaman extends Model
 {
     use HasFactory;
 
-    // Paksa nama tabel agar tidak di-plural-kan otomatis oleh Laravel
+    /**
+     * Nama tabel di database.
+     *
+     * @var string
+     */
     protected $table = 'paket_peminjamans';
 
-    protected $fillable = ['nama_paket', 'harga', 'kategori', 'durasi', 'fasilitas', 'deskripsi'];
+    /**
+     * Relasi many-to-many ke Facility melalui detail_paket_peminjamans.
+     */
+    public function facilities(): BelongsToMany
+    {
+        return $this->belongsToMany(Facility::class, 'detail_paket_peminjamans', 'paket_peminjaman_id', 'facility_id')
+            ->withTimestamps();
+    }
+
+    /**
+     * Relasi has-many ke tabel detail pivot.
+     */
+    public function details(): HasMany
+    {
+        return $this->hasMany(DetailPaketPeminjaman::class, 'paket_peminjaman_id');
+    }
+
+    /**
+     * Relasi ke seluruh peminjaman aula yang menggunakan paket ini.
+     */
+    public function peminjamans(): HasMany
+    {
+        return $this->hasMany(Peminjaman::class, 'paket_peminjaman_id');
+    }
+
+    /**
+     * Nama tampilan paket peminjaman.
+     */
+    public function getDisplayNameAttribute(): string
+    {
+        return $this->nama_paket ?: 'Paket '.ucwords($this->kategori);
+    }
+
+    protected $fillable = ['nama_paket', 'harga', 'harga_dp', 'kategori', 'durasi', 'fasilitas', 'deskripsi'];
 }
