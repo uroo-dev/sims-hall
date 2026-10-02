@@ -2,8 +2,6 @@
 
 namespace App\Models;
 
-
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Observers\ProdukUnggulanObserver;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
@@ -89,7 +87,8 @@ class ProdukUnggulan extends Model
     public function jurusan()
     {
         return $this->belongsTo(Jurusan::class);
-}
+    }
+
     protected function dokumentasiUrls(): Attribute
     {
         return Attribute::get(fn (): array => array_map(
