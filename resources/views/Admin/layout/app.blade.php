@@ -12,8 +12,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Chart.js untuk grafik batang -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
         tailwind.config = {
@@ -183,78 +181,6 @@
                 }
             });
         }
-
-        // Inisialisasi grafik batang
-        window.onload = function () {
-            const canvas = document.getElementById('aulaChart');
-
-            // Halaman di luar modul aula (mis. PKL & BKK) tidak punya canvas
-            // ini. Tanpa guard di bawah, window.onload melempar TypeError dan
-            // mematikan script lain yang bergantung padanya.
-            if (!canvas) return;
-
-            const ctx = canvas.getContext('2d');
-
-            new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: ['Terjangkau', 'Standar 1', 'Standar 2', 'Standar 3', 'Unggulan'],
-                    datasets: [{
-                        label: 'Jumlah Peminjaman',
-                        data: [9, 10, 8, 16, 18],
-                        backgroundColor: '#6ee7b7', // exact light emerald green bar color from screenshot
-                        hoverBackgroundColor: '#34d399',
-                        borderRadius: 4,
-                        barThickness: 28,
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function (context) {
-                                    return `Total: ${context.raw} Peminjaman`;
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            grid: {
-                                display: false
-                            },
-                            ticks: {
-                                font: {
-                                    size: 10,
-                                    family: "'Inter', sans-serif"
-                                },
-                                color: '#374151'
-                            }
-                        },
-                        y: {
-                            min: 0,
-                            max: 18,
-                            ticks: {
-                                stepSize: 2,
-                                font: {
-                                    size: 10,
-                                    family: "'Inter', sans-serif"
-                                },
-                                color: '#4b5563'
-                            },
-                            grid: {
-                                color: '#f3f4f6'
-                            }
-                        }
-                    }
-                }
-            });
-        };
     </script>
 
     @stack('scripts')

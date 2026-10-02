@@ -441,3 +441,55 @@
         </section>
 
 @endsection
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Inisialisasi grafik batang peminjaman per paket
+    document.addEventListener('DOMContentLoaded', function () {
+        const canvas = document.getElementById('aulaChart');
+        if (!canvas) return;
+
+        const ctx = canvas.getContext('2d');
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Terjangkau', 'Standar 1', 'Standar 2', 'Standar 3', 'Unggulan'],
+                datasets: [{
+                    label: 'Jumlah Peminjaman',
+                    data: [9, 10, 8, 16, 18],
+                    backgroundColor: '#6ee7b7',
+                    hoverBackgroundColor: '#34d399',
+                    borderRadius: 4,
+                    barThickness: 28,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: (context) => `Total: ${context.raw} Peminjaman`
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: { font: { size: 10, family: "'Inter', sans-serif" }, color: '#374151' }
+                    },
+                    y: {
+                        min: 0,
+                        max: 18,
+                        ticks: { stepSize: 2, font: { size: 10, family: "'Inter', sans-serif" }, color: '#4b5563' },
+                        grid: { color: '#f3f4f6' }
+                    }
+                }
+            }
+        });
+    });
+</script>
+@endpush

@@ -56,6 +56,25 @@ class User extends Authenticatable
     }
 
     /**
+     * Kembalikan URL dashboard yang sesuai dengan role user.
+     * Dipakai oleh AuthController (setelah login) dan DashboardController (dispatcher /dashboard).
+     */
+    public function dashboardRoute(): string
+    {
+        return match ($this->role) {
+            'pelanggan'                        => route('customer.dashboard'),
+            'kepala_sekolah'                   => route('kepala-sekolah.dashboard'),
+            'bkk', 'admin_pklbkk'             => route('pkl.dashboard'),
+            'admin_produk', 'admin_produk_unggulan' => route('produk-unggulan.index'),
+            'admin_ppdb'                       => route('index.dashboard.ppdb'),
+            'admin_kesiswaan'                  => route('admin.kesiswaan.index'),
+            'admin_master'                     => route('datamaster.index'),
+            'admin_sekolah'                    => route('admin.artikel.index'),
+            default                            => route('admin.peminjaman.dashboard'),
+        };
+    }
+
+    /**
      * Cek apakah user memiliki akses ke fitur/modul tertentu berdasarkan role langsung.
      */
     public function hasFitur(string $fiturName): bool

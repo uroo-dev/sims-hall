@@ -18,20 +18,7 @@ class DashboardController extends Controller
      */
     public function dispatch(Request $request): RedirectResponse
     {
-        $role = $request->user()?->role;
-
-        return match ($role) {
-            'pelanggan' => redirect()->route('customer.dashboard'),
-            'kepala_sekolah' => redirect()->route('kepala-sekolah.dashboard'),
-            'bkk', 'admin_pklbkk' => redirect()->route('pkl.dashboard'),
-            'admin_produk', 'admin_produk_unggulan' => redirect()->route('produk-unggulan.index'),
-            'admin_ppdb' => redirect()->route('index.dashboard.ppdb'),
-            'admin_kesiswaan' => redirect()->route('admin.kesiswaan.index'),
-            'admin_master' => redirect()->route('datamaster.index'),
-            'admin_sekolah' => redirect()->route('admin.artikel.index'),
-            'admin_aula', 'admin', 'super_admin', 'super_duper_admin' => redirect()->route('admin.peminjaman.dashboard'),
-            default => redirect()->route('admin.peminjaman.dashboard'),
-        };
+        return redirect($request->user()->dashboardRoute());
     }
 
     /**
