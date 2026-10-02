@@ -6,7 +6,7 @@
 <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-md transition-all duration-300 border-b border-slate-100">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
         <!-- Logo Section -->
-        <a href="{{ url('/') }}" class="flex items-center gap-3 group">
+        <a href="{{ route('landing') }}" class="flex items-center gap-3 group">
             <div class="w-12 h-12 flex items-center justify-center rounded-lg p-1 group-hover:scale-105 transition-transform">
                 <div class="relative w-full h-full flex items-center justify-center transform-gpu translate-z-10 transition-transform duration-300 group-hover:scale-105">
                     @if (file_exists(public_path('assets/logosmkk.png')))
@@ -26,6 +26,14 @@
         <!-- Desktop Nav Pill -->
         <nav class="hidden lg:flex items-center bg-brand-blue text-white rounded-full px-6 py-2.5 shadow-lg shadow-blue-500/20">
             
+            <a href="{{ route('landing') }}"
+                class="px-3 py-1 text-sm transition-colors
+                {{ request()->routeIs('landing') 
+                    ? 'font-semibold bg-white/20 rounded-full' 
+                    : 'font-medium hover:text-blue-200' }}">
+                Beranda
+            </a>
+
             {{-- LINK: PROFIL (ACTIVE STATE) --}}
             <a href="{{ route('profil') }}"
                 class="px-3 py-1 text-sm transition-colors
@@ -37,13 +45,16 @@
 
             <!-- Dropdown Kesiswaan -->
             <div class="relative dropdown">
-                <button class="dropdown-toggle px-3 py-1 text-sm font-medium hover:text-blue-200 transition-colors inline-flex items-center gap-1">
+                <button class="dropdown-toggle px-3 py-1 text-sm transition-colors inline-flex items-center gap-1
+                    {{ request()->routeIs('kesiswaan') 
+                        ? 'font-semibold bg-white/20 rounded-full' 
+                        : 'font-medium hover:text-blue-200' }}">
                     Kesiswaan <i class="fa-solid fa-chevron-down text-xs transition-transform duration-200"></i>
                 </button>
                 <div class="dropdown-menu hidden absolute left-0 mt-2 w-48 bg-white text-slate-800 rounded-xl shadow-xl py-2 border border-slate-100 z-50">
-                    <a href="#" class="block px-4 py-2 text-xs font-semibold hover:bg-slate-50 hover:text-brand-blue">Prestasi Siswa</a>
-                    <a href="#" class="block px-4 py-2 text-xs font-semibold hover:bg-slate-50 hover:text-brand-blue">Ekstrakurikuler</a>
-                    <a href="#" class="block px-4 py-2 text-xs font-semibold hover:bg-slate-50 hover:text-brand-blue">Tata Tertib</a>
+                    <a href="{{ route('kesiswaan') }}#prestasi" class="block px-4 py-2 text-xs font-semibold hover:bg-slate-50 hover:text-brand-blue">Prestasi Siswa</a>
+                    <a href="{{ route('kesiswaan') }}#ekstrakurikuler" class="block px-4 py-2 text-xs font-semibold hover:bg-slate-50 hover:text-brand-blue">Ekstrakurikuler</a>
+                    <a href="{{ route('kesiswaan') }}#tata-tertib" class="block px-4 py-2 text-xs font-semibold hover:bg-slate-50 hover:text-brand-blue">Tata Tertib</a>
                 </div>
             </div>
 
@@ -70,6 +81,7 @@
                         <a href="{{ route('produk-unggulan') }}" class="block px-4 py-2 text-xs font-semibold hover:bg-slate-50 hover:text-brand-blue">Teknik Ototronik</a>
                         <a href="{{ route('produk-unggulan') }}" class="block px-4 py-2 text-xs font-semibold hover:bg-slate-50 hover:text-brand-blue">Rekayasa Perangkat Lunak</a>
                     @endforelse
+
                 </div>
             </div>
 
@@ -81,22 +93,23 @@
                         : 'font-medium hover:text-blue-200' }}">
                     Peminjaman Aula <i class="fa-solid fa-chevron-down text-xs transition-transform duration-200"></i>
                 </button>
-                <div class="dropdown-menu hidden absolute left-0 mt-2 w-52 bg-white text-slate-800 rounded-xl shadow-xl py-2 border border-slate-100 z-50">
+                <div class="dropdown-menu hidden absolute left-0 mt-2 w-48 bg-white text-slate-800 rounded-xl shadow-xl py-2 border border-slate-100 z-50">
                     <a href="{{ route('layanan-peminjaman') }}#informasi" class="block px-4 py-2 text-xs font-semibold hover:bg-slate-50 hover:text-brand-blue">Info Peminjaman</a>
-                    <a href="{{ route('layanan-peminjaman') }}#paket" class="block px-4 py-2 text-xs font-semibold hover:bg-slate-50 hover:text-brand-blue">Paket & Tarif</a>
-                    <a href="{{ route('layanan-peminjaman') }}#fasilitas" class="block px-4 py-2 text-xs font-semibold hover:bg-slate-50 hover:text-brand-blue">Fasilitas Unggulan</a>
                     <a href="{{ route('layanan-peminjaman') }}#jadwal" class="block px-4 py-2 text-xs font-semibold hover:bg-slate-50 hover:text-brand-blue">Cek Ketersediaan Aula</a>
                 </div>
             </div>
 
             <!-- Dropdown PKL & BKK -->
             <div class="relative dropdown">
-                <button class="dropdown-toggle px-3 py-1 text-sm font-medium hover:text-blue-200 transition-colors inline-flex items-center gap-1">
+                <button class="dropdown-toggle px-3 py-1 text-sm transition-colors inline-flex items-center gap-1
+                    {{ request()->routeIs('pkl', 'pkl.detail', 'bkk', 'bkk.detail', 'pkl-bkk') 
+                        ? 'font-semibold bg-white/20 rounded-full' 
+                        : 'font-medium hover:text-blue-200' }}">
                     PKL & BKK <i class="fa-solid fa-chevron-down text-xs transition-transform duration-200"></i>
                 </button>
                 <div class="dropdown-menu hidden absolute left-0 mt-2 w-48 bg-white text-slate-800 rounded-xl shadow-xl py-2 border border-slate-100 z-50">
-                    <a href="{{ route('pkl-bkk') }}#mitra" class="block px-4 py-2 text-xs font-semibold hover:bg-slate-50 hover:text-brand-blue">Mitra DUDI</a>
-                    <a href="{{ route('pkl-bkk') }}#lowongan" class="block px-4 py-2 text-xs font-semibold hover:bg-slate-50 hover:text-brand-blue">Lowongan Pekerjaan</a>
+                    <a href="{{ route('pkl') }}" class="block px-4 py-2 text-xs font-semibold hover:bg-slate-50 hover:text-brand-blue">Mitra DUDI</a>
+                    <a href="{{ route('bkk') }}" class="block px-4 py-2 text-xs font-semibold hover:bg-slate-50 hover:text-brand-blue">Lowongan Kerja</a>
                 </div>
             </div>
 
@@ -109,7 +122,13 @@
                 Informasi
             </a>
 
-            <a href="{{ url('/#ppdb') }}" class="px-3 py-1 text-sm font-medium hover:text-blue-200 transition-colors">PPDB</a>
+            <a href="{{ route('ppdb') }}"
+                class="px-3 py-1 text-sm transition-colors
+                {{ request()->routeIs('ppdb') 
+                    ? 'font-semibold bg-white/20 rounded-full' 
+                    : 'font-medium hover:text-blue-200' }}">
+                PPDB
+            </a>
         </nav>
 
         <!-- Mobile Hamburger Menu Button -->
@@ -123,7 +142,14 @@
     <div id="mobile-menu" class="hidden lg:hidden bg-white border-b border-slate-200 px-6 py-4 transition-all">
         <div class="flex flex-col gap-3 font-semibold text-slate-700">
             
-            {{-- LINK: PROFIL (ACTIVE STATE MOBILE) --}}
+            <a href="{{ route('landing') }}" 
+                class="py-1 transition-colors
+                {{ request()->routeIs('landing') 
+                    ? 'text-brand-blue font-bold' 
+                    : 'hover:text-brand-blue' }}">
+                Beranda
+            </a>
+
             <a href="{{ route('profil') }}" 
                 class="py-1 transition-colors
                 {{ request()->routeIs('profil') 
@@ -147,6 +173,14 @@
                     @endforeach
                 </div>
             @endif
+            <a href="{{ route('kesiswaan') }}" 
+                class="py-1 transition-colors
+                {{ request()->routeIs('kesiswaan') 
+                    ? 'text-brand-blue font-bold' 
+                    : 'hover:text-brand-blue' }}">
+                Kesiswaan
+            </a>
+
             <a href="{{ route('layanan-peminjaman') }}" 
                 class="py-1 transition-colors
                 {{ request()->routeIs('layanan-peminjaman') 
@@ -154,7 +188,13 @@
                     : 'hover:text-brand-blue' }}">
                 Peminjaman Aula
             </a>
-            <a href="{{ route('pkl-bkk') }}" class="hover:text-brand-blue py-1">PKL & BKK</a>
+            <a href="{{ route('pkl') }}" 
+                class="py-1 transition-colors
+                {{ request()->routeIs('pkl', 'pkl.detail', 'bkk', 'bkk.detail', 'pkl-bkk') 
+                    ? 'text-brand-blue font-bold' 
+                    : 'hover:text-brand-blue' }}">
+                PKL & BKK
+            </a>
             <a href="{{ route('informasi') }}" 
                 class="py-1 transition-colors
                 {{ request()->routeIs('informasi*') 
@@ -162,7 +202,13 @@
                     : 'hover:text-brand-blue' }}">
                 Informasi
             </a>
-            <a href="{{ url('/#ppdb') }}" class="hover:text-brand-blue py-1">PPDB 2026</a>
+            <a href="{{ route('ppdb') }}" 
+                class="py-1 transition-colors
+                {{ request()->routeIs('ppdb') 
+                    ? 'text-brand-blue font-bold' 
+                    : 'hover:text-brand-blue' }}">
+                PPDB 2026
+            </a>
         </div>
     </div>
 </header>

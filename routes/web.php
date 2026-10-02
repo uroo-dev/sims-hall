@@ -51,6 +51,12 @@ Route::get('/produk-unggulan', [PublicProdukUnggulanController::class, 'index'])
 
 Route::get('/layanan-peminjaman', [PublicController::class, 'layananPeminjaman'])->name('layanan-peminjaman');
 
+Route::get('/pkl', [PublicController::class, 'pkl'])->name('pkl');
+Route::get('/pkl/mitra/{dudi}', [PublicController::class, 'pklDetail'])->name('pkl.detail');
+
+Route::get('/bkk', [PublicController::class, 'bkk'])->name('bkk');
+Route::get('/bkk/lowongan/{lowongan}', [PublicController::class, 'bkkDetail'])->name('bkk.detail');
+
 Route::get('/pkl-bkk', [PublicController::class, 'pklBkk'])->name('pkl-bkk');
 
 Route::get('/informasi', [PublicController::class, 'informasi'])->name('informasi');
@@ -103,6 +109,7 @@ Route::middleware(['auth', 'role:bkk,admin_pklbkk,super_admin,super_duper_admin'
         Route::get('/', [BkkController::class, 'index'])->name('dashboard');
 
         Route::get('/dudi', [BkkController::class, 'dudi'])->name('dudi.index');
+        Route::post('/dudi', [BkkController::class, 'storeDudi'])->name('dudi.store');
         Route::patch('/dudi/{dudi}', [BkkController::class, 'updateDudi'])->name('dudi.update');
 
         Route::get('/lowongan', [BkkController::class, 'lowongan'])->name('lowongan.index');
@@ -121,6 +128,7 @@ Route::middleware(['auth', 'role:bkk,admin_pklbkk,super_admin,super_duper_admin'
         Route::post('/pengajuan', [PklController::class, 'store'])->name('store');
 
         Route::get('/surat/{surat}', [PklController::class, 'showSurat'])->name('surat.show');
+        Route::put('/surat/{surat}', [PklController::class, 'updateSurat'])->name('surat.update');
         Route::get('/surat/{surat}/download', [PklController::class, 'downloadSurat'])->name('surat.download');
         Route::post('/surat/{surat}/regenerate', [PklController::class, 'regeneratePdf'])->name('surat.regenerate');
 

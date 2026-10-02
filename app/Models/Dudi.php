@@ -199,4 +199,28 @@ class Dudi extends Model
 
         return $this->penempatanFix()->count();
     }
+
+    /**
+     * URL logo DUDI (mendukung aset di public/assets dan storage upload).
+     */
+    public function getLogoUrlAttribute(): ?string
+    {
+        if (empty($this->logo)) {
+            return null;
+        }
+
+        if (file_exists(public_path('assets/'.$this->logo))) {
+            return asset('assets/'.$this->logo);
+        }
+
+        if (file_exists(public_path('storage/'.$this->logo))) {
+            return asset('storage/'.$this->logo);
+        }
+
+        if (str_starts_with($this->logo, 'http://') || str_starts_with($this->logo, 'https://')) {
+            return $this->logo;
+        }
+
+        return asset('storage/'.$this->logo);
+    }
 }

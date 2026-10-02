@@ -79,15 +79,24 @@
 
             <div class="bg-white rounded-2xl border border-gray-100 card-shadow p-4 flex flex-col">
 
-                <div class="flex items-start justify-between gap-2">
-                    <div class="min-w-0">
-                        <h3 class="font-bold text-gray-900 text-sm leading-snug">{{ $l->posisi }}</h3>
-                        <p class="text-[11px] text-gray-600 mt-1 font-medium">{{ $l->nama_perusahaan }}</p>
-                        @if ($l->dudi)
-                            <p class="text-[11px] text-gray-500 mt-0.5">
-                                <i class="fa-solid fa-location-dot mr-1"></i>{{ $l->dudi->kota }}
-                            </p>
+                <div class="flex items-start justify-between gap-3">
+                    <div class="flex items-start gap-3 min-w-0">
+                        @if ($l->logo_url)
+                            <img src="{{ $l->logo_url }}" alt="Logo {{ $l->nama_perusahaan }}" class="w-10 h-10 object-contain rounded-xl border border-gray-100 bg-gray-50 p-1 shrink-0">
+                        @else
+                            <div class="w-10 h-10 rounded-xl bg-blue-50 text-brand-600 border border-blue-100 flex items-center justify-center shrink-0 text-sm">
+                                <i class="fa-solid fa-briefcase"></i>
+                            </div>
                         @endif
+                        <div class="min-w-0">
+                            <h3 class="font-bold text-gray-900 text-sm leading-snug truncate" title="{{ $l->posisi }}">{{ $l->posisi }}</h3>
+                            <p class="text-[11px] text-gray-600 mt-0.5 font-medium truncate">{{ $l->nama_perusahaan }}</p>
+                            @if ($l->dudi)
+                                <p class="text-[11px] text-gray-500 mt-0.5">
+                                    <i class="fa-solid fa-location-dot mr-1 text-brand-500"></i>{{ $l->dudi->kota }}
+                                </p>
+                            @endif
+                        </div>
                     </div>
                     <span class="shrink-0 text-[10px] font-bold px-2 py-1 rounded-md {{ $badge[0] }}">
                         {{ $badge[1] }}

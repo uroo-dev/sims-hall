@@ -22,7 +22,7 @@ class BkkSeederTest extends TestCase
         $this->seed(BkkSeeder::class);
 
         $this->assertSame(2, Guru::count());
-        $this->assertSame(5, Siswa::count());
+        $this->assertSame(12, Siswa::count());
         $this->assertSame(3, Dudi::count());
         $this->assertSame(2, Lowongan::count());
 

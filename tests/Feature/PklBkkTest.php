@@ -509,6 +509,87 @@ class PklBkkTest extends TestCase
         $this->assertSame('421/BKK/'.now()->year.'/2', SuratPengajuan::generateNomorSurat(now()->year));
     }
 
+    public function test_halaman_penempatan_menampilkan_hierarki_jurusan_kelas_dan_siswa(): void
+    {
+        $penempatan = $this->buatPenempatan();
+        $siswa = $penempatan->siswa;
+
+        // Level 1: Jurusan
+        $resJurusan = $this->actingAs($this->bkk)->get(route('pkl.index'))->assertOk();
+        $resJurusan->assertSee('Penempatan PKL per Jurusan');
+        $resJurusan->assertSee($siswa->jurusan);
+
+        // Level 2: Kelas dalam Jurusan
+        $resKelas = $this->actingAs($this->bkk)->get(route('pkl.index', ['jurusan' => $siswa->jurusan]))->assertOk();
+        $resKelas->assertSee('Jurusan '.$siswa->jurusan);
+        $resKelas->assertSee($siswa->kelas);
+
+        // Level 3: Siswa dalam Kelas
+        $resSiswa = $this->actingAs($this->bkk)->get(route('pkl.index', ['jurusan' => $siswa->jurusan, 'kelas' => $siswa->kelas]))->assertOk();
+        $resSiswa->assertSee('Daftar Siswa Kelas '.$siswa->kelas);
+        $resSiswa->assertSee($siswa->nama);
+        $resSiswa->assertSee(route('pkl.surat.download', $penempatan->surat_pengajuan_id));
+        $resSiswa->assertSee(route('pkl.surat.show', $penempatan->surat_pengajuan_id));
+    }
+
+    public function test_surat_pengajuan_bisa_diupdate_dan_pdf_diregenerate(): void
+    {
+        Storage::fake('public');
+
+        $penempatan = $this->buatPenempatan();
+        $surat = $penempatan->suratPengajuan;
+
+        $dudiBaru = Dudi::create([
+            'nama_dudi' => 'PT Revisi Baru',
+            'alamat' => 'Jl. Baru No. 1',
+            'kota' => 'Surakarta',
+            'bidang_usaha' => 'IT',
+            'kuota_maksimal' => 5,
+        ]);
+
+        $guruBaru = Guru::create([
+            'nip' => '199001012015011001',
+            'nama' => 'Guru Revisi, S.Kom',
+            'jurusan' => 'RPL',
+        ]);
+
+        $payload = [
+            'dudi_id' => $dudiBaru->id,
+            'guru_id' => $guruBaru->id,
+            'tanggal_surat' => now()->toDateString(),
+            'tgl_mulai_pkl' => now()->addDays(5)->toDateString(),
+            'tgl_selesai_pkl' => now()->addMonths(3)->toDateString(),
+            'siswa_ids' => [$this->siswaA->id, $this->siswaB->id],
+        ];
+
+        $response = $this->actingAs($this->bkk)
+            ->put(route('pkl.surat.update', $surat), $payload)
+            ->assertRedirect(route('pkl.surat.show', $surat))
+            ->assertSessionHas('success');
+
+        $suratUpdated = $surat->fresh();
+        $this->assertSame($dudiBaru->id, $suratUpdated->dudi_id);
+        $this->assertSame(2, $suratUpdated->penempatanPkls()->count());
+        $this->assertNotNull($suratUpdated->file_pdf_path);
+        Storage::disk('public')->assertExists($suratUpdated->file_pdf_path);
+    }
+
+    public function test_halaman_siswa_menampilkan_seleksi_kelas(): void
+    {
+        $penempatan = $this->buatPenempatan();
+        $siswa = $penempatan->siswa;
+
+        // Tanpa filter kelas -> tampilkan card kelas
+        $response = $this->actingAs($this->bkk)->get(route('pkl.siswa.index'))->assertOk();
+        $response->assertSee('Data Siswa PKL per Kelas');
+        $response->assertSee($siswa->kelas);
+
+        // Dengan filter kelas -> tampilkan tabel siswa kelas itu
+        $responseKelas = $this->actingAs($this->bkk)->get(route('pkl.siswa.index', ['kelas' => $siswa->kelas]))->assertOk();
+        $responseKelas->assertSee('Data Siswa Kelas '.$siswa->kelas);
+        $responseKelas->assertSee($siswa->nama);
+    }
+
     /**
      * Helper: satu penempatan berstatus pengajuan.
      */

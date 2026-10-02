@@ -71,6 +71,27 @@
             </div>
 
         </div>
+        <!-- Section Powered By -->
+        <div class="mt-12 pt-8 border-t border-blue-400/30 text-center">
+            <p class="text-xs uppercase tracking-widest text-blue-100 font-semibold mb-4">Powered by:</p>
+
+            <!-- Container Putih Transparan Tone Lebih Terang -->
+            <div
+                class="bg-white/40 backdrop-blur-md border border-white/50 rounded-2xl px-6 py-4 inline-flex flex-wrap items-center justify-center gap-6 sm:gap-8 max-w-5xl mx-auto shadow-sm">
+                <img src="{{ asset('assets/logo-jhic/logo1.png') }}" alt="JHIC 2.0"
+                    class="h-8 sm:h-9 w-auto object-contain hover:scale-105 transition-transform">
+                <img src="{{ asset('assets/logo-jhic/logo2.png') }}" alt="Jagoan Hosting"
+                    class="h-8 sm:h-9 w-auto object-contain hover:scale-105 transition-transform">
+                <img src="{{ asset('assets/logo-jhic/logo3.png') }}" alt="KOMDIGI"
+                    class="h-8 sm:h-9 w-auto object-contain hover:scale-105 transition-transform">
+                <img src="{{ asset('assets/logo-jhic/logo4.png') }}" alt="Garuda Spark"
+                    class="h-8 sm:h-9 w-auto object-contain hover:scale-105 transition-transform">
+
+                <!-- Logo Ke-5 Ukuran Diperkecil -->
+                <img src="{{ asset('assets/logo-jhic/logo5.png') }}" alt="NGALUP"
+                    class="h-5 sm:h-6 w-auto object-contain hover:scale-105 transition-transform">
+            </div>
+        </div>
     </div>
 
     <!-- Copyright Bottom Bar -->

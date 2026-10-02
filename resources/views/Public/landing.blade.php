@@ -311,88 +311,87 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div
-                class="bg-gradient-to-r from-blue-300 via-blue-200 to-slate-200 rounded-2xl p-8 flex flex-col justify-between relative overflow-hidden shadow-sm hover:shadow-lg transition-shadow">
-                <div class="pr-24 z-10">
-                    <h3 class="text-xl sm:text-2xl font-extrabold text-slate-900 mb-3">
-                        TEKNIK PERMESINAN
-                    </h3>
-                    <p
-                        class="text-slate-700 text-xs sm:text-sm uppercase tracking-wide leading-relaxed mb-6 font-semibold">
-                        DIPROSES MENGGUNAKAN MESIN MODERN YANG MENGHASILKAN PRODUK DENGAN KUALITAS TINGGI, PRESISI,
-                        DAN HASIL YANG KONSISTEN.
-                    </p>
-                    <a href="#"
-                    class="bg-slate-900 text-white text-xs font-bold px-5 py-2.5 rounded-lg uppercase tracking-wider hover:bg-slate-800 transition-colors">
-                    SEMUA PRODUK
-                </a>
+                <div id="produk-mesin"
+                    class="bg-gradient-to-r from-blue-300 via-blue-200 to-slate-200 rounded-2xl p-8 flex flex-col justify-between relative overflow-hidden shadow-sm hover:shadow-lg transition-shadow">
+                    <div class="pr-24 z-10">
+                        <h3 class="text-xl sm:text-2xl font-extrabold text-slate-900 mb-3">
+                            TEKNIK PERMESINAN
+                        </h3>
+                        <p
+                            class="text-slate-700 text-xs sm:text-sm uppercase tracking-wide leading-relaxed mb-6 font-semibold">
+                            DIPROSES MENGGUNAKAN MESIN MODERN YANG MENGHASILKAN PRODUK DENGAN KUALITAS TINGGI, PRESISI,
+                            DAN HASIL YANG KONSISTEN.
+                        </p>
+                        <a href="#"
+                            class="bg-slate-900 text-white text-xs font-bold px-5 py-2.5 rounded-lg uppercase tracking-wider hover:bg-slate-800 transition-colors">
+                            SEMUA PRODUK
+                        </a>
+                    </div>
+                    <div class="absolute right-5 bottom-10 w-32 h-32 opacity-90">
+                        <img src="{{ asset('assets/produk mesin.png') }}" alt="Bolt / Hardware" class="w-full h-full object-contain">
+                    </div>
                 </div>
-                <div class="absolute right-5 bottom-10 w-32 h-32 opacity-90">
-                    <img src="assets/produk mesin.png" alt="Bolt / Hardware" class="w-full h-full object-contain">
-                </div>
-            </div>
 
-            <div
-                class="bg-gradient-to-r from-amber-200 via-amber-100 to-yellow-50 rounded-2xl p-8 flex flex-col justify-between relative overflow-hidden shadow-sm hover:shadow-lg transition-shadow">
-                <div class="pr-28 z-10">
-                    <h3 class="text-xl sm:text-2xl font-extrabold text-slate-900 mb-3">
-                        TEKNIK PEMBUATAN KAIN
-                    </h3>
-                    <p
-                        class="text-slate-700 text-xs sm:text-sm uppercase tracking-wide leading-relaxed mb-6 font-semibold">
-                        DARI KAIN BATIK, TENUN, HINGGA KAIN ECOPRINT SEMUA DIPRODUKSI OLEH SISWA JURUSAN TEKSTIL.
-                    </p>
-                    <a href="#"
-                    class="bg-slate-900 text-white text-xs font-bold px-5 py-2.5 rounded-lg uppercase tracking-wider hover:bg-slate-800 transition-colors">
-                    SEMUA PRODUK
-                </a>
-                  
+                <div id="produk-tpk"
+                    class="bg-gradient-to-r from-amber-200 via-amber-100 to-yellow-50 rounded-2xl p-8 flex flex-col justify-between relative overflow-hidden shadow-sm hover:shadow-lg transition-shadow">
+                    <div class="pr-28 z-10">
+                        <h3 class="text-xl sm:text-2xl font-extrabold text-slate-900 mb-3">
+                            TEKNIK PEMBUATAN KAIN
+                        </h3>
+                        <p
+                            class="text-slate-700 text-xs sm:text-sm uppercase tracking-wide leading-relaxed mb-6 font-semibold">
+                            DARI KAIN BATIK, TENUN, HINGGA KAIN ECOPRINT SEMUA DIPRODUKSI OLEH SISWA JURUSAN TEKSTIL.
+                        </p>
+                        <a href="#"
+                            class="bg-slate-900 text-white text-xs font-bold px-5 py-2.5 rounded-lg uppercase tracking-wider hover:bg-slate-800 transition-colors">
+                            SEMUA PRODUK
+                        </a>
+                    </div>
+                    <div class="absolute right-5 bottom-10 w-32 h-36 flex items-center justify-center opacity-90">
+                        <img src="{{ asset('assets/produk tpk.png') }}" alt="Bolt / Hardware" class="w-full h-full object-contain">
+                    </div>
                 </div>
-                <div class="absolute right-5 bottom-10 w-32 h-36 flex items-center justify-center opacity-90">
-                    <img src="assets/produk tpk.png" alt="Bolt / Hardware" class="w-full h-full object-contain">
-                </div>
-            </div>
 
-            <div
-                class="bg-gradient-to-r from-emerald-200 via-teal-100 to-emerald-50 rounded-2xl p-8 flex flex-col justify-between relative overflow-hidden shadow-sm hover:shadow-lg transition-shadow">
-                <div class="pr-32 z-10">
-                    <h3 class="text-xl sm:text-2xl font-extrabold text-slate-900 mb-3">
-                        REKAYASA PERANGKAT LUNAK
-                    </h3>
-                    <p
-                        class="text-slate-700 text-xs sm:text-sm uppercase tracking-wide leading-relaxed mb-6 font-semibold">
-                        DARI COMPANY PROFILE, E-COMMERCE, HINGGA APLIKASI ONLINE
-                    </p>
-                    <a href="#"
-                    class="bg-slate-900 text-white text-xs font-bold px-5 py-2.5 rounded-lg uppercase tracking-wider hover:bg-slate-800 transition-colors">
-                    SEMUA PRODUK
-                </a>
+                <div id="produk-rpl"
+                    class="bg-gradient-to-r from-emerald-200 via-teal-100 to-emerald-50 rounded-2xl p-8 flex flex-col justify-between relative overflow-hidden shadow-sm hover:shadow-lg transition-shadow">
+                    <div class="pr-32 z-10">
+                        <h3 class="text-xl sm:text-2xl font-extrabold text-slate-900 mb-3">
+                            REKAYASA PERANGKAT LUNAK
+                        </h3>
+                        <p
+                            class="text-slate-700 text-xs sm:text-sm uppercase tracking-wide leading-relaxed mb-6 font-semibold">
+                            DARI COMPANY PROFILE, E-COMMERCE, HINGGA APLIKASI ONLINE
+                        </p>
+                        <a href="#"
+                            class="bg-slate-900 text-white text-xs font-bold px-5 py-2.5 rounded-lg uppercase tracking-wider hover:bg-slate-800 transition-colors">
+                            SEMUA PRODUK
+                        </a>
+                    </div>
+                    <div class="absolute right-5 bottom-10 w-32 h-36 flex items-center justify-center opacity-90">
+                        <img src="{{ asset('assets/produk rpl.png') }}" alt="Bolt / Hardware" class="w-full h-full object-contain">
+                    </div>
                 </div>
-                <div class="absolute right-5 bottom-10 w-32 h-36 flex items-center justify-center opacity-90">
-                    <img src="assets/produk rpl.png" alt="Bolt / Hardware" class="w-full h-full object-contain">
-                </div>
-            </div>
 
-            <div
-                class="bg-gradient-to-r from-red-300 via-pink-200 to-rose-100 rounded-2xl p-8 flex flex-col justify-between relative overflow-hidden shadow-sm hover:shadow-lg transition-shadow">
-                <div class="pr-28 z-10">
-                    <h3 class="text-xl sm:text-2xl font-extrabold text-slate-900 mb-3">
-                        TEKNIK OTOTRONIK
-                    </h3>
-                    <p
-                        class="text-slate-700 text-xs sm:text-sm uppercase tracking-wide leading-relaxed mb-6 font-semibold">
-                        TEKNOLOGI OTOTRONIK MODERN DALAM PERAWATAN DAN PERBAIKAN KENDARAAN UNTUK MENGHASILKAN
-                        PERFORMA YANG OPTIMAL DAN BERKUALITAS.
-                    </p>
-                    <a href="#"
-                        class="bg-slate-900 text-white text-xs font-bold px-5 py-2.5 rounded-lg uppercase tracking-wider hover:bg-slate-800 transition-colors">
-                        SEMUA PRODUK
-                    </a>
+                <div id="produk-oto"
+                    class="bg-gradient-to-r from-red-300 via-pink-200 to-rose-100 rounded-2xl p-8 flex flex-col justify-between relative overflow-hidden shadow-sm hover:shadow-lg transition-shadow">
+                    <div class="pr-28 z-10">
+                        <h3 class="text-xl sm:text-2xl font-extrabold text-slate-900 mb-3">
+                            TEKNIK OTOTRONIK
+                        </h3>
+                        <p
+                            class="text-slate-700 text-xs sm:text-sm uppercase tracking-wide leading-relaxed mb-6 font-semibold">
+                            TEKNOLOGI OTOTRONIK MODERN DALAM PERAWATAN DAN PERBAIKAN KENDARAAN UNTUK MENGHASILKAN
+                            PERFORMA YANG OPTIMAL DAN BERKUALITAS.
+                        </p>
+                        <a href="#"
+                            class="bg-slate-900 text-white text-xs font-bold px-5 py-2.5 rounded-lg uppercase tracking-wider hover:bg-slate-800 transition-colors">
+                            SEMUA PRODUK
+                        </a>
+                    </div>
+                    <div class="absolute right-5 bottom-10 w-32 h-36 flex items-center justify-center opacity-90">
+                        <img src="{{ asset('assets/produk oto.png') }}" alt="Bolt / Hardware" class="w-full h-full object-contain">
+                    </div>
                 </div>
-                <div class="absolute right-5 bottom-10 w-32 h-36 flex items-center justify-center opacity-90">
-                    <img src="assets/produk oto.png" alt="Bolt / Hardware" class="w-full h-full object-contain">
-                </div>
-            </div>
             </div>
 
         </div>

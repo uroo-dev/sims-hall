@@ -36,10 +36,10 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-[11px] font-semibold text-gray-600 mb-1.5">
-                            DUDI Terdaftar
+                            DUDI Terdaftar <span class="text-xs font-normal text-brand-600">(Dapat Dicari)</span>
                         </label>
-                        <select name="dudi_id" id="dudi-terdaftar"
-                            class="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-brand-500 focus:border-brand-500">
+                        {{-- Hidden real select for form payload compatibility --}}
+                        <select name="dudi_id" id="dudi-terdaftar" class="hidden">
                             <option value="">-- Buat DUDI baru (isi form di bawah) --</option>
                             @foreach ($dudis as $d)
                                 <option value="{{ $d->id }}"
@@ -50,7 +50,60 @@
                                 </option>
                             @endforeach
                         </select>
-                        <p class="text-[10px] text-gray-400 mt-1">Hanya DUDI dengan sisa kuota ditampilkan.</p>
+
+                        {{-- Searchable Combobox UI --}}
+                        <div class="relative" id="dudi-combobox">
+                            <button type="button" id="dudi-combo-btn"
+                                class="w-full text-left bg-white text-sm border border-gray-200 rounded-lg px-3 py-2 flex items-center justify-between focus:ring-2 focus:ring-brand-500 focus:border-brand-500 cursor-pointer shadow-xs">
+                                <span id="dudi-combo-label" class="truncate text-gray-700 font-medium">
+                                    -- Pilih / Cari DUDI terdaftar --
+                                </span>
+                                <i class="fa-solid fa-chevron-down text-xs text-gray-400 ml-2 transition-transform duration-200" id="dudi-combo-icon"></i>
+                            </button>
+
+                            <div id="dudi-combo-menu"
+                                class="hidden absolute left-0 right-0 z-50 mt-1.5 bg-white border border-gray-200 rounded-xl shadow-xl overflow-hidden text-sm">
+                                <div class="p-2 border-b border-gray-100 bg-gray-50/80">
+                                    <div class="relative">
+                                        <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-2.5 text-xs text-gray-400"></i>
+                                        <input type="text" id="dudi-search-input" placeholder="Ketik nama perusahaan, kota, bidang usaha..."
+                                            autocomplete="off"
+                                            class="w-full pl-8 pr-3 py-1.5 text-xs border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500">
+                                    </div>
+                                </div>
+
+                                <div class="max-h-60 overflow-y-auto divide-y divide-gray-50 p-1" id="dudi-combo-options">
+                                    <div class="dudi-opt-item px-3 py-2.5 hover:bg-brand-50 text-brand-700 font-semibold text-xs cursor-pointer rounded-lg flex items-center gap-2 transition"
+                                        data-val="" data-name="-- Buat DUDI baru (isi form di bawah) --" data-search="buat baru ketik baru">
+                                        <i class="fa-solid fa-circle-plus text-brand-600"></i>
+                                        <span>-- Buat DUDI baru (isi form di bawah) --</span>
+                                    </div>
+                                    @foreach ($dudis as $d)
+                                        <div class="dudi-opt-item px-3 py-2 hover:bg-gray-50 cursor-pointer rounded-lg transition"
+                                            data-val="{{ $d->id }}"
+                                            data-name="{{ $d->nama_dudi }}"
+                                            data-search="{{ strtolower($d->nama_dudi . ' ' . $d->kota . ' ' . $d->bidang_usaha) }}">
+                                            <div class="flex items-center justify-between gap-2">
+                                                <span class="font-semibold text-gray-900 text-xs truncate">{{ $d->nama_dudi }}</span>
+                                                <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-50 text-brand-700 shrink-0">
+                                                    Sisa {{ $d->sisa_kuota }}
+                                                </span>
+                                            </div>
+                                            <div class="text-[11px] text-gray-500 flex items-center gap-2 mt-0.5">
+                                                <span><i class="fa-solid fa-location-dot text-[10px] mr-1 text-gray-400"></i>{{ $d->kota }}</span>
+                                                <span>&bull;</span>
+                                                <span class="truncate">{{ $d->bidang_usaha }}</span>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                    <div id="dudi-combo-empty" class="hidden px-3 py-4 text-center text-xs text-gray-400">
+                                        <i class="fa-solid fa-building-circle-xmark text-lg text-gray-300 mb-1 block"></i>
+                                        Tidak ada DUDI yang cocok dengan pencarian
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-[10px] text-gray-400 mt-1">Cari DUDI atau pilih opsi buat DUDI baru.</p>
                     </div>
 
                     <div>
@@ -245,6 +298,95 @@
             const inputDudiBaru = document.getElementById('dudi-baru');
             const panelBaru = document.getElementById('panel-dudi-baru');
 
+            // --- Searchable Combobox Controls ---
+            const comboWrapper = document.getElementById('dudi-combobox');
+            const comboBtn = document.getElementById('dudi-combo-btn');
+            const comboLabel = document.getElementById('dudi-combo-label');
+            const comboIcon = document.getElementById('dudi-combo-icon');
+            const comboMenu = document.getElementById('dudi-combo-menu');
+            const searchInput = document.getElementById('dudi-search-input');
+            const optItems = Array.from(document.querySelectorAll('.dudi-opt-item'));
+            const emptyMsg = document.getElementById('dudi-combo-empty');
+
+            function updateComboDisplay(val) {
+                if (val === '') {
+                    comboLabel.textContent = '-- Buat DUDI baru (isi form di bawah) --';
+                    comboLabel.classList.add('text-brand-600', 'font-semibold');
+                } else {
+                    const item = optItems.find(function(it) { return it.dataset.val === String(val); });
+                    comboLabel.textContent = item ? item.dataset.name : '-- Pilih / Cari DUDI terdaftar --';
+                    comboLabel.classList.remove('text-brand-600');
+                }
+            }
+
+            function openCombo() {
+                if (!comboMenu) return;
+                comboMenu.classList.remove('hidden');
+                if (comboIcon) comboIcon.classList.add('rotate-180');
+                if (searchInput) {
+                    searchInput.value = '';
+                    filterOptions('');
+                    setTimeout(function() { searchInput.focus(); }, 50);
+                }
+            }
+
+            function closeCombo() {
+                if (!comboMenu) return;
+                comboMenu.classList.add('hidden');
+                if (comboIcon) comboIcon.classList.remove('rotate-180');
+            }
+
+            function filterOptions(query) {
+                const q = query.toLowerCase().trim();
+                let visibleCount = 0;
+                optItems.forEach(function(item) {
+                    const match = !q || item.dataset.search.includes(q) || item.dataset.name.toLowerCase().includes(q);
+                    item.style.display = match ? '' : 'none';
+                    if (match) visibleCount++;
+                });
+                if (emptyMsg) {
+                    emptyMsg.classList.toggle('hidden', visibleCount > 0);
+                }
+            }
+
+            if (comboBtn && comboMenu) {
+                comboBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    if (comboMenu.classList.contains('hidden')) {
+                        openCombo();
+                    } else {
+                        closeCombo();
+                    }
+                });
+
+                if (searchInput) {
+                    searchInput.addEventListener('input', function(e) {
+                        filterOptions(e.target.value);
+                    });
+                    searchInput.addEventListener('keydown', function(e) {
+                        if (e.key === 'Escape') closeCombo();
+                    });
+                }
+
+                optItems.forEach(function(item) {
+                    item.addEventListener('click', function() {
+                        const val = this.dataset.val;
+                        if (selectDudi) {
+                            selectDudi.value = val;
+                            selectDudi.dispatchEvent(new Event('change'));
+                        }
+                        updateComboDisplay(val);
+                        closeCombo();
+                    });
+                });
+
+                document.addEventListener('click', function(e) {
+                    if (comboWrapper && !comboWrapper.contains(e.target)) {
+                        closeCombo();
+                    }
+                });
+            }
+
             if (selectDudi && inputDudiBaru && panelBaru) {
                 function syncDudi() {
                     const pakaiBaru = selectDudi.value === '';
@@ -254,6 +396,7 @@
                     panelBaru.querySelectorAll('input').forEach(function(i) {
                         i.disabled = !pakaiBaru;
                     });
+                    updateComboDisplay(selectDudi.value);
                 }
                 selectDudi.addEventListener('change', syncDudi);
                 syncDudi();

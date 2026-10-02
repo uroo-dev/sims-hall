@@ -21,7 +21,8 @@
     @endif
 
     <form method="POST"
-        action="{{ $lowongan ? route('pkl.lowongan.update', $lowongan) : route('pkl.lowongan.store') }}">
+        action="{{ $lowongan ? route('pkl.lowongan.update', $lowongan) : route('pkl.lowongan.store') }}"
+        enctype="multipart/form-data">
         @csrf
         @if ($lowongan)
             @method('PUT')
@@ -100,6 +101,33 @@
                         </option>
                     @endforeach
                 </select>
+            </div>
+
+            <div>
+                <label class="block text-[11px] font-semibold text-gray-600 mb-1.5">
+                    Foto / Logo Lowongan <span class="font-normal text-gray-400">(opsional, max 2MB)</span>
+                </label>
+                @if ($lowongan && $lowongan->logo_url)
+                    <div class="flex items-center gap-3 mb-2 p-2.5 bg-slate-50 border border-slate-200 rounded-xl">
+                        <img src="{{ $lowongan->logo_url }}" alt="Logo saat ini" class="w-12 h-12 object-contain rounded-lg border bg-white p-1">
+                        <div class="text-xs">
+                            <p class="font-semibold text-slate-700">Logo saat ini terpasang</p>
+                            @if ($lowongan->logo)
+                                <label class="inline-flex items-center gap-1.5 text-red-600 cursor-pointer text-[11px] mt-1">
+                                    <input type="checkbox" name="hapus_logo" value="1" class="rounded border-gray-300 text-red-600 focus:ring-red-500">
+                                    Hapus logo khusus ini (gunakan logo DUDI/default)
+                                </label>
+                            @else
+                                <p class="text-[11px] text-slate-400">(Menggunakan logo bawaan DUDI)</p>
+                            @endif
+                        </div>
+                    </div>
+                @endif
+                <input type="file" name="logo" accept="image/*"
+                    class="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-brand-blue hover:file:bg-blue-100 border border-gray-200 rounded-lg p-1.5">
+                <p class="text-[10px] text-gray-400 mt-1">
+                    Upload logo perusahaan / poster lowongan kerja (JPG, PNG, WEBP). Jika kosong dan memilih DUDI, akan otomatis memakai logo DUDI.
+                </p>
             </div>
 
             <div>
