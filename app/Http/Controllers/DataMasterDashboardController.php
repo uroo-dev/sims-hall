@@ -118,7 +118,7 @@ class DataMasterDashboardController extends Controller
             'username' => 'required|string|max:255|unique:users,username',
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
-            'role' => 'required|in:admin,admin_aula,admin_master,admin_kesiswaan,admin_produk,admin_produk_unggulan,admin_ppdb,admin_pklbkk,super_admin,super_duper_admin,user,guru,kepala_sekolah,organisasi,instansi_luar_terikat,instansi_luar,pelanggan,bkk',
+            'role' => 'required|in:admin,admin_aula,admin_master,admin_kesiswaan,admin_produk,admin_produk_unggulan,admin_ppdb,admin_pklbkk,admin_sekolah,super_admin,super_duper_admin,user,guru,kepala_sekolah,organisasi,instansi_luar_terikat,instansi_luar,pelanggan,bkk',
         ]);
 
         User::create([
@@ -140,7 +140,7 @@ class DataMasterDashboardController extends Controller
             'username' => 'required|string|max:255|unique:users,username,'.$id,
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,'.$id,
-            'role' => 'required|in:admin,admin_aula,admin_master,admin_kesiswaan,admin_produk,admin_produk_unggulan,admin_ppdb,admin_pklbkk,super_admin,super_duper_admin,user,guru,kepala_sekolah,organisasi,instansi_luar_terikat,instansi_luar,pelanggan,bkk',
+            'role' => 'required|in:admin,admin_aula,admin_master,admin_kesiswaan,admin_produk,admin_produk_unggulan,admin_ppdb,admin_pklbkk,admin_sekolah,super_admin,super_duper_admin,user,guru,kepala_sekolah,organisasi,instansi_luar_terikat,instansi_luar,pelanggan,bkk',
         ]);
 
         $user->update([

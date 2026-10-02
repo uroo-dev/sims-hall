@@ -204,7 +204,31 @@
                     </a>
                 @endif
 
-                @if(in_array($userRole, ['admin_master', 'super_admin', 'super_duper_admin']))
+                @if(in_array($userRole, ['admin_sekolah', 'super_admin', 'super_duper_admin']))
+                    <!-- SECTION: ARTIKEL SEKOLAH -->
+                    <div class="pt-3 pb-1">
+                        <div class="flex items-center justify-between text-[11px] font-bold text-blue-100/80 tracking-wider uppercase px-2 mb-2">
+                            <span>Artikel Sekolah</span>
+                            <span class="w-12 h-[1px] bg-white/30"></span>
+                        </div>
+                    </div>
+
+                    <!-- KATEGORI ARTIKEL -->
+                    <a href="{{ route('admin.kategori-artikel.index') }}"
+                        class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('admin.kategori-artikel.*') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
+                        <i class="fa-solid fa-tags text-base w-5 text-center"></i>
+                        <span>Kategori Artikel</span>
+                    </a>
+
+                    <!-- DAFTAR ARTIKEL -->
+                    <a href="{{ route('admin.artikel.index') }}"
+                        class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('admin.artikel.*') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
+                        <i class="fa-solid fa-newspaper text-base w-5 text-center"></i>
+                        <span>Daftar Artikel</span>
+                    </a>
+                @endif
+
+                @if(in_array($userRole, ['admin_master', 'admin_sekolah', 'super_admin', 'super_duper_admin']))
                     <!-- SECTION: DATA MASTER SEKOLAH -->
                     <div class="pt-3 pb-1">
                         <div class="flex items-center justify-between text-[11px] font-bold text-blue-100/80 tracking-wider uppercase px-2 mb-2">
@@ -213,23 +237,25 @@
                         </div>
                     </div>
 
-                    <a href="{{ route('datamaster.index') }}"
-                        class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('datamaster.index') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
-                        <i class="fa-solid fa-graduation-cap text-base w-5 text-center"></i>
-                        <span>Dashboard Master</span>
-                    </a>
+                    @if(in_array($userRole, ['admin_master', 'super_admin', 'super_duper_admin']))
+                        <a href="{{ route('datamaster.index') }}"
+                            class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('datamaster.index') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
+                            <i class="fa-solid fa-graduation-cap text-base w-5 text-center"></i>
+                            <span>Dashboard Master</span>
+                        </a>
 
-                    <a href="{{ route('datamaster.sekolah.edit') }}"
-                        class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('datamaster.sekolah.*') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
-                        <i class="fa-solid fa-school text-base w-5 text-center"></i>
-                        <span>Data Sekolah</span>
-                    </a>
+                        <a href="{{ route('datamaster.sekolah.edit') }}"
+                            class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('datamaster.sekolah.*') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
+                            <i class="fa-solid fa-school text-base w-5 text-center"></i>
+                            <span>Data Sekolah</span>
+                        </a>
 
-                    <a href="{{ route('datamaster.users') }}"
-                        class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('datamaster.users*') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
-                        <i class="fa-solid fa-users-gear text-base w-5 text-center"></i>
-                        <span>Data Users</span>
-                    </a>
+                        <a href="{{ route('datamaster.users') }}"
+                            class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('datamaster.users*') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
+                            <i class="fa-solid fa-users-gear text-base w-5 text-center"></i>
+                            <span>Data Users</span>
+                        </a>
+                    @endif
 
                     <a href="{{ route('datamaster.guru.index') }}"
                         class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('datamaster.guru.*') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">

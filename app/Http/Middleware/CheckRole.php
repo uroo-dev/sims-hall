@@ -24,7 +24,7 @@ class CheckRole
         }
 
         // Super admin bypasses admin/module role checks
-        $adminRoles = ['admin', 'super_admin', 'super_duper_admin', 'admin_aula', 'admin_master', 'admin_kesiswaan', 'admin_produk', 'admin_produk_unggulan', 'admin_ppdb', 'admin_pklbkk', 'bkk'];
+        $adminRoles = ['admin', 'super_admin', 'super_duper_admin', 'admin_aula', 'admin_master', 'admin_kesiswaan', 'admin_produk', 'admin_produk_unggulan', 'admin_ppdb', 'admin_pklbkk', 'admin_sekolah', 'bkk'];
         if ($user->isSuperAdmin() && array_intersect($roles, $adminRoles)) {
             return $next($request);
         }

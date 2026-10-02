@@ -92,6 +92,10 @@ class User extends Authenticatable
             return true;
         }
 
+        if (in_array($fiturName, ['sekolah', 'artikel'], true) && $this->role === 'admin_sekolah') {
+            return true;
+        }
+
         return false;
     }
 }

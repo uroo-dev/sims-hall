@@ -29,7 +29,7 @@ return [
             'key' => 'dashboard',
             'label' => 'Dashboard',
             'icon' => 'fa-table-cells-large',
-            'roles' => ['admin_aula', 'admin_master', 'admin_kesiswaan', 'admin_produk', 'admin_produk_unggulan', 'admin_ppdb', 'admin_pklbkk', 'super_admin', 'super_duper_admin', 'bkk'],
+            'roles' => ['admin_aula', 'admin_master', 'admin_kesiswaan', 'admin_produk', 'admin_produk_unggulan', 'admin_ppdb', 'admin_pklbkk', 'admin_sekolah', 'super_admin', 'super_duper_admin', 'bkk'],
             // Role bkk / admin_pklbkk masuk ke dashboard BKK, bukan dashboard utama.
             'route' => [
                 'bkk' => 'pkl.dashboard',
@@ -39,10 +39,21 @@ return [
         ],
 
         [
+            'key' => 'artikel',
+            'label' => 'Artikel Sekolah',
+            'icon' => 'fa-newspaper',
+            'roles' => ['admin_sekolah', 'super_admin', 'super_duper_admin'],
+            'children' => [
+                ['label' => 'Kategori Artikel', 'icon' => 'fa-tags', 'route' => 'admin.kategori-artikel.index'],
+                ['label' => 'Daftar Artikel', 'icon' => 'fa-newspaper', 'route' => 'admin.artikel.index'],
+            ],
+        ],
+
+        [
             'key' => 'master',
             'label' => 'Data Master Sekolah',
             'icon' => 'fa-graduation-cap',
-            'roles' => ['admin_master', 'super_admin', 'super_duper_admin'],
+            'roles' => ['admin_master', 'admin_sekolah', 'super_admin', 'super_duper_admin'],
             'children' => [
                 ['label' => 'Dashboard Sekolah', 'icon' => 'fa-comment-dots', 'route' => 'datamaster.index'],
                 ['label' => 'Data Sekolah', 'icon' => 'fa-school', 'route' => 'datamaster.sekolah.edit'],

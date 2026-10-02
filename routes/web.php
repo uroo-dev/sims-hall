@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminPeminjamanController;
+use App\Http\Controllers\ArtikelController;
 use App\Http\Controllers\AulaController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BkkController;
@@ -9,6 +10,7 @@ use App\Http\Controllers\CustomerPanelController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DataMasterDashboardController;
 use App\Http\Controllers\FasilitasController;
+use App\Http\Controllers\KategoriArtikelController;
 use App\Http\Controllers\KepalaSekolahController;
 use App\Http\Controllers\LaporanPemasukanController;
 use App\Http\Controllers\PaketPeminjamanController;
@@ -134,8 +136,27 @@ Route::middleware('auth')->group(function () {
 
     // --- DASHBOARD UTAMA ---
     Route::get('/dashboard', [DashboardController::class, 'index'])
-        ->middleware('role:admin,admin_aula,admin_master,admin_kesiswaan,admin_produk,admin_produk_unggulan,admin_ppdb,admin_pklbkk,super_admin,super_duper_admin,pelanggan,kepala_sekolah')
+        ->middleware('role:admin,admin_aula,admin_master,admin_kesiswaan,admin_produk,admin_produk_unggulan,admin_ppdb,admin_pklbkk,admin_sekolah,super_admin,super_duper_admin,pelanggan,kepala_sekolah')
         ->name('dashboard');
+
+    // Admin Sekolah / Super Admin: CRUD Kategori Artikel & Artikel
+    Route::middleware('role:admin_sekolah,super_admin,super_duper_admin')->prefix('admin')->name('admin.')->group(function () {
+        // Kategori Artikel
+        Route::get('/kategori-artikel', [KategoriArtikelController::class, 'index'])->name('kategori-artikel.index');
+        Route::post('/kategori-artikel', [KategoriArtikelController::class, 'store'])->name('kategori-artikel.store');
+        Route::put('/kategori-artikel/{id}', [KategoriArtikelController::class, 'update'])->name('kategori-artikel.update');
+        Route::delete('/kategori-artikel/{id}', [KategoriArtikelController::class, 'destroy'])->name('kategori-artikel.destroy');
+
+        // Artikel
+        Route::get('/artikel', [ArtikelController::class, 'index'])->name('artikel.index');
+        Route::get('/artikel/create', [ArtikelController::class, 'create'])->name('artikel.create');
+        Route::post('/artikel', [ArtikelController::class, 'store'])->name('artikel.store');
+        Route::post('/artikel/upload-image', [ArtikelController::class, 'uploadImage'])->name('artikel.upload-image');
+        Route::get('/artikel/{id}', [ArtikelController::class, 'show'])->name('artikel.show');
+        Route::get('/artikel/{id}/edit', [ArtikelController::class, 'edit'])->name('artikel.edit');
+        Route::put('/artikel/{id}', [ArtikelController::class, 'update'])->name('artikel.update');
+        Route::delete('/artikel/{id}', [ArtikelController::class, 'destroy'])->name('artikel.destroy');
+    });
 
     // Kepala Sekolah: Dashboard & Persetujuan Final Peminjaman Aula
     Route::middleware('role:kepala_sekolah,super_admin,super_duper_admin')->prefix('kepala-sekolah')->name('kepala-sekolah.')->group(function () {
@@ -225,7 +246,7 @@ Route::middleware('auth')->group(function () {
     */
     Route::prefix('dashboard/data-master')->group(function () {
         Route::get('/', [DataMasterDashboardController::class, 'index'])
-            ->middleware('role:admin_master,super_admin,super_duper_admin')
+            ->middleware('role:admin_master,admin_sekolah,super_admin,super_duper_admin')
             ->name('datamaster.index');
 
         Route::get('/sekolah', [DataMasterDashboardController::class, 'editSekolah'])
@@ -254,36 +275,36 @@ Route::middleware('auth')->group(function () {
 
         // Data Guru
         Route::get('/guru', [DataMasterDashboardController::class, 'guru'])
-            ->middleware('role:admin_master,super_admin,super_duper_admin')
+            ->middleware('role:admin_master,admin_sekolah,super_admin,super_duper_admin')
             ->name('datamaster.guru.index');
 
         Route::post('/guru', [DataMasterDashboardController::class, 'storeGuru'])
-            ->middleware('role:admin_master,super_admin,super_duper_admin')
+            ->middleware('role:admin_master,admin_sekolah,super_admin,super_duper_admin')
             ->name('datamaster.guru.store');
 
         Route::put('/guru/{id}', [DataMasterDashboardController::class, 'updateGuru'])
-            ->middleware('role:admin_master,super_admin,super_duper_admin')
+            ->middleware('role:admin_master,admin_sekolah,super_admin,super_duper_admin')
             ->name('datamaster.guru.update');
 
         Route::delete('/guru/{id}', [DataMasterDashboardController::class, 'destroyGuru'])
-            ->middleware('role:admin_master,super_admin,super_duper_admin')
+            ->middleware('role:admin_master,admin_sekolah,super_admin,super_duper_admin')
             ->name('datamaster.guru.destroy');
 
         // Data Siswa
         Route::get('/siswa', [DataMasterDashboardController::class, 'siswa'])
-            ->middleware('role:admin_master,super_admin,super_duper_admin')
+            ->middleware('role:admin_master,admin_sekolah,super_admin,super_duper_admin')
             ->name('datamaster.siswa.index');
 
         Route::post('/siswa', [DataMasterDashboardController::class, 'storeSiswa'])
-            ->middleware('role:admin_master,super_admin,super_duper_admin')
+            ->middleware('role:admin_master,admin_sekolah,super_admin,super_duper_admin')
             ->name('datamaster.siswa.store');
 
         Route::put('/siswa/{id}', [DataMasterDashboardController::class, 'updateSiswa'])
-            ->middleware('role:admin_master,super_admin,super_duper_admin')
+            ->middleware('role:admin_master,admin_sekolah,super_admin,super_duper_admin')
             ->name('datamaster.siswa.update');
 
         Route::delete('/siswa/{id}', [DataMasterDashboardController::class, 'destroySiswa'])
-            ->middleware('role:admin_master,super_admin,super_duper_admin')
+            ->middleware('role:admin_master,admin_sekolah,super_admin,super_duper_admin')
             ->name('datamaster.siswa.destroy');
     });
 });
