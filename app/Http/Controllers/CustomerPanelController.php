@@ -143,6 +143,11 @@ class CustomerPanelController extends Controller
     public function peminjamanCreate(Request $request): View
     {
         $user = $this->getCurrentUser();
+
+        if (! $user || $user->role !== 'pelanggan') {
+            abort(403, 'Akses ditolak: Hanya akun dengan role pelanggan yang dapat mengajukan peminjaman aula.');
+        }
+
         $selectedPaketId = $request->query('paket_id');
 
         // Eager load facilities & details agar bebas N+1 query
@@ -190,6 +195,11 @@ class CustomerPanelController extends Controller
     public function peminjamanStore(Request $request): RedirectResponse
     {
         $user = $this->getCurrentUser();
+
+        if (! $user || $user->role !== 'pelanggan') {
+            abort(403, 'Akses ditolak: Hanya akun dengan role pelanggan yang dapat mengajukan peminjaman aula.');
+        }
+
         $isCustom = $request->boolean('is_custom') || $request->input('is_custom') === '1' || $request->input('paket_peminjaman_id') === 'custom';
 
         $rules = [

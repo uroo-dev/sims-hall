@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use App\Models\DetailPembayaran;
-use App\Models\Fitur;
 use App\Models\PaketPeminjaman;
 use App\Models\PaymentConfiguration;
 use App\Models\Pembayaran;
@@ -863,11 +862,7 @@ class CustomerPanelTest extends TestCase
         ]);
 
         $admin = User::factory()->create([
-            'role' => 'admin',
-        ]);
-        Fitur::create([
-            'user_id' => $admin->id,
-            'nama_fitur' => 'aula',
+            'role' => 'admin_aula',
         ]);
 
         $paket = PaketPeminjaman::create([
@@ -1013,18 +1008,14 @@ class CustomerPanelTest extends TestCase
     public function test_halaman_pembayaran_setelah_admin_menolak_dp_menampilkan_form_transfer_ulang_bukan_refund(): void
     {
         $pelanggan = User::factory()->create([
-            'role' => 'user',
+            'role' => 'pelanggan',
             'email' => 'buyer@example.com',
             'name' => 'Buyer Test',
         ]);
 
         $admin = User::factory()->create([
-            'role' => 'admin',
+            'role' => 'admin_aula',
             'email' => 'admin_sarpras@example.com',
-        ]);
-        Fitur::create([
-            'user_id' => $admin->id,
-            'nama_fitur' => 'aula',
         ]);
 
         $paket = PaketPeminjaman::create([

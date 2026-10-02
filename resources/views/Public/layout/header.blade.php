@@ -54,12 +54,17 @@
 
             <!-- Dropdown Peminjaman Aula -->
             <div class="relative dropdown">
-                <button class="dropdown-toggle px-3 py-1 text-sm font-medium hover:text-blue-200 transition-colors inline-flex items-center gap-1">
+                <button class="dropdown-toggle px-3 py-1 text-sm transition-colors inline-flex items-center gap-1
+                    {{ request()->routeIs('layanan-peminjaman') 
+                        ? 'font-semibold bg-white/20 rounded-full' 
+                        : 'font-medium hover:text-blue-200' }}">
                     Peminjaman Aula <i class="fa-solid fa-chevron-down text-xs transition-transform duration-200"></i>
                 </button>
-                <div class="dropdown-menu hidden absolute left-0 mt-2 w-48 bg-white text-slate-800 rounded-xl shadow-xl py-2 border border-slate-100 z-50">
-                    <a href="#" class="block px-4 py-2 text-xs font-semibold hover:bg-slate-50 hover:text-brand-blue">Info Peminjaman</a>
-                    <a href="#" class="block px-4 py-2 text-xs font-semibold hover:bg-slate-50 hover:text-brand-blue">Cek Ketersediaan Aula</a>
+                <div class="dropdown-menu hidden absolute left-0 mt-2 w-52 bg-white text-slate-800 rounded-xl shadow-xl py-2 border border-slate-100 z-50">
+                    <a href="{{ route('layanan-peminjaman') }}#informasi" class="block px-4 py-2 text-xs font-semibold hover:bg-slate-50 hover:text-brand-blue">Info Peminjaman</a>
+                    <a href="{{ route('layanan-peminjaman') }}#paket" class="block px-4 py-2 text-xs font-semibold hover:bg-slate-50 hover:text-brand-blue">Paket & Tarif</a>
+                    <a href="{{ route('layanan-peminjaman') }}#fasilitas" class="block px-4 py-2 text-xs font-semibold hover:bg-slate-50 hover:text-brand-blue">Fasilitas Unggulan</a>
+                    <a href="{{ route('layanan-peminjaman') }}#jadwal" class="block px-4 py-2 text-xs font-semibold hover:bg-slate-50 hover:text-brand-blue">Cek Ketersediaan Aula</a>
                 </div>
             </div>
 
@@ -98,7 +103,13 @@
 
             <a href="#" class="hover:text-brand-blue py-1">Kesiswaan</a>
             <a href="#" class="hover:text-brand-blue py-1">Produk Unggulan</a>
-            <a href="#" class="hover:text-brand-blue py-1">Peminjaman Aula</a>
+            <a href="{{ route('layanan-peminjaman') }}" 
+                class="py-1 transition-colors
+                {{ request()->routeIs('layanan-peminjaman') 
+                    ? 'text-brand-blue font-bold' 
+                    : 'hover:text-brand-blue' }}">
+                Peminjaman Aula
+            </a>
             <a href="{{ route('pkl-bkk') }}" class="hover:text-brand-blue py-1">PKL & BKK</a>
             <a href="#" class="hover:text-brand-blue py-1">PPDB 2026</a>
         </div>

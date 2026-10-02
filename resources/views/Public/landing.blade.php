@@ -483,23 +483,61 @@
                                     Kami siap membantu menciptakan tempat kegiatan yang nyaman dan berkualitas.
                                 </p>
 
-                                <div class="pt-3">
-                                    <button onclick="openModal('Mulai Peminjaman Aula', 'Form jadwal peminjaman aula.')"
-                                        class="bg-[#0066B2] hover:bg-blue-700 text-white font-semibold text-xs sm:text-sm px-6 py-2.5 rounded-full transition-all duration-200 shadow-md">
-                                        Mulai Peminjaman
-                                    </button>
+                                <div class="pt-3 flex flex-wrap items-center gap-3">
+                                    <a href="{{ route('layanan-peminjaman') }}"
+                                        class="bg-[#0066B2] hover:bg-blue-700 text-white font-semibold text-xs sm:text-sm px-6 py-2.5 rounded-full transition-all duration-200 shadow-md inline-flex items-center gap-2">
+                                        <span>Layanan & Jadwal Aula</span>
+                                        <i class="fa-solid fa-arrow-right text-xs"></i>
+                                    </a>
                                 </div>
                             </div>
 
-                            <div class="md:col-span-5 relative mt-4 md:mt-0 pl-0 sm:pl-2">
-                                <div class="relative rounded-2xl overflow-hidden shadow-md h-80 sm:h-96 w-full bg-slate-200">
-                                    {{-- Sama seperti hero: nama file di DB dicek ke disk,
-                                         kalau tidak ada jatuh ke gambar cadangan. --}}
-                                    @if($aulas->first() && $aulas->first()->dokumentasi && is_file(public_path('assets/' . $aulas->first()->dokumentasi)))
-                                        <img src="{{ asset('assets/' . $aulas->first()->dokumentasi) }}" alt="{{ $aulas->first()->nama }}" class="w-full h-full object-cover">
-                                    @else
-                                        <img src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=800&auto=format&fit=crop&q=80" alt="Gedung Auditorium Aula" class="w-full h-full object-cover">
-                                    @endif
+                            <div class="md:col-span-5 relative mt-6 md:mt-0 pl-0 sm:pl-2">
+                                @php
+                                    $landingAula = $aulas->first();
+                                    $foto1Url = $landingAula?->foto_dokumentasi_url ?? asset('assets/logosmkk.png');
+                                    $foto2Url = $landingAula?->foto_dokumentasi_2_url ?? asset('assets/logosmkk.png');
+                                    $hasCustom1 = $landingAula?->has_custom_dokumentasi ?? false;
+                                    $hasCustom2 = $landingAula?->has_custom_dokumentasi_2 ?? false;
+                                @endphp
+
+                                <div class="relative w-full aspect-[4/3] max-w-[420px] mx-auto">
+                                    <!-- Aksen Lingkaran Background -->
+                                    <div class="absolute -bottom-4 -right-4 w-48 h-48 border-[14px] border-[#0066B2]/20 rounded-full z-0"></div>
+
+                                    <!-- DOKUMENTASI 1 (Foto Utama Aula / Logo Alternatif) -->
+                                    <div class="relative rounded-2xl overflow-hidden shadow-xl h-72 sm:h-80 w-full z-10 border border-slate-100 {{ $hasCustom1 ? 'bg-slate-200' : 'bg-gradient-to-br from-blue-50 to-slate-100 flex items-center justify-center p-6' }}">
+                                        @if($hasCustom1)
+                                            <img src="{{ $foto1Url }}" alt="{{ $landingAula?->nama ?? 'Aula Sekolah' }}" class="w-full h-full object-cover">
+                                        @else
+                                            <div class="flex flex-col items-center justify-center text-center p-4">
+                                                <img src="{{ $foto1Url }}" alt="Logo SMK" class="w-24 h-24 object-contain mb-3 drop-shadow-sm">
+                                                <span class="text-xs font-bold text-slate-700 uppercase tracking-wider">{{ $landingAula?->nama ?? 'Aula SMKN 2 Kra' }}</span>
+                                                <span class="text-[10px] text-slate-500 mt-0.5">Gedung Pertemuan &amp; Serbaguna</span>
+                                            </div>
+                                        @endif
+                                        <div class="absolute top-3 left-3 bg-black/50 backdrop-blur-sm text-white px-2.5 py-1 rounded-full text-[10px] font-semibold flex items-center gap-1.5 shadow">
+                                            <i class="fa-solid fa-camera text-[9px]"></i>
+                                            <span>Foto Aula</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- DOKUMENTASI 2 (Foto Pendukung / Interior / Logo Alternatif Floating) -->
+                                    <div class="absolute -bottom-4 -left-3 sm:-left-5 w-36 sm:w-44 rounded-xl overflow-hidden shadow-2xl border-4 border-white bg-white z-20 transition-transform duration-300 hover:scale-105">
+                                        <div class="aspect-video relative {{ $hasCustom2 ? 'bg-slate-100' : 'bg-blue-50/70 flex items-center justify-center p-3' }}">
+                                            @if($hasCustom2)
+                                                <img src="{{ $foto2Url }}" alt="Interior Aula" class="w-full h-full object-cover">
+                                            @else
+                                                <div class="flex items-center gap-2">
+                                                    <img src="{{ $foto2Url }}" alt="Logo Alternatif" class="w-10 h-10 object-contain">
+                                                    <div class="text-left">
+                                                        <span class="block text-[10px] font-bold text-slate-800 leading-tight">Fasilitas</span>
+                                                        <span class="block text-[8px] text-slate-500">SMKN 2 Kra</span>
+                                                    </div>
+                                                </div>
+                                            @endif
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

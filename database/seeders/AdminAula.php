@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\Fitur;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
@@ -13,20 +12,13 @@ class AdminAula extends Seeder
      */
     public function run(): void
     {
-        $user = User::firstOrCreate(
+        User::firstOrCreate(
             ['username' => 'admin_aula'],
             [
                 'name' => 'Admin Aula',
                 'email' => 'admin_aula@example.com',
-                'role' => 'admin',
+                'role' => 'admin_aula',
                 'password' => 'password',
-            ]
-        );
-
-        Fitur::firstOrCreate(
-            ['user_id' => $user->id],
-            [
-                'nama_fitur' => 'aula',
             ]
         );
     }

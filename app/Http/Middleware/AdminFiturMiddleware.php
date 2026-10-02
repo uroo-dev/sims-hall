@@ -25,16 +25,12 @@ class AdminFiturMiddleware
             return $next($request);
         }
 
-        if ($user->role !== 'admin') {
-            abort(403);
+        foreach ($allowedFitur as $fitur) {
+            if ($user->hasFitur($fitur)) {
+                return $next($request);
+            }
         }
 
-        $adminFitur = $user->fitur;
-
-        if (! $adminFitur || ! in_array($adminFitur->nama_fitur, $allowedFitur, true)) {
-            abort(403);
-        }
-
-        return $next($request);
+        abort(403);
     }
 }

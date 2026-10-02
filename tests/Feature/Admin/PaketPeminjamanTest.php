@@ -3,7 +3,6 @@
 namespace Tests\Feature\Admin;
 
 use App\Models\Facility;
-use App\Models\Fitur;
 use App\Models\PaketPeminjaman;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -15,16 +14,9 @@ class PaketPeminjamanTest extends TestCase
 
     private function createAdminAula(): User
     {
-        $user = User::factory()->create([
-            'role' => 'admin',
+        return User::factory()->create([
+            'role' => 'admin_aula',
         ]);
-
-        Fitur::create([
-            'user_id' => $user->id,
-            'nama_fitur' => 'aula',
-        ]);
-
-        return $user;
     }
 
     public function test_guest_is_redirected_from_paket_index(): void
@@ -37,12 +29,7 @@ class PaketPeminjamanTest extends TestCase
     public function test_user_without_aula_fitur_cannot_access_paket(): void
     {
         $user = User::factory()->create([
-            'role' => 'admin',
-        ]);
-
-        Fitur::create([
-            'user_id' => $user->id,
-            'nama_fitur' => 'kesiswaan',
+            'role' => 'admin_kesiswaan',
         ]);
 
         $response = $this->actingAs($user)->get('/admin/paket');

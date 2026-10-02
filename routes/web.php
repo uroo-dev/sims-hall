@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminPeminjamanController;
+use App\Http\Controllers\AulaController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BkkController;
 use App\Http\Controllers\ChatbotController;
@@ -45,9 +46,7 @@ Route::get('/produk-unggulan', function () {
     return view('Public.produk-unggulan');
 })->name('produk-unggulan');
 
-Route::get('/layanan-peminjaman', function () {
-    return view('Public.layanan-peminjaman');
-})->name('layanan-peminjaman');
+Route::get('/layanan-peminjaman', [PublicController::class, 'layananPeminjaman'])->name('layanan-peminjaman');
 
 Route::get('/pkl-bkk', [PublicController::class, 'pklBkk'])->name('pkl-bkk');
 
@@ -89,7 +88,7 @@ Route::middleware('guest')->group(function () {
 | Role yang boleh akses: bkk, admin, super_admin, super_duper_admin
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth', 'role:bkk,admin,super_admin,super_duper_admin'])
+Route::middleware(['auth', 'role:bkk,admin_pklbkk,super_admin,super_duper_admin'])
     ->prefix('dashboard/pkl-bkk')
     ->name('pkl.')
     ->group(function () {
@@ -135,7 +134,7 @@ Route::middleware('auth')->group(function () {
 
     // --- DASHBOARD UTAMA ---
     Route::get('/dashboard', [DashboardController::class, 'index'])
-        ->middleware('role:admin,super_admin,super_duper_admin,pelanggan,kepala_sekolah')
+        ->middleware('role:admin,admin_aula,admin_master,admin_kesiswaan,admin_produk,admin_produk_unggulan,admin_ppdb,admin_pklbkk,super_admin,super_duper_admin,pelanggan,kepala_sekolah')
         ->name('dashboard');
 
     // Kepala Sekolah: Dashboard & Persetujuan Final Peminjaman Aula
@@ -156,8 +155,12 @@ Route::middleware('auth')->group(function () {
         Route::get('/laporan-pemasukan/pdf', [LaporanPemasukanController::class, 'exportPdf'])->name('laporan.pdf');
     });
 
-    // Admin Aula: CRUD Fasilitas, Paket Peminjaman, & Manajemen Peminjaman
+    // Admin Aula: Konfigurasi Aula, CRUD Fasilitas, Paket Peminjaman, & Manajemen Peminjaman
     Route::middleware('adminFitur:aula')->prefix('admin')->name('admin.')->group(function () {
+        // Konfigurasi Profil & Informasi Aula
+        Route::get('/aula', [AulaController::class, 'index'])->name('aula.index');
+        Route::put('/aula', [AulaController::class, 'update'])->name('aula.update');
+
         Route::resource('fasilitas', FasilitasController::class)
             ->parameters(['fasilitas' => 'facility'])
             ->except(['create', 'edit', 'show']);
@@ -189,7 +192,8 @@ Route::middleware('auth')->group(function () {
         Route::put('/payment-configuration', [PaymentConfigurationController::class, 'update'])->name('payment-configuration.update');
     });
 
-    Route::prefix('customer')->name('customer.')->group(function () {
+    // Customer Panel: Hanya role pelanggan yang diizinkan mengajukan peminjaman & mengakses panel pelanggan
+    Route::middleware('role:pelanggan')->prefix('customer')->name('customer.')->group(function () {
         Route::get('/', function () {
             return redirect()->route('customer.dashboard');
         });
@@ -221,31 +225,65 @@ Route::middleware('auth')->group(function () {
     */
     Route::prefix('dashboard/data-master')->group(function () {
         Route::get('/', [DataMasterDashboardController::class, 'index'])
-            ->middleware('role:admin,super_admin,super_duper_admin')
+            ->middleware('role:admin_master,super_admin,super_duper_admin')
             ->name('datamaster.index');
 
         Route::get('/sekolah', [DataMasterDashboardController::class, 'editSekolah'])
-            ->middleware('role:admin,super_admin,super_duper_admin')
+            ->middleware('role:admin_master,super_admin,super_duper_admin')
             ->name('datamaster.sekolah.edit');
 
         Route::put('/sekolah', [DataMasterDashboardController::class, 'updateSekolah'])
-            ->middleware('role:admin,super_admin,super_duper_admin')
+            ->middleware('role:admin_master,super_admin,super_duper_admin')
             ->name('datamaster.sekolah.update');
 
         Route::get('/users', [DataMasterDashboardController::class, 'users'])
-            ->middleware('role:admin,super_admin,super_duper_admin')
+            ->middleware('role:admin_master,super_admin,super_duper_admin')
             ->name('datamaster.users');
 
         Route::post('/users', [DataMasterDashboardController::class, 'storeUser'])
-            ->middleware('role:admin,super_admin,super_duper_admin')
+            ->middleware('role:admin_master,super_admin,super_duper_admin')
             ->name('datamaster.users.store');
 
         Route::put('/users/{id}', [DataMasterDashboardController::class, 'updateUser'])
-            ->middleware('role:admin,super_admin,super_duper_admin')
+            ->middleware('role:admin_master,super_admin,super_duper_admin')
             ->name('datamaster.users.update');
 
         Route::delete('/users/{id}', [DataMasterDashboardController::class, 'destroyUser'])
-            ->middleware('role:admin,super_admin,super_duper_admin')
+            ->middleware('role:admin_master,super_admin,super_duper_admin')
             ->name('datamaster.users.destroy');
+
+        // Data Guru
+        Route::get('/guru', [DataMasterDashboardController::class, 'guru'])
+            ->middleware('role:admin_master,super_admin,super_duper_admin')
+            ->name('datamaster.guru.index');
+
+        Route::post('/guru', [DataMasterDashboardController::class, 'storeGuru'])
+            ->middleware('role:admin_master,super_admin,super_duper_admin')
+            ->name('datamaster.guru.store');
+
+        Route::put('/guru/{id}', [DataMasterDashboardController::class, 'updateGuru'])
+            ->middleware('role:admin_master,super_admin,super_duper_admin')
+            ->name('datamaster.guru.update');
+
+        Route::delete('/guru/{id}', [DataMasterDashboardController::class, 'destroyGuru'])
+            ->middleware('role:admin_master,super_admin,super_duper_admin')
+            ->name('datamaster.guru.destroy');
+
+        // Data Siswa
+        Route::get('/siswa', [DataMasterDashboardController::class, 'siswa'])
+            ->middleware('role:admin_master,super_admin,super_duper_admin')
+            ->name('datamaster.siswa.index');
+
+        Route::post('/siswa', [DataMasterDashboardController::class, 'storeSiswa'])
+            ->middleware('role:admin_master,super_admin,super_duper_admin')
+            ->name('datamaster.siswa.store');
+
+        Route::put('/siswa/{id}', [DataMasterDashboardController::class, 'updateSiswa'])
+            ->middleware('role:admin_master,super_admin,super_duper_admin')
+            ->name('datamaster.siswa.update');
+
+        Route::delete('/siswa/{id}', [DataMasterDashboardController::class, 'destroySiswa'])
+            ->middleware('role:admin_master,super_admin,super_duper_admin')
+            ->name('datamaster.siswa.destroy');
     });
 });

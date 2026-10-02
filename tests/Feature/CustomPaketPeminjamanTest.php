@@ -4,7 +4,6 @@ namespace Tests\Feature;
 
 use App\Models\DetailPembayaran;
 use App\Models\Facility;
-use App\Models\Fitur;
 use App\Models\PaymentConfiguration;
 use App\Models\Pembayaran;
 use App\Models\Peminjaman;
@@ -35,13 +34,8 @@ class CustomPaketPeminjamanTest extends TestCase
         Storage::fake('public');
 
         $this->admin = User::factory()->create([
-            'role' => 'admin',
+            'role' => 'admin_aula',
             'username' => 'admin_aula',
-        ]);
-
-        Fitur::create([
-            'user_id' => $this->admin->id,
-            'nama_fitur' => 'aula',
         ]);
 
         $this->pelanggan = User::factory()->create([

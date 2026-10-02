@@ -6,10 +6,9 @@ use Database\Factories\GuruFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['user_id', 'nip', 'nama', 'jurusan', 'no_hp'])]
+#[Fillable(['nip', 'nama', 'jurusan', 'no_hp'])]
 class Guru extends Model
 {
     /** @use HasFactory<GuruFactory> */
@@ -25,14 +24,6 @@ class Guru extends Model
         return [
             'nip' => 'string',
         ];
-    }
-
-    /**
-     * Akun login guru (opsional - guru bisa dibuat tanpa akun).
-     */
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class);
     }
 
     /**

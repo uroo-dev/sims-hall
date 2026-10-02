@@ -206,15 +206,12 @@
                     </a>
                 </div>
 
-                <!-- Siluet Avatar Profil Kotak Persis Sesuai Gambar -->
+                <!-- Avatar Profil Pengguna -->
                 <div class="w-full aspect-[4/5] max-h-[300px] border border-gray-200 rounded-lg overflow-hidden flex items-center justify-center bg-[#fdfdfd] relative shadow-inner">
-                    <svg viewBox="0 0 200 240" class="w-full h-full text-[#383a3f]" fill="currentColor">
-                        <rect width="200" height="240" fill="#fafafa" />
-                        <path d="M25 240 C25 185, 55 170, 75 165 C85 162, 88 152, 88 142 L88 135 C82 131, 80 125, 80 115 C80 108, 83 105, 86 103 C84 90, 85 70, 95 55 C108 35, 130 38, 140 45 C150 52, 153 65, 150 78 C158 84, 160 95, 158 105 C157 112, 153 118, 148 122 L148 142 C148 152, 151 162, 161 165 C181 170, 211 185, 211 240 Z" />
-                        <path d="M80 115 C76 115, 74 120, 74 125 C74 130, 77 134, 80 134 Z" fill="#9ca3af" />
-                        <path d="M76 128 Q78 145, 85 152 Q87 155, 90 155" fill="none" stroke="#d1d5db" stroke-width="2.5" stroke-linecap="round" />
-                        <circle cx="91" cy="155" r="4.5" fill="#f3f4f6" stroke="#9ca3af" stroke-width="1.5" />
-                    </svg>
+                    <img src="{{ asset('assets/default-avatar.png') }}"
+                        alt="Foto Profil {{ $user?->name ?? 'Pengguna' }}"
+                        class="w-full h-full object-cover"
+                        onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name={{ urlencode($user?->name ?? 'Pengguna') }}&background=0070ba&color=fff&size=300';">
                 </div>
 
                 <!-- Info User (Nama & Email Instansi) -->

@@ -145,7 +145,7 @@ class SuratPengajuanService
 
         return [
             'name' => $user->name,
-            'nip' => Guru::where('user_id', $user->id)->value('nip'),
+            'nip' => Guru::where('nama', $user->name)->value('nip'),
         ];
     }
 

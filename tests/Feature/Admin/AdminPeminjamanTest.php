@@ -3,7 +3,6 @@
 namespace Tests\Feature\Admin;
 
 use App\Models\DetailPembayaran;
-use App\Models\Fitur;
 use App\Models\PaketPeminjaman;
 use App\Models\PaymentConfiguration;
 use App\Models\Pembayaran;
@@ -20,16 +19,9 @@ class AdminPeminjamanTest extends TestCase
 
     private function createAdminAula(): User
     {
-        $user = User::factory()->create([
-            'role' => 'admin',
+        return User::factory()->create([
+            'role' => 'admin_aula',
         ]);
-
-        Fitur::create([
-            'user_id' => $user->id,
-            'nama_fitur' => 'aula',
-        ]);
-
-        return $user;
     }
 
     private function createCustomerUser(string $email = 'pemohon@instansi.com'): User
@@ -85,8 +77,7 @@ class AdminPeminjamanTest extends TestCase
 
     public function test_user_without_aula_fitur_cannot_access_peminjaman(): void
     {
-        $user = User::factory()->create(['role' => 'admin']);
-        Fitur::create(['user_id' => $user->id, 'nama_fitur' => 'kesiswaan']);
+        $user = User::factory()->create(['role' => 'admin_kesiswaan']);
 
         $response = $this->actingAs($user)->get('/admin/peminjaman');
         $response->assertForbidden();

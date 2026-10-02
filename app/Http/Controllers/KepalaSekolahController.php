@@ -166,7 +166,7 @@ class KepalaSekolahController extends Controller
         ];
 
         $kepalaSekolah = $request->user()?->role === 'kepala_sekolah' ? $request->user() : User::where('role', 'kepala_sekolah')->first();
-        $petugasAdmin = User::where('role', 'admin')->whereHas('fitur', fn ($q) => $q->where('nama_fitur', 'aula'))->first() ?? $request->user();
+        $petugasAdmin = User::where('role', 'admin_aula')->first() ?? User::whereIn('role', ['admin', 'super_admin', 'super_duper_admin'])->first() ?? $request->user();
         $paymentConfig = PaymentConfiguration::current();
 
         $logoBase64 = null;

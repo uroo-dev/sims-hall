@@ -27,9 +27,11 @@
         <div class="relative group">
             <button
                 class="flex items-center gap-2.5 bg-gray-50 border border-gray-200 rounded-full py-1 px-3 hover:bg-gray-100 transition">
-                <div
-                    class="w-6 h-6 rounded-full bg-blue-100 text-[#0073c6] flex items-center justify-center text-xs font-bold">
-                    <i class="fa-regular fa-user"></i>
+                <div class="w-6 h-6 rounded-full overflow-hidden bg-blue-100 border border-gray-200 flex items-center justify-center flex-shrink-0">
+                    <img src="{{ asset('assets/default-avatar.png') }}"
+                        alt="{{ auth()->user()->name ?? 'User' }}"
+                        class="w-full h-full object-cover"
+                        onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name ?? 'User') }}&background=0073c6&color=fff&size=64';">
                 </div>
                 <div class="text-left text-xs leading-none">
                     <div class="font-bold text-gray-800">{{ auth()->user()->name ?? 'Admin' }}</div>

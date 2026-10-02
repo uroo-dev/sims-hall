@@ -5,8 +5,56 @@
 
 
 
+    <!-- STATS OVERVIEW -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-6">
+        <!-- TOTAL GURU -->
+        <a href="{{ route('datamaster.guru.index') }}" class="group bg-white rounded-2xl p-5 card-shadow border border-gray-100 hover:border-brand-300 hover:shadow-md transition duration-200 flex items-center justify-between">
+            <div class="space-y-1">
+                <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Total Guru</span>
+                <div class="text-2xl font-extrabold text-gray-800">{{ $totalGuru ?? 0 }}</div>
+                <div class="text-[11px] font-semibold text-brand-600 group-hover:text-brand-700 flex items-center gap-1">
+                    <span>Kelola Data Guru</span>
+                    <i class="fa-solid fa-arrow-right text-[10px] transform group-hover:translate-x-1 transition-transform"></i>
+                </div>
+            </div>
+            <div class="w-12 h-12 rounded-2xl bg-cyan-50 text-cyan-600 flex items-center justify-center text-xl border border-cyan-100 group-hover:scale-110 transition-transform">
+                <i class="fa-solid fa-chalkboard-user"></i>
+            </div>
+        </a>
+
+        <!-- TOTAL SISWA -->
+        <a href="{{ route('datamaster.siswa.index') }}" class="group bg-white rounded-2xl p-5 card-shadow border border-gray-100 hover:border-brand-300 hover:shadow-md transition duration-200 flex items-center justify-between">
+            <div class="space-y-1">
+                <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Total Siswa</span>
+                <div class="text-2xl font-extrabold text-gray-800">{{ $totalSiswa ?? 0 }}</div>
+                <div class="text-[11px] font-semibold text-brand-600 group-hover:text-brand-700 flex items-center gap-1">
+                    <span>Kelola Data Siswa</span>
+                    <i class="fa-solid fa-arrow-right text-[10px] transform group-hover:translate-x-1 transition-transform"></i>
+                </div>
+            </div>
+            <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl border border-emerald-100 group-hover:scale-110 transition-transform">
+                <i class="fa-solid fa-user-graduate"></i>
+            </div>
+        </a>
+
+        <!-- TOTAL USERS -->
+        <a href="{{ route('datamaster.users') }}" class="group bg-white rounded-2xl p-5 card-shadow border border-gray-100 hover:border-brand-300 hover:shadow-md transition duration-200 flex items-center justify-between">
+            <div class="space-y-1">
+                <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Akun Pengguna</span>
+                <div class="text-2xl font-extrabold text-gray-800">{{ $totalUsers ?? 0 }}</div>
+                <div class="text-[11px] font-semibold text-brand-600 group-hover:text-brand-700 flex items-center gap-1">
+                    <span>Kelola Akun User</span>
+                    <i class="fa-solid fa-arrow-right text-[10px] transform group-hover:translate-x-1 transition-transform"></i>
+                </div>
+            </div>
+            <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl border border-blue-100 group-hover:scale-110 transition-transform">
+                <i class="fa-solid fa-users-gear"></i>
+            </div>
+        </a>
+    </div>
+
     <!-- BOTTOM SECTION -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <!-- KEPALA SEKOLAH CARD -->
         <div class="bg-white rounded-2xl p-5 card-shadow border border-gray-100 flex flex-col justify-between">
             <div>

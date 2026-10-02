@@ -12,8 +12,11 @@
         <!-- Header Profil -->
         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-gray-100">
             <div class="flex items-center gap-4">
-                <div class="w-16 h-16 rounded-2xl bg-blue-50 border border-blue-200 flex items-center justify-center text-[#0070ba] text-2xl font-bold">
-                    <i class="fa-regular fa-user"></i>
+                <div class="w-16 h-16 rounded-2xl overflow-hidden border border-blue-200 shadow-sm flex-shrink-0">
+                    <img src="{{ asset('assets/default-avatar.png') }}"
+                        alt="Foto Profil {{ $user->name ?? 'Pengguna' }}"
+                        class="w-full h-full object-cover"
+                        onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name={{ urlencode($user->name ?? 'Pengguna') }}&background=0070ba&color=fff&size=128';">
                 </div>
                 <div>
                     <h2 class="text-xl font-bold text-gray-900">{{ $user->name ?? 'Pengguna' }}</h2>
