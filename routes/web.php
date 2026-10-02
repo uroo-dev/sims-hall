@@ -122,6 +122,7 @@ Route::middleware(['auth', 'role:bkk,admin_pklbkk,super_admin,super_duper_admin'
         Route::post('/pengajuan', [PklController::class, 'store'])->name('store');
 
         Route::get('/surat/{surat}', [PklController::class, 'showSurat'])->name('surat.show');
+        Route::put('/surat/{surat}', [PklController::class, 'updateSurat'])->name('surat.update');
         Route::get('/surat/{surat}/download', [PklController::class, 'downloadSurat'])->name('surat.download');
         Route::post('/surat/{surat}/regenerate', [PklController::class, 'regeneratePdf'])->name('surat.regenerate');
 

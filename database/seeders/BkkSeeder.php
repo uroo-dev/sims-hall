@@ -76,18 +76,19 @@ class BkkSeeder extends Seeder
     }
 
     /**
-     * 5 Siswa kelas XII.
+     * Siswa kelas XII dari berbagai jurusan dan kelas (XII RA, XII RB, XII TPM, dll).
      *
      * @return array<string, Siswa>
      */
     private function seedSiswa(): array
     {
         $data = [
+            // Rekayasa Perangkat Lunak (RPL) - XII RA
             [
                 'key' => 'rizky',
                 'nis' => '2401001',
                 'nama' => 'Rizky Pratama',
-                'kelas' => 'XII',
+                'kelas' => 'XII RA',
                 'jurusan' => 'Rekayasa Perangkat Lunak (RPL)',
                 'no_hp' => '081211112201',
             ],
@@ -95,33 +96,94 @@ class BkkSeeder extends Seeder
                 'key' => 'putri',
                 'nis' => '2401002',
                 'nama' => 'Putri Anggraini',
-                'kelas' => 'XII',
+                'kelas' => 'XII RA',
                 'jurusan' => 'Rekayasa Perangkat Lunak (RPL)',
                 'no_hp' => '081211112202',
             ],
             [
-                'key' => 'dimas',
-                'nis' => '2402001',
-                'nama' => 'Dimas Wijaya',
-                'kelas' => 'XII',
-                'jurusan' => 'Teknik Komputer dan Jaringan (TKJ)',
+                'key' => 'faiz',
+                'nis' => '2401003',
+                'nama' => 'M. Faiz Bayu Nur A.',
+                'kelas' => 'XII RA',
+                'jurusan' => 'Rekayasa Perangkat Lunak (RPL)',
                 'no_hp' => '081211112203',
             ],
+            // Rekayasa Perangkat Lunak (RPL) - XII RB
             [
-                'key' => 'ayu',
-                'nis' => '2403001',
-                'nama' => 'Ayu Lestari',
-                'kelas' => 'XII',
-                'jurusan' => 'Teknik Perancangan dan Pembuatan Program Komputer (TKPK)',
+                'key' => 'davin',
+                'nis' => '2401004',
+                'nama' => 'Davin Wahyu Amanta',
+                'kelas' => 'XII RB',
+                'jurusan' => 'Rekayasa Perangkat Lunak (RPL)',
                 'no_hp' => '081211112204',
             ],
             [
-                'key' => 'fajar',
-                'nis' => '2403002',
-                'nama' => 'Fajar Nugroho',
-                'kelas' => 'XII',
-                'jurusan' => 'Teknik Perancangan dan Pembuatan Program Komputer (TKPK)',
+                'key' => 'raras',
+                'nis' => '2401005',
+                'nama' => 'Raras Putri Febriana',
+                'kelas' => 'XII RB',
+                'jurusan' => 'Rekayasa Perangkat Lunak (RPL)',
                 'no_hp' => '081211112205',
+            ],
+            // Teknik Pemesinan (TPM) - XII TPM A
+            [
+                'key' => 'nofal',
+                'nis' => '2402001',
+                'nama' => 'Nofal Mita Hulhaq',
+                'kelas' => 'XII TPM A',
+                'jurusan' => 'Teknik Pemesinan (TPM)',
+                'no_hp' => '081211112206',
+            ],
+            [
+                'key' => 'bagas',
+                'nis' => '2402002',
+                'nama' => 'Bagas Pratama',
+                'kelas' => 'XII TPM A',
+                'jurusan' => 'Teknik Pemesinan (TPM)',
+                'no_hp' => '081211112207',
+            ],
+            // Teknik Pemesinan (TPM) - XII TPM B
+            [
+                'key' => 'ilham',
+                'nis' => '2402003',
+                'nama' => 'Ilham Ramadhan',
+                'kelas' => 'XII TPM B',
+                'jurusan' => 'Teknik Pemesinan (TPM)',
+                'no_hp' => '081211112208',
+            ],
+            // Teknik Ototronik (TO) - XII TO A
+            [
+                'key' => 'dimas',
+                'nis' => '2403001',
+                'nama' => 'Dimas Wijaya',
+                'kelas' => 'XII TO A',
+                'jurusan' => 'Teknik Ototronik (TO)',
+                'no_hp' => '081211112209',
+            ],
+            [
+                'key' => 'aditya',
+                'nis' => '2403002',
+                'nama' => 'Aditya Pratama',
+                'kelas' => 'XII TO A',
+                'jurusan' => 'Teknik Ototronik (TO)',
+                'no_hp' => '081211112210',
+            ],
+            // Teknik Pembuatan Kain (TPK) - XII TPK A
+            [
+                'key' => 'ayu',
+                'nis' => '2404001',
+                'nama' => 'Ayu Lestari',
+                'kelas' => 'XII TPK A',
+                'jurusan' => 'Teknik Pembuatan Kain (TPK)',
+                'no_hp' => '081211112211',
+            ],
+            [
+                'key' => 'fajar',
+                'nis' => '2404002',
+                'nama' => 'Fajar Nugroho',
+                'kelas' => 'XII TPK A',
+                'jurusan' => 'Teknik Pembuatan Kain (TPK)',
+                'no_hp' => '081211112212',
             ],
         ];
 

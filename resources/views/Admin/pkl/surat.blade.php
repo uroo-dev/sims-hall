@@ -26,16 +26,29 @@
             <h2 class="font-bold text-gray-900 text-base">Surat Pengajuan PKL</h2>
             <p class="text-[11px] text-gray-500 mt-0.5">{{ $surat->nomor_surat }}</p>
         </div>
-        <a href="{{ route('pkl.index') }}"
-            class="text-xs font-semibold text-gray-500 hover:text-gray-700 px-3 py-2 rounded-lg transition">
-            <i class="fa-solid fa-arrow-left mr-1.5"></i> Kembali
-        </a>
+        <div class="flex items-center gap-2">
+            <button type="button" onclick="openEditSuratModal()"
+                class="text-xs font-bold bg-amber-500 hover:bg-amber-600 text-white px-3.5 py-2 rounded-lg transition shadow-xs flex items-center gap-1.5 cursor-pointer">
+                <i class="fa-solid fa-pen-to-square"></i>
+                <span>Edit Data Surat</span>
+            </button>
+            <a href="{{ route('pkl.index') }}"
+                class="text-xs font-semibold text-gray-500 hover:text-gray-700 bg-white border border-gray-200 px-3 py-2 rounded-lg transition">
+                <i class="fa-solid fa-arrow-left mr-1.5"></i> Kembali
+            </a>
+        </div>
     </div>
 
     {{-- INFO SURAT --}}
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-3 md:gap-4">
         <div class="lg:col-span-2 bg-white rounded-2xl border border-gray-100 card-shadow p-5">
-            <h3 class="font-bold text-gray-900 text-sm mb-4">Detail Surat</h3>
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="font-bold text-gray-900 text-sm">Detail Surat</h3>
+                <button type="button" onclick="openEditSuratModal()"
+                    class="text-xs font-semibold text-amber-600 hover:text-amber-700 bg-amber-50 px-2.5 py-1 rounded-md transition cursor-pointer flex items-center gap-1">
+                    <i class="fa-solid fa-pen-to-square"></i> Perbaiki Typo / Edit
+                </button>
+            </div>
 
             <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-sm">
                 <div>
@@ -79,14 +92,20 @@
                 </div>
             </dl>
 
-            {{-- AKSI PDF --}}
+            {{-- AKSI PDF & EDIT --}}
             <div class="mt-5 pt-4 border-t border-gray-100 flex flex-wrap items-center gap-2">
                 @if ($surat->file_pdf_path)
                     <a href="{{ route('pkl.surat.download', $surat) }}"
-                        class="text-sm font-semibold bg-brand-600 hover:bg-brand-700 text-white px-4 py-2.5 rounded-lg transition">
-                        <i class="fa-solid fa-download mr-1.5"></i> Download PDF
+                        class="text-sm font-semibold bg-brand-600 hover:bg-brand-700 text-white px-4 py-2.5 rounded-lg transition shadow-xs flex items-center gap-1.5">
+                        <i class="fa-solid fa-download"></i> Download PDF
                     </a>
                 @endif
+
+                <button type="button" onclick="openEditSuratModal()"
+                    class="text-sm font-semibold bg-amber-500 hover:bg-amber-600 text-white px-4 py-2.5 rounded-lg transition cursor-pointer flex items-center gap-1.5 shadow-xs">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                    <span>Edit Data Surat</span>
+                </button>
 
                 <button type="button" onclick="openRegenerateModal()"
                     class="text-sm font-semibold bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2.5 rounded-lg transition cursor-pointer">
@@ -172,6 +191,157 @@
 @endsection
 
 @push('modals')
+<!-- ==================== MODAL EDIT DATA SURAT ==================== -->
+<div id="modalEditSurat" class="fixed inset-0 !m-0 z-[100] hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity">
+    <div class="bg-white rounded-3xl w-full max-w-2xl shadow-2xl border border-slate-100 overflow-hidden transform transition-all scale-95 duration-200 max-h-[90vh] flex flex-col" id="modalEditSuratBox">
+        <div class="p-5 border-b border-gray-100 flex items-center justify-between bg-slate-50/70">
+            <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-sm font-bold border border-amber-100">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                </div>
+                <div>
+                    <h3 class="font-extrabold text-slate-900 text-sm">Edit Data Surat Pengajuan</h3>
+                    <p class="text-[11px] text-slate-500">Nomor: {{ $surat->nomor_surat }}</p>
+                </div>
+            </div>
+            <button type="button" onclick="closeEditSuratModal()" class="text-gray-400 hover:text-gray-600 p-1 rounded-lg">
+                <i class="fa-solid fa-xmark text-base"></i>
+            </button>
+        </div>
+
+        <form action="{{ route('pkl.surat.update', $surat) }}" method="POST" id="form-edit-surat" class="flex flex-col flex-1 overflow-hidden">
+            @csrf
+            @method('PUT')
+
+            <div class="p-5 space-y-4 overflow-y-auto flex-1">
+                {{-- DUDI & Guru --}}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-[11px] font-semibold text-gray-700 mb-1.5">
+                            DUDI Tujuan <span class="text-red-500">*</span>
+                        </label>
+                        <select name="dudi_id" required
+                            class="w-full text-xs border border-gray-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-brand-500 focus:border-brand-500">
+                            @foreach ($dudis as $d)
+                                <option value="{{ $d->id }}" @selected(old('dudi_id', $surat->dudi_id) == $d->id)>
+                                    {{ $d->nama_dudi }} ({{ $d->kota }})
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-semibold text-gray-700 mb-1.5">
+                            Guru Pembimbing <span class="text-red-500">*</span>
+                        </label>
+                        @php
+                            $currentGuruId = $surat->penempatanPkls->first()?->guru_id;
+                        @endphp
+                        <select name="guru_id" required
+                            class="w-full text-xs border border-gray-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-brand-500 focus:border-brand-500">
+                            @foreach ($gurus as $g)
+                                <option value="{{ $g->id }}" @selected(old('guru_id', $currentGuruId) == $g->id)>
+                                    {{ $g->nama }} ({{ $g->jurusan }})
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+
+                {{-- Tanggal Surat & Periode PKL --}}
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                        <label class="block text-[11px] font-semibold text-gray-700 mb-1.5">
+                            Tanggal Surat <span class="text-red-500">*</span>
+                        </label>
+                        <input type="date" name="tanggal_surat" required max="{{ now()->toDateString() }}"
+                            value="{{ old('tanggal_surat', $surat->tanggal_surat->format('Y-m-d')) }}"
+                            class="w-full text-xs border border-gray-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-brand-500 focus:border-brand-500">
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-semibold text-gray-700 mb-1.5">
+                            Mulai PKL <span class="text-red-500">*</span>
+                        </label>
+                        <input type="date" name="tgl_mulai_pkl" required
+                            value="{{ old('tgl_mulai_pkl', $surat->tgl_mulai_pkl->format('Y-m-d')) }}"
+                            class="w-full text-xs border border-gray-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-brand-500 focus:border-brand-500">
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-semibold text-gray-700 mb-1.5">
+                            Selesai PKL <span class="text-red-500">*</span>
+                        </label>
+                        <input type="date" name="tgl_selesai_pkl" required
+                            value="{{ old('tgl_selesai_pkl', $surat->tgl_selesai_pkl->format('Y-m-d')) }}"
+                            class="w-full text-xs border border-gray-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-brand-500 focus:border-brand-500">
+                    </div>
+                </div>
+
+                {{-- Daftar Siswa --}}
+                <div>
+                    @php
+                        $assignedIds = $surat->penempatanPkls->pluck('siswa_id')->all();
+                    @endphp
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="text-[11px] font-semibold text-gray-700">
+                            Pilih Siswa yang Masuk dalam Surat Ini <span class="text-red-500">*</span>
+                        </label>
+                        <div class="flex items-center gap-2">
+                            <button type="button" id="btn-edit-pilih-semua" class="text-[11px] text-brand-600 hover:underline">Pilih semua</button>
+                            <span class="text-gray-300">&bull;</span>
+                            <button type="button" id="btn-edit-kosongkan" class="text-[11px] text-gray-500 hover:underline">Kosongkan</button>
+                        </div>
+                    </div>
+
+                    <div class="mb-2">
+                        <input type="text" id="cari-siswa-modal" placeholder="Filter nama siswa atau kelas..."
+                            class="w-full text-xs border border-gray-200 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-brand-500 focus:border-brand-500">
+                    </div>
+
+                    <div class="max-h-48 overflow-y-auto border border-gray-200 rounded-xl divide-y divide-gray-100 p-1">
+                        @foreach ($availableSiswas as $s)
+                            @php
+                                $isChecked = in_array($s->id, old('siswa_ids', $assignedIds));
+                            @endphp
+                            <label class="edit-siswa-item flex items-center gap-3 px-3 py-2 hover:bg-gray-50 rounded-lg cursor-pointer transition text-xs"
+                                data-text="{{ strtolower($s->nama . ' ' . $s->label_kelas . ' ' . $s->nis) }}">
+                                <input type="checkbox" name="siswa_ids[]" value="{{ $s->id }}"
+                                    @checked($isChecked)
+                                    class="edit-siswa-checkbox w-4 h-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500">
+                                <span class="flex-1 min-w-0">
+                                    <span class="font-bold text-gray-800 block truncate">{{ $s->nama }}</span>
+                                    <span class="text-[10px] text-gray-500">{{ $s->label_kelas }} &middot; NIS {{ $s->nis }}</span>
+                                </span>
+                                @if (in_array($s->id, $assignedIds))
+                                    <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-blue-50 text-brand-700">Sudah Ada</span>
+                                @endif
+                            </label>
+                        @endforeach
+                    </div>
+                </div>
+
+                <div class="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800 flex items-start gap-2">
+                    <i class="fa-solid fa-circle-info text-amber-600 mt-0.5"></i>
+                    <span>Setelah disimpan, sistem akan langsung <strong>men-generate ulang berkas PDF</strong> surat ini dengan data perubahan yang baru.</span>
+                </div>
+            </div>
+
+            <div class="p-4 border-t border-gray-100 bg-gray-50/80 flex items-center justify-end gap-2.5">
+                <button type="button" onclick="closeEditSuratModal()"
+                    class="px-4 py-2 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-100 text-xs font-semibold transition cursor-pointer">
+                    Batal
+                </button>
+                <button type="submit"
+                    class="px-5 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 active:scale-95 text-white text-xs font-bold shadow-xs transition flex items-center gap-1.5 cursor-pointer">
+                    <i class="fa-solid fa-floppy-disk text-xs"></i>
+                    <span>Simpan &amp; Update PDF</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <!-- ==================== MODAL REGENERATE PDF ==================== -->
 <div id="modalRegeneratePdf" class="fixed inset-0 !m-0 z-[100] hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity">
     <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl border border-slate-100 overflow-hidden transform transition-all scale-95 duration-200" id="modalRegeneratePdfBox">
@@ -209,6 +379,32 @@
 
 @push('scripts')
 <script>
+    function openEditSuratModal() {
+        const modal = document.getElementById('modalEditSurat');
+        const box = document.getElementById('modalEditSuratBox');
+        if (!modal || !box) return;
+
+        document.body.classList.add('overflow-hidden');
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            box.classList.remove('scale-95');
+            box.classList.add('scale-100');
+        }, 10);
+    }
+
+    function closeEditSuratModal() {
+        const modal = document.getElementById('modalEditSurat');
+        const box = document.getElementById('modalEditSuratBox');
+        if (!modal || !box) return;
+
+        box.classList.remove('scale-100');
+        box.classList.add('scale-95');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+        }, 150);
+    }
+
     function openRegenerateModal() {
         const modal = document.getElementById('modalRegeneratePdf');
         const box = document.getElementById('modalRegeneratePdfBox');
@@ -235,15 +431,55 @@
         }, 150);
     }
 
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') closeRegenerateModal();
+    document.addEventListener('DOMContentLoaded', function() {
+        // Modal live search siswa
+        const searchInput = document.getElementById('cari-siswa-modal');
+        const siswaItems = Array.from(document.querySelectorAll('.edit-siswa-item'));
+        const checkboxes = Array.from(document.querySelectorAll('.edit-siswa-checkbox'));
+
+        if (searchInput) {
+            searchInput.addEventListener('input', function(e) {
+                const q = e.target.value.toLowerCase().trim();
+                siswaItems.forEach(function(item) {
+                    item.style.display = !q || item.dataset.text.includes(q) ? '' : 'none';
+                });
+            });
+        }
+
+        const btnPilihSemua = document.getElementById('btn-edit-pilih-semua');
+        const btnKosongkan = document.getElementById('btn-edit-kosongkan');
+
+        if (btnPilihSemua) {
+            btnPilihSemua.addEventListener('click', function() {
+                checkboxes.forEach(function(cb) {
+                    if (cb.closest('.edit-siswa-item').style.display !== 'none') cb.checked = true;
+                });
+            });
+        }
+
+        if (btnKosongkan) {
+            btnKosongkan.addEventListener('click', function() {
+                checkboxes.forEach(function(cb) { cb.checked = false; });
+            });
+        }
+
+        const formEdit = document.getElementById('form-edit-surat');
+        if (formEdit) {
+            formEdit.addEventListener('submit', function(e) {
+                const checked = checkboxes.filter(function(cb) { return cb.checked; });
+                if (checked.length === 0) {
+                    e.preventDefault();
+                    alert('Pilih minimal satu siswa dalam surat ini.');
+                }
+            });
+        }
     });
 
-    const modalRegeneratePdfEl = document.getElementById('modalRegeneratePdf');
-    if (modalRegeneratePdfEl) {
-        modalRegeneratePdfEl.addEventListener('click', function(e) {
-            if (e.target === this) closeRegenerateModal();
-        });
-    }
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeEditSuratModal();
+            closeRegenerateModal();
+        }
+    });
 </script>
 @endpush

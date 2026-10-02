@@ -316,15 +316,52 @@ class BkkController extends Controller
     }
 
     /**
-     * Daftar siswa PKL + filter status, untuk monitoring.
+     * Daftar siswa PKL per kelas & monitoring status penempatan.
      */
     public function siswa(Request $request): View
     {
+        $filterKelas = $request->string('kelas')->trim()->toString();
         $filterStatus = $request->string('status')->trim()->toString();
         $search = $request->string('q')->trim()->toString();
 
+        // Rekap kelas (1 query, anti-N+1)
+        $allSiswas = Siswa::query()
+            ->withCount([
+                'penempatanFix as fix_count',
+                'penempatanPkls as menunggu_count' => fn ($q) => $q->where('status_penempatan', PenempatanPkl::STATUS_PENGAJUAN),
+                'penempatanPkls as ditolak_count' => fn ($q) => $q->where('status_penempatan', PenempatanPkl::STATUS_DITOLAK),
+            ])
+            ->get();
+
+        $kelasList = $allSiswas
+            ->groupBy('kelas')
+            ->map(function ($group, $kelas) {
+                $total = $group->count();
+                $fix = (int) $group->sum('fix_count');
+                $menunggu = (int) $group->sum('menunggu_count');
+                $ditolak = (int) $group->sum('ditolak_count');
+                $belum = $total - $fix;
+
+                return (object) [
+                    'kelas' => $kelas ?: 'Tanpa Kelas',
+                    'jurusan' => $group->first()?->jurusan ?? '-',
+                    'total' => $total,
+                    'fix' => $fix,
+                    'menunggu' => $menunggu,
+                    'ditolak' => $ditolak,
+                    'belum' => $belum,
+                    'persentase_fix' => $total > 0 ? (int) round(($fix / $total) * 100) : 0,
+                ];
+            })
+            ->values()
+            ->sortBy('kelas');
+
         $query = Siswa::with(['penempatanPkls' => fn ($q) => $q->with(['dudi', 'guru'])->latest()])
             ->withCount('penempatanFix');
+
+        if ($filterKelas !== '') {
+            $query->where('kelas', $filterKelas);
+        }
 
         if ($filterStatus === 'fix') {
             $query->whereHas('penempatanFix');
@@ -342,8 +379,13 @@ class BkkController extends Controller
             });
         }
 
+        $selectedKelasInfo = $filterKelas !== '' ? $kelasList->firstWhere('kelas', $filterKelas) : null;
+
         return view('Admin.bkk.siswa', [
+            'kelasList' => $kelasList,
             'siswas' => $query->orderBy('nama')->get(),
+            'filterKelas' => $filterKelas,
+            'selectedKelasInfo' => $selectedKelasInfo,
             'filterStatus' => $filterStatus,
             'search' => $search,
             'pageTitle' => 'Data Siswa PKL',

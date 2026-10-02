@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Dudi;
 use App\Models\Guru;
 use App\Models\PenempatanPkl;
+use App\Models\Sekolah;
 use App\Models\SuratPengajuan;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Carbon;
@@ -106,14 +107,44 @@ class SuratPengajuanService
     {
         $surat->loadMissing(['dudi', 'penempatanPkls.siswa', 'penempatanPkls.guru']);
 
+        $sekolah = Sekolah::first();
+        $namaKepsek = 'Sukidi, S.Pd., M.Pd';
+        if ($sekolah && ! empty($sekolah->nama_kepsek)) {
+            $namaKepsek = preg_replace('/^Bapak\s+/i', '', $sekolah->nama_kepsek);
+        }
+
+        $logoJatengPath = public_path('assets/logo-jateng.png');
+        $logoJateng = is_file($logoJatengPath)
+            ? 'data:image/png;base64,'.base64_encode((string) file_get_contents($logoJatengPath))
+            : null;
+
+        $logoSmkn2Path = public_path('assets/logo-smkn2.png');
+        $logoSmkn2 = is_file($logoSmkn2Path)
+            ? 'data:image/png;base64,'.base64_encode((string) file_get_contents($logoSmkn2Path))
+            : null;
+
+        $mulai = Carbon::parse($surat->tgl_mulai_pkl);
+        $selesai = Carbon::parse($surat->tgl_selesai_pkl);
+        $diffMonths = (int) round($mulai->diffInMonths($selesai) ?: ($mulai->diffInDays($selesai) / 30));
+        $durasiBulan = max(1, $diffMonths);
+
         $pdf = Pdf::loadView('pkl.surat-pengajuan', [
             'surat' => $surat,
             'siswas' => $surat->penempatanPkls->pluck('siswa')->filter()->values(),
             'guru' => $surat->penempatanPkls->pluck('guru')->filter()->unique('id')->first(),
-            'tanggalIndonesia' => fn ($t) => $this->tanggalIndonesia($t),
+            'tanggalIndonesia' => fn ($t, $padZero = false) => $this->tanggalIndonesia($t, $padZero),
+            'tanggalSurat' => $this->tanggalIndonesia($surat->tanggal_surat),
+            'tanggalMulai' => $this->tanggalIndonesia($surat->tgl_mulai_pkl, true),
+            'tanggalSelesai' => $this->tanggalIndonesia($surat->tgl_selesai_pkl, true),
+            'durasiBulan' => $durasiBulan,
+            'namaKepsek' => $namaKepsek,
+            'pangkatKepsek' => 'Pembina Utama Muda',
+            'nipKepsek' => '19700310 199702 1 004',
+            'logoJateng' => $logoJateng,
+            'logoSmkn2' => $logoSmkn2,
             'penandaTangan' => $this->penandaTangan(),
-            'jabatan' => 'Manager BKK dan PKL',
-            'namaSekolah' => 'SMK Negeri 2 Karanganyar Dietrich Scholtze',
+            'jabatan' => 'Kepala SMK Negeri 2 Karanganyar',
+            'namaSekolah' => 'SMK Negeri 2 Karanganyar',
             'namaKota' => 'Karanganyar',
         ])->setPaper('a4', 'portrait');
 
@@ -202,12 +233,13 @@ class SuratPengajuanService
     }
 
     /**
-     * Format tanggal Indonesia: "12 September 2026".
+     * Format tanggal Indonesia: "12 September 2026" atau "01 September 2026".
      */
-    public function tanggalIndonesia(Carbon|string $tanggal): string
+    public function tanggalIndonesia(Carbon|string $tanggal, bool $padZero = false): string
     {
         $date = $tanggal instanceof Carbon ? $tanggal : Carbon::parse($tanggal);
+        $day = $padZero ? sprintf('%02d', $date->day) : (string) $date->day;
 
-        return sprintf('%d %s %d', $date->day, self::BULAN[$date->month], $date->year);
+        return sprintf('%s %s %d', $day, self::BULAN[$date->month], $date->year);
     }
 }
