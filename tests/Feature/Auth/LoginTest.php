@@ -71,7 +71,7 @@ class LoginTest extends TestCase
 
     public function test_admin_role_can_access_pkl_bkk_dashboard(): void
     {
-        $user = User::factory()->create(['role' => 'admin']);
+        $user = User::factory()->create(['role' => 'admin_pklbkk']);
 
         $this->actingAs($user)
             ->get('/dashboard/pkl-bkk')
@@ -81,7 +81,7 @@ class LoginTest extends TestCase
 
     public function test_admin_can_access_all_pkl_bkk_pages(): void
     {
-        $user = User::factory()->create(['role' => 'admin']);
+        $user = User::factory()->create(['role' => 'admin_pklbkk']);
 
         $pages = [
             '/dashboard/pkl-bkk/dudi' => 'Data DUDI',
@@ -105,6 +105,11 @@ class LoginTest extends TestCase
         $user = User::factory()->create(['role' => 'guru']);
 
         $this->actingAs($user)
+            ->get('/dashboard/pkl-bkk/penempatan')
+            ->assertForbidden();
+
+        $adminAula = User::factory()->create(['role' => 'admin_aula']);
+        $this->actingAs($adminAula)
             ->get('/dashboard/pkl-bkk/penempatan')
             ->assertForbidden();
     }

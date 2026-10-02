@@ -107,7 +107,7 @@ class PklBkkTest extends TestCase
 
     public function test_sidebar_admin_melihat_semua_modul(): void
     {
-        $admin = User::factory()->create(['role' => 'admin']);
+        $admin = User::factory()->create(['role' => 'super_admin']);
 
         $response = $this->actingAs($admin)->get(route('pkl.dashboard'))->assertOk();
 
@@ -117,9 +117,13 @@ class PklBkkTest extends TestCase
 
     public function test_admin_tetap_bisa_mengakses_modul_pkl_bkk(): void
     {
-        $admin = User::factory()->create(['role' => 'admin']);
+        $admin = User::factory()->create(['role' => 'admin_pklbkk']);
 
         $this->actingAs($admin)->get(route('pkl.dashboard'))->assertOk();
+
+        // admin_aula tidak boleh mengakses modul PKL & BKK
+        $adminAula = User::factory()->create(['role' => 'admin_aula']);
+        $this->actingAs($adminAula)->get(route('pkl.dashboard'))->assertForbidden();
     }
 
     public function test_tamu_tidak_bisa_mengakses_modul_pkl_bkk(): void

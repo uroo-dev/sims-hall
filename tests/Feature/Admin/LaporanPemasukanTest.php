@@ -3,7 +3,6 @@
 namespace Tests\Feature\Admin;
 
 use App\Models\DetailPembayaran;
-use App\Models\Fitur;
 use App\Models\PaketPeminjaman;
 use App\Models\Pembayaran;
 use App\Models\Peminjaman;
@@ -18,17 +17,10 @@ class LaporanPemasukanTest extends TestCase
 
     private function createAdminAula(): User
     {
-        $user = User::factory()->create([
+        return User::factory()->create([
             'username' => 'admin_aula',
-            'role' => 'admin',
+            'role' => 'admin_aula',
         ]);
-
-        Fitur::create([
-            'user_id' => $user->id,
-            'nama_fitur' => 'aula',
-        ]);
-
-        return $user;
     }
 
     private function createKepalaSekolah(): User

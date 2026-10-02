@@ -98,7 +98,7 @@
                     <span>Laporan Pemasukan</span>
                 </a>
 
-            @elseif($userRole === 'bkk')
+            @elseif($userRole === 'bkk' || $userRole === 'admin_pklbkk')
                 <!-- 1. DASHBOARD BKK -->
                 <a href="{{ route('pkl.dashboard') }}"
                     class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('pkl.dashboard') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
@@ -157,35 +157,47 @@
                     <span>Dashboard</span>
                 </a>
 
-                <!-- 2. FASILITAS -->
-                <a href="{{ route('admin.fasilitas.index') }}"
-                    class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('admin.fasilitas.*') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
-                    <i class="fa-solid fa-box text-base w-5 text-center"></i>
-                    <span>Fasilitas</span>
-                </a>
+                @if(in_array($userRole, ['admin_aula', 'super_admin', 'super_duper_admin']))
+                    <!-- SECTION: PEMINJAMAN AULA -->
+                    @if(in_array($userRole, ['super_admin', 'super_duper_admin']))
+                        <div class="pt-3 pb-1">
+                            <div class="flex items-center justify-between text-[11px] font-bold text-blue-100/80 tracking-wider uppercase px-2 mb-2">
+                                <span>Peminjaman Aula</span>
+                                <span class="w-12 h-[1px] bg-white/30"></span>
+                            </div>
+                        </div>
+                    @endif
 
-                <!-- 3. PAKET PEMINJAMAN -->
-                <a href="{{ route('admin.paket.index') }}"
-                    class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('admin.paket.*') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
-                    <i class="fa-solid fa-boxes-packing text-base w-5 text-center"></i>
-                    <span>Paket Peminjaman</span>
-                </a>
+                    <!-- 2. FASILITAS -->
+                    <a href="{{ route('admin.fasilitas.index') }}"
+                        class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('admin.fasilitas.*') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
+                        <i class="fa-solid fa-box text-base w-5 text-center"></i>
+                        <span>Fasilitas</span>
+                    </a>
 
-                <!-- 4. DAFTAR PEMINJAMAN -->
-                <a href="{{ route('admin.peminjaman.index') }}"
-                    class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('admin.peminjaman.*') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
-                    <i class="fa-solid fa-clipboard-list text-base w-5 text-center"></i>
-                    <span>Daftar Peminjaman</span>
-                </a>
+                    <!-- 3. PAKET PEMINJAMAN -->
+                    <a href="{{ route('admin.paket.index') }}"
+                        class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('admin.paket.*') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
+                        <i class="fa-solid fa-boxes-packing text-base w-5 text-center"></i>
+                        <span>Paket Peminjaman</span>
+                    </a>
 
-                <!-- 5. LAPORAN PEMASUKAN AULA (ADMIN AULA) -->
-                <a href="{{ route('admin.laporan.index') }}"
-                    class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('admin.laporan.*') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
-                    <i class="fa-solid fa-file-invoice-dollar text-base w-5 text-center"></i>
-                    <span>Laporan Pemasukan</span>
-                </a>
+                    <!-- 4. DAFTAR PEMINJAMAN -->
+                    <a href="{{ route('admin.peminjaman.index') }}"
+                        class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('admin.peminjaman.*') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
+                        <i class="fa-solid fa-clipboard-list text-base w-5 text-center"></i>
+                        <span>Daftar Peminjaman</span>
+                    </a>
 
-                @if(in_array($userRole, ['admin', 'super_admin', 'super_duper_admin']))
+                    <!-- 5. LAPORAN PEMASUKAN AULA (ADMIN AULA) -->
+                    <a href="{{ route('admin.laporan.index') }}"
+                        class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('admin.laporan.*') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
+                        <i class="fa-solid fa-file-invoice-dollar text-base w-5 text-center"></i>
+                        <span>Laporan Pemasukan</span>
+                    </a>
+                @endif
+
+                @if(in_array($userRole, ['admin_master', 'super_admin', 'super_duper_admin']))
                     <!-- SECTION: DATA MASTER SEKOLAH -->
                     <div class="pt-3 pb-1">
                         <div class="flex items-center justify-between text-[11px] font-bold text-blue-100/80 tracking-wider uppercase px-2 mb-2">
@@ -211,13 +223,17 @@
                         <i class="fa-solid fa-users-gear text-base w-5 text-center"></i>
                         <span>Data Users</span>
                     </a>
+                @endif
 
+                @if(in_array($userRole, ['super_admin', 'super_duper_admin']))
                     <a href="{{ route('admin.payment-configuration.index') }}"
                         class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('admin.payment-configuration.*') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
                         <i class="fa-solid fa-sliders text-base w-5 text-center"></i>
                         <span>Konfigurasi Peminjaman</span>
                     </a>
+                @endif
 
+                @if(in_array($userRole, ['super_admin', 'super_duper_admin']))
                     <!-- SECTION: PKL & BKK -->
                     <div class="pt-3 pb-1">
                         <div class="flex items-center justify-between text-[11px] font-bold text-blue-100/80 tracking-wider uppercase px-2 mb-2">

@@ -110,7 +110,7 @@ class MergeSmokeTest extends TestCase
 
     public function test_route_data_master_milik_dapin_terdaftar(): void
     {
-        $admin = User::factory()->create(['role' => 'admin']);
+        $admin = User::factory()->create(['role' => 'admin_master']);
 
         $this->actingAs($admin)->get(route('datamaster.index'))->assertOk();
         $this->actingAs($admin)->get(route('datamaster.users'))->assertOk();
@@ -131,7 +131,7 @@ class MergeSmokeTest extends TestCase
 
     public function test_admin_melihat_data_master_dan_pkl_bkk(): void
     {
-        $admin = User::factory()->create(['role' => 'admin']);
+        $admin = User::factory()->create(['role' => 'super_admin']);
 
         $html = $this->actingAs($admin)->get(route('pkl.dashboard'))->assertOk()->getContent();
 
@@ -142,7 +142,7 @@ class MergeSmokeTest extends TestCase
 
     public function test_tidak_ada_sidebar_ganda_di_semua_halaman_admin(): void
     {
-        $admin = User::factory()->create(['role' => 'admin']);
+        $admin = User::factory()->create(['role' => 'super_admin']);
 
         foreach ([route('dashboard'), route('pkl.dashboard'), route('datamaster.index')] as $url) {
             $html = $this->actingAs($admin)->get($url)->assertOk()->getContent();

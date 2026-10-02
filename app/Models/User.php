@@ -7,7 +7,6 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -17,13 +16,6 @@ class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
-
-    /**
-     * The relationships that should always be loaded.
-     *
-     * @var array<int, string>
-     */
-    protected $with = ['fitur'];
 
     /**
      * Get the attributes that should be cast.
@@ -39,14 +31,6 @@ class User extends Authenticatable
     }
 
     /**
-     * Relasi ke Fitur yang ditugaskan kepada user (terutama role admin).
-     */
-    public function fitur(): HasOne
-    {
-        return $this->hasOne(Fitur::class);
-    }
-
-    /**
      * Cek apakah user adalah super admin.
      */
     public function isSuperAdmin(): bool
@@ -55,7 +39,7 @@ class User extends Authenticatable
     }
 
     /**
-     * Cek apakah user memiliki akses ke fitur tertentu.
+     * Cek apakah user memiliki akses ke fitur/modul tertentu berdasarkan role langsung.
      */
     public function hasFitur(string $fiturName): bool
     {
@@ -63,11 +47,34 @@ class User extends Authenticatable
             return true;
         }
 
-        if ($this->role !== 'admin') {
-            return false;
+        if ($this->role === 'admin_'.$fiturName) {
+            return true;
         }
 
-        return $this->fitur?->nama_fitur === $fiturName;
+        if ($fiturName === 'aula' && $this->role === 'admin_aula') {
+            return true;
+        }
 
+        if ($fiturName === 'master' && $this->role === 'admin_master') {
+            return true;
+        }
+
+        if ($fiturName === 'kesiswaan' && $this->role === 'admin_kesiswaan') {
+            return true;
+        }
+
+        if (in_array($fiturName, ['produk', 'produk_unggulan'], true) && in_array($this->role, ['admin_produk', 'admin_produk_unggulan'], true)) {
+            return true;
+        }
+
+        if (in_array($fiturName, ['pklbkk', 'bkk'], true) && in_array($this->role, ['bkk', 'admin_pklbkk'], true)) {
+            return true;
+        }
+
+        if ($fiturName === 'ppdb' && $this->role === 'admin_ppdb') {
+            return true;
+        }
+
+        return false;
     }
 }

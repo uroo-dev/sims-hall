@@ -271,7 +271,7 @@ class DataMasterSeeder extends Seeder
             [
                 'name' => 'Admin Data Master Sekolah',
                 'email' => 'datamastersekolah@smkn2kra.sch.id',
-                'role' => 'admin',
+                'role' => 'admin_master',
                 'password' => Hash::make('password'),
             ]
         );

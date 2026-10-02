@@ -89,7 +89,7 @@ Route::middleware('guest')->group(function () {
 | Role yang boleh akses: bkk, admin, super_admin, super_duper_admin
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth', 'role:bkk,admin,super_admin,super_duper_admin'])
+Route::middleware(['auth', 'role:bkk,admin_pklbkk,super_admin,super_duper_admin'])
     ->prefix('dashboard/pkl-bkk')
     ->name('pkl.')
     ->group(function () {
@@ -135,7 +135,7 @@ Route::middleware('auth')->group(function () {
 
     // --- DASHBOARD UTAMA ---
     Route::get('/dashboard', [DashboardController::class, 'index'])
-        ->middleware('role:admin,super_admin,super_duper_admin,pelanggan,kepala_sekolah')
+        ->middleware('role:admin,admin_aula,admin_master,admin_kesiswaan,admin_produk,admin_produk_unggulan,admin_ppdb,admin_pklbkk,super_admin,super_duper_admin,pelanggan,kepala_sekolah')
         ->name('dashboard');
 
     // Kepala Sekolah: Dashboard & Persetujuan Final Peminjaman Aula
@@ -221,31 +221,31 @@ Route::middleware('auth')->group(function () {
     */
     Route::prefix('dashboard/data-master')->group(function () {
         Route::get('/', [DataMasterDashboardController::class, 'index'])
-            ->middleware('role:admin,super_admin,super_duper_admin')
+            ->middleware('role:admin_master,super_admin,super_duper_admin')
             ->name('datamaster.index');
 
         Route::get('/sekolah', [DataMasterDashboardController::class, 'editSekolah'])
-            ->middleware('role:admin,super_admin,super_duper_admin')
+            ->middleware('role:admin_master,super_admin,super_duper_admin')
             ->name('datamaster.sekolah.edit');
 
         Route::put('/sekolah', [DataMasterDashboardController::class, 'updateSekolah'])
-            ->middleware('role:admin,super_admin,super_duper_admin')
+            ->middleware('role:admin_master,super_admin,super_duper_admin')
             ->name('datamaster.sekolah.update');
 
         Route::get('/users', [DataMasterDashboardController::class, 'users'])
-            ->middleware('role:admin,super_admin,super_duper_admin')
+            ->middleware('role:admin_master,super_admin,super_duper_admin')
             ->name('datamaster.users');
 
         Route::post('/users', [DataMasterDashboardController::class, 'storeUser'])
-            ->middleware('role:admin,super_admin,super_duper_admin')
+            ->middleware('role:admin_master,super_admin,super_duper_admin')
             ->name('datamaster.users.store');
 
         Route::put('/users/{id}', [DataMasterDashboardController::class, 'updateUser'])
-            ->middleware('role:admin,super_admin,super_duper_admin')
+            ->middleware('role:admin_master,super_admin,super_duper_admin')
             ->name('datamaster.users.update');
 
         Route::delete('/users/{id}', [DataMasterDashboardController::class, 'destroyUser'])
-            ->middleware('role:admin,super_admin,super_duper_admin')
+            ->middleware('role:admin_master,super_admin,super_duper_admin')
             ->name('datamaster.users.destroy');
     });
 });

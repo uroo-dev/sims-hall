@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use App\Models\DetailPembayaran;
-use App\Models\Fitur;
 use App\Models\PaketPeminjaman;
 use App\Models\PaymentConfiguration;
 use App\Models\Pembayaran;
@@ -863,11 +862,7 @@ class CustomerPanelTest extends TestCase
         ]);
 
         $admin = User::factory()->create([
-            'role' => 'admin',
-        ]);
-        Fitur::create([
-            'user_id' => $admin->id,
-            'nama_fitur' => 'aula',
+            'role' => 'admin_aula',
         ]);
 
         $paket = PaketPeminjaman::create([
@@ -1019,12 +1014,8 @@ class CustomerPanelTest extends TestCase
         ]);
 
         $admin = User::factory()->create([
-            'role' => 'admin',
+            'role' => 'admin_aula',
             'email' => 'admin_sarpras@example.com',
-        ]);
-        Fitur::create([
-            'user_id' => $admin->id,
-            'nama_fitur' => 'aula',
         ]);
 
         $paket = PaketPeminjaman::create([

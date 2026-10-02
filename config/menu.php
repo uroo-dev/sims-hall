@@ -29,10 +29,11 @@ return [
             'key' => 'dashboard',
             'label' => 'Dashboard',
             'icon' => 'fa-table-cells-large',
-            'roles' => ['admin', 'super_admin', 'super_duper_admin', 'bkk'],
-            // Role bkk masuk ke dashboard BKK, bukan dashboard utama.
+            'roles' => ['admin_aula', 'admin_master', 'admin_kesiswaan', 'admin_produk', 'admin_produk_unggulan', 'admin_ppdb', 'admin_pklbkk', 'super_admin', 'super_duper_admin', 'bkk'],
+            // Role bkk / admin_pklbkk masuk ke dashboard BKK, bukan dashboard utama.
             'route' => [
                 'bkk' => 'pkl.dashboard',
+                'admin_pklbkk' => 'pkl.dashboard',
                 'default' => 'dashboard',
             ],
         ],
@@ -41,7 +42,7 @@ return [
             'key' => 'master',
             'label' => 'Data Master Sekolah',
             'icon' => 'fa-graduation-cap',
-            'roles' => ['admin', 'super_admin', 'super_duper_admin'],
+            'roles' => ['admin_master', 'super_admin', 'super_duper_admin'],
             'children' => [
                 ['label' => 'Dashboard Sekolah', 'icon' => 'fa-comment-dots', 'route' => 'datamaster.index'],
                 ['label' => 'Data Sekolah', 'icon' => 'fa-school', 'route' => 'datamaster.sekolah.edit'],
@@ -53,13 +54,13 @@ return [
             'key' => 'aula',
             'label' => 'Peminjaman Aula',
             'icon' => 'fa-building-columns',
-            'roles' => ['admin', 'super_admin', 'super_duper_admin'],
+            'roles' => ['admin_aula', 'super_admin', 'super_duper_admin'],
             'children' => [
                 ['label' => 'Dashboard Aula', 'icon' => 'fa-gauge-high', 'route' => null],
-                ['label' => 'Fasilitas', 'icon' => 'fa-box', 'route' => null],
-                ['label' => 'Paket Peminjaman', 'icon' => 'fa-boxes-packing', 'route' => null],
-                ['label' => 'Persetujuan 1', 'icon' => 'fa-cart-shopping', 'route' => null],
-                ['label' => 'Laporan Operasional', 'icon' => 'fa-chart-simple', 'route' => null],
+                ['label' => 'Fasilitas', 'icon' => 'fa-box', 'route' => 'admin.fasilitas.index'],
+                ['label' => 'Paket Peminjaman', 'icon' => 'fa-boxes-packing', 'route' => 'admin.paket.index'],
+                ['label' => 'Persetujuan 1', 'icon' => 'fa-cart-shopping', 'route' => 'admin.peminjaman.index'],
+                ['label' => 'Laporan Operasional', 'icon' => 'fa-chart-simple', 'route' => 'admin.laporan.index'],
             ],
         ],
 
@@ -67,7 +68,7 @@ return [
             'key' => 'kepsek',
             'label' => 'Kepala Sekolah',
             'icon' => 'fa-user-tie',
-            'roles' => ['admin', 'super_admin', 'super_duper_admin', 'kepala_sekolah'],
+            'roles' => ['super_admin', 'super_duper_admin', 'kepala_sekolah'],
             'children' => [
                 ['label' => 'Dashboard KS', 'icon' => 'fa-gauge-high', 'route' => null],
                 ['label' => 'Persetujuan 2', 'icon' => 'fa-cart-shopping', 'route' => null],
@@ -79,7 +80,7 @@ return [
             'key' => 'kesiswaan',
             'label' => 'Kesiswaan',
             'icon' => 'fa-users',
-            'roles' => ['admin', 'super_admin', 'super_duper_admin'],
+            'roles' => ['admin_kesiswaan', 'super_admin', 'super_duper_admin'],
             'children' => [
                 ['label' => 'Dashboard K', 'icon' => 'fa-gauge-high', 'route' => null],
                 ['label' => 'Data Prestasi', 'icon' => 'fa-trophy', 'route' => null],
@@ -92,7 +93,7 @@ return [
             'key' => 'produk',
             'label' => 'Produk Unggulan',
             'icon' => 'fa-store',
-            'roles' => ['admin', 'super_admin', 'super_duper_admin'],
+            'roles' => ['admin_produk', 'admin_produk_unggulan', 'super_admin', 'super_duper_admin'],
             'children' => [
                 ['label' => 'Dashboard PU', 'icon' => 'fa-gauge-high', 'route' => null],
                 ['label' => 'Data Produk', 'icon' => 'fa-basket-shopping', 'route' => null],
@@ -101,14 +102,14 @@ return [
 
         /*
         |----------------------------------------------------------------------
-        | Modul PKL & BKK - satu-satunya modul untuk role `bkk`
+        | Modul PKL & BKK - modul untuk role `bkk` dan `admin_pklbkk`
         |----------------------------------------------------------------------
         */
         [
             'key' => 'pklbkk',
             'label' => 'PKL & BKK',
             'icon' => 'fa-briefcase',
-            'roles' => ['bkk', 'admin', 'super_admin', 'super_duper_admin'],
+            'roles' => ['bkk', 'admin_pklbkk', 'super_admin', 'super_duper_admin'],
             'children' => [
                 [
                     'label' => 'Dashboard BKK',
@@ -147,7 +148,7 @@ return [
             'key' => 'ppdb',
             'label' => 'PPDB',
             'icon' => 'fa-user-plus',
-            'roles' => ['admin', 'super_admin', 'super_duper_admin'],
+            'roles' => ['admin_ppdb', 'super_admin', 'super_duper_admin'],
             'children' => [
                 ['label' => 'Dashboard PPDB', 'icon' => 'fa-gauge-high', 'route' => null],
                 ['label' => 'Informasi & Persyaratan', 'icon' => 'fa-file-lines', 'route' => null],

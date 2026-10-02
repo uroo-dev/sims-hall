@@ -30,6 +30,12 @@
                 class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-500 text-gray-700">
                 <option value="">Semua Role</option>
                 <option value="admin">Admin</option>
+                <option value="admin_aula">Admin Aula</option>
+                <option value="admin_master">Admin Data Master</option>
+                <option value="admin_kesiswaan">Admin Kesiswaan</option>
+                <option value="admin_produk">Admin Produk</option>
+                <option value="admin_ppdb">Admin PPDB</option>
+                <option value="bkk">BKK & PKL</option>
                 <option value="super_admin">Super Admin</option>
                 <option value="super_duper_admin">Super Duper Admin</option>
                 <option value="guru">Guru</option>
@@ -69,6 +75,12 @@
                             @php
                                 $badgeColor = match($user->role) {
                                     'admin'                  => 'bg-blue-100 text-blue-700',
+                                    'admin_aula'             => 'bg-sky-100 text-sky-700',
+                                    'admin_master'           => 'bg-cyan-100 text-cyan-700',
+                                    'admin_kesiswaan'        => 'bg-violet-100 text-violet-700',
+                                    'admin_produk', 'admin_produk_unggulan' => 'bg-amber-100 text-amber-700',
+                                    'admin_ppdb'             => 'bg-emerald-100 text-emerald-700',
+                                    'admin_pklbkk', 'bkk'    => 'bg-teal-100 text-teal-700',
                                     'super_admin'            => 'bg-indigo-100 text-indigo-700',
                                     'super_duper_admin'      => 'bg-purple-100 text-purple-700',
                                     'guru'                   => 'bg-cyan-100 text-cyan-700',
@@ -170,8 +182,13 @@
                     <select name="role" required
                         class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs md:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-600/20 focus:border-brand-600 transition">
                         <option value="" disabled {{ old('role') ? '' : 'selected' }}>-- Pilih Role --</option>
-                        <optgroup label="Admin Sistem">
-                            <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Admin</option>
+                        <optgroup label="Admin Fitur & Sistem">
+                            <option value="admin_aula" {{ old('role') == 'admin_aula' ? 'selected' : '' }}>Admin Aula</option>
+                            <option value="admin_master" {{ old('role') == 'admin_master' ? 'selected' : '' }}>Admin Data Master</option>
+                            <option value="admin_kesiswaan" {{ old('role') == 'admin_kesiswaan' ? 'selected' : '' }}>Admin Kesiswaan</option>
+                            <option value="admin_produk" {{ old('role') == 'admin_produk' ? 'selected' : '' }}>Admin Produk</option>
+                            <option value="admin_ppdb" {{ old('role') == 'admin_ppdb' ? 'selected' : '' }}>Admin PPDB</option>
+                            <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Admin (Umum)</option>
                             <option value="super_admin" {{ old('role') == 'super_admin' ? 'selected' : '' }}>Super Admin</option>
                             <option value="super_duper_admin" {{ old('role') == 'super_duper_admin' ? 'selected' : '' }}>Super Duper Admin</option>
                         </optgroup>
@@ -255,8 +272,13 @@
                     <select name="role" id="edit_role" required
                         class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs md:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition">
                         <option value="" disabled>-- Pilih Role --</option>
-                        <optgroup label="Admin Sistem">
-                            <option value="admin">Admin</option>
+                        <optgroup label="Admin Fitur & Sistem">
+                            <option value="admin_aula">Admin Aula</option>
+                            <option value="admin_master">Admin Data Master</option>
+                            <option value="admin_kesiswaan">Admin Kesiswaan</option>
+                            <option value="admin_produk">Admin Produk</option>
+                            <option value="admin_ppdb">Admin PPDB</option>
+                            <option value="admin">Admin (Umum)</option>
                             <option value="super_admin">Super Admin</option>
                             <option value="super_duper_admin">Super Duper Admin</option>
                         </optgroup>
