@@ -170,6 +170,7 @@ Navigasi diatur menggunakan Blade if-else berdasarkan role user autentikasi:
                     class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('index.informasi.ppdb') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
                     <i class="fa-solid fa-file-lines text-base w-5 text-center"></i>
                     <span>Informasi & Persyaratan</span>
+                </a>
             @elseif($userRole === 'admin_kesiswaan')
 
                     <!-- 1. DASHBOARD KESISWAAN -->
