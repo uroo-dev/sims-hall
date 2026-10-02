@@ -1,11 +1,15 @@
 @import 'tailwindcss';
 
+@source '../views/**/*.blade.php';
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 
 @theme {
     --font-sans: 'Poppins', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
+
+    /* Landing page publik */
+    --font-jakarta: 'Plus Jakarta Sans', 'Inter', ui-sans-serif, system-ui, sans-serif;
 
     --color-brand-50: #f0f7ff;
     --color-brand-100: #e0effe;
@@ -14,11 +18,43 @@
     --color-brand-700: #005596;
     --color-brand-800: #004377;
     --color-brand-900: #003159;
+
+    /* Alias semantik yang dipakai seluruh view publik (nav pill, tombol CTA,
+       teks brand). Tanpa dua token ini `bg-brand-blue` ds. tidak menghasilkan
+       CSS sama sekali karena Tailwind hanya menelusuri nama variabel yang
+       terdaftar di @theme. */
+    --color-brand-blue: #006cb8;
+    --color-brand-darkBlue: #004377;
+}
+
+/* Fractal plus texture from landing page Figma artboard */
+.plus-tex {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12.77' height='13.82'%3E%3Ctext x='50%25' y='55%25' dominant-baseline='central' text-anchor='middle' fill='%230369a1' font-size='9' font-family='Poppins, sans-serif'%3E%2B%3C/text%3E%3C/svg%3E");
+    background-size: 12.77px 13.82px;
+    background-repeat: repeat;
+    --color-brand-blue: #0066c4;
+    --color-brand-dark-blue: #0052a3;
+    --color-brand-red: #ff4d4d;
+    --color-brand-green: #28c76f;
 }
 
 /* Subtle Card Shadows from Figma */
 .figma-card-shadow {
     box-shadow: 0px 4px 20px 0px rgba(0, 0, 0, 0.06);
+}
+
+/* Landing page publik */
+@utility dot-pattern {
+    background-image: radial-gradient(#0066c4 1.5px, transparent 1.5px);
+    background-size: 12px 12px;
+}
+
+@utility card-shadow {
+    box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.08);
+}
+
+@utility floating-button-shadow {
+    box-shadow: 0 8px 25px rgba(0, 102, 196, 0.3);
 }
 
 /* Custom Scrollbar */

@@ -248,7 +248,7 @@
                 <div class="text-center">
                     <p class="text-xs text-slate-500 font-medium">
                         Belum memiliki akun?
-                        <a href="{{ url('/') }}" class="text-sky-600 font-bold hover:underline hover:text-sky-800 transition">
+                        <a href="{{ route('registrasi') }}" class="text-sky-600 font-bold hover:underline hover:text-sky-800 transition">
                             Daftar Sekarang
                         </a>
                     </p>

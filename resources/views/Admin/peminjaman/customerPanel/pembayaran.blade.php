@@ -1,0 +1,1277 @@
+@extends('Admin.layout.app')
+
+@section('title', 'Pembayaran Sewa Aula - SMKN 2 Karanganyar')
+
+@section('content')
+<div class="space-y-6">
+
+    <!-- STEP PROGRESS TRACKER -->
+    <div class="bg-white rounded-2xl p-4 md:p-6 figma-card-shadow border border-slate-100">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 text-center">
+            <!-- Step 1 -->
+            <div class="flex items-center gap-2.5 p-2 rounded-xl bg-slate-50 text-slate-500">
+                <div class="w-7 h-7 rounded-full bg-emerald-500 text-white font-bold text-xs flex items-center justify-center flex-shrink-0">
+                    <i class="fa-solid fa-check"></i>
+                </div>
+                <div class="text-left">
+                    <span class="block text-[10px] font-bold text-slate-400 uppercase">Langkah 1</span>
+                    <span class="text-xs font-bold text-slate-700">Pilih Paket</span>
+                </div>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="flex items-center gap-2.5 p-2 rounded-xl bg-slate-50 text-slate-500">
+                <div class="w-7 h-7 rounded-full bg-emerald-500 text-white font-bold text-xs flex items-center justify-center flex-shrink-0">
+                    <i class="fa-solid fa-check"></i>
+                </div>
+                <div class="text-left">
+                    <span class="block text-[10px] font-bold text-slate-400 uppercase">Langkah 2</span>
+                    <span class="text-xs font-bold text-slate-700">Form Pengajuan</span>
+                </div>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="flex items-center gap-2.5 p-2 rounded-xl bg-brand-50 border border-brand-200 text-brand-700">
+                <div class="w-7 h-7 rounded-full bg-brand-600 text-white font-bold text-xs flex items-center justify-center flex-shrink-0 shadow-xs">
+                    3
+                </div>
+                <div class="text-left">
+                    <span class="block text-[10px] font-bold text-brand-500 uppercase">Langkah 3</span>
+                    <span class="text-xs font-black text-brand-700">Pembayaran DP / Lunas</span>
+                </div>
+            </div>
+
+            <!-- Step 4 -->
+            <div class="flex items-center gap-2.5 p-2 rounded-xl bg-slate-50 text-slate-400 {{ $pembayaran->status_pembayaran === 'lunas' ? 'opacity-100 bg-emerald-50 text-emerald-700' : 'opacity-60' }}">
+                <div class="w-7 h-7 rounded-full {{ $pembayaran->status_pembayaran === 'lunas' ? 'bg-emerald-500 text-white' : 'bg-slate-200 text-slate-500' }} font-bold text-xs flex items-center justify-center flex-shrink-0">
+                    @if ($pembayaran->status_pembayaran === 'lunas')
+                        <i class="fa-solid fa-check"></i>
+                    @else
+                        4
+                    @endif
+                </div>
+                <div class="text-left">
+                    <span class="block text-[10px] font-bold text-slate-400 uppercase">Langkah 4</span>
+                    <span class="text-xs font-bold text-slate-500">Verifikasi Sekolah</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NOTIFIKASI SUCCESS / ERROR -->
+    @if (session('success'))
+        <div class="bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl p-4 flex items-center justify-between shadow-sm animate-fade-in">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold text-sm">
+                    <i class="fa-solid fa-check"></i>
+                </div>
+                <span class="text-xs md:text-sm font-medium">{{ session('success') }}</span>
+            </div>
+            <button type="button" onclick="this.parentElement.remove()" class="text-emerald-500 hover:text-emerald-700">
+                <i class="fa-solid fa-xmark text-sm"></i>
+            </button>
+        </div>
+    @endif
+
+    @if ($errors->any())
+        <div class="bg-red-50 border border-red-200 text-red-800 rounded-2xl p-4 space-y-2 shadow-sm animate-fade-in">
+            <div class="flex items-center gap-2 font-bold text-xs md:text-sm text-red-700">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                <span>Terdapat kesalahan pengiriman bukti pembayaran:</span>
+            </div>
+            <ul class="list-disc list-inside text-xs text-red-600 space-y-1">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+    <!-- CARD TENGGAT WAKTU & STATUS (PUTIH SOLID, COMPACT/TIPIS, HIGHLIGHT COUNTDOWN SAJA) -->
+    @php
+        $refund = $refundDetail ?? $pembayaran->details->firstWhere('tipe_pembayaran', 'refund');
+        $isCustom = (bool) ($pembayaran->peminjaman?->is_custom);
+        $isWaitingAdminPrice = $isCustom && ((float) $pembayaran->total_tagihan <= 0);
+        $isPartial = $pembayaran->status_pembayaran === 'partial' || ($pembayaran->total_terbayar > 0 && $pembayaran->sisa_tagihan > 0);
+        $targetDeadline = $isPartial
+            ? ($pembayaran->jatuh_tempo_pelunasan ?: ($pembayaran->peminjaman?->tanggal_mulai ? \Carbon\Carbon::parse($pembayaran->peminjaman->tanggal_mulai)->subHours((int) ($config->jatuh_tempo_pelunasan_jam ?? 24)) : now()->addHours(48)))
+            : ($pembayaran->jatuh_tempo_dp ?: now()->addHours(24));
+        $isExpired = now()->isAfter($targetDeadline) && in_array($pembayaran->status_pembayaran, ['pending', 'rejected']);
+
+        $latestPaymentDetail = $pembayaran->details->where('tipe_pembayaran', '!=', 'refund')->sortByDesc('id')->first();
+        $isDetailRejected = $latestPaymentDetail && $latestPaymentDetail->status === 'rejected';
+
+        $isCancelled = $pembayaran->peminjaman?->status === 'cancelled';
+
+        // 1. isRefund: Benar-benar ada proses pengembalian dana (status pembayaran refund_pending atau refunded)
+        $isRefund = in_array($pembayaran->status_pembayaran, ['refund_pending', 'refunded']);
+
+        // 2. isPeminjamanClosed: Permohonan peminjaman sudah selesai/ditolak/dibatalkan/hangus sehingga tidak menerima pembayaran baru
+        $isPeminjamanClosed = $isRefund || $pembayaran->peminjaman?->status === 'rejected' || $isCancelled || $pembayaran->status_pembayaran === 'hangus';
+    @endphp
+    <div class="bg-white rounded-2xl p-4 md:py-3.5 md:px-5 border border-slate-100 figma-card-shadow flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <!-- Info Kiri: Invoice, Paket, Pemohon & Jadwal -->
+        <div class="space-y-1">
+            <div class="flex items-center gap-2 flex-wrap">
+                <span class="px-2.5 py-0.5 bg-slate-100 text-slate-700 rounded-md text-[10px] font-bold tracking-wider uppercase">
+                    Invoice {{ $pembayaran->kode_pembayaran }}
+                </span>
+                @if ($isWaitingAdminPrice)
+                    <span class="px-2.5 py-0.5 bg-amber-50 text-amber-900 border border-amber-300 rounded-md text-[10px] font-bold uppercase">
+                        <i class="fa-solid fa-hourglass-half mr-1"></i> Menunggu Verifikasi & Harga Admin
+                    </span>
+                @elseif ($pembayaran->status_pembayaran === 'lunas')
+                    <span class="px-2.5 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-md text-[10px] font-bold uppercase">
+                        <i class="fa-solid fa-check mr-1"></i> Lunas
+                    </span>
+                @elseif ($pembayaran->status_pembayaran === 'refund_pending')
+                    <span class="px-2.5 py-0.5 bg-purple-50 text-purple-700 border border-purple-200 rounded-md text-[10px] font-bold uppercase animate-pulse">
+                        <i class="fa-solid fa-hand-holding-dollar mr-1"></i> Menunggu Refund
+                    </span>
+                @elseif ($pembayaran->status_pembayaran === 'refunded')
+                    <span class="px-2.5 py-0.5 bg-slate-100 text-slate-700 border border-slate-200 rounded-md text-[10px] font-bold uppercase">
+                        <i class="fa-solid fa-check-double mr-1"></i> Refund Selesai
+                    </span>
+                @elseif ($isCancelled)
+                    <span class="px-2.5 py-0.5 bg-slate-100 text-slate-700 border border-slate-300 rounded-md text-[10px] font-bold uppercase">
+                        <i class="fa-solid fa-ban mr-1"></i> Dibatalkan
+                    </span>
+                @elseif ($pembayaran->peminjaman?->status === 'rejected' || $pembayaran->status_pembayaran === 'rejected')
+                    <span class="px-2.5 py-0.5 bg-red-50 text-red-700 border border-red-200 rounded-md text-[10px] font-bold uppercase">
+                        <i class="fa-solid fa-ban mr-1"></i> Pengajuan Ditolak
+                    </span>
+                @elseif ($isDetailRejected)
+                    <span class="px-2.5 py-0.5 bg-red-50 text-red-700 border border-red-200 rounded-md text-[10px] font-bold uppercase">
+                        <i class="fa-solid fa-triangle-exclamation mr-1"></i> Bukti Ditolak (Transfer Ulang)
+                    </span>
+                @elseif ($pembayaran->status_pembayaran === 'partial')
+                    <span class="px-2.5 py-0.5 bg-blue-50 text-brand-700 border border-blue-200 rounded-md text-[10px] font-bold uppercase">
+                        <i class="fa-solid fa-shield-halved mr-1"></i> DP Terverifikasi
+                    </span>
+                @elseif ($pembayaran->status_pembayaran === 'hangus')
+                    <span class="px-2.5 py-0.5 bg-slate-200 text-slate-700 rounded-md text-[10px] font-bold uppercase">
+                        Expired
+                    </span>
+                @else
+                    <span class="px-2.5 py-0.5 bg-amber-50 text-amber-800 border border-amber-200 rounded-md text-[10px] font-bold uppercase">
+                        Menunggu Pembayaran
+                    </span>
+                @endif
+            </div>
+
+            <h1 class="text-base md:text-lg font-black text-slate-800 tracking-tight leading-snug">
+                {{ $pembayaran->peminjaman?->nama_paket ?? ($paket?->nama_paket ?: 'Paket Sewa Aula') }}
+            </h1>
+            <p class="text-xs text-slate-500">
+                Peminjam: <strong class="text-slate-700">{{ $pembayaran->peminjaman?->nama }}</strong> &bull;
+                Jadwal: {{ $pembayaran->peminjaman?->tanggal_mulai?->translatedFormat('d M Y, H:i') }} - {{ $pembayaran->peminjaman?->tanggal_selesai?->translatedFormat('d M Y, H:i') }} WIB
+            </p>
+
+            @if ($pembayaran->peminjaman?->canBeCancelled())
+                <div class="pt-2 flex items-center gap-2 flex-wrap">
+                    <button type="button" onclick="openCancelModal()"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl text-xs font-bold transition cursor-pointer">
+                        <i class="fa-solid fa-ban text-[11px]"></i>
+                        <span>Batalkan Pengajuan</span>
+                    </button>
+                    <span class="text-[11px] text-slate-400">
+                        (Maksimal pembatalan H-{{ $pembayaran->peminjaman->hari_maksimal_cancel }}: sampai {{ $pembayaran->peminjaman->batas_pembatalan->translatedFormat('d M Y, H:i') }} WIB)
+                    </span>
+                </div>
+            @endif
+        </div>
+
+        @if ($isRefund)
+            <!-- Info Kanan Saat Status Refund (Proses Pengembalian Dana) -->
+            <div class="flex flex-col md:items-end justify-center pt-2 md:pt-0 border-t md:border-t-0 border-slate-100">
+                <span class="text-[10px] font-bold text-purple-600 uppercase tracking-wider flex items-center gap-1">
+                    <i class="fa-solid fa-hand-holding-dollar"></i> Status Pengembalian Dana
+                </span>
+                <div class="text-base md:text-lg font-black text-purple-700 mt-0.5">
+                    {{ $pembayaran->status_pembayaran === 'refunded' ? 'Refund Selesai' : 'Pengembalian Dana (Refund)' }}
+                </div>
+                <div class="text-[11px] font-medium text-slate-500">
+                    Total Dana: <strong class="text-purple-800">Rp {{ number_format($pembayaran->total_refund ?: $pembayaran->total_terbayar, 0, ',', '.') }}</strong>
+                </div>
+            </div>
+        @elseif ($isPeminjamanClosed)
+            <!-- Info Kanan Saat Permohonan Ditolak / Kedaluwarsa (Tanpa Refund) -->
+            <div class="flex flex-col md:items-end justify-center pt-2 md:pt-0 border-t md:border-t-0 border-slate-100">
+                <span class="text-[10px] font-bold text-red-600 uppercase tracking-wider flex items-center gap-1">
+                    <i class="fa-solid fa-ban"></i> Status Permohonan
+                </span>
+                <div class="text-base md:text-lg font-black text-red-700 mt-0.5">
+                    Permohonan Dibatalkan / Ditolak
+                </div>
+                <div class="text-[11px] font-medium text-slate-500">
+                    {{ $pembayaran->status_pembayaran === 'hangus' ? 'Batas waktu transfer telah berakhir' : 'Pengajuan ditolak oleh admin' }}
+                </div>
+            </div>
+        @elseif ($isWaitingAdminPrice)
+            <!-- Info Kanan Saat Paket Custom Menunggu Penetapan Harga Admin -->
+            <div class="flex flex-col md:items-end justify-center pt-2 md:pt-0 border-t md:border-t-0 border-slate-100">
+                <span class="text-[10px] font-bold text-amber-700 uppercase tracking-wider flex items-center gap-1">
+                    <i class="fa-solid fa-hourglass-half text-amber-500"></i> Status Paket Custom
+                </span>
+                <div class="text-base md:text-lg font-black text-slate-800 mt-0.5">
+                    Menunggu Penetapan Harga
+                </div>
+                <div class="text-[11px] font-medium text-slate-500">
+                    Countdown DP aktif setelah harga ditetapkan
+                </div>
+            </div>
+        @else
+            <!-- Info Kanan: Highlight Countdown Teks Saja (Menunggu Pembayaran / Transfer Ulang) -->
+            <div class="flex flex-col md:items-end justify-center pt-2 md:pt-0 border-t md:border-t-0 border-slate-100">
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                    <i class="fa-regular fa-clock text-amber-500"></i> {{ $isPartial ? 'Tenggat Waktu Pelunasan' : 'Tenggat Waktu Pembayaran DP' }}
+                </span>
+                <div class="flex items-center gap-1 font-mono text-xl md:text-2xl font-black tracking-wider text-brand-700 mt-0.5">
+                    <span id="cd-hours">00</span>
+                    <span class="text-slate-300 font-sans">:</span>
+                    <span id="cd-minutes">00</span>
+                    <span class="text-slate-300 font-sans">:</span>
+                    <span id="cd-seconds">00</span>
+                </div>
+                <div id="countdownStatus" class="text-[11px] font-medium text-slate-500">
+                    Batas: {{ $targetDeadline->translatedFormat('d M Y, H:i') }} WIB
+                </div>
+            </div>
+        @endif
+    </div>
+
+    <!-- BANNER PERINGATAN REJECT PEMBAYARAN (TRANSFER ULANG) -->
+    @if (($isDetailRejected || $pembayaran->status_pembayaran === 'rejected') && $pembayaran->peminjaman?->status !== 'rejected')
+        <div class="bg-red-50 border-2 border-red-200 text-red-900 rounded-2xl p-5 shadow-xs flex items-start gap-4">
+            <div class="w-10 h-10 rounded-xl bg-red-600 text-white flex items-center justify-center font-bold text-lg flex-shrink-0">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <div class="space-y-1.5 text-xs md:text-sm">
+                <h3 class="font-black text-red-900 text-sm md:text-base">Bukti Pembayaran Ditolak Oleh Admin! Silakan Transfer Ulang</h3>
+                <p class="text-red-700 leading-relaxed">
+                    <strong>Alasan Penolakan:</strong> {{ $latestPaymentDetail?->catatan ?: $pembayaran->catatan }}
+                </p>
+                <div class="text-[11px] text-red-800 bg-red-100/60 p-2.5 rounded-xl border border-red-200">
+                    <i class="fa-regular fa-clock mr-1 font-bold"></i> Batas Waktu Transfer Ulang: <strong>{{ $targetDeadline->translatedFormat('d F Y, H:i') }} WIB</strong>. Jika melewati batas waktu tersebut tanpa mengunggah bukti pembayaran yang valid, sistem secara otomatis akan membatalkan dan menolak permohonan peminjaman aula.
+                </div>
+            </div>
+        </div>
+    @endif
+
+    <!-- BANNER KEDALUWARSA / PERMOHONAN DIBATALKAN OTOMATIS OLEH SISTEM ATAU PEMOHON -->
+    @if ($pembayaran->status_pembayaran === 'hangus' || (($pembayaran->peminjaman?->status === 'rejected' || $isCancelled) && $pembayaran->status_pembayaran !== 'refund_pending' && $pembayaran->status_pembayaran !== 'refunded'))
+        @if ($isCancelled && $latestPaymentDetail && $latestPaymentDetail->status === 'pending')
+            <div class="bg-amber-50/80 border-2 border-amber-300 text-amber-900 rounded-2xl p-5 shadow-xs flex items-start gap-4">
+                <div class="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center font-bold text-lg flex-shrink-0">
+                    <i class="fa-solid fa-hourglass-half"></i>
+                </div>
+                <div class="space-y-1 text-xs md:text-sm">
+                    <h3 class="font-black text-amber-950 text-sm md:text-base">Pengajuan Dibatalkan &bull; Menunggu Verifikasi Pembayaran</h3>
+                    <p class="text-amber-800 leading-relaxed">
+                        Anda telah membatalkan pengajuan ini. Bukti pembayaran yang Anda unggah saat ini sedang diverifikasi oleh admin sekolah. Setelah pembayaran terverifikasi valid, proses pengembalian dana (refund) akan dibuka secara otomatis.
+                    </p>
+                </div>
+            </div>
+        @else
+            <div class="bg-slate-100 border-2 border-slate-300 text-slate-800 rounded-2xl p-5 shadow-xs flex items-start gap-4">
+                <div class="w-10 h-10 rounded-xl bg-slate-600 text-white flex items-center justify-center font-bold text-lg flex-shrink-0">
+                    <i class="fa-solid fa-ban"></i>
+                </div>
+                <div class="space-y-1 text-xs md:text-sm">
+                    <h3 class="font-black text-slate-900 text-sm md:text-base">{{ $isCancelled ? 'Permohonan Peminjaman Aula Telah Dibatalkan' : 'Permohonan Peminjaman Aula Telah Ditolak / Dibatalkan' }}</h3>
+                    <p class="text-slate-600 leading-relaxed">
+                        {{ $pembayaran->catatan ?: ($pembayaran->peminjaman?->catatan ?: 'Permohonan peminjaman aula ini telah dibatalkan atau melewati batas waktu pembayaran yang ditentukan.') }}
+                    </p>
+                    <div class="pt-2">
+                        <a href="{{ route('customer.paket') }}" class="inline-flex items-center gap-1.5 px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-xl shadow-xs transition">
+                            <i class="fa-solid fa-plus text-[10px]"></i>
+                            <span>Ajukan Permohonan Baru</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        @endif
+    @endif
+
+    <!-- MODUL KHUSUS REFUND (JIKA STATUS PEMBAYARAN REFUND_PENDING ATAU REFUNDED) -->
+    @if (in_array($pembayaran->status_pembayaran, ['refund_pending', 'refunded']))
+        <div class="bg-purple-50/60 rounded-3xl p-6 md:p-8 border-2 border-purple-200 figma-card-shadow space-y-6">
+            <div class="flex items-center gap-3.5 pb-4 border-b border-purple-200/80">
+                <div class="w-12 h-12 rounded-2xl bg-purple-600 text-white flex items-center justify-center text-xl font-bold flex-shrink-0 shadow-xs">
+                    <i class="fa-solid fa-hand-holding-dollar"></i>
+                </div>
+                <div>
+                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-purple-200 text-purple-800 uppercase tracking-wider">
+                        Pengembalian Dana (Refund)
+                    </span>
+                    <h2 class="text-base md:text-lg font-black text-slate-900 tracking-tight mt-0.5">
+                        {{ $isCancelled ? 'Pengajuan Dibatalkan & Proses Pengembalian Dana' : 'Pengajuan Peminjaman Ditolak & Proses Pengembalian Dana' }}
+                    </h2>
+                    <p class="text-xs text-slate-500">
+                        Pihak sekolah mengembalikan dana sebesar <strong class="text-purple-700">Rp {{ number_format($pembayaran->total_refund ?: $pembayaran->total_terbayar, 0, ',', '.') }}</strong> yang telah Anda bayarkan.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Catatan Alasan Penolakan dari Admin / Alasan Pembatalan -->
+            <div class="p-4 bg-white rounded-2xl border border-purple-100 text-xs md:text-sm space-y-1">
+                <span class="font-bold text-slate-700 block">{{ $isCancelled ? 'Alasan Pembatalan Pengajuan:' : 'Keterangan / Alasan Penolakan dari Pihak Sekolah:' }}</span>
+                <p class="text-slate-600 italic">
+                    "{{ $pembayaran->catatan ?: ($pembayaran->peminjaman?->catatan ?: 'Pengajuan dibatalkan oleh pemohon.') }}"
+                </p>
+            </div>
+            </div>
+
+            @php
+                $refund = $refundDetail ?: $pembayaran->details->firstWhere('tipe_pembayaran', 'refund');
+            @endphp
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                <!-- KOLOM 1: DATA REKENING PEMOHON -->
+                <div class="bg-white p-5 md:p-6 rounded-2xl border border-purple-100 space-y-4">
+                    <div class="flex items-center gap-2 font-bold text-slate-800 text-xs md:text-sm uppercase tracking-wide">
+                        <i class="fa-solid fa-credit-card text-purple-600"></i>
+                        <span>1. Rekening Pengembalian Dana Anda</span>
+                    </div>
+
+                    @if ($refund && $refund->norek_tujuan)
+                        <!-- Data Rekening Sudah Terisi -->
+                        <div class="p-4 bg-purple-50/40 rounded-xl border border-purple-100 space-y-2 text-xs">
+                            <div>
+                                <span class="text-slate-400 block text-[10px] uppercase font-bold">Nama Bank:</span>
+                                <strong class="text-slate-900 text-sm">{{ $refund->bank_tujuan }}</strong>
+                            </div>
+                            <div>
+                                <span class="text-slate-400 block text-[10px] uppercase font-bold">Nomor Rekening:</span>
+                                <span class="font-mono font-black text-purple-700 text-base">{{ $refund->norek_tujuan }}</span>
+                            </div>
+                            <div>
+                                <span class="text-slate-400 block text-[10px] uppercase font-bold">Atas Nama Pemilik:</span>
+                                <strong class="text-slate-800 text-xs">{{ $refund->atas_nama_pengirim }}</strong>
+                            </div>
+                        </div>
+
+                        @if ($pembayaran->status_pembayaran === 'refund_pending' && !$refund->bukti_pembayaran)
+                            <div class="p-3 bg-amber-50 rounded-xl border border-amber-200 text-[11px] text-amber-800 flex items-center gap-2">
+                                <i class="fa-solid fa-hourglass-half text-amber-600"></i>
+                                <span>Data rekening Anda telah diterima. Menunggu pihak sekolah mentransfer dan mengirimkan bukti transfer refund.</span>
+                            </div>
+                        @endif
+                    @else
+                        <!-- Form Pengisian Rekening Pemohon -->
+                        <form action="{{ route('customer.pembayaran.rekening-refund', $pembayaran->id) }}" method="POST" class="space-y-3">
+                            @csrf
+                            <p class="text-[11px] text-slate-500">
+                                Silakan masukkan nomor rekening tujuan yang aktif untuk menerima transfer pengembalian dana (refund):
+                            </p>
+
+                            <div class="space-y-1">
+                                <label class="block text-xs font-bold text-slate-700 uppercase">Nama Bank <span class="text-red-500">*</span></label>
+                                <input type="text" name="bank_tujuan" required placeholder="Contoh: Bank BCA, BRI, Mandiri, Bank Jateng"
+                                    class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 focus:bg-white focus:ring-2 focus:ring-purple-500 focus:outline-none">
+                            </div>
+
+                            <div class="space-y-1">
+                                <label class="block text-xs font-bold text-slate-700 uppercase">Nomor Rekening <span class="text-red-500">*</span></label>
+                                <input type="text" name="norek_tujuan" required placeholder="Contoh: 1234567890"
+                                    class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-mono text-slate-800 focus:bg-white focus:ring-2 focus:ring-purple-500 focus:outline-none">
+                            </div>
+
+                            <div class="space-y-1">
+                                <label class="block text-xs font-bold text-slate-700 uppercase">Atas Nama Pemilik Rekening <span class="text-red-500">*</span></label>
+                                <input type="text" name="atas_nama_pengirim" required placeholder="Nama lengkap sesuai buku tabungan"
+                                    class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 focus:bg-white focus:ring-2 focus:ring-purple-500 focus:outline-none">
+                            </div>
+
+                            <button type="submit"
+                                class="w-full py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold shadow-xs transition flex items-center justify-center gap-1.5">
+                                <i class="fa-solid fa-paper-plane text-xs"></i>
+                                <span>Simpan Data Rekening Refund</span>
+                            </button>
+                        </form>
+                    @endif
+                </div>
+
+                <!-- KOLOM 2: BUKTI TRANSFER REFUND DARI SEKOLAH & KONFIRMASI -->
+                <div class="bg-white p-5 md:p-6 rounded-2xl border border-purple-100 space-y-4">
+                    <div class="flex items-center gap-2 font-bold text-slate-800 text-xs md:text-sm uppercase tracking-wide">
+                        <i class="fa-solid fa-receipt text-purple-600"></i>
+                        <span>2. Bukti Transfer Refund Dari Sekolah</span>
+                    </div>
+
+                    @if ($refund && $refund->bukti_pembayaran)
+                        <!-- Admin Sudah Mengirim Bukti Transfer Refund -->
+                        <div class="space-y-3">
+                            <div class="p-3 bg-emerald-50 rounded-xl border border-emerald-200 text-xs text-emerald-800 flex items-center justify-between">
+                                <span class="font-bold"><i class="fa-solid fa-check-circle mr-1"></i> Bukti Transfer Telah Diunggah</span>
+                                <span class="text-[11px] text-emerald-600">{{ $refund->tanggal_bayar ? $refund->tanggal_bayar->format('d/m/Y H:i') : '' }}</span>
+                            </div>
+
+                            <a href="{{ $refund->bukti_pembayaran_url }}" target="_blank"
+                                class="block rounded-xl overflow-hidden border border-slate-200 hover:opacity-95 transition">
+                                <img src="{{ $refund->bukti_pembayaran_url }}" alt="Bukti Transfer Refund" class="w-full h-40 object-cover">
+                            </a>
+
+                            @if ($pembayaran->status_pembayaran === 'refund_pending')
+                                <!-- Tombol Konfirmasi Dana Telah Diterima via Modal -->
+                                <button type="button" onclick="openModalKonfirmasiRefund()"
+                                    class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-xl text-xs font-black shadow-xs transition flex items-center justify-center gap-2 cursor-pointer">
+                                    <i class="fa-solid fa-circle-check"></i>
+                                    <span>Konfirmasi Dana Telah Diterima (Selesai)</span>
+                                </button>
+                            @else
+                                <div class="p-3.5 bg-emerald-50 rounded-xl text-xs text-emerald-800 text-center font-bold flex items-center justify-center gap-2">
+                                    <i class="fa-solid fa-check-double text-base"></i>
+                                    <span>Pengembalian dana telah selesai dan dikonfirmasi diterima.</span>
+                                </div>
+                            @endif
+                        </div>
+                    @else
+                        <!-- Menunggu Admin Unggah Bukti -->
+                        <div class="p-8 text-center text-slate-400 space-y-2">
+                            <i class="fa-regular fa-clock text-3xl text-purple-300 block mb-1"></i>
+                            <p class="font-bold text-slate-700 text-xs md:text-sm">Menunggu Transfer Dari Sekolah</p>
+                            <p class="text-[11px] text-slate-400">
+                                Bukti transfer refund akan tampil di sini setelah admin sekolah mentransfer dana ke rekening yang Anda masukkan.
+                            </p>
+                        </div>
+                    @endif
+                </div>
+
+            </div>
+        </div>
+    @endif
+
+    <!-- MAIN TWO-COLUMN CONTENT GRID -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <!-- KOLOM KIRI (SPAN 2): FORMULIR KONFIRMASI PEMBAYARAN & RIWAYAT -->
+        <div class="lg:col-span-2 space-y-6">
+
+            <!-- 1. FORMULIR KONFIRMASI PEMBAYARAN / STATE MENUNGGU HARGA ADMIN -->
+            @if ($isWaitingAdminPrice)
+                <!-- TAMPILAN STATE: MENUNGGU VERIFIKASI & PENETAPAN HARGA OLEH ADMIN AULA -->
+                <div class="bg-white rounded-2xl p-6 md:p-8 figma-card-shadow border border-amber-200 space-y-6">
+                    <div class="flex items-center gap-3.5 pb-4 border-b border-slate-100">
+                        <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-xl flex-shrink-0 border border-amber-200">
+                            <i class="fa-solid fa-sliders"></i>
+                        </div>
+                        <div>
+                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 uppercase tracking-wider">
+                                Paket Custom Peminjaman Aula
+                            </span>
+                            <h2 class="text-base md:text-lg font-black text-slate-900 tracking-tight mt-0.5">
+                                Menunggu Verifikasi & Penetapan Harga oleh Admin Aula
+                            </h2>
+                            <p class="text-xs text-slate-500">
+                                Permohonan paket custom Anda telah tersimpan dan saat ini sedang ditinjau oleh Admin Aula.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="p-4 bg-amber-50/60 rounded-2xl border border-amber-200/80 space-y-2 text-xs md:text-sm text-amber-950">
+                        <p class="font-bold flex items-center gap-2">
+                            <i class="fa-solid fa-circle-info text-amber-600"></i>
+                            <span>Langkah Selanjutnya:</span>
+                        </p>
+                        <p class="text-amber-800 leading-relaxed text-xs">
+                            Admin Aula SMKN 2 Karanganyar akan memverifikasi ketersediaan seluruh fasilitas yang Anda ajukan dan menetapkan total harga sewa aula. Setelah admin menetapkan harga, formulir pembayaran (DP / Lunas) dan countdown tenggat waktu pembayaran akan otomatis aktif di halaman ini.
+                        </p>
+                    </div>
+
+                    <!-- FASILITAS YANG DIAJUKAN -->
+                    <div class="space-y-3 pt-1">
+                        <span class="block text-xs font-bold text-slate-700 uppercase tracking-wide">
+                            Fasilitas yang Anda Ajukan:
+                        </span>
+                        @php
+                            $facilitiesList = $pembayaran->peminjaman?->daftar_fasilitas ?? collect();
+                        @endphp
+                        @if ($facilitiesList->isNotEmpty())
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                                @foreach ($facilitiesList as $fac)
+                                    <div class="flex items-center gap-2.5 p-3 rounded-xl bg-slate-50 border border-slate-200/80 text-xs text-slate-700">
+                                        <div class="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center flex-shrink-0 text-[10px]">
+                                            <i class="fa-solid fa-check"></i>
+                                        </div>
+                                        <span class="font-semibold">{{ $fac->judul }}</span>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @else
+                            <p class="text-xs text-slate-400 italic">Tidak ada fasilitas spesifik yang terdata.</p>
+                        @endif
+                    </div>
+
+                    <div class="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
+                        <a href="{{ route('customer.pembayaran.show', $pembayaran->id) }}"
+                           class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition">
+                            <i class="fa-solid fa-rotate text-xs"></i>
+                            <span>Muat Ulang Halaman</span>
+                        </a>
+                        <span class="text-xs text-slate-400 italic">
+                            * Halaman akan otomatis memperbarui tagihan setelah harga ditentukan admin.
+                        </span>
+                    </div>
+                </div>
+            @elseif (!in_array($pembayaran->status_pembayaran, ['lunas', 'refund_pending', 'refunded', 'hangus']) && $pembayaran->peminjaman?->status !== 'rejected')
+                <div class="bg-white rounded-2xl p-6 md:p-8 figma-card-shadow border border-slate-100 space-y-7">
+                    <!-- Header Card -->
+                    <div class="flex items-center gap-3 pb-4 border-b border-slate-100">
+                        <div class="w-10 h-10 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center font-bold text-base flex-shrink-0">
+                            <i class="fa-solid fa-receipt"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-sm md:text-base font-bold text-slate-800 uppercase tracking-wide">
+                                {{ ($pembayaran->status_pembayaran === 'rejected' || $isDetailRejected) ? 'Konfirmasi Transfer Ulang Bukti Pembayaran' : 'Konfirmasi & Unggah Bukti Transfer' }}
+                            </h2>
+                            <p class="text-xs text-slate-500 mt-0.5">Pilih rekening tujuan, skema pembayaran, dan kirimkan struk transfer Anda</p>
+                        </div>
+                    </div>
+
+                    <form action="{{ route('customer.pembayaran.bayar', $pembayaran->id) }}" method="POST" enctype="multipart/form-data" class="space-y-7">
+                        @csrf
+
+                        <!-- KOMPONEN 1: PILIHAN SKEMA PEMBAYARAN (DP ATAU LANGSUNG LUNAS) -->
+                        <div class="space-y-2.5">
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide">
+                                1. Pilih Skema Pembayaran <span class="text-red-500">*</span>
+                            </label>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+                                <!-- Option 1: Bayar DP -->
+                                <label class="payment-option cursor-pointer p-4 rounded-2xl border-2 border-brand-500 bg-brand-50/30 flex items-start gap-3 transition hover:border-brand-600 shadow-2xs">
+                                    <input type="radio" name="tipe_pembayaran" value="dp" checked onchange="updatePaymentScheme('dp')"
+                                        class="mt-1 text-brand-600 focus:ring-brand-500">
+                                    <div class="space-y-1">
+                                        <div class="flex items-center gap-1.5">
+                                            <span class="text-xs font-black text-slate-800">Bayar Uang Muka (DP)</span>
+                                            <span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-brand-100 text-brand-700">Cicilan 1</span>
+                                        </div>
+                                        <div class="text-base md:text-lg font-black text-brand-700">
+                                            Rp {{ number_format($nominalDp, 0, ',', '.') }}
+                                        </div>
+                                        <p class="text-[11px] text-slate-500 leading-tight">
+                                            Konfirmasi booking aula awal. Pelunasan dapat diselesaikan kemudian.
+                                        </p>
+                                    </div>
+                                </label>
+
+                                <!-- Option 2: Langsung Lunas -->
+                                <label class="payment-option cursor-pointer p-4 rounded-2xl border-2 border-slate-200 bg-slate-50/50 flex items-start gap-3 transition hover:border-brand-500 shadow-2xs">
+                                    <input type="radio" name="tipe_pembayaran" value="lunas_langsung" onchange="updatePaymentScheme('lunas_langsung')"
+                                        class="mt-1 text-brand-600 focus:ring-brand-500">
+                                    <div class="space-y-1">
+                                        <div class="flex items-center gap-1.5">
+                                            <span class="text-xs font-black text-slate-800">Langsung Lunas (100%)</span>
+                                            <span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-100 text-emerald-700">Penuh</span>
+                                        </div>
+                                        <div class="text-base md:text-lg font-black text-emerald-700">
+                                            Rp {{ number_format($pembayaran->sisa_tagihan, 0, ',', '.') }}
+                                        </div>
+                                        <p class="text-[11px] text-slate-500 leading-tight">
+                                            Selesaikan pembayaran penuh tanpa perlu membayar cicilan berikutnya.
+                                        </p>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- KOMPONEN 2: REKENING TUJUAN & NOMINAL BAYAR -->
+                        <div class="pt-3 border-t border-slate-100/80 space-y-4">
+                            <span class="block text-xs font-bold text-slate-700 uppercase tracking-wide">
+                                2. Rekening Tujuan Sekolah & Nominal Transfer
+                            </span>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <div>
+                                    <label for="bank_tujuan" class="block text-xs font-semibold text-slate-600 mb-1.5">
+                                        Pilih Rekening / Metode Tujuan <span class="text-red-500">*</span>
+                                    </label>
+                                    <select name="bank_tujuan" id="bank_tujuan" required onchange="handleBankChange(this)"
+                                        class="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs md:text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-600/20 focus:border-brand-600 transition">
+                                        <option value="{{ $config->bank_utama }}" data-type="bank" data-norek="{{ $config->norek_utama }}" data-an="{{ $config->atas_nama_utama }}">
+                                            {{ $config->bank_utama }} - {{ $config->norek_utama }} (a.n. {{ $config->atas_nama_utama }})
+                                        </option>
+                                        @if ($config->bank_alternatif_1)
+                                            <option value="{{ $config->bank_alternatif_1 }}" data-type="bank" data-norek="{{ $config->norek_alternatif_1 }}" data-an="{{ $config->atas_nama_alternatif_1 }}">
+                                                {{ $config->bank_alternatif_1 }} - {{ $config->norek_alternatif_1 }} (a.n. {{ $config->atas_nama_alternatif_1 }})
+                                            </option>
+                                        @endif
+                                        @if ($config->bank_alternatif_2)
+                                            <option value="{{ $config->bank_alternatif_2 }}" data-type="bank" data-norek="{{ $config->norek_alternatif_2 }}" data-an="{{ $config->atas_nama_alternatif_2 }}">
+                                                {{ $config->bank_alternatif_2 }} - {{ $config->norek_alternatif_2 }} (a.n. {{ $config->atas_nama_alternatif_2 }})
+                                            </option>
+                                        @endif
+                                        <option value="QRIS" data-type="qris" data-merchant="{{ $config->qris_merchant ?: 'SMKN 2 KRA AULA' }}">
+                                            QRIS Resmi Sekolah ({{ $config->qris_merchant ?: 'SMKN 2 KRA AULA' }})
+                                        </option>
+                                    </select>
+
+                                    <!-- Box Info Rekening Bank (Tampil saat pilih Bank) -->
+                                    <div id="bankInfoBox" class="mt-2.5 p-2.5 bg-blue-50/40 border border-blue-100/70 rounded-xl flex items-center justify-between text-xs">
+                                        <div class="text-slate-600 text-[11px] truncate mr-2">
+                                            No. Rek: <strong id="selectedNorek" class="font-mono text-slate-800 font-bold">{{ $config->norek_utama }}</strong>
+                                            <span class="text-slate-300 mx-1.5">|</span>
+                                            a.n. <strong id="selectedAtasNama" class="text-slate-800">{{ $config->atas_nama_utama }}</strong>
+                                        </div>
+                                        <button type="button" onclick="salinNorekTerpilih(this)"
+                                            class="px-2.5 py-1 bg-white hover:bg-slate-100 border border-slate-200 rounded-lg text-[11px] font-bold text-brand-600 flex items-center gap-1 shadow-2xs transition flex-shrink-0">
+                                            <i class="fa-regular fa-copy"></i>
+                                            <span>Salin</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label for="jumlah_bayar" class="block text-xs font-semibold text-slate-600 mb-1.5">
+                                        Jumlah Transfer (Rp) <span class="text-red-500">*</span>
+                                    </label>
+                                    <input type="number" name="jumlah_bayar" id="jumlah_bayar" required min="1000"
+                                        value="{{ old('jumlah_bayar', $nominalDp) }}"
+                                        class="w-full px-3.5 py-3 bg-slate-100 border border-slate-200 rounded-xl text-xs md:text-sm font-black text-brand-700 focus:outline-none transition">
+                                </div>
+                            </div>
+
+                            <!-- Gambar QRIS Lebar 2/3 dari Card Parent (Tampil saat pilih QRIS) -->
+                            <div id="qrisInfoBox" class="w-full hidden pt-2 text-center">
+                                @if ($config->qris_image)
+                                    <img src="{{ $config->qris_url }}" alt="QRIS {{ $config->qris_merchant ?: 'Sekolah' }}"
+                                        class="w-full md:w-2/3 mx-auto h-auto rounded-2xl border border-slate-200 object-contain shadow-xs">
+                                @else
+                                    <div class="w-full md:w-2/3 mx-auto py-12 text-center bg-slate-50 border border-dashed border-slate-200 rounded-2xl text-slate-400">
+                                        <i class="fa-solid fa-qrcode text-6xl mb-2 text-slate-300 block"></i>
+                                        <span class="text-xs">QR Code belum diunggah di konfigurasi</span>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+
+                        <!-- KOMPONEN 3: DATA REKENING PENGIRIM -->
+                        <div class="pt-3 border-t border-slate-100/80 space-y-4">
+                            <span class="block text-xs font-bold text-slate-700 uppercase tracking-wide">
+                                3. Identitas Rekening Pengirim
+                            </span>
+
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                                <div>
+                                    <label for="bank_pengirim" class="block text-xs font-semibold text-slate-600 mb-1.5">
+                                        Bank Asal Pengirim <span class="text-red-500">*</span>
+                                    </label>
+                                    <input type="text" name="bank_pengirim" id="bank_pengirim" required maxlength="100"
+                                        value="{{ old('bank_pengirim') }}"
+                                        placeholder="Contoh: BCA / BRI / Mandiri"
+                                        class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs md:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-600/20 focus:border-brand-600 transition font-medium">
+                                </div>
+
+                                <div>
+                                    <label for="norek_pengirim" class="block text-xs font-semibold text-slate-600 mb-1.5">
+                                        Nomor Rekening Pengirim <span class="text-red-500">*</span>
+                                    </label>
+                                    <input type="text" name="norek_pengirim" id="norek_pengirim" required maxlength="100"
+                                        value="{{ old('norek_pengirim') }}"
+                                        placeholder="Nomor rekening Anda"
+                                        class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs md:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-600/20 focus:border-brand-600 transition font-mono font-medium">
+                                </div>
+
+                                <div>
+                                    <label for="atas_nama_pengirim" class="block text-xs font-semibold text-slate-600 mb-1.5">
+                                        Atas Nama Pengirim <span class="text-red-500">*</span>
+                                    </label>
+                                    <input type="text" name="atas_nama_pengirim" id="atas_nama_pengirim" required maxlength="150"
+                                        value="{{ old('atas_nama_pengirim', $user?->name) }}"
+                                        placeholder="Nama di buku tabungan"
+                                        class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs md:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-600/20 focus:border-brand-600 transition font-medium">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- KOMPONEN 4: UPLOAD BUKTI & TANGGAL TRANSFER -->
+                        <div class="pt-3 border-t border-slate-100/80 space-y-4">
+                            <span class="block text-xs font-bold text-slate-700 uppercase tracking-wide">
+                                4. Bukti Struk & Waktu Transfer
+                            </span>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <div>
+                                    <label for="bukti_pembayaran" class="block text-xs font-semibold text-slate-600 mb-1.5">
+                                        Unggah Bukti Struk / Transfer <span class="text-red-500">*</span>
+                                    </label>
+                                    <input type="file" name="bukti_pembayaran" id="bukti_pembayaran" required accept="image/jpeg,image/png,image/webp"
+                                        class="w-full text-xs text-slate-500 file:mr-3 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100 cursor-pointer border border-slate-200 rounded-xl bg-slate-50/50 p-1">
+                                    <p class="text-[11px] text-slate-400 mt-1.5">Format berkas: Gambar JPG, JPEG, PNG, WEBP (Maks. 3MB).</p>
+                                </div>
+
+                                <div>
+                                    <label for="tanggal_bayar" class="block text-xs font-semibold text-slate-600 mb-1.5">
+                                        Waktu Transfer Dilakukan <span class="text-red-500">*</span>
+                                    </label>
+                                    <input type="datetime-local" name="tanggal_bayar" id="tanggal_bayar" required
+                                        value="{{ old('tanggal_bayar', now()->format('Y-m-d\TH:i')) }}"
+                                        class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs md:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-600/20 focus:border-brand-600 transition font-medium">
+                                    <p class="text-[11px] text-slate-400 mt-1.5">Sesuai jam dan tanggal yang tertera pada bukti transfer.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- KOMPONEN 5: CATATAN OPSIONAL -->
+                        <div class="pt-3 border-t border-slate-100/80 space-y-2">
+                            <label for="catatan" class="block text-xs font-bold text-slate-700 uppercase tracking-wide">
+                                5. Catatan Tambahan (Opsional)
+                            </label>
+                            <input type="text" name="catatan" id="catatan" maxlength="1000"
+                                value="{{ old('catatan') }}"
+                                placeholder="Contoh: Transfer DP aula via m-BCA a.n Budi Santoso"
+                                class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs md:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-600/20 focus:border-brand-600 transition">
+                        </div>
+
+                        <!-- SUBMIT -->
+                        <div class="pt-4 border-t border-slate-100">
+                            <button type="submit" id="btnSubmitPayment"
+                                class="w-full py-3.5 px-4 bg-brand-600 hover:bg-brand-700 active:scale-95 text-white font-bold rounded-xl text-sm shadow-md transition flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-paper-plane text-xs"></i>
+                                <span>Kirim Bukti Pembayaran</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            @endif
+
+            <!-- 2. RIWAYAT TRANSAKSI / CICILAN -->
+            @php
+                $uploadedTransactions = $pembayaran->details->filter(function ($trx) {
+                    return !empty($trx->bukti_pembayaran);
+                });
+            @endphp
+            @if ($uploadedTransactions->isNotEmpty())
+                <div class="bg-white rounded-2xl p-6 figma-card-shadow border border-slate-100 space-y-4">
+                    <div class="flex items-center gap-2.5 pb-3 border-b border-slate-100">
+                        <div class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-sm">
+                            <i class="fa-solid fa-list-check"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wide">Riwayat Transfer yang Telah Diunggah</h2>
+                            <p class="text-xs text-slate-500">Status verifikasi oleh pihak pengelola aula</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        @foreach ($uploadedTransactions as $trx)
+                            <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-3">
+                                <div class="space-y-1">
+                                    <div class="flex items-center gap-2">
+                                        <span class="font-mono text-xs font-bold text-slate-800">{{ $trx->kode_transaksi }}</span>
+                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold {{ $trx->tipe_pembayaran === 'dp' ? 'bg-blue-100 text-brand-700' : 'bg-emerald-100 text-emerald-700' }}">
+                                            {{ $trx->label_tipe }}
+                                        </span>
+                                    </div>
+                                    <div class="text-xs text-slate-600">
+                                        Dari <strong>{{ $trx->bank_pengirim }}</strong> ({{ $trx->norek_pengirim }} a.n. {{ $trx->atas_nama_pengirim }})
+                                        ke <strong>{{ $trx->bank_tujuan }}</strong>
+                                    </div>
+                                    <div class="text-[11px] text-slate-400">
+                                        Waktu: {{ $trx->tanggal_bayar?->translatedFormat('d M Y, H:i') }} WIB
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center gap-3">
+                                    <div class="text-right">
+                                        <div class="font-black text-sm text-slate-800">
+                                            Rp {{ number_format($trx->jumlah_bayar, 0, ',', '.') }}
+                                        </div>
+                                        <span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold {{ $trx->status === 'verified' ? 'bg-emerald-100 text-emerald-700' : ($trx->status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-800') }}">
+                                            {{ $trx->status === 'verified' ? 'Terverifikasi' : ($trx->status === 'rejected' ? 'Ditolak' : 'Menunggu Verifikasi') }}
+                                        </span>
+                                    </div>
+
+                                    @if ($trx->bukti_pembayaran_url)
+                                        <a href="{{ $trx->bukti_pembayaran_url }}" target="_blank"
+                                            class="w-9 h-9 rounded-xl bg-white hover:bg-brand-50 text-slate-600 hover:text-brand-600 border border-slate-200 flex items-center justify-center transition shadow-xs"
+                                            title="Lihat Bukti Transfer">
+                                            <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
+                                        </a>
+                                    @endif
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
+
+        </div>
+
+        <!-- KOLOM KANAN (SPAN 1): RINGKASAN TAGIHAN & FASILITAS AULA -->
+        <div class="space-y-6">
+
+            <!-- CARD RINGKASAN TAGIHAN -->
+            <div class="bg-white rounded-2xl p-6 figma-card-shadow border border-slate-100 space-y-4">
+                <span class="text-xs font-bold text-brand-600 uppercase tracking-wider block">
+                    Ringkasan Tagihan Sewa
+                </span>
+
+                <div class="space-y-2.5 text-xs text-slate-600">
+                    @if ($isWaitingAdminPrice)
+                        <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+                            <span>Total Biaya Paket:</span>
+                            <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-amber-100 text-amber-900 border border-amber-200">
+                                Menunggu Admin
+                            </span>
+                        </div>
+                        <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+                            <span>Total Terverifikasi:</span>
+                            <strong class="font-extrabold text-slate-400">Rp 0</strong>
+                        </div>
+                        <div class="flex items-center justify-between pt-1">
+                            <span class="text-sm font-bold text-slate-800">Sisa Tagihan:</span>
+                            <span class="text-xs font-bold text-slate-400 italic">
+                                Belum Diterbitkan
+                            </span>
+                        </div>
+                    @else
+                        <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+                            <span>Total Biaya Paket:</span>
+                            <strong class="font-extrabold text-slate-800">Rp {{ number_format($pembayaran->total_tagihan, 0, ',', '.') }}</strong>
+                        </div>
+                        <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+                            <span>Total Terverifikasi:</span>
+                            <strong class="font-extrabold text-emerald-600">Rp {{ number_format($pembayaran->total_terbayar, 0, ',', '.') }}</strong>
+                        </div>
+                        <div class="flex items-center justify-between pt-1">
+                            <span class="text-sm font-bold text-slate-800">Sisa Tagihan:</span>
+                            <span class="text-lg font-black {{ $isPeminjamanClosed ? 'text-slate-500' : 'text-brand-700' }}">
+                                Rp {{ number_format($isPeminjamanClosed ? 0 : $pembayaran->sisa_tagihan, 0, ',', '.') }}
+                            </span>
+                        </div>
+                    @endif
+                </div>
+
+                @if ($isWaitingAdminPrice)
+                    <div class="p-3 bg-amber-50/70 border border-amber-200 rounded-xl space-y-1 text-xs">
+                        <div class="flex items-center justify-between text-amber-900 font-bold">
+                            <span>Status Biaya:</span>
+                            <span>Verifikasi Admin</span>
+                        </div>
+                        <div class="text-[11px] text-amber-700 leading-relaxed">
+                            Admin Aula akan menetapkan nominal tagihan sewa setelah memeriksa ketersediaan fasilitas yang dipilih.
+                        </div>
+                    </div>
+                @elseif (!$isPeminjamanClosed)
+                    <div class="p-3 bg-blue-50/70 border border-blue-100 rounded-xl space-y-1 text-xs">
+                        <div class="flex items-center justify-between text-slate-700">
+                            <span>Minimal DP:</span>
+                            <strong class="text-brand-700 font-bold">Rp {{ number_format($nominalDp, 0, ',', '.') }}</strong>
+                        </div>
+                        <div class="text-[11px] text-slate-500">
+                            Pembayaran DP dapat mengamankan jadwal aula untuk Anda.
+                        </div>
+                    </div>
+                @elseif ($isRefund)
+                    <div class="p-3 bg-purple-50 border border-purple-100 rounded-xl space-y-1 text-xs">
+                        <div class="flex items-center justify-between text-slate-700">
+                            <span class="text-purple-800 font-bold">Status Peminjaman:</span>
+                            <strong class="text-purple-700 font-bold uppercase text-[11px]">Ditolak / Refund</strong>
+                        </div>
+                        <div class="text-[11px] text-slate-500">
+                            Permohonan ditolak. Total dana yang dikembalikan: <strong>Rp {{ number_format($pembayaran->total_refund ?: $pembayaran->total_terbayar, 0, ',', '.') }}</strong>.
+                        </div>
+                    </div>
+                @else
+                    <div class="p-3 bg-red-50 border border-red-100 rounded-xl space-y-1 text-xs">
+                        <div class="flex items-center justify-between text-slate-700">
+                            <span class="text-red-800 font-bold">Status Peminjaman:</span>
+                            <strong class="text-red-700 font-bold uppercase text-[11px]">Ditolak / Batal</strong>
+                        </div>
+                        <div class="text-[11px] text-slate-500">
+                            Permohonan telah ditolak. Tidak ada tagihan pembayaran.
+                        </div>
+                    </div>
+                @endif
+            </div>
+
+            <!-- CARD DETAIL PAKET & FASILITAS -->
+            <div class="bg-white rounded-2xl p-6 figma-card-shadow border border-slate-100 space-y-4">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-slate-700 uppercase tracking-wider">
+                        Detail Fasilitas Paket
+                    </span>
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold {{ $isCustom ? 'bg-purple-100 text-purple-700' : 'bg-blue-50 text-brand-700' }}">
+                        {{ $isCustom ? 'Paket Custom' : ($paket?->kategori ?: 'Reguler') }}
+                    </span>
+                </div>
+
+                @php
+                    $detailFacilities = $pembayaran->peminjaman?->daftar_fasilitas ?? collect();
+                @endphp
+                <div class="space-y-2 max-h-56 overflow-y-auto pr-1 text-xs text-slate-600">
+                    @if ($detailFacilities->isNotEmpty())
+                        @foreach ($detailFacilities as $fac)
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-circle-check text-brand-600 text-xs flex-shrink-0"></i>
+                                <span>{{ $fac->judul }}</span>
+                            </div>
+                        @endforeach
+                    @else
+                        <div class="text-slate-400 italic">Fasilitas standar aula SMK Negeri 2 Karanganyar.</div>
+                    @endif
+                </div>
+
+                @if ($pembayaran->peminjaman?->catatan)
+                    <div class="pt-3 border-t border-slate-100 text-xs text-slate-500">
+                        <span class="font-bold text-slate-700 block mb-0.5">Catatan Pemohon:</span>
+                        <p class="italic bg-slate-50 p-2.5 rounded-xl border border-slate-100">{{ $pembayaran->peminjaman->catatan }}</p>
+                    </div>
+                @endif
+            </div>
+
+            <!-- TOMBOL NAVIGASI CEPAT -->
+            <div class="space-y-2">
+                <a href="{{ route('customer.cek-peminjaman') }}"
+                    class="w-full py-3 px-4 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-bold text-center block transition shadow-xs">
+                    <i class="fa-solid fa-desktop mr-1.5 text-xs text-brand-600"></i> Lihat Status Peminjaman
+                </a>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+@endsection
+
+@push('modals')
+<!-- ============================================================== -->
+<!-- MODAL: KONFIRMASI PENERIMAAN DANA REFUND -->
+<!-- ============================================================== -->
+<div id="modalKonfirmasiRefund" class="fixed inset-0 !m-0 z-[100] hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity">
+    <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl border border-slate-100 overflow-hidden transform transition-all scale-95 duration-200" id="modalKonfirmasiRefundBox">
+        <!-- HEADER -->
+        <div class="p-5 md:p-6 pb-2 md:pb-3 bg-white flex items-center justify-between flex-shrink-0">
+            <div class="flex items-center gap-3.5">
+                <div class="w-11 h-11 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg border border-emerald-100/80 shadow-xs flex-shrink-0">
+                    <i class="fa-solid fa-hand-holding-dollar"></i>
+                </div>
+                <div>
+                    <h3 class="font-extrabold text-slate-900 text-base md:text-lg tracking-tight">Konfirmasi Terima Refund</h3>
+                    <p class="text-slate-500 text-xs mt-0.5">Peminjaman Aula SMKN 2 Karanganyar</p>
+                </div>
+            </div>
+            <button type="button" onclick="closeModalKonfirmasiRefund()" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition cursor-pointer" title="Tutup Modal">
+                <i class="fa-solid fa-xmark text-sm"></i>
+            </button>
+        </div>
+
+        <!-- BODY -->
+        <div class="p-5 md:p-6 space-y-4">
+            <div class="p-4 bg-emerald-50/70 border border-emerald-200/80 rounded-2xl space-y-2">
+                <div class="flex justify-between items-center text-xs">
+                    <span class="text-emerald-800 font-medium">Total Dana Dikembalikan:</span>
+                    <strong class="text-emerald-700 font-black text-sm">
+                        Rp {{ number_format($pembayaran->total_refund ?: $pembayaran->total_terbayar, 0, ',', '.') }}
+                    </strong>
+                </div>
+                @if (!empty($refund?->bank_pengirim))
+                    <div class="pt-2 border-t border-emerald-200/60 text-xs text-emerald-800 space-y-0.5">
+                        <div class="text-[11px] text-emerald-600">Dikirim ke Rekening Anda:</div>
+                        <div class="font-bold">{{ $refund->bank_pengirim }} &bull; {{ $refund->norek_pengirim }}</div>
+                        <div class="text-[11px] text-emerald-700">a.n. {{ $refund->atas_nama_pengirim }}</div>
+                    </div>
+                @endif
+            </div>
+
+            <div class="text-xs text-slate-600 leading-relaxed space-y-2">
+                <p>
+                    Apakah Anda yakin telah menerima dana pengembalian ke rekening Anda sesuai dengan bukti transfer dari sekolah?
+                </p>
+                <div class="p-3 bg-amber-50 border border-amber-200/80 rounded-xl text-amber-800 text-[11px] flex items-start gap-2">
+                    <i class="fa-solid fa-circle-exclamation text-amber-500 mt-0.5 flex-shrink-0"></i>
+                    <span>Setelah dikonfirmasi, status pembayaran akan menjadi <strong>Selesai (Refunded)</strong> dan proses transaksi peminjaman aula ini ditutup.</span>
+                </div>
+            </div>
+
+            <!-- FOOTER ACTIONS -->
+            <div class="pt-3 border-t border-slate-100 flex items-center justify-end gap-2.5">
+                <button type="button" onclick="closeModalKonfirmasiRefund()"
+                    class="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 text-xs md:text-sm font-semibold transition cursor-pointer">
+                    Batal
+                </button>
+                <form action="{{ route('customer.pembayaran.konfirmasi-refund', $pembayaran->id) }}" method="POST" class="inline m-0">
+                    @csrf
+                    <button type="submit"
+                        class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs md:text-sm font-bold shadow-sm transition flex items-center gap-1.5 cursor-pointer">
+                        <i class="fa-solid fa-circle-check text-xs"></i>
+                        <span>Ya, Dana Telah Diterima</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL BATALKAN PENGAJUAN -->
+@if ($pembayaran->peminjaman?->canBeCancelled())
+<div id="modalCancel" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div id="modalCancelBox" class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 transform transition-all duration-200 scale-95 space-y-4">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center text-lg border border-rose-100 shadow-xs flex-shrink-0">
+                    <i class="fa-solid fa-ban"></i>
+                </div>
+                <div>
+                    <h3 class="font-extrabold text-slate-900 text-base md:text-lg tracking-tight">Batalkan Pengajuan</h3>
+                    <p class="text-slate-500 text-xs">Peminjaman Aula SMKN 2 Kra</p>
+                </div>
+            </div>
+            <button type="button" onclick="closeCancelModal()" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition cursor-pointer" title="Tutup">
+                <i class="fa-solid fa-xmark text-sm"></i>
+            </button>
+        </div>
+
+        <form id="formCancel" action="{{ route('customer.peminjaman.cancel', $pembayaran->peminjaman->id) }}" method="POST" class="space-y-4 m-0">
+            @csrf
+            <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200/70 space-y-2 text-xs">
+                <div class="flex justify-between items-center text-slate-600">
+                    <span class="font-medium">Invoice:</span>
+                    <span class="font-bold font-mono text-slate-900">{{ $pembayaran->kode_pembayaran }}</span>
+                </div>
+                <div class="flex justify-between items-center text-slate-600">
+                    <span class="font-medium">Paket:</span>
+                    <span class="font-bold text-slate-900">{{ $paket?->nama_paket ?: 'Paket Sewa Aula' }}</span>
+                </div>
+                <div class="flex justify-between items-center text-slate-600">
+                    <span class="font-medium">Batas Maks. Batal:</span>
+                    <span class="font-bold text-rose-700">H-{{ $pembayaran->peminjaman->hari_maksimal_cancel }} ({{ $pembayaran->peminjaman->batas_pembatalan->translatedFormat('d M Y, H:i') }} WIB)</span>
+                </div>
+            </div>
+
+            <div class="p-3.5 bg-amber-50/70 border border-amber-200 text-amber-900 rounded-2xl text-[11px] leading-relaxed space-y-1">
+                <div class="font-bold flex items-center gap-1.5 text-amber-800">
+                    <i class="fa-solid fa-circle-info text-xs"></i>
+                    <span>Ketentuan Pembatalan & Pengembalian Dana:</span>
+                </div>
+                <p>
+                    Sesuai ketentuan, pembatalan dapat dilakukan maksimal <strong>H-{{ $pembayaran->peminjaman->hari_maksimal_cancel }}</strong> sebelum pelaksanaan acara dan tidak dapat dibatalkan pada hari H.
+                </p>
+                @if ($pembayaran->total_terbayar > 0)
+                    <div class="font-semibold text-purple-900 pt-1 border-t border-amber-200/60">
+                        Dana pembayaran yang telah terverifikasi sebesar <strong class="text-purple-700">Rp {{ number_format($pembayaran->total_terbayar, 0, ',', '.') }}</strong> akan dikembalikan (refund) oleh pihak admin sekolah setelah pembatalan diproses.
+                    </div>
+                @else
+                    <div class="text-slate-600 pt-1 border-t border-amber-200/60">
+                        Belum ada pembayaran yang terverifikasi untuk pengajuan ini. Pengajuan akan langsung dibatalkan.
+                    </div>
+                @endif
+            </div>
+
+            <div class="space-y-1.5">
+                <label for="alasan_pembatalan" class="block text-xs font-bold text-slate-700">
+                    Alasan Pembatalan (Opsional):
+                </label>
+                <textarea name="alasan_pembatalan" id="alasan_pembatalan" rows="3"
+                          placeholder="Tuliskan alasan pembatalan peminjaman..."
+                          class="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs md:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition"></textarea>
+            </div>
+
+            <div class="flex items-center justify-end gap-2.5 pt-2 border-t border-slate-100">
+                <button type="button" onclick="closeCancelModal()"
+                        class="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 text-xs md:text-sm font-semibold transition cursor-pointer">
+                    Batal
+                </button>
+                <button type="submit"
+                        class="px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs md:text-sm font-bold shadow-xs transition flex items-center gap-2 cursor-pointer">
+                    <i class="fa-solid fa-ban text-xs"></i>
+                    <span>Ya, Batalkan Pengajuan</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+@endif
+@endpush
+
+@push('scripts')
+<script>
+    // Copy to clipboard helper
+    function salinTeks(teks, btn) {
+        if (!navigator.clipboard) {
+            const temp = document.createElement('textarea');
+            temp.value = teks;
+            document.body.appendChild(temp);
+            temp.select();
+            document.execCommand('copy');
+            document.body.removeChild(temp);
+        } else {
+            navigator.clipboard.writeText(teks);
+        }
+
+        const originalHtml = btn.innerHTML;
+        btn.innerHTML = '<i class="fa-solid fa-check text-emerald-600"></i> <span class="text-emerald-600">Disalin!</span>';
+        setTimeout(() => {
+            btn.innerHTML = originalHtml;
+        }, 2000);
+    }
+
+    // Salin nomor rekening yang saat ini terpilih pada select dropdown
+    function salinNorekTerpilih(btn) {
+        const selectEl = document.getElementById('bank_tujuan');
+        if (!selectEl) return;
+        const selectedOption = selectEl.options[selectEl.selectedIndex];
+        const norek = selectedOption.getAttribute('data-norek') || '';
+        if (norek) {
+            salinTeks(norek, btn);
+        }
+    }
+
+    // Handler ketika user memilih rekening bank berbeda atau QRIS di dropdown
+    function handleBankChange(selectEl) {
+        const selectedOption = selectEl.options[selectEl.selectedIndex];
+        const isQris = selectedOption.value === 'QRIS' || selectedOption.getAttribute('data-type') === 'qris';
+        const bankInfoBox = document.getElementById('bankInfoBox');
+        const qrisInfoBox = document.getElementById('qrisInfoBox');
+
+        if (isQris) {
+            if (bankInfoBox) bankInfoBox.classList.add('hidden');
+            if (qrisInfoBox) qrisInfoBox.classList.remove('hidden');
+        } else {
+            if (qrisInfoBox) qrisInfoBox.classList.add('hidden');
+            if (bankInfoBox) bankInfoBox.classList.remove('hidden');
+
+            const norek = selectedOption.getAttribute('data-norek') || '';
+            const an = selectedOption.getAttribute('data-an') || '';
+            const norekEl = document.getElementById('selectedNorek');
+            const anEl = document.getElementById('selectedAtasNama');
+            if (norekEl) norekEl.innerText = norek;
+            if (anEl) anEl.innerText = an;
+        }
+    }
+
+    // Dynamic Payment Scheme Switcher
+    const nominalDp = {{ (float) $nominalDp }};
+    const nominalLunas = {{ (float) $pembayaran->sisa_tagihan }};
+
+    function updatePaymentScheme(scheme) {
+        const inputJumlah = document.getElementById('jumlah_bayar');
+        if (inputJumlah) {
+            if (scheme === 'dp') {
+                inputJumlah.value = nominalDp;
+            } else {
+                inputJumlah.value = nominalLunas;
+            }
+        }
+    }
+
+    // MODAL KONFIRMASI REFUND DANA DITERIMA
+    function openModalKonfirmasiRefund() {
+        const modal = document.getElementById('modalKonfirmasiRefund');
+        const box = document.getElementById('modalKonfirmasiRefundBox');
+        if (!modal || !box) return;
+        document.body.classList.add('overflow-hidden');
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            box.classList.remove('scale-95');
+            box.classList.add('scale-100');
+        }, 10);
+    }
+
+    function closeModalKonfirmasiRefund() {
+        const modal = document.getElementById('modalKonfirmasiRefund');
+        const box = document.getElementById('modalKonfirmasiRefundBox');
+        if (!modal || !box) return;
+        box.classList.remove('scale-100');
+        box.classList.add('scale-95');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+        }, 150);
+    }
+
+    // MODAL BATALKAN PENGAJUAN
+    function openCancelModal() {
+        const modal = document.getElementById('modalCancel');
+        const box = document.getElementById('modalCancelBox');
+        if (!modal || !box) return;
+        document.body.classList.add('overflow-hidden');
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            box.classList.remove('scale-95');
+            box.classList.add('scale-100');
+        }, 10);
+    }
+
+    function closeCancelModal() {
+        const modal = document.getElementById('modalCancel');
+        const box = document.getElementById('modalCancelBox');
+        if (!modal || !box) return;
+        box.classList.remove('scale-100');
+        box.classList.add('scale-95');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+        }, 150);
+    }
+
+    // Tutup modal jika klik di luar box (backdrop) atau tekan tombol ESC
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            closeModalKonfirmasiRefund();
+            closeCancelModal();
+        }
+    });
+    const modalRefundEl = document.getElementById('modalKonfirmasiRefund');
+    if (modalRefundEl) {
+        modalRefundEl.addEventListener('click', (e) => {
+            if (e.target === modalRefundEl) closeModalKonfirmasiRefund();
+        });
+    }
+    const modalCancelEl = document.getElementById('modalCancel');
+    if (modalCancelEl) {
+        modalCancelEl.addEventListener('click', (e) => {
+            if (e.target === modalCancelEl) closeCancelModal();
+        });
+    }
+
+    @if (!$isPeminjamanClosed)
+    // REAL-TIME COUNTDOWN TIMER (NO REFRESH REQUIRED)
+    // Target ISO timestamp
+    const deadlineIso = @js($targetDeadline->toIso8601String());
+    const deadlineTime = new Date(deadlineIso).getTime();
+
+    function updateCountdown() {
+        const now = new Date().getTime();
+        const difference = deadlineTime - now;
+
+        const hoursEl = document.getElementById('cd-hours');
+        const minutesEl = document.getElementById('cd-minutes');
+        const secondsEl = document.getElementById('cd-seconds');
+        const statusEl = document.getElementById('countdownStatus');
+
+        if (difference <= 0) {
+            if (hoursEl) hoursEl.innerText = '00';
+            if (minutesEl) minutesEl.innerText = '00';
+            if (secondsEl) secondsEl.innerText = '00';
+            if (statusEl) {
+                statusEl.innerHTML = '<span class="text-red-600 font-extrabold"><i class="fa-solid fa-triangle-exclamation mr-1"></i> WAKTU TRANSFER TELAH BERAKHIR (KADALUARSA)</span>';
+            }
+            return;
+        }
+
+        const totalHours = Math.floor(difference / (1000 * 60 * 60));
+        const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+
+        if (hoursEl) hoursEl.innerText = String(totalHours).padStart(2, '0');
+        if (minutesEl) minutesEl.innerText = String(minutes).padStart(2, '0');
+        if (secondsEl) secondsEl.innerText = String(seconds).padStart(2, '0');
+
+        // Dynamic visual urgency status
+        if (totalHours < 2) {
+            statusEl.innerHTML = '<span class="text-amber-600 font-bold"><i class="fa-solid fa-bell mr-1"></i> Segera Berakhir: Selesaikan transfer dalam hitungan jam</span>';
+        }
+    }
+
+    // Jalankan timer setiap 1 detik secara real-time
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+    @endif
+</script>
+@endpush
