@@ -12,5 +12,6 @@ class Ppdb_informasi extends Model
         'judul',
         'keterangan',
         'path_file',
+        'path_file_hasil',
     ];
 }

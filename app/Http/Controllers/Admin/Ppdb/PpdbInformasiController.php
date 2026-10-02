@@ -229,6 +229,74 @@ class PpdbInformasiController extends Controller
     }
 
     /**
+     * Upload atau perbarui file hasil seleksi PPDB.
+     */
+    public function hasilSeleksiFileUpload(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'path_file_hasil' => ['required', 'file', 'mimes:pdf,doc,docx', 'max:10240'],
+        ], [
+            'path_file_hasil.required' => 'File hasil seleksi wajib diupload.',
+            'path_file_hasil.file' => 'File hasil seleksi tidak valid.',
+            'path_file_hasil.mimes' => 'Format file harus pdf, doc, atau docx.',
+            'path_file_hasil.max' => 'Ukuran file maksimal 10 MB.',
+        ]);
+
+        $informasi = Ppdb_informasi::first();
+
+        if ($informasi && $informasi->path_file_hasil) {
+            if (Storage::disk('public')->exists($informasi->path_file_hasil)) {
+                Storage::disk('public')->delete($informasi->path_file_hasil);
+            } elseif (Storage::exists($informasi->path_file_hasil)) {
+                Storage::delete($informasi->path_file_hasil);
+            }
+        }
+
+        if (! $informasi) {
+            $informasi = new Ppdb_informasi;
+        }
+
+        $file = $request->file('path_file_hasil');
+        $path = $file->store('ppdb/hasil-seleksi', 'public');
+
+        $informasi->path_file_hasil = $path;
+        if (! $informasi->exists) {
+            $informasi->judul = $informasi->judul ?? '';
+            $informasi->save();
+        } else {
+            $informasi->save();
+        }
+
+        return redirect()
+            ->back()
+            ->withFragment('section-hasil-seleksi')
+            ->with('success', 'File hasil seleksi berhasil diupload.');
+    }
+
+    /**
+     * Hapus file hasil seleksi PPDB.
+     */
+    public function hasilSeleksiFileDelete(): RedirectResponse
+    {
+        $informasi = Ppdb_informasi::first();
+
+        if ($informasi && $informasi->path_file_hasil) {
+            if (Storage::disk('public')->exists($informasi->path_file_hasil)) {
+                Storage::disk('public')->delete($informasi->path_file_hasil);
+            } elseif (Storage::exists($informasi->path_file_hasil)) {
+                Storage::delete($informasi->path_file_hasil);
+            }
+            $informasi->path_file_hasil = null;
+            $informasi->save();
+        }
+
+        return redirect()
+            ->back()
+            ->withFragment('section-hasil-seleksi')
+            ->with('success', 'File hasil seleksi berhasil dihapus.');
+    }
+
+    /**
      * CRUD Jurusan.
      */
     public function jurusanStore(Request $request): RedirectResponse
