@@ -4,11 +4,14 @@ use App\Http\Controllers\Admin\Ppdb\PpdbDashboardController;
 use App\Http\Controllers\Admin\Ppdb\PpdbInformasiController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Public\Ppdb\PpdbController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get('/ppdb', [PpdbController::class, 'index'])->name('public.ppdb');
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'create'])->name('login');
