@@ -92,9 +92,14 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
+          # strip_components: 2 buang "public/build" dari path hasil glob,
+          # jadi assets/ dan manifest.json mendarat langsung di root target.
+          # (Strip 1 hanya membuang "public" dan menyisakan build/... ->
+          #  manifest.json tidak ditemukan dan @vite meledak dengan
+          #  ViteManifestNotFoundException.)
           source: public/build/*
           target: /tmp/sims-hall-build
-          strip_components: 1
+          strip_components: 2
           rm: true
 
       - name: Deploy via SSH
@@ -121,6 +126,29 @@ jobs:
             set -e
             cd /home/gajagohosting/apps/sims-hall
 
+            # --- Validasi staging DULU, sebelum public/build yang sedang
+            # --- serving disentuh. Kalau staging salah, public_html/build
+            # --- (symlink ke sini) tetap menunjuk build lama yang masih utuh.
+            if [ ! -f /tmp/sims-hall-build/manifest.json ]; then
+              echo "FATAL: /tmp/sims-hall-build/manifest.json tidak ada." >&2
+              echo "Isi staging:" >&2
+              find /tmp/sims-hall-build -maxdepth 3 >&2
+              exit 1
+            fi
+
+            # Pastikan file yang disebut manifest benar-benar ada dan tidak nol
+            # byte. Ini yang dulu diam-diam rusak: JS 0 byte tapi HTTP tetap 200.
+            for entry in resources/js/app.js resources/css/app.css; do
+              rel=$(php -r '$m=json_decode(file_get_contents("/tmp/sims-hall-build/manifest.json"),true);$k=$argv[1];echo $m[$k]["file"]??"";' "$entry")
+              if [ -z "$rel" ] || [ ! -s "/tmp/sims-hall-build/$rel" ]; then
+                echo "FATAL: aset untuk $entry hilang atau kosong: '$rel'" >&2
+                exit 1
+              fi
+              echo "OK: $entry -> $rel ($(wc -c < "/tmp/sims-hall-build/$rel") byte)"
+            done
+
+            # --- Baru swapping. Dua mv berurutan; selanya hanya(rename),
+            # --- jadi tidak pernah ada keadaan setengah tertulis.
             rm -rf public/build.prev
             if [ -d public/build ]; then
               mv public/build public/build.prev
@@ -128,6 +156,8 @@ jobs:
             mv /tmp/sims-hall-build public/build
             rm -rf public/build.prev /tmp/sims-hall-build
 
+            # public_html/build adalah symlink ke public/build, jadi web root
+            # langsung ikut berubah tanpa langkah sync terpisah.
             echo "== aset frontend aktif =="
             ls -l public/build/manifest.json
             ls -l public/build/assets/
