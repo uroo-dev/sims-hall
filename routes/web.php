@@ -3,6 +3,8 @@
 use App\Http\Controllers\AdminPeminjamanController;
 use App\Http\Controllers\ArtikelController;
 use App\Http\Controllers\AulaController;
+use App\Http\Controllers\Admin\Ppdb\PpdbDashboardController;
+use App\Http\Controllers\Admin\Ppdb\PpdbInformasiController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BkkController;
 use App\Http\Controllers\ChatbotController;
@@ -21,6 +23,7 @@ use App\Models\Sekolah;
 use App\Http\Controllers\ProdukController;
 use App\Http\Controllers\ProdukUnggulanController;
 use App\Http\Controllers\Public\ProdukUnggulanController as PublicProdukUnggulanController;
+use App\Http\Controllers\Public\Ppdb\PpdbController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -38,10 +41,6 @@ Route::get('/profil', function () {
         'sekolah' => Sekolah::first() ?? new Sekolah,
     ]);
 })->name('profil');
-
-Route::get('/ppdb', function () {
-    return view('Public.ppdb');
-})->name('ppdb');
 
 Route::get('/kesiswaan', function () {
     return view('Public.kesiswaan');
@@ -80,6 +79,8 @@ Route::post('/chatbot/send', [ChatbotController::class, 'send'])
 | Auth
 |--------------------------------------------------------------------------
 */
+Route::get('/ppdb', [PpdbController::class, 'index'])->name('ppdb');
+
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'create'])->name('login');
     Route::post('/login', [AuthController::class, 'store'])->middleware('throttle:6,1');
@@ -147,6 +148,7 @@ Route::middleware('auth')->group(function () {
     Route::match(['get', 'post'], '/logout', [AuthController::class, 'destroy'])->name('logout');
 
     // --- DASHBOARD UTAMA ---
+
     Route::get('/dashboard', [DashboardController::class, 'index'])
         ->middleware('role:admin,admin_aula,admin_master,admin_kesiswaan,admin_produk,admin_produk_unggulan,admin_ppdb,admin_pklbkk,admin_sekolah,super_admin,super_duper_admin,pelanggan,kepala_sekolah')
         ->name('dashboard');
@@ -318,7 +320,34 @@ Route::middleware('auth')->group(function () {
         Route::delete('/siswa/{id}', [DataMasterDashboardController::class, 'destroySiswa'])
             ->middleware('role:admin_master,admin_sekolah,super_admin,super_duper_admin')
             ->name('datamaster.siswa.destroy');
-    });
+        });
+        Route::middleware('role:admin_ppdb,super_admin,super_duper_admin')->prefix('admin/ppdb')->group(function () {
+            Route::get('/dashboard', [PpdbDashboardController::class, 'index'])->name('index.dashboard.ppdb');
+            Route::get('/informasi', [PpdbInformasiController::class, 'index'])->name('index.informasi.ppdb');
+            Route::post('/master', [PpdbDashboardController::class, 'masterUpdate'])->name('update.master.ppdb');
+            Route::post('/informasi', [PpdbInformasiController::class, 'informasiUpdate'])->name('update.informasi.ppdb');
+            Route::post('/tanggal-penting', [PpdbInformasiController::class, 'tanggalPentingPost'])->name('post.tanggal-penting.ppdb');
+            Route::post('/persyaratan', [PpdbInformasiController::class, 'persyaratanPost'])->name('post.persyaratan.ppdb');
+            Route::post('/persyaratan-file', [PpdbInformasiController::class, 'persyaratanFileUpload'])->name('upload.persyaratan.file.ppdb');
+            Route::put('/tanggal-penting/{agenda}', [PpdbInformasiController::class, 'tanggalPentingUpdate'])->name('update.tanggal-penting.ppdb');
+            Route::delete('/tanggal-penting/{agenda}', [PpdbInformasiController::class, 'tanggalPentingDelete'])->name('delete.tanggal-penting.ppdb');
+            Route::delete('/persyaratan-file', [PpdbInformasiController::class, 'persyaratanFileDelete'])->name('delete.persyaratan.file.ppdb');
+            Route::post('/hasil-seleksi-file', [PpdbInformasiController::class, 'hasilSeleksiFileUpload'])->name('upload.hasil-seleksi.file.ppdb');
+            Route::delete('/hasil-seleksi-file', [PpdbInformasiController::class, 'hasilSeleksiFileDelete'])->name('delete.hasil-seleksi.file.ppdb');
+            Route::get('/persyaratan/{id}', [PpdbInformasiController::class, 'persyaratanDelete'])->name('delete.persyaratan.ppdb');
+
+            // Jurusan
+            Route::post('/jurusan', [PpdbInformasiController::class, 'jurusanStore'])->name('post.jurusan.ppdb');
+            Route::put('/jurusan/{jurusan}', [PpdbInformasiController::class, 'jurusanUpdate'])->name('update.jurusan.ppdb');
+            Route::post('/jurusan/{jurusan}/image', [PpdbInformasiController::class, 'jurusanImageUpdate'])->name('update.jurusan.image.ppdb');
+            Route::delete('/jurusan/{jurusan}/image', [PpdbInformasiController::class, 'jurusanImageDestroy'])->name('delete.jurusan.image.ppdb');
+            Route::delete('/jurusan/{jurusan}', [PpdbInformasiController::class, 'jurusanDestroy'])->name('delete.jurusan.ppdb');
+
+            // Jalur Seleksi
+            Route::post('/jalur', [PpdbInformasiController::class, 'jalurStore'])->name('post.jalur.ppdb');
+            Route::put('/jalur/{jalur}', [PpdbInformasiController::class, 'jalurUpdate'])->name('update.jalur.ppdb');
+            Route::delete('/jalur/{jalur}', [PpdbInformasiController::class, 'jalurDestroy'])->name('delete.jalur.ppdb');
+        });
 });
 
 Route::get('/produk-unggulan-publik', [PublicProdukUnggulanController::class, 'index'])

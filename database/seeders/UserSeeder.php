@@ -31,6 +31,15 @@ class UserSeeder extends Seeder
             ]
         );
         User::firstOrCreate(
+            ['username' => 'admin_ppdb'],
+            [
+                'name' => 'ppdb',
+                'email' => 'ppdb@gmail.com',
+                'role' => 'admin_ppdb',
+                'password' => '1234',
+            ]
+        );
+        User::firstOrCreate(
             ['username' => 'dwika'],
             [
                 'name' => 'dwika',

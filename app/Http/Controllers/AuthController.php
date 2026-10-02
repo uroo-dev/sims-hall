@@ -106,6 +106,9 @@ class AuthController extends Controller
         if (in_array(Auth::user()?->role, ['admin_produk', 'admin_produk_unggulan'], true)) {
             return redirect()->intended(route('produk-unggulan.index'));
         }
+        if (in_array(Auth::user()?->role, ['admin_ppdb'], true)) {
+            return redirect()->intended(route('index.dashboard.ppdb'));
+        }
         return redirect()->intended(route('dashboard'));
 
     }
