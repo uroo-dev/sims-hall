@@ -63,27 +63,12 @@
                                 <img src="{{ $heroDocs[0] }}" alt="Dokumentasi" class="w-full h-full object-cover rounded-xl">
                             </div>
                         @else
-                            <!-- Default Fallback Cards -->
-                            <div class="absolute top-0 right-0 w-[80%] bg-gradient-to-br from-blue-900 to-indigo-900 rounded-2xl overflow-hidden shadow-2xl z-10 p-5 text-white border-4 border-white">
-                                <span class="inline-block bg-blue-600 text-white text-[10px] font-bold px-2.5 py-1 rounded mb-3 uppercase tracking-wider">
-                                    BERITA HARI INI
-                                </span>
-                                <h4 class="text-sm sm:text-base font-bold leading-snug mb-2">
-                                    SMKN 2 KARANGANYAR SIAP PERTAHANKAN GELAR JATENG DI LKBB-PB NASIONAL
-                                </h4>
-                                <div class="h-24 bg-slate-800 rounded-lg mt-2 overflow-hidden">
-                                    <img src="https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=400&auto=format&fit=crop&q=80" alt="News" class="w-full h-full object-cover opacity-80">
-                                </div>
-                            </div>
-
-                            <div class="absolute bottom-0 left-0 w-[70%] bg-gradient-to-br from-emerald-800 to-teal-900 rounded-2xl overflow-hidden shadow-2xl z-20 p-5 text-white border-4 border-white">
-                                <div class="text-[10px] font-semibold text-emerald-300 mb-1">SMKN 2 KARANGANYAR MENGUCAPKAN</div>
-                                <h4 class="text-xl sm:text-2xl font-black italic tracking-wide text-amber-300 mb-2">
-                                    SELAMAT DAN SUKSES !
-                                </h4>
-                                <div class="h-20 bg-slate-800 rounded-lg overflow-hidden">
-                                    <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=400&auto=format&fit=crop&q=80" alt="Sukses" class="w-full h-full object-cover opacity-80">
-                                </div>
+                            {{-- Dokumentasi kesiswaan belum diisi: tampilkan panel
+                                 kosong yang jujur, bukan foto prestasi hardcode. --}}
+                            <div class="w-full h-full rounded-2xl border-4 border-white bg-white shadow-2xl flex flex-col items-center justify-center text-center gap-3 p-8">
+                                <i class="fa-solid fa-images text-slate-300 text-4xl"></i>
+                                <p class="text-sm font-bold text-slate-700">Dokumentasi belum diunggah</p>
+                                <p class="text-xs text-slate-400">Admin kesiswaan belum menambahkan foto untuk bagian ini.</p>
                             </div>
                         @endif
 
@@ -345,17 +330,21 @@
 
                     <!-- Slider Content -->
                     <div id="prestasi-banner-slider" class="w-full flex gap-4 sm:gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory scrollbar-none py-1">
-                        <!-- Banner 1: LKBB-PB Nasional -->
-                        <div class="min-w-[280px] sm:min-w-[420px] md:min-w-[calc(50%-12px)] flex-1 snap-start rounded-2xl overflow-hidden shadow-sm bg-gradient-to-r from-[#0a1a44] via-[#0f2a6b] to-[#0a183d] flex items-center justify-center cursor-pointer group"
-                             onclick="openModal('SMKN 2 KARANGANYAR SIAP PERTAHANKAN GELAR JATENG DI LKBB-PB NASIONAL', 'SMK Negeri 2 Karanganyar siap mempertahankan gelar juara Jawa Tengah di ajang LKBB-PB Nasional dengan persiapan matang dan dedikasi tim terbaik.', '{{ asset('assets/prestasi/banner_terbaru_1.png') }}')">
-                            <img src="{{ asset('assets/prestasi/banner_terbaru_1.png') }}" alt="Banner LKBB-PB" class="w-full h-auto object-cover rounded-xl transition-transform duration-300 group-hover:scale-[1.02]">
-                        </div>
-
-                        <!-- Banner 2: Selamat dan Sukses -->
-                        <div class="min-w-[280px] sm:min-w-[420px] md:min-w-[calc(50%-12px)] flex-1 snap-start rounded-2xl overflow-hidden shadow-sm bg-gradient-to-r from-[#1c384a] via-[#244b63] to-[#162f3f] flex items-center justify-center cursor-pointer group"
-                             onclick="openModal('SMKN 2 KARANGANYAR MENGUCAPKAN SELAMAT DAN SUKSES !', 'Apresiasi setinggi-tingginya kepada seluruh civitas akademika dan siswa-siswi berprestasi atas dedikasi dan kontribusi luar biasa untuk sekolah tercinta.', '{{ asset('assets/prestasi/banner_terbaru_2.png') }}')">
-                            <img src="{{ asset('assets/prestasi/banner_terbaru_2.png') }}" alt="Banner Selamat dan Sukses" class="w-full h-auto object-cover rounded-xl transition-transform duration-300 group-hover:scale-[1.02]">
-                        </div>
+                        @php
+                            // Banner diambil dari artikel prestasi yang memang punya
+                            // gambar, supaya tidak menampilkan materi placeholder.
+                            $bannerPrestasies = $prestasies->filter(fn ($p) => $p->gambarUrl())->take(6);
+                        @endphp
+                        @forelse ($bannerPrestasies as $banner)
+                            <div class="min-w-[280px] sm:min-w-[420px] md:min-w-[calc(50%-12px)] flex-1 snap-start rounded-2xl overflow-hidden shadow-sm bg-slate-900 flex items-center justify-center cursor-pointer group"
+                                 onclick="openModal('{{ addslashes($banner->judul) }}', '{{ addslashes($banner->ringkasan ?: strip_tags($banner->konten)) }}', '{{ $banner->gambarUrl() }}')">
+                                <img src="{{ $banner->gambarUrl() }}" alt="{{ $banner->judul }}" class="w-full h-auto object-cover rounded-xl transition-transform duration-300 group-hover:scale-[1.02]">
+                            </div>
+                        @empty
+                            <div class="w-full py-8 text-center text-slate-500 text-sm">
+                                Belum ada banner prestasi yang dipublikasikan.
+                            </div>
+                        @endforelse
                     </div>
 
                     <!-- Next Button -->
@@ -368,30 +357,35 @@
 
             <!-- Grid Prestasi (4 Kolom per Baris) -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12 relative z-10">
-                @forelse ($prestasis as $item)
+                @forelse ($prestasies as $item)
                     @php
-                        $prestasiImg = $item->dokumentasiUrl() ?: asset('assets/prestasi/prestasi_' . (($loop->index % 8) + 1) . '.png');
+                        // Tanpa gambar, kartu tetap tampil dengan placeholder piala
+                        // supaya tidak memaksa admin mengunggah gambar.
+                        $ringkasan = $item->ringkasan ?: strip_tags($item->konten);
                     @endphp
                     <div class="bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-100 hover:shadow-lg transition-all duration-300 flex flex-col group">
                         <div class="h-44 bg-slate-100 relative overflow-hidden flex items-center justify-center">
-                            <img src="{{ $prestasiImg }}" alt="{{ $item->judul }}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
+                            @if ($item->gambarUrl())
+                                <img src="{{ $item->gambarUrl() }}" alt="{{ $item->judul }}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
+                            @else
+                                <div class="w-full h-full flex flex-col items-center justify-center gap-2 text-slate-400">
+                                    <i class="fa-solid fa-trophy text-3xl"></i>
+                                    <span class="text-[10px] uppercase tracking-wider">Tanpa gambar</span>
+                                </div>
+                            @endif
                         </div>
                         <div class="p-4 flex flex-col flex-grow justify-between">
+                            <h3 class="text-[13px] font-bold text-slate-900 leading-snug mb-1.5 line-clamp-2">
+                                {{ $item->judul }}
+                            </h3>
                             <p class="text-[11px] sm:text-xs text-slate-600 leading-relaxed mb-4 flex-grow line-clamp-4">
-                                {{ $item->deskripsi }}
+                                {{ $ringkasan }}
                             </p>
                             <div class="flex justify-end pt-1">
-                                @if (Str::contains(strtolower($item->deskripsi), 'snbt'))
-                                    <button onclick="openModal('{{ addslashes($item->judul) }}', '{{ addslashes($item->deskripsi) }}', '{{ $prestasiImg }}')" 
-                                        class="bg-[#0066C4] hover:bg-blue-700 text-white text-[10px] font-bold px-3.5 py-1 rounded-full uppercase tracking-wider transition-colors shadow-sm">
-                                        Selanjutnya
-                                    </button>
-                                @else
-                                    <button onclick="openModal('{{ addslashes($item->judul) }}', '{{ addslashes($item->deskripsi) }}', '{{ $prestasiImg }}')" 
-                                        class="bg-[#374151] hover:bg-slate-900 text-white text-[10px] font-bold px-3.5 py-1 rounded-full uppercase tracking-wider transition-colors shadow-sm">
-                                        Lihat Detail
-                                    </button>
-                                @endif
+                                <a href="{{ route('informasi.show', $item->slug) }}"
+                                    class="bg-[#0066C4] hover:bg-blue-700 text-white text-[10px] font-bold px-3.5 py-1 rounded-full uppercase tracking-wider transition-colors shadow-sm">
+                                    Lihat Detail
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -521,10 +515,18 @@
             document.getElementById('global-modal-body').textContent = body;
             const imgWrap = document.getElementById('global-modal-img-wrap');
             const imgEl = document.getElementById('global-modal-img');
-            const finalImage = imageUrl || "{{ asset('assets/prestasi/prestasi_1.png') }}";
+            // Tanpa gambar, area gambar disembunyikan. Tidak ada lagi fallback ke
+            // foto prestasi tetap karena itu menampilkan materi yang bukan milik
+            // data yang sedang dibuka.
             if (imgWrap && imgEl) {
-                imgEl.src = finalImage;
-                imgWrap.classList.remove('hidden');
+                if (imageUrl) {
+                    imgEl.src = imageUrl;
+                    imgEl.alt = title;
+                    imgWrap.classList.remove('hidden');
+                } else {
+                    imgEl.removeAttribute('src');
+                    imgWrap.classList.add('hidden');
+                }
             }
             document.getElementById('global-modal').classList.remove('hidden');
         }

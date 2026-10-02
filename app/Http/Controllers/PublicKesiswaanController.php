@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Artikel;
 use App\Models\Ekstrakurikuler;
 use App\Models\Kesiswaan;
-use App\Models\Prestasi;
 use App\Models\TataTertib;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
@@ -22,13 +22,20 @@ class PublicKesiswaanController extends Controller
         $kesiswaan = Kesiswaan::current();
         $ekstrakurikulers = Ekstrakurikuler::query()->orderBy('ekstrakurikulerID')->get();
         $tataTertibs = TataTertib::query()->orderBy('tata_tertibID')->get();
-        $prestasis = Prestasi::query()->orderBy('id', 'asc')->get();
+
+        // Data prestasi tidak lagi memakai tabel `prestasis`; sebuah prestasi
+        // adalah artikel berstatus published yang masuk kategori "Prestasi".
+        $prestasies = Artikel::with('kategori')
+            ->prestasi()
+            ->orderByDesc('published_at')
+            ->orderByDesc('id')
+            ->get();
 
         return view('Public.kesiswaan', [
             'kesiswaan' => $kesiswaan,
             'ekstrakurikulers' => $ekstrakurikulers,
             'tataTertibs' => $tataTertibs,
-            'prestasis' => $prestasis,
+            'prestasies' => $prestasies,
         ]);
     }
 

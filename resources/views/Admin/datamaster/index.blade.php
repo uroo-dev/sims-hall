@@ -70,7 +70,7 @@
                 </div>
             </div>
             <div class="bg-gray-50 border border-gray-200 rounded-lg p-2.5 text-center">
-                <h3 class="font-bold text-gray-800 text-xs md:text-sm">{{ $sekolah->nama_kepsek ?? 'Bapak Sukidi S.Pd., M.Pd.' }}</h3>
+                <h3 class="font-bold text-gray-800 text-xs md:text-sm">{{ $sekolah->nama_kepsek ?: 'Nama Kepala Sekolah Belum Diatur' }}</h3>
                 <p class="text-gray-500 text-[11px] mt-0.5">Kepala Sekolah SMKN 2 Karanganyar</p>
             </div>
         </div>
@@ -98,33 +98,64 @@
             {!! nl2br(e($sekolah->sejarah ?? 'Data sejarah belum diisi.')) !!}
         </div>
     </div>
+@endsection
 
+@push('scripts')
     <!-- Script Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const ctx = document.getElementById('userChart').getContext('2d');
+            const canvas = document.getElementById('userChart');
+            if (!canvas) return;
+
+            const ctx = canvas.getContext('2d');
             new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: ['Organisasi', 'Guru', 'Kepala Sekolah', 'Instansi Luar Terikat', 'Instansi Luar'],
+                    labels: {!! json_encode($userChartLabels ?? ['Admin', 'Guru', 'Kepala Sekolah', 'Pelanggan']) !!},
                     datasets: [{
-                        data: [6, 10, 1, 16, 18], // Anda bisa mengganti ini dengan data dinamis dari controller jika mau
+                        label: 'Jumlah Pengguna',
+                        data: {!! json_encode($userChartData ?? [0, 0, 0, 0]) !!},
                         backgroundColor: '#82e0aa',
-                        borderRadius: 2,
-                        barThickness: 28
+                        hoverBackgroundColor: '#58d68d',
+                        borderRadius: 4,
+                        barThickness: 24
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => `Total: ${context.raw} Pengguna`
+                            }
+                        }
+                    },
                     scales: {
-                        x: { grid: { display: false }, ticks: { font: { size: 9, weight: 'bold' }, color: '#333', maxRotation: 0, autoSkip: false } },
-                        y: { min: 0, max: 18, ticks: { stepSize: 2, font: { size: 10 }, color: '#666' }, grid: { color: '#f0f0f0' } }
+                        x: {
+                            grid: { display: false },
+                            ticks: {
+                                font: { size: 9, weight: 'bold' },
+                                color: '#333',
+                                maxRotation: 45,
+                                autoSkip: false
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1,
+                                precision: 0,
+                                font: { size: 10 },
+                                color: '#666'
+                            },
+                            grid: { color: '#f0f0f0' }
+                        }
                     }
                 }
             });
         });
     </script>
-@endsection
+@endpush

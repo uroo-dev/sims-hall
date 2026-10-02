@@ -72,10 +72,10 @@ class DashboardTest extends TestCase
             'status' => 'approved_final',
         ]);
 
-        $response = $this->actingAs($admin)->get('/dashboard');
+        $response = $this->actingAs($admin)->get(route('admin.peminjaman.dashboard'));
 
         $response->assertOk();
-        $response->assertViewIs('Admin.dashboard');
+        $response->assertViewIs('Admin.peminjaman.dashboard');
         $response->assertViewHas('peminjamanTerverifikasiCount', 1);
         $response->assertViewHas('paketCount', 1);
         $response->assertViewHas('facilityCount', 2);
@@ -92,7 +92,7 @@ class DashboardTest extends TestCase
             'norek_utama' => '1380009988771',
         ]);
 
-        $response = $this->actingAs($superAdmin)->get('/dashboard');
+        $response = $this->actingAs($superAdmin)->get(route('admin.peminjaman.dashboard'));
 
         $response->assertOk();
         $response->assertViewHas('isSuperAdmin', true);
@@ -121,7 +121,7 @@ class DashboardTest extends TestCase
             'status' => 'approved_final',
         ]);
 
-        $response = $this->actingAs($admin)->get('/dashboard?month='.$tanggalAcara->month.'&year='.$tanggalAcara->year);
+        $response = $this->actingAs($admin)->get(route('admin.peminjaman.dashboard', ['month' => $tanggalAcara->month, 'year' => $tanggalAcara->year]));
 
         $response->assertOk();
         $response->assertViewHas('calendarDate');

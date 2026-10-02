@@ -455,10 +455,10 @@
         new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: ['Terjangkau', 'Standar 1', 'Standar 2', 'Standar 3', 'Unggulan'],
+                labels: {!! json_encode($paketChartLabels ?? ['Terjangkau', 'Standar 1', 'Standar 2', 'Unggulan']) !!},
                 datasets: [{
                     label: 'Jumlah Peminjaman',
-                    data: [9, 10, 8, 16, 18],
+                    data: {!! json_encode($paketChartData ?? [0, 0, 0, 0]) !!},
                     backgroundColor: '#6ee7b7',
                     hoverBackgroundColor: '#34d399',
                     borderRadius: 4,
@@ -482,9 +482,8 @@
                         ticks: { font: { size: 10, family: "'Inter', sans-serif" }, color: '#374151' }
                     },
                     y: {
-                        min: 0,
-                        max: 18,
-                        ticks: { stepSize: 2, font: { size: 10, family: "'Inter', sans-serif" }, color: '#4b5563' },
+                        beginAtZero: true,
+                        ticks: { stepSize: 1, precision: 0, font: { size: 10, family: "'Inter', sans-serif" }, color: '#4b5563' },
                         grid: { color: '#f3f4f6' }
                     }
                 }

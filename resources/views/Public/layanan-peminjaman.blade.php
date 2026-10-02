@@ -81,7 +81,7 @@
                         </li>
                         <li class="flex items-center gap-3">
                             <span class="w-2 h-2 rounded-full bg-brand-blue flex-shrink-0"></span>
-                            <span>Gedung Luas Berkapasitas Hingga 1.200+ Orang.</span>
+                            <span>Gedung Luas Berkapasitas Hingga 500+ Orang.</span>
                         </li>
                         <li class="flex items-center gap-3">
                             <span class="w-2 h-2 rounded-full bg-brand-blue flex-shrink-0"></span>

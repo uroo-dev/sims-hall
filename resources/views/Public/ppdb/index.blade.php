@@ -74,7 +74,7 @@
                     {{ $informasi?->judul ?? 'Informasi Panduan PPDB' }}
                 </h2>
                 <p class="text-slate-500 text-sm sm:text-base leading-relaxed">
-                    {{ $informasi?->keterangan ?? 'Fasilitas sekolah dengan kapasitas luas untuk berbagai kebutuhan acara institusi, perusahaan, dan masyarakat umum.' }}
+                    {{ $informasi?->keterangan ?? 'Panduan lengkap dan tahapan pendaftaran peserta didik baru SMK Negeri 2 Karanganyar.' }}
                 </p>
             </div>
 
@@ -153,7 +153,7 @@
                     Pilihan Kompetensi Keahlian & Hasil Seleksi
                 </h2>
                 <p class="text-slate-500 text-sm sm:text-base leading-relaxed">
-                    Fasilitas sekolah dengan kapasitas luas untuk berbagai kebutuhan acara institusi.
+                    Informasi daya tampung setiap kompetensi keahlian dan persentase kuota jalur seleksi penerimaan.
                 </p>
             </div>
 

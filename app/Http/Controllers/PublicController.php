@@ -16,7 +16,8 @@ use App\Models\PaymentConfiguration;
 use App\Models\Peminjaman;
 use App\Models\PenempatanPkl;
 use App\Models\Ppdb;
-use App\Models\Prestasi;
+use App\Models\Ppdb_jurusan;
+use App\Models\Ppdb_master;
 use App\Models\ProdukUnggulan;
 use App\Models\Sekolah;
 use App\Models\Siswa;
@@ -31,10 +32,10 @@ class PublicController extends Controller
         $sekolah = Sekolah::first() ?? new Sekolah;
 
         // Data Pendukung
-        $jurusans = Jurusan::all();
+        $jurusans = Jurusan::with('produk')->orderBy('jurusanID')->get();
         $ekstrakurikulers = Ekstrakurikuler::all();
-        $prestasis = Prestasi::orderBy('created_at', 'desc')->take(2)->get();
-        $produkUnggulans = ProdukUnggulan::all();
+        $prestasies = $this->prestasiesTerbaru(3);
+        $produkUnggulan = ProdukUnggulan::current();
 
         // Hanya DUDI yang benar-benar disetujui tampil di landing. Tanpa filter
         // ini semua mitra — termasuk yang baru diinput BKK dan belum disetujui —
@@ -45,22 +46,42 @@ class PublicController extends Controller
         $aulas = Aula::all();
         $paketPeminjamans = PaketPeminjaman::all();
 
-        // Data PPDB
-        $ppdb = Ppdb::first();
+        // Data PPDB (Gunakan master & jurusan dari modul PPDB baru, dengan fallback model lama)
+        $ppdbMaster = Ppdb_master::first();
+        $ppdbJurusans = Ppdb_jurusan::orderBy('id')->get();
+        $ppdb = $ppdbMaster ?: Ppdb::first();
         $informasiPpdbs = InformasiPpdb::all();
 
         return view('Public.landing', compact(
             'sekolah',
             'jurusans',
             'ekstrakurikulers',
-            'prestasis',
-            'produkUnggulans',
+            'prestasies',
+            'produkUnggulan',
             'dudis',
             'aulas',
             'paketPeminjamans',
             'ppdb',
+            'ppdbMaster',
+            'ppdbJurusans',
             'informasiPpdbs'
         ));
+    }
+
+    /**
+     * Artikel prestasi untuk ditampilkan di halaman publik.
+     *
+     * Data prestasi tidak lagi hidup di tabel `prestasis`: sebuah prestasi
+     * adalah artikel berstatus published yang masuk kategori "Prestasi".
+     */
+    protected function prestasiesTerbaru(?int $limit = null)
+    {
+        return Artikel::with('kategori')
+            ->prestasi()
+            ->orderByDesc('published_at')
+            ->orderByDesc('id')
+            ->when($limit, fn ($q) => $q->limit($limit))
+            ->get();
     }
 
     /**
@@ -78,7 +99,12 @@ class PublicController extends Controller
             ->get();
 
         $rekap = [
+            // Semua mitra yang dipublikasikan di halaman ini.
             'total_dudi' => $dudis->count(),
+            // Hanya yang sudah ditandai resmi oleh sekolah. Dipisahkan dari
+            // `total_dudi` supaya label "Mitra Resmi" di publik tidak menghitung
+            // mitra terdaftar (is_mitra_resmi = false) sebagai mitra resmi.
+            'total_dudi_resmi' => $dudis->where('is_mitra_resmi', true)->count(),
             'siswa_fix' => PenempatanPkl::status(PenempatanPkl::STATUS_FIX)->count(),
             'siswa_menunggu' => PenempatanPkl::status(PenempatanPkl::STATUS_PENGAJUAN)->count(),
             'siswa_belum_pkl' => Siswa::belumPkl()->count(),
@@ -117,14 +143,6 @@ class PublicController extends Controller
             $dudi->program_2,
             $dudi->program_3,
         ]));
-
-        if (empty($programs)) {
-            $programs = [
-                'Teknisi Ahli Industri',
-                'Quality Control & Maintenance',
-                'Digital Systems & Administration',
-            ];
-        }
 
         $siswaFixCount = $dudi->penempatanFix()->count();
 
@@ -209,6 +227,9 @@ class PublicController extends Controller
             'siswa_menunggu' => PenempatanPkl::status(PenempatanPkl::STATUS_PENGAJUAN)->count(),
             'siswa_belum_pkl' => Siswa::belumPkl()->count(),
             'total_dudi' => $dudis->count(),
+            // Lihat catatan pada PublicController::pkl() — label "mitra industri
+            // resmi" hanya boleh memakai angka yang benar-benar berstatus resmi.
+            'total_dudi_resmi' => $dudis->where('is_mitra_resmi', true)->count(),
             'total_lowongan' => $lowongans->count(),
         ];
 

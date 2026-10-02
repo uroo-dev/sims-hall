@@ -40,33 +40,68 @@
                     </div>
                 </div>
 
-                <!-- RIGHT: Visual Composition (Hiring Posters from prototype) -->
+                <!-- RIGHT: Visual Composition (Lowongan aktif dari database) -->
                 <div class="lg:col-span-6 relative mt-12 lg:mt-0 flex justify-center lg:justify-end">
+                    @php
+                        // Dua kartu visual ini dulunya poster lowongan hardcode
+                        // (PT Indaco Warna Dunia / PT SCA). Sekarang memakai
+                        // lowongan aktif yang benar-benar ada di database.
+                        $posterLowongans = $lowongans->take(2);
+                        $gradienPoster = [
+                            'from-blue-900 to-indigo-900',
+                            'from-emerald-800 to-teal-900',
+                        ];
+                    @endphp
+
                     <div class="relative w-full max-w-[500px] aspect-[4/3]">
 
-                        <!-- Main Poster 1 -->
-                        <div class="absolute top-0 right-0 w-[72%] bg-gradient-to-br from-blue-900 to-indigo-900 rounded-2xl overflow-hidden shadow-2xl z-10 p-5 text-white border-4 border-white flex flex-col justify-center h-64">
-                            <span class="inline-block bg-blue-600 text-white text-[10px] font-bold px-2.5 py-1 rounded mb-3 uppercase tracking-wider w-fit">
-                                WE ARE HIRING
-                            </span>
-                            <h4 class="text-xl sm:text-2xl font-black leading-tight mb-2">
-                                PT INDACO WARNA DUNIA
-                            </h4>
-                            <p class="text-xs text-blue-200 mb-4">Operator Produksi, Operator Gudang Bahan Baku, Maintenance Teknik</p>
-                            <div class="mt-auto flex items-center justify-between">
-                                <span class="text-[10px] bg-white/20 px-2.5 py-1 rounded font-semibold">Tersedia Berbagai Posisi</span>
-                                <i class="fa-solid fa-briefcase text-blue-300"></i>
-                            </div>
-                        </div>
+                        @forelse ($posterLowongans as $posterLowongan)
+                            @php
+                                $i = $loop->index;
+                                $perusahaan = $posterLowongan->dudi?->nama_dudi ?: $posterLowongan->nama_perusahaan;
+                            @endphp
 
-                        <!-- Main Poster 2 -->
-                        <div class="absolute bottom-0 left-0 w-[64%] bg-gradient-to-br from-emerald-800 to-teal-900 rounded-2xl overflow-hidden shadow-2xl z-20 p-4 text-white border-4 border-white h-48 flex flex-col justify-center">
-                            <div class="text-[10px] font-semibold text-emerald-300 mb-1">PT. SCA (Agung Tex Group)</div>
-                            <h4 class="text-lg font-black italic tracking-wide text-amber-300 mb-2">
-                                MEMBUTUHKAN SEGERA
-                            </h4>
-                            <p class="text-[10px] text-emerald-100">Staff Bagian Produksi, Staff Bagian Pemasaran, Operator Tenun</p>
-                        </div>
+                            @if ($i === 0)
+                                <!-- Poster utama: lowongan terbaru -->
+                                <a href="{{ route('bkk.detail', $posterLowongan) }}"
+                                    class="absolute top-0 right-0 w-[72%] bg-gradient-to-br {{ $gradienPoster[$i] }} rounded-2xl overflow-hidden shadow-2xl z-10 p-5 text-white border-4 border-white flex flex-col justify-center h-64 hover:scale-[1.02] transition-transform">
+                                    <span class="inline-block bg-blue-600 text-white text-[10px] font-bold px-2.5 py-1 rounded mb-3 uppercase tracking-wider w-fit">
+                                        {{ $posterLowongan->tipe }}
+                                    </span>
+                                    <h4 class="text-xl sm:text-2xl font-black leading-tight mb-2 uppercase">
+                                        {{ $perusahaan }}
+                                    </h4>
+                                    <p class="text-xs text-blue-200 mb-4">{{ $posterLowongan->posisi }}</p>
+                                    <div class="mt-auto flex items-center justify-between">
+                                        <span class="text-[10px] bg-white/20 px-2.5 py-1 rounded font-semibold">
+                                            Deadline {{ $posterLowongan->deadline->format('d M Y') }}
+                                        </span>
+                                        <i class="fa-solid fa-briefcase text-blue-300"></i>
+                                    </div>
+                                </a>
+                            @else
+                                <!-- Poster kedua: lowongan berikutnya -->
+                                <a href="{{ route('bkk.detail', $posterLowongan) }}"
+                                    class="absolute bottom-0 left-0 w-[64%] bg-gradient-to-br {{ $gradienPoster[$i] }} rounded-2xl overflow-hidden shadow-2xl z-20 p-4 text-white border-4 border-white h-48 flex flex-col justify-center hover:scale-[1.02] transition-transform">
+                                    <div class="text-[10px] font-semibold text-emerald-300 mb-1 uppercase">
+                                        {{ $perusahaan }}
+                                    </div>
+                                    <h4 class="text-lg font-black italic tracking-wide text-amber-300 mb-2">
+                                        {{ $posterLowongan->posisi }}
+                                    </h4>
+                                    <p class="text-[10px] text-emerald-100">
+                                        Deadline {{ $posterLowongan->deadline->format('d M Y') }}
+                                    </p>
+                                </a>
+                            @endif
+                        @empty
+                            <!-- Belum ada lowongan aktif: jangan tampilkan poster palsu -->
+                            <div class="w-full h-full flex flex-col items-center justify-center text-center gap-3 bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl p-8">
+                                <i class="fa-solid fa-briefcase text-3xl text-slate-300"></i>
+                                <p class="text-sm font-semibold text-slate-600">Belum ada lowongan aktif</p>
+                                <p class="text-xs text-slate-400">Lowongan yang dipublikasikan BKK akan tampil di sini.</p>
+                            </div>
+                        @endforelse
 
                         <!-- Abstract decorative shapes -->
                         <div class="absolute -top-6 -left-6 w-24 h-24 dot-pattern opacity-50 z-0"></div>

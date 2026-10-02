@@ -34,6 +34,7 @@ class DatabaseSeeder extends Seeder
             ChatbotKnowledgeSeeder::class,
             DataMasterSeeder::class,
             JurusanSeeder::class,
+            KategoriArtikelSeeder::class,
             ProdukSeeder::class,
             ProdukUnggulanSeeder::class,
             KesiswaanSeeder::class,
