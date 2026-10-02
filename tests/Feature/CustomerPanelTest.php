@@ -1,0 +1,1093 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Models\DetailPembayaran;
+use App\Models\PaketPeminjaman;
+use App\Models\PaymentConfiguration;
+use App\Models\Pembayaran;
+use App\Models\Peminjaman;
+use App\Models\Persetujuan;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
+use Tests\TestCase;
+
+class CustomerPanelTest extends TestCase
+{
+    use RefreshDatabase;
+
+    public function test_customer_dashboard_dapat_diakses_oleh_pelanggan(): void
+    {
+        $pelanggan = User::factory()->create([
+            'name' => 'Ilham',
+            'email' => 'PBB@smk2nkra.sch.id',
+            'role' => 'pelanggan',
+        ]);
+
+        $paket = PaketPeminjaman::create([
+            'nama_paket' => 'Standar 2',
+            'kategori' => 'standar 2',
+            'harga' => 4400000,
+        ]);
+
+        Peminjaman::create([
+            'paket_peminjaman_id' => $paket->id,
+            'nama' => 'Ilham',
+            'email_instansi' => 'PBB@smk2nkra.sch.id',
+            'tanggal_mulai' => now()->startOfMonth()->addDays(24),
+            'tanggal_selesai' => now()->startOfMonth()->addDays(24)->addHours(12),
+            'status' => 'approved_final',
+        ]);
+
+        $response = $this->actingAs($pelanggan)->get(route('customer.dashboard'));
+
+        $response->assertOk();
+        $response->assertViewIs('Admin.peminjaman.customerPanel.dashboard');
+        $response->assertSee('PEMINJAMAN TERVERIFIKASI');
+        $response->assertSee('CEK KETERSEDIAAN');
+        $response->assertSee('Ilham');
+    }
+
+    public function test_kalender_ketersediaan_hanya_menandai_tanggal_sebagai_terpakai_jika_peminjaman_sudah_diapprove(): void
+    {
+        $pelanggan = User::factory()->create([
+            'role' => 'pelanggan',
+            'email' => 'buyer@example.com',
+        ]);
+
+        $paket = PaketPeminjaman::create([
+            'nama_paket' => 'Aula Utama',
+            'kategori' => 'unggulan',
+            'harga' => 5000000,
+        ]);
+
+        $targetMonth = now()->month;
+        $targetYear = now()->year;
+
+        // Peminjaman 1: Masih pending (BELUM diapprove) pada tanggal 10
+        Peminjaman::create([
+            'paket_peminjaman_id' => $paket->id,
+            'nama' => 'Peminjam Pending',
+            'email_instansi' => 'pending@example.com',
+            'tanggal_mulai' => now()->startOfMonth()->addDays(9)->setTime(8, 0), // Tanggal 10
+            'tanggal_selesai' => now()->startOfMonth()->addDays(9)->setTime(12, 0),
+            'status' => 'pending',
+        ]);
+
+        // Peminjaman 2: Masih draft (BELUM diapprove) pada tanggal 12
+        Peminjaman::create([
+            'paket_peminjaman_id' => $paket->id,
+            'nama' => 'Peminjam Draft',
+            'email_instansi' => 'draft@example.com',
+            'tanggal_mulai' => now()->startOfMonth()->addDays(11)->setTime(8, 0), // Tanggal 12
+            'tanggal_selesai' => now()->startOfMonth()->addDays(11)->setTime(12, 0),
+            'status' => 'draft',
+        ]);
+
+        // Peminjaman 3: SUDAH diapprove (approved_1) pada tanggal 18
+        Peminjaman::create([
+            'paket_peminjaman_id' => $paket->id,
+            'nama' => 'Peminjam Approved 1',
+            'email_instansi' => 'approved1@example.com',
+            'tanggal_mulai' => now()->startOfMonth()->addDays(17)->setTime(8, 0), // Tanggal 18
+            'tanggal_selesai' => now()->startOfMonth()->addDays(17)->setTime(15, 0),
+            'status' => 'approved_1',
+        ]);
+
+        // Peminjaman 4: SUDAH diapprove final (approved_final) pada tanggal 22
+        Peminjaman::create([
+            'paket_peminjaman_id' => $paket->id,
+            'nama' => 'Peminjam Approved Final',
+            'email_instansi' => 'final@example.com',
+            'tanggal_mulai' => now()->startOfMonth()->addDays(21)->setTime(8, 0), // Tanggal 22
+            'tanggal_selesai' => now()->startOfMonth()->addDays(21)->setTime(17, 0),
+            'status' => 'approved_final',
+        ]);
+
+        $response = $this->actingAs($pelanggan)->get(route('customer.dashboard', [
+            'month' => $targetMonth,
+            'year' => $targetYear,
+        ]));
+
+        $response->assertOk();
+        $bookedDays = $response->viewData('bookedDays');
+
+        // Tanggal 10 (pending) dan 12 (draft) TIDAK boleh ditandai sebagai booked/terpakai
+        $this->assertArrayNotHasKey(10, $bookedDays);
+        $this->assertArrayNotHasKey(12, $bookedDays);
+
+        // Tanggal 18 (approved_1) dan 22 (approved_final) HARUS ditandai sebagai booked/terpakai
+        $this->assertArrayHasKey(18, $bookedDays);
+        $this->assertArrayHasKey(22, $bookedDays);
+        $this->assertEquals('Peminjam Approved 1', $bookedDays[18][0]['nama']);
+        $this->assertEquals('Peminjam Approved Final', $bookedDays[22][0]['nama']);
+    }
+
+    public function test_customer_paket_peminjaman_dapat_diakses_oleh_pelanggan(): void
+    {
+        $pelanggan = User::factory()->create([
+            'role' => 'pelanggan',
+        ]);
+
+        $paket = PaketPeminjaman::create([
+            'nama_paket' => 'Unggulan',
+            'kategori' => 'unggulan',
+            'harga' => 6000000,
+            'harga_dp' => 2000000,
+        ]);
+
+        $response = $this->actingAs($pelanggan)->get(route('customer.paket'));
+
+        $response->assertOk();
+        $response->assertViewIs('Admin.peminjaman.customerPanel.paket');
+        $response->assertSee('Unggulan');
+        $response->assertSee('Pilih Paket');
+        $response->assertSee('Deposit (DP):');
+        $response->assertSee('2.000.000');
+    }
+
+    public function test_customer_cek_peminjaman_riwayat_dapat_diakses_oleh_pelanggan(): void
+    {
+        $pelanggan = User::factory()->create([
+            'name' => 'Ilham',
+            'email' => 'PBB@smk2nkra.sch.id',
+            'role' => 'pelanggan',
+        ]);
+
+        $response = $this->actingAs($pelanggan)->get(route('customer.cek-peminjaman'));
+
+        $response->assertOk();
+        $response->assertViewIs('Admin.peminjaman.customerPanel.riwayat');
+        $response->assertSee('Daftar Peminjaman');
+        $response->assertSee('Pembayaran');
+    }
+
+    public function test_customer_profil_dapat_diakses_oleh_pelanggan(): void
+    {
+        $pelanggan = User::factory()->create([
+            'name' => 'Ilham',
+            'email' => 'PBB@smk2nkra.sch.id',
+            'role' => 'pelanggan',
+        ]);
+
+        $response = $this->actingAs($pelanggan)->get(route('customer.profil'));
+
+        $response->assertOk();
+        $response->assertViewIs('Admin.peminjaman.customerPanel.profil');
+        $response->assertSee('Informasi Akun');
+    }
+
+    public function test_pelanggan_mengakses_dashboard_dialihkan_ke_customer_dashboard(): void
+    {
+        $pelanggan = User::factory()->create([
+            'role' => 'pelanggan',
+        ]);
+
+        $response = $this->actingAs($pelanggan)->get(route('dashboard'));
+
+        $response->assertRedirect(route('customer.dashboard'));
+    }
+
+    public function test_pelanggan_yang_sudah_login_mengakses_login_dialihkan_ke_customer_dashboard(): void
+    {
+        $pelanggan = User::factory()->create([
+            'role' => 'pelanggan',
+        ]);
+
+        $response = $this->actingAs($pelanggan)->get(route('login'));
+
+        $response->assertRedirect(route('customer.dashboard'));
+    }
+
+    public function test_guest_diarahkan_ke_login_saat_mengakses_customer_panel(): void
+    {
+        $response = $this->get(route('customer.dashboard'));
+
+        $response->assertRedirect('/login');
+    }
+
+    public function test_customer_riwayat_menampilkan_empty_case_saat_data_kosong(): void
+    {
+        $pelanggan = User::factory()->create([
+            'role' => 'pelanggan',
+        ]);
+
+        $response = $this->actingAs($pelanggan)->get(route('customer.riwayat'));
+
+        $response->assertOk();
+        $response->assertSee('Belum Ada Riwayat Peminjaman');
+        $response->assertDontSee('ORD-002');
+    }
+
+    public function test_customer_paket_menampilkan_empty_case_saat_data_kosong(): void
+    {
+        $pelanggan = User::factory()->create([
+            'role' => 'pelanggan',
+        ]);
+
+        $response = $this->actingAs($pelanggan)->get(route('customer.paket'));
+
+        $response->assertOk();
+        $response->assertSee('Belum Ada Paket Peminjaman');
+        $response->assertDontSee('6.000.000');
+    }
+
+    public function test_pelanggan_dapat_mengakses_form_pengajuan_peminjaman(): void
+    {
+        $pelanggan = User::factory()->create([
+            'role' => 'pelanggan',
+        ]);
+
+        $paket = PaketPeminjaman::create([
+            'nama_paket' => 'Paket Premium Aula',
+            'kategori' => 'unggulan',
+            'harga' => 5000000,
+            'harga_dp' => 1500000,
+        ]);
+
+        $response = $this->actingAs($pelanggan)->get(route('customer.peminjaman.create', ['paket_id' => $paket->id]));
+
+        $response->assertOk();
+        $response->assertViewIs('Admin.peminjaman.customerPanel.pengajuan');
+        $response->assertSee('Pengajuan Peminjaman Aula');
+        $response->assertSee('Paket Premium Aula');
+        $response->assertSee('5.000.000');
+    }
+
+    public function test_pelanggan_dapat_mengajukan_peminjaman_dan_diarahkan_ke_halaman_pembayaran(): void
+    {
+        Storage::fake('public');
+
+        PaymentConfiguration::create([
+            'nama_sekolah' => 'SMK Negeri 2 Karanganyar',
+            'bank_utama' => 'Bank Jateng',
+            'norek_utama' => '1234567890',
+            'atas_nama_utama' => 'Bendahara Aula SMK 2',
+            'jatuh_tempo_dp_jam' => 24,
+            'jatuh_tempo_pelunasan_jam' => 72,
+        ]);
+
+        $pelanggan = User::factory()->create([
+            'name' => 'Budi Santoso',
+            'email' => 'budi@instansi.com',
+            'role' => 'pelanggan',
+        ]);
+
+        $paket = PaketPeminjaman::create([
+            'nama_paket' => 'Paket Pernikahan',
+            'kategori' => 'unggulan',
+            'harga' => 8000000,
+            'harga_dp' => 2500000,
+        ]);
+
+        $suratFile = UploadedFile::fake()->create('surat-pengajuan.pdf', 300, 'application/pdf');
+
+        $tglMulai = now()->addDays(5)->format('Y-m-d\TH:i');
+        $tglSelesai = now()->addDays(5)->addHours(8)->format('Y-m-d\TH:i');
+
+        $response = $this->actingAs($pelanggan)->post(route('customer.peminjaman.store'), [
+            'paket_peminjaman_id' => $paket->id,
+            'nama' => 'Budi Santoso',
+            'email_instansi' => 'budi@instansi.com',
+            'tanggal_mulai' => $tglMulai,
+            'tanggal_selesai' => $tglSelesai,
+            'surat_pengantar' => $suratFile,
+            'catatan' => 'Mohon sediakan sound system tambahan.',
+        ]);
+
+        $peminjaman = Peminjaman::where('email_instansi', 'budi@instansi.com')->first();
+        $this->assertNotNull($peminjaman);
+        $this->assertEquals('pending', $peminjaman->status);
+
+        $pembayaran = Pembayaran::where('peminjaman_id', $peminjaman->id)->first();
+        $this->assertNotNull($pembayaran);
+        $this->assertEquals(8000000, $pembayaran->total_tagihan);
+        $this->assertNotNull($pembayaran->jatuh_tempo_dp);
+
+        $response->assertRedirect(route('customer.pembayaran.show', $pembayaran));
+    }
+
+    public function test_pengajuan_peminjaman_gagal_jika_jadwal_bentrok(): void
+    {
+        Storage::fake('public');
+
+        $pelanggan = User::factory()->create([
+            'role' => 'pelanggan',
+        ]);
+
+        $paket = PaketPeminjaman::create([
+            'nama_paket' => 'Paket Seminar',
+            'kategori' => 'standar 1',
+            'harga' => 3000000,
+        ]);
+
+        // Buat peminjaman approved
+        Peminjaman::create([
+            'paket_peminjaman_id' => $paket->id,
+            'nama' => 'Peminjam Pertama',
+            'email_instansi' => 'peminjam1@instansi.com',
+            'tanggal_mulai' => now()->addDays(7)->setTime(8, 0),
+            'tanggal_selesai' => now()->addDays(7)->setTime(16, 0),
+            'status' => 'approved_final',
+        ]);
+
+        $suratFile = UploadedFile::fake()->create('surat.pdf', 200, 'application/pdf');
+
+        $response = $this->actingAs($pelanggan)->post(route('customer.peminjaman.store'), [
+            'paket_peminjaman_id' => $paket->id,
+            'nama' => 'Peminjam Kedua',
+            'email_instansi' => 'peminjam2@instansi.com',
+            'tanggal_mulai' => now()->addDays(7)->setTime(10, 0)->format('Y-m-d\TH:i'),
+            'tanggal_selesai' => now()->addDays(7)->setTime(14, 0)->format('Y-m-d\TH:i'),
+            'surat_pengantar' => $suratFile,
+        ]);
+
+        $response->assertSessionHasErrors(['tanggal_mulai']);
+        $this->assertDatabaseMissing('peminjamans', [
+            'email_instansi' => 'peminjam2@instansi.com',
+        ]);
+    }
+
+    public function test_pengajuan_peminjaman_gagal_jika_bentrok_dengan_status_approved_1(): void
+    {
+        Storage::fake('public');
+
+        $pelanggan = User::factory()->create([
+            'role' => 'pelanggan',
+        ]);
+
+        $paket = PaketPeminjaman::create([
+            'nama_paket' => 'Paket Seminar',
+            'kategori' => 'standar 1',
+            'harga' => 3000000,
+        ]);
+
+        // Buat peminjaman approved_1 (disetujui admin)
+        Peminjaman::create([
+            'paket_peminjaman_id' => $paket->id,
+            'nama' => 'Peminjam Disetujui Admin',
+            'email_instansi' => 'approved1@instansi.com',
+            'tanggal_mulai' => now()->addDays(10)->setTime(9, 0),
+            'tanggal_selesai' => now()->addDays(10)->setTime(15, 0),
+            'status' => 'approved_1',
+        ]);
+
+        $suratFile = UploadedFile::fake()->create('surat.pdf', 200, 'application/pdf');
+
+        $response = $this->actingAs($pelanggan)->post(route('customer.peminjaman.store'), [
+            'paket_peminjaman_id' => $paket->id,
+            'nama' => 'Pemohon Bentrok',
+            'email_instansi' => 'bentrok@instansi.com',
+            'tanggal_mulai' => now()->addDays(10)->setTime(12, 0)->format('Y-m-d\TH:i'),
+            'tanggal_selesai' => now()->addDays(10)->setTime(17, 0)->format('Y-m-d\TH:i'),
+            'surat_pengantar' => $suratFile,
+        ]);
+
+        $response->assertSessionHasErrors(['tanggal_mulai']);
+        $this->assertDatabaseMissing('peminjamans', [
+            'email_instansi' => 'bentrok@instansi.com',
+        ]);
+    }
+
+    public function test_pengajuan_peminjaman_gagal_jika_bentrok_dengan_persetujuan_approved(): void
+    {
+        Storage::fake('public');
+
+        $pelanggan = User::factory()->create([
+            'role' => 'pelanggan',
+        ]);
+
+        $paket = PaketPeminjaman::create([
+            'nama_paket' => 'Paket Seminar',
+            'kategori' => 'standar 1',
+            'harga' => 3000000,
+        ]);
+
+        $admin = User::factory()->create(['role' => 'admin']);
+
+        // Buat peminjaman dengan relasi persetujuan status approved
+        $peminjaman = Peminjaman::create([
+            'paket_peminjaman_id' => $paket->id,
+            'nama' => 'Peminjam Dengan Persetujuan',
+            'email_instansi' => 'persetujuan@instansi.com',
+            'tanggal_mulai' => now()->addDays(12)->setTime(8, 0),
+            'tanggal_selesai' => now()->addDays(12)->setTime(14, 0),
+            'status' => 'pending',
+        ]);
+
+        Persetujuan::create([
+            'peminjaman_id' => $peminjaman->id,
+            'approver_id' => $admin->id,
+            'level' => 'admin',
+            'status' => 'approved',
+            'catatan_approval' => 'Disetujui',
+            'tanggal_proses' => now(),
+        ]);
+
+        $suratFile = UploadedFile::fake()->create('surat.pdf', 200, 'application/pdf');
+
+        $response = $this->actingAs($pelanggan)->post(route('customer.peminjaman.store'), [
+            'paket_peminjaman_id' => $paket->id,
+            'nama' => 'Pemohon Baru Bentrok',
+            'email_instansi' => 'pemohonbaru@instansi.com',
+            'tanggal_mulai' => now()->addDays(12)->setTime(10, 0)->format('Y-m-d\TH:i'),
+            'tanggal_selesai' => now()->addDays(12)->setTime(16, 0)->format('Y-m-d\TH:i'),
+            'surat_pengantar' => $suratFile,
+        ]);
+
+        $response->assertSessionHasErrors(['tanggal_mulai']);
+        $this->assertDatabaseMissing('peminjamans', [
+            'email_instansi' => 'pemohonbaru@instansi.com',
+        ]);
+    }
+
+    public function test_pengajuan_peminjaman_berhasil_jika_jadwal_tidak_bentrok(): void
+    {
+        Storage::fake('public');
+
+        $pelanggan = User::factory()->create([
+            'role' => 'pelanggan',
+        ]);
+
+        $paket = PaketPeminjaman::create([
+            'nama_paket' => 'Paket Seminar',
+            'kategori' => 'standar 1',
+            'harga' => 3000000,
+        ]);
+
+        // Buat peminjaman approved di hari ke-15
+        Peminjaman::create([
+            'paket_peminjaman_id' => $paket->id,
+            'nama' => 'Peminjam Hari 15',
+            'email_instansi' => 'hari15@instansi.com',
+            'tanggal_mulai' => now()->addDays(15)->setTime(8, 0),
+            'tanggal_selesai' => now()->addDays(15)->setTime(16, 0),
+            'status' => 'approved_final',
+        ]);
+
+        $suratFile = UploadedFile::fake()->create('surat.pdf', 200, 'application/pdf');
+
+        // Ajukan di hari ke-16 (tidak bentrok)
+        $response = $this->actingAs($pelanggan)->post(route('customer.peminjaman.store'), [
+            'paket_peminjaman_id' => $paket->id,
+            'nama' => 'Peminjam Hari 16',
+            'email_instansi' => 'hari16@instansi.com',
+            'tanggal_mulai' => now()->addDays(16)->setTime(8, 0)->format('Y-m-d\TH:i'),
+            'tanggal_selesai' => now()->addDays(16)->setTime(16, 0)->format('Y-m-d\TH:i'),
+            'surat_pengantar' => $suratFile,
+        ]);
+
+        $response->assertSessionDoesntHaveErrors();
+        $this->assertDatabaseHas('peminjamans', [
+            'email_instansi' => 'hari16@instansi.com',
+        ]);
+    }
+
+    public function test_pelanggan_dapat_melihat_halaman_pembayaran_dengan_informasi_rekening_dan_countdown(): void
+    {
+        $config = PaymentConfiguration::create([
+            'nama_sekolah' => 'SMK Negeri 2 Karanganyar',
+            'bank_utama' => 'Bank Jateng',
+            'norek_utama' => '1234567890',
+            'atas_nama_utama' => 'Bendahara Aula SMK 2',
+            'jatuh_tempo_dp_jam' => 24,
+            'jatuh_tempo_pelunasan_jam' => 72,
+        ]);
+
+        $pelanggan = User::factory()->create([
+            'email' => 'customer@test.com',
+            'role' => 'pelanggan',
+        ]);
+
+        $paket = PaketPeminjaman::create([
+            'nama_paket' => 'Paket Reguler',
+            'kategori' => 'standar 1',
+            'harga' => 3000000,
+            'harga_dp' => 1000000,
+        ]);
+
+        $peminjaman = Peminjaman::create([
+            'paket_peminjaman_id' => $paket->id,
+            'nama' => 'Customer Test',
+            'email_instansi' => 'customer@test.com',
+            'tanggal_mulai' => now()->addDays(3),
+            'tanggal_selesai' => now()->addDays(3)->addHours(6),
+            'status' => 'draft',
+        ]);
+
+        $pembayaran = Pembayaran::create([
+            'peminjaman_id' => $peminjaman->id,
+            'kode_pembayaran' => 'PAY-TEST-001',
+            'total_tagihan' => 3000000,
+            'sisa_tagihan' => 3000000,
+            'status_pembayaran' => 'pending',
+            'jatuh_tempo_dp' => now()->addHours(24),
+        ]);
+
+        $response = $this->actingAs($pelanggan)->get(route('customer.pembayaran.show', $pembayaran));
+
+        $response->assertOk();
+        $response->assertViewIs('Admin.peminjaman.customerPanel.pembayaran');
+        $response->assertSee('Bank Jateng');
+        $response->assertSee('1234567890');
+        $response->assertSee('Bendahara Aula SMK 2');
+        $response->assertSee('PAY-TEST-001');
+        $response->assertSee('cd-hours');
+        $response->assertSee('updateCountdown');
+    }
+
+    public function test_pelanggan_dapat_mengirim_bukti_pembayaran_dp(): void
+    {
+        Storage::fake('public');
+
+        PaymentConfiguration::create([
+            'nama_sekolah' => 'SMK Negeri 2 Karanganyar',
+            'bank_utama' => 'Bank Jateng',
+            'norek_utama' => '1234567890',
+            'atas_nama_utama' => 'Bendahara Aula SMK 2',
+        ]);
+
+        $pelanggan = User::factory()->create([
+            'email' => 'customer@test.com',
+            'role' => 'pelanggan',
+        ]);
+
+        $paket = PaketPeminjaman::create([
+            'nama_paket' => 'Paket Reguler',
+            'kategori' => 'standar 1',
+            'harga' => 3000000,
+            'harga_dp' => 1000000,
+        ]);
+
+        $peminjaman = Peminjaman::create([
+            'paket_peminjaman_id' => $paket->id,
+            'nama' => 'Customer Test',
+            'email_instansi' => 'customer@test.com',
+            'tanggal_mulai' => now()->addDays(3),
+            'tanggal_selesai' => now()->addDays(3)->addHours(6),
+            'status' => 'draft',
+        ]);
+
+        $pembayaran = Pembayaran::create([
+            'peminjaman_id' => $peminjaman->id,
+            'kode_pembayaran' => 'PAY-TEST-002',
+            'total_tagihan' => 3000000,
+            'sisa_tagihan' => 3000000,
+            'status_pembayaran' => 'pending',
+            'jatuh_tempo_dp' => now()->addHours(24),
+        ]);
+
+        $bukti = UploadedFile::fake()->image('bukti_transfer.jpg');
+
+        $response = $this->actingAs($pelanggan)->post(route('customer.pembayaran.bayar', $pembayaran), [
+            'tipe_pembayaran' => 'dp',
+            'metode' => 'transfer_bank',
+            'bank_tujuan' => 'Bank Jateng',
+            'bank_pengirim' => 'BCA',
+            'norek_pengirim' => '987654321',
+            'atas_nama_pengirim' => 'Customer Pengirim',
+            'jumlah_bayar' => 1000000,
+            'tanggal_bayar' => now()->format('Y-m-d\TH:i'),
+            'bukti_pembayaran' => $bukti,
+        ]);
+
+        $response->assertRedirect(route('customer.pembayaran.show', $pembayaran));
+
+        $this->assertDatabaseHas('detail_pembayarans', [
+            'pembayaran_id' => $pembayaran->id,
+            'tipe_pembayaran' => 'dp',
+            'jumlah_bayar' => 1000000,
+            'bank_tujuan' => 'Bank Jateng',
+            'norek_tujuan' => '1234567890',
+            'atas_nama_pengirim' => 'Customer Pengirim',
+            'status' => 'pending',
+        ]);
+
+        $peminjaman->refresh();
+        $this->assertEquals('pending', $peminjaman->status);
+    }
+
+    public function test_pelanggan_dapat_melihat_opsi_qris_dan_membayar_via_qris(): void
+    {
+        Storage::fake('public');
+
+        PaymentConfiguration::create([
+            'nama_sekolah' => 'SMK Negeri 2 Karanganyar',
+            'bank_utama' => 'Bank Jateng',
+            'norek_utama' => '1234567890',
+            'atas_nama_utama' => 'Bendahara Aula SMK 2',
+            'qris_merchant' => 'SMKN 2 KRA AULA OFFICIAL',
+        ]);
+
+        $pelanggan = User::factory()->create([
+            'email' => 'customer_qris@test.com',
+            'role' => 'pelanggan',
+        ]);
+
+        $paket = PaketPeminjaman::create([
+            'nama_paket' => 'Paket Aula QRIS',
+            'kategori' => 'standar 1',
+            'harga' => 2000000,
+            'harga_dp' => 500000,
+        ]);
+
+        $peminjaman = Peminjaman::create([
+            'paket_peminjaman_id' => $paket->id,
+            'nama' => 'Customer QRIS',
+            'email_instansi' => 'customer_qris@test.com',
+            'tanggal_mulai' => now()->addDays(2),
+            'tanggal_selesai' => now()->addDays(2)->addHours(4),
+            'status' => 'draft',
+        ]);
+
+        $pembayaran = Pembayaran::create([
+            'peminjaman_id' => $peminjaman->id,
+            'kode_pembayaran' => 'PAY-QRIS-001',
+            'total_tagihan' => 2000000,
+            'sisa_tagihan' => 2000000,
+            'status_pembayaran' => 'pending',
+            'jatuh_tempo_dp' => now()->addHours(24),
+        ]);
+
+        $resView = $this->actingAs($pelanggan)->get(route('customer.pembayaran.show', $pembayaran));
+        $resView->assertOk();
+        $resView->assertSee('QRIS Resmi Sekolah');
+        $resView->assertSee('SMKN 2 KRA AULA OFFICIAL');
+        $resView->assertSee('id="qrisInfoBox"', false);
+
+        $bukti = UploadedFile::fake()->image('bukti_qris.jpg');
+
+        $response = $this->actingAs($pelanggan)->post(route('customer.pembayaran.bayar', $pembayaran), [
+            'tipe_pembayaran' => 'dp',
+            'metode' => 'transfer_bank',
+            'bank_tujuan' => 'QRIS',
+            'bank_pengirim' => 'GoPay',
+            'norek_pengirim' => '08123456789',
+            'atas_nama_pengirim' => 'Customer QRIS User',
+            'jumlah_bayar' => 500000,
+            'tanggal_bayar' => now()->format('Y-m-d\TH:i'),
+            'bukti_pembayaran' => $bukti,
+        ]);
+
+        $response->assertRedirect(route('customer.pembayaran.show', $pembayaran));
+
+        $this->assertDatabaseHas('detail_pembayarans', [
+            'pembayaran_id' => $pembayaran->id,
+            'tipe_pembayaran' => 'dp',
+            'jumlah_bayar' => 500000,
+            'bank_tujuan' => 'QRIS',
+            'norek_tujuan' => 'SMKN 2 KRA AULA OFFICIAL',
+            'bank_pengirim' => 'GoPay',
+            'status' => 'pending',
+        ]);
+    }
+
+    public function test_card_daftar_pembayaran_dapat_diklik_menuju_halaman_pembayaran(): void
+    {
+        $pelanggan = User::factory()->create([
+            'email' => 'customer_card@test.com',
+            'role' => 'pelanggan',
+        ]);
+
+        $paket = PaketPeminjaman::create([
+            'nama_paket' => 'Paket Card Test',
+            'kategori' => 'standar 1',
+            'harga' => 2500000,
+        ]);
+
+        $peminjaman = Peminjaman::create([
+            'paket_peminjaman_id' => $paket->id,
+            'nama' => 'Customer Card',
+            'email_instansi' => 'customer_card@test.com',
+            'tanggal_mulai' => now()->addDays(4),
+            'tanggal_selesai' => now()->addDays(4)->addHours(5),
+            'status' => 'pending',
+        ]);
+
+        $pembayaran = Pembayaran::create([
+            'peminjaman_id' => $peminjaman->id,
+            'kode_pembayaran' => 'PAY-CARD-001',
+            'total_tagihan' => 2500000,
+            'sisa_tagihan' => 2500000,
+            'status_pembayaran' => 'pending',
+            'jatuh_tempo_dp' => now()->addHours(24),
+        ]);
+
+        $response = $this->actingAs($pelanggan)->get(route('customer.cek-peminjaman'));
+        $response->assertOk();
+        $response->assertSee(route('customer.pembayaran.show', $pembayaran->id));
+        $response->assertSee('Buka Pembayaran');
+    }
+
+    public function test_bukti_pembayaran_hanya_menerima_file_gambar_dan_menolak_pdf(): void
+    {
+        Storage::fake('public');
+
+        PaymentConfiguration::create([
+            'nama_sekolah' => 'SMK Negeri 2 Karanganyar',
+            'bank_utama' => 'Bank Jateng',
+            'norek_utama' => '1234567890',
+            'atas_nama_utama' => 'Bendahara Aula SMK 2',
+        ]);
+
+        $pelanggan = User::factory()->create([
+            'email' => 'customer_image_val@test.com',
+            'role' => 'pelanggan',
+        ]);
+
+        $paket = PaketPeminjaman::create([
+            'nama_paket' => 'Paket Val Image',
+            'kategori' => 'standar 1',
+            'harga' => 2000000,
+        ]);
+
+        $peminjaman = Peminjaman::create([
+            'paket_peminjaman_id' => $paket->id,
+            'nama' => 'Customer Image Val',
+            'email_instansi' => 'customer_image_val@test.com',
+            'tanggal_mulai' => now()->addDays(2),
+            'tanggal_selesai' => now()->addDays(2)->addHours(4),
+            'status' => 'draft',
+        ]);
+
+        $pembayaran = Pembayaran::create([
+            'peminjaman_id' => $peminjaman->id,
+            'kode_pembayaran' => 'PAY-VAL-001',
+            'total_tagihan' => 2000000,
+            'sisa_tagihan' => 2000000,
+            'status_pembayaran' => 'pending',
+            'jatuh_tempo_dp' => now()->addHours(24),
+        ]);
+
+        // 1. Coba upload file PDF (harus gagal validasi)
+        $filePdf = UploadedFile::fake()->create('struk_pembayaran.pdf', 200, 'application/pdf');
+
+        $responsePdf = $this->actingAs($pelanggan)->post(route('customer.pembayaran.bayar', $pembayaran), [
+            'tipe_pembayaran' => 'dp',
+            'metode' => 'transfer_bank',
+            'bank_tujuan' => 'Bank Jateng',
+            'bank_pengirim' => 'BCA',
+            'norek_pengirim' => '12345678',
+            'atas_nama_pengirim' => 'Pengirim PDF',
+            'jumlah_bayar' => 500000,
+            'tanggal_bayar' => now()->format('Y-m-d\TH:i'),
+            'bukti_pembayaran' => $filePdf,
+        ]);
+
+        $responsePdf->assertSessionHasErrors('bukti_pembayaran');
+
+        // 2. Upload file gambar JPG (harus sukses)
+        $fileJpg = UploadedFile::fake()->image('struk_pembayaran.jpg');
+
+        $responseJpg = $this->actingAs($pelanggan)->post(route('customer.pembayaran.bayar', $pembayaran), [
+            'tipe_pembayaran' => 'dp',
+            'metode' => 'transfer_bank',
+            'bank_tujuan' => 'Bank Jateng',
+            'bank_pengirim' => 'BCA',
+            'norek_pengirim' => '12345678',
+            'atas_nama_pengirim' => 'Pengirim JPG',
+            'jumlah_bayar' => 500000,
+            'tanggal_bayar' => now()->format('Y-m-d\TH:i'),
+            'bukti_pembayaran' => $fileJpg,
+        ]);
+
+        $responseJpg->assertSessionHasNoErrors();
+        $responseJpg->assertRedirect(route('customer.pembayaran.show', $pembayaran));
+    }
+
+    public function test_pelanggan_hanya_dapat_memilih_waktu_peminjaman_sesuai_selisih_minimal_hari_booking(): void
+    {
+        Storage::fake('public');
+
+        PaymentConfiguration::truncate();
+        PaymentConfiguration::create([
+            'nama_sekolah' => 'SMK Negeri 2 Karanganyar',
+            'bank_utama' => 'Bank Jateng',
+            'norek_utama' => '1234567890',
+            'atas_nama_utama' => 'Bendahara Aula SMK 2',
+            'jatuh_tempo_dp_jam' => 24,
+            'jatuh_tempo_pelunasan_jam' => 48,
+            'minimal_hari_booking' => 10,
+        ]);
+
+        $pelanggan = User::factory()->create([
+            'email' => 'customer_selisih@test.com',
+            'role' => 'pelanggan',
+        ]);
+
+        $paket = PaketPeminjaman::create([
+            'nama_paket' => 'Paket Selisih Waktu',
+            'kategori' => 'standar 1',
+            'harga' => 2000000,
+        ]);
+
+        // Coba pilih tanggal 5 hari ke depan (harus gagal validasi karena min 10 hari)
+        $tglGagal = now()->addDays(5)->setTime(8, 0)->format('Y-m-d\TH:i');
+        $responseGagal = $this->actingAs($pelanggan)->post(route('customer.peminjaman.store'), [
+            'paket_peminjaman_id' => $paket->id,
+            'nama' => 'Pemesan Gagal',
+            'email_instansi' => 'customer_selisih@test.com',
+            'tanggal_mulai' => $tglGagal,
+            'tanggal_selesai' => now()->addDays(5)->setTime(16, 0)->format('Y-m-d\TH:i'),
+        ]);
+
+        $responseGagal->assertSessionHasErrors(['tanggal_mulai']);
+
+        // Pilih tanggal 10 hari ke depan (harus sukses)
+        $tglSukses = now()->startOfDay()->addDays(10)->setTime(8, 0)->format('Y-m-d\TH:i');
+        $responseSukses = $this->actingAs($pelanggan)->post(route('customer.peminjaman.store'), [
+            'paket_peminjaman_id' => $paket->id,
+            'nama' => 'Pemesan Sukses',
+            'email_instansi' => 'customer_selisih@test.com',
+            'tanggal_mulai' => $tglSukses,
+            'tanggal_selesai' => now()->startOfDay()->addDays(10)->setTime(16, 0)->format('Y-m-d\TH:i'),
+        ]);
+
+        $responseSukses->assertSessionHasNoErrors();
+        $this->assertDatabaseHas('peminjamans', [
+            'email_instansi' => 'customer_selisih@test.com',
+            'status' => 'pending',
+        ]);
+    }
+
+    public function test_tolak_peminjaman_refund_pending_hapus_tenggat_waktu_sisa_tagihan_nol_dan_sembunyikan_riwayat_transfer_tanpa_bukti(): void
+    {
+        Storage::fake('public');
+
+        $pelanggan = User::factory()->create([
+            'email' => 'customer_refund@test.com',
+            'role' => 'pelanggan',
+        ]);
+
+        $admin = User::factory()->create([
+            'role' => 'admin_aula',
+        ]);
+
+        $paket = PaketPeminjaman::create([
+            'nama_paket' => 'Paket Refund Test',
+            'kategori' => 'standar 1',
+            'harga' => 2000000,
+        ]);
+
+        $peminjaman = Peminjaman::create([
+            'paket_peminjaman_id' => $paket->id,
+            'nama' => 'Pemohon Refund',
+            'email_instansi' => 'customer_refund@test.com',
+            'tanggal_mulai' => now()->addDays(5),
+            'tanggal_selesai' => now()->addDays(5)->addHours(4),
+            'status' => 'pending',
+        ]);
+
+        $pembayaran = Pembayaran::create([
+            'peminjaman_id' => $peminjaman->id,
+            'kode_pembayaran' => 'PAY-RFD-001',
+            'total_tagihan' => 2000000,
+            'total_terbayar' => 600000,
+            'sisa_tagihan' => 1400000,
+            'status_pembayaran' => 'partial',
+            'jatuh_tempo_pelunasan' => now()->addDays(3),
+        ]);
+
+        // Detail DP yang sudah diverifikasi (ada bukti transfer)
+        $pembayaran->details()->create([
+            'kode_transaksi' => 'TRX-DP-001',
+            'tipe_pembayaran' => 'dp',
+            'jumlah_bayar' => 600000,
+            'metode' => 'transfer',
+            'bank_pengirim' => 'BCA',
+            'norek_pengirim' => '112233',
+            'atas_nama_pengirim' => 'Pemohon',
+            'bank_tujuan' => 'Bank Jateng',
+            'status' => 'verified',
+            'bukti_pembayaran' => 'bukti/dp.jpg',
+        ]);
+
+        // Admin menolak peminjaman aula
+        $responseReject = $this->actingAs($admin)->post(route('admin.peminjaman.reject', $peminjaman->id), [
+            'alasan_penolakan' => 'Aula sedang direnovasi darurat',
+        ]);
+        $responseReject->assertRedirect();
+
+        $pembayaran->refresh();
+        $this->assertEquals('refund_pending', $pembayaran->status_pembayaran);
+        $this->assertEquals(0, (float) $pembayaran->sisa_tagihan);
+        $this->assertEquals(600000, (float) $pembayaran->total_refund);
+
+        // Pelanggan membuka halaman pembayaran
+        $resCustomer = $this->actingAs($pelanggan)->get(route('customer.pembayaran.show', $pembayaran));
+        $resCustomer->assertOk();
+
+        // 1. Informasi tenggat waktu & countdown pembayaran dihapus
+        $resCustomer->assertDontSee('id="cd-hours"', false);
+        $resCustomer->assertDontSee('Tenggat Waktu Pelunasan');
+        $resCustomer->assertDontSee('Tenggat Waktu Pembayaran DP');
+
+        // 2. Sisa tagihan bernilai 0
+        $resCustomer->assertSee('Sisa Tagihan:');
+        $resCustomer->assertSee('Rp 0');
+
+        // 3. Admin belum kirim bukti transfer refund -> Riwayat Transfer yang Telah Diunggah TIDAK boleh memuat refund kosong
+        $resCustomer->assertDontSee('TRX-RFD-');
+        $resCustomer->assertDontSee('Menunggu pemohon melengkapi data rekening pengembalian dana');
+
+        // 4. Modal konfirmasi refund tersedia dan tidak menggunakan alert confirm JS
+        $resCustomer->assertSee('id="modalKonfirmasiRefund"', false);
+        $resCustomer->assertDontSee("onsubmit=\"return confirm('Apakah Anda yakin telah menerima dana pengembalian ke rekening Anda?')\"", false);
+    }
+
+    public function test_pelanggan_konfirmasi_refund_mengubah_status_menjadi_refunded(): void
+    {
+        Storage::fake('public');
+
+        $pelanggan = User::factory()->create([
+            'email' => 'customer_confirm_refund@test.com',
+            'role' => 'pelanggan',
+        ]);
+
+        $admin = User::factory()->create([
+            'role' => 'super_admin',
+        ]);
+
+        $paket = PaketPeminjaman::create([
+            'nama_paket' => 'Paket Confirm Refund Test',
+            'kategori' => 'standar 1',
+            'harga' => 1500000,
+        ]);
+
+        $peminjaman = Peminjaman::create([
+            'paket_peminjaman_id' => $paket->id,
+            'nama' => 'Pemohon Confirm Refund',
+            'email_instansi' => 'customer_confirm_refund@test.com',
+            'tanggal_mulai' => now()->addDays(5),
+            'tanggal_selesai' => now()->addDays(5)->addHours(4),
+            'status' => 'rejected',
+        ]);
+
+        $pembayaran = Pembayaran::create([
+            'peminjaman_id' => $peminjaman->id,
+            'kode_pembayaran' => 'PAY-RFD-002',
+            'total_tagihan' => 1500000,
+            'total_terbayar' => 500000,
+            'total_refund' => 500000,
+            'sisa_tagihan' => 0,
+            'status_pembayaran' => 'refund_pending',
+        ]);
+
+        // Detail refund yang sudah diupload bukti oleh admin
+        $pembayaran->details()->create([
+            'kode_transaksi' => 'TRX-RFD-002',
+            'tipe_pembayaran' => 'refund',
+            'jumlah_bayar' => 500000,
+            'metode' => 'transfer',
+            'bank_pengirim' => 'Bank Sekolah',
+            'norek_pengirim' => '998877',
+            'atas_nama_pengirim' => 'SMKN 2 Kra',
+            'bank_tujuan' => 'BCA',
+            'status' => 'pending',
+            'bukti_pembayaran' => 'bukti/refund.jpg',
+        ]);
+
+        // Pelanggan mengonfirmasi dana telah diterima
+        $response = $this->actingAs($pelanggan)->post(route('customer.pembayaran.konfirmasi-refund', $pembayaran->id));
+        $response->assertRedirect(route('customer.pembayaran.show', $pembayaran->id));
+        $response->assertSessionHas('success');
+
+        $pembayaran->refresh();
+        $this->assertEquals('refunded', $pembayaran->status_pembayaran);
+        $this->assertEquals(0, (float) $pembayaran->sisa_tagihan);
+
+        // Halaman pembayaran menampilkan status selesai
+        $resView = $this->actingAs($pelanggan)->get(route('customer.pembayaran.show', $pembayaran->id));
+        $resView->assertOk();
+        $resView->assertSee('Refund Selesai');
+        $resView->assertSee('Pengembalian dana telah selesai dan dikonfirmasi diterima.');
+    }
+
+    public function test_halaman_pembayaran_setelah_admin_menolak_dp_menampilkan_form_transfer_ulang_bukan_refund(): void
+    {
+        $pelanggan = User::factory()->create([
+            'role' => 'pelanggan',
+            'email' => 'buyer@example.com',
+            'name' => 'Buyer Test',
+        ]);
+
+        $admin = User::factory()->create([
+            'role' => 'admin_aula',
+            'email' => 'admin_sarpras@example.com',
+        ]);
+
+        $paket = PaketPeminjaman::create([
+            'nama_paket' => 'Paket Seminar',
+            'harga' => 1000000,
+            'harga_dp' => 300000,
+            'kategori' => 'unggulan',
+            'deskripsi' => 'Paket lengkap',
+        ]);
+
+        $peminjaman = Peminjaman::create([
+            'paket_peminjaman_id' => $paket->id,
+            'nama' => 'Buyer Test',
+            'email_instansi' => 'buyer@example.com',
+            'tanggal_mulai' => now()->addDays(5)->format('Y-m-d H:i:s'),
+            'tanggal_selesai' => now()->addDays(5)->addHours(4)->format('Y-m-d H:i:s'),
+            'status' => 'pending',
+        ]);
+
+        $pembayaran = Pembayaran::create([
+            'peminjaman_id' => $peminjaman->id,
+            'kode_pembayaran' => 'ORD-TEST-REJECT',
+            'total_tagihan' => 1000000,
+            'total_terbayar' => 0,
+            'sisa_tagihan' => 1000000,
+            'status_pembayaran' => 'pending',
+            'jatuh_tempo_dp' => now()->addDay(),
+        ]);
+
+        $detailDp = DetailPembayaran::create([
+            'pembayaran_id' => $pembayaran->id,
+            'kode_transaksi' => 'TRX-DP-099',
+            'tipe_pembayaran' => 'dp',
+            'jumlah_bayar' => 300000,
+            'metode' => 'transfer',
+            'bank_tujuan' => 'Bank Jateng',
+            'norek_tujuan' => '123456',
+            'bank_pengirim' => 'BCA',
+            'norek_pengirim' => '654321',
+            'atas_nama_pengirim' => 'Buyer Test',
+            'bukti_pembayaran' => 'bukti/dp.jpg',
+            'tanggal_bayar' => now(),
+            'status' => 'pending',
+        ]);
+
+        // Admin menolak bukti pembayaran DP
+        $responseReject = $this->actingAs($admin)->post('/admin/peminjaman/'.$peminjaman->id.'/reject-pembayaran', [
+            'alasan_penolakan' => 'Bukti transfer tidak jelas / palsu',
+            'detail_id' => $detailDp->id,
+        ]);
+        $responseReject->assertRedirect('/admin/peminjaman/'.$peminjaman->id);
+
+        $pembayaran->refresh();
+        $detailDp->refresh();
+
+        // 1. Status pembayaran harus tetap pending, detail DP berstatus rejected
+        $this->assertEquals('pending', $pembayaran->status_pembayaran);
+        $this->assertEquals('rejected', $detailDp->status);
+        $this->assertEquals(1000000, (float) $pembayaran->sisa_tagihan);
+
+        // 2. Di sisi pelanggan: melihat halaman pembayaran
+        $responseCustomer = $this->actingAs($pelanggan)->get(route('customer.pembayaran.show', $pembayaran->id));
+        $responseCustomer->assertOk();
+
+        // Tidak boleh menampilkan info refund karena pelanggan harus bayar ulang DP
+        $responseCustomer->assertDontSee('Status Pengembalian Dana');
+        $responseCustomer->assertDontSee('Pengajuan Peminjaman Ditolak & Proses Pengembalian Dana');
+
+        // Harus menampilkan informasi penolakan bukti & formulir transfer ulang & tenggat waktu DP
+        $responseCustomer->assertSee('Bukti Pembayaran Ditolak Oleh Admin! Silakan Transfer Ulang');
+        $responseCustomer->assertSee('Bukti transfer tidak jelas / palsu');
+        $responseCustomer->assertSee('Konfirmasi Transfer Ulang Bukti Pembayaran');
+        $responseCustomer->assertSee('Tenggat Waktu Pembayaran DP');
+    }
+}

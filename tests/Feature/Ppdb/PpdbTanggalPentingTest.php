@@ -15,7 +15,7 @@ class PpdbTanggalPentingTest extends TestCase
     {
         $this->actingAs($this->admin());
 
-        $this->post('/ppdb/tanggal-penting', [
+        $this->post('/admin/ppdb/tanggal-penting', [
             'nama_agenda' => 'Senam Jasmani',
             'tanggal_mulai' => '2026-06-20',
             'tanggal_selesai' => '2026-06-27',
@@ -37,7 +37,7 @@ class PpdbTanggalPentingTest extends TestCase
         $this->actingAs($this->admin());
 
         $this->from('/ppdb/informasi')
-            ->post('/ppdb/tanggal-penting', [])
+            ->post('/admin/ppdb/tanggal-penting', [])
             ->assertRedirect('/ppdb/informasi')
             ->assertSessionHasErrors(['nama_agenda', 'tanggal_mulai', 'tanggal_selesai', 'keterangan']);
 
@@ -48,7 +48,7 @@ class PpdbTanggalPentingTest extends TestCase
     {
         $this->actingAs($this->admin());
 
-        $this->post('/ppdb/tanggal-penting', [
+        $this->post('/admin/ppdb/tanggal-penting', [
             'nama_agenda' => 'Terbalik',
             'tanggal_mulai' => '2026-06-27',
             'tanggal_selesai' => '2026-06-20',
@@ -62,7 +62,7 @@ class PpdbTanggalPentingTest extends TestCase
     {
         $this->actingAs($this->admin());
 
-        $this->post('/ppdb/tanggal-penting', [
+        $this->post('/admin/ppdb/tanggal-penting', [
             'nama_agenda' => 'Satu Hari',
             'tanggal_mulai' => '2026-06-20',
             'tanggal_selesai' => '2026-06-20',
@@ -76,7 +76,7 @@ class PpdbTanggalPentingTest extends TestCase
     {
         $this->actingAs($this->admin());
 
-        $this->post('/ppdb/tanggal-penting', [
+        $this->post('/admin/ppdb/tanggal-penting', [
             'nama_agenda' => str_repeat('a', 101),
             'tanggal_mulai' => '2026-06-20',
             'tanggal_selesai' => '2026-06-27',
@@ -90,7 +90,7 @@ class PpdbTanggalPentingTest extends TestCase
     {
         $this->actingAs($this->admin());
 
-        $this->post('/ppdb/tanggal-penting', [
+        $this->post('/admin/ppdb/tanggal-penting', [
             'nama_agenda' => 'Agenda',
             'tanggal_mulai' => '2026-06-20',
             'tanggal_selesai' => '2026-06-27',
@@ -142,7 +142,7 @@ class PpdbTanggalPentingTest extends TestCase
 
         $agenda = $this->buatAgenda();
 
-        $this->put('/ppdb/tanggal-penting/'.$agenda->id, [
+        $this->put('/admin/ppdb/tanggal-penting/'.$agenda->id, [
             'nama_agenda' => 'Senam Terbarui',
             'tanggal_mulai' => '2026-07-01',
             'tanggal_selesai' => '2026-07-05',
@@ -164,7 +164,7 @@ class PpdbTanggalPentingTest extends TestCase
 
         $agenda = $this->buatAgenda();
 
-        $this->delete('/ppdb/tanggal-penting/'.$agenda->id)->assertRedirect();
+        $this->delete('/admin/ppdb/tanggal-penting/'.$agenda->id)->assertRedirect();
 
         $this->assertDatabaseCount('ppdb_tanggal_penting', 0);
     }
@@ -185,7 +185,7 @@ class PpdbTanggalPentingTest extends TestCase
 
         $this->buatAgenda();
 
-        $this->get('/ppdb/informasi')
+        $this->get('/admin/ppdb/informasi')
             ->assertOk()
             ->assertSee('Senam Jasmani')
             ->assertSee('Kegiatan rutin hari minggu');
@@ -195,21 +195,21 @@ class PpdbTanggalPentingTest extends TestCase
     {
         $agenda = $this->buatAgenda();
 
-        $this->post('/ppdb/tanggal-penting', [
+        $this->post('/admin/ppdb/tanggal-penting', [
             'nama_agenda' => 'Gagal',
             'tanggal_mulai' => '2026-06-20',
             'tanggal_selesai' => '2026-06-27',
             'keterangan' => 'Gagal',
         ])->assertRedirect('/login');
 
-        $this->put('/ppdb/tanggal-penting/'.$agenda->id, [
+        $this->put('/admin/ppdb/tanggal-penting/'.$agenda->id, [
             'nama_agenda' => 'Gagal',
             'tanggal_mulai' => '2026-06-20',
             'tanggal_selesai' => '2026-06-27',
             'keterangan' => 'Gagal',
         ])->assertRedirect('/login');
 
-        $this->delete('/ppdb/tanggal-penting/'.$agenda->id)->assertRedirect('/login');
+        $this->delete('/admin/ppdb/tanggal-penting/'.$agenda->id)->assertRedirect('/login');
 
         $this->assertDatabaseCount('ppdb_tanggal_penting', 1);
     }
@@ -229,6 +229,6 @@ class PpdbTanggalPentingTest extends TestCase
 
     private function admin(): User
     {
-        return User::factory()->create(['role' => 'admin']);
+        return User::factory()->create(['role' => 'admin_ppdb']);
     }
 }
