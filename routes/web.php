@@ -13,31 +13,10 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
-Route::get('/', [PublicProdukUnggulanController::class, 'index'])->name('home');
+Route::get('/produk-unggulan', [PublicProdukUnggulanController::class, 'index'])->name('home');
 Route::get('/produk-unggulan-publik', [PublicProdukUnggulanController::class, 'index'])
     ->name('public.produk-unggulan');
 
-Route::middleware('guest')->group(function () {
-    Route::get('/login', [AuthController::class, 'create'])->name('login');
-    Route::post('/login', [AuthController::class, 'store'])->middleware('throttle:6,1');
-});
-
-Route::middleware('auth')->group(function () {
-    Route::post('/logout', [AuthController::class, 'destroy'])->name('logout');
-
-    Route::get('/produk', [DashboardController::class, 'index'])
-        ->middleware('role:admin_produk,super_admin,super_duper_admin')
-        ->name('dashboard');
-});
-
-/*
-|--------------------------------------------------------------------------
-| Produk Unggulan
-|--------------------------------------------------------------------------
-| Catatan: tambahkan middleware 'adminFitur:produk_unggulan' pada group di
-| bawah bila setiap admin hanya boleh mengakses fitur yang terdaftar di
-| tabel `fiturs` (admin super perlu baris fitur agar tidak 403).
-*/
 
 Route::middleware(['auth', 'role:admin_produk,super_admin,super_duper_admin'])->prefix('produk-unggulan')->group(function () {
     Route::get('/', [ProdukUnggulanController::class, 'index'])->name('produk-unggulan.index');
