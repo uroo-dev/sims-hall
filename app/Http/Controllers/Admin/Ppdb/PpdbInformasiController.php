@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin\Ppdb;
 
 use App\Http\Controllers\Controller;
 use App\Models\Ppdb_informasi;
+use App\Models\Ppdb_jalur;
+use App\Models\Ppdb_jurusan;
 use App\Models\Ppdb_persyaratan;
 use App\Models\Ppdb_tanggal_penting;
 use Illuminate\Http\RedirectResponse;
@@ -18,10 +20,17 @@ class PpdbInformasiController extends Controller
      */
     public function index(): View
     {
+        $jurusans = Ppdb_jurusan::orderBy('id')->get();
+        $jalurs = Ppdb_jalur::orderBy('id')->get();
+
         return view('Admin.ppdb.informasi', [
             'informasi' => Ppdb_informasi::first(),
             'agendas' => Ppdb_tanggal_penting::orderBy('tanggal_mulai')->get(),
             'persyaratan' => Ppdb_persyaratan::select(['id', 'syarat'])->get(),
+            'jurusans' => $jurusans,
+            'jalurs' => $jalurs,
+            'totalDayaTampung' => $jurusans->sum('daya_tampung'),
+            'totalPercentase' => $jalurs->sum('percentase'),
         ]);
     }
 
@@ -217,5 +226,203 @@ class PpdbInformasiController extends Controller
             ->back()
             ->withFragment('section-persyaratan')
             ->with('success', 'File persyaratan berhasil dihapus.');
+    }
+
+    /**
+     * CRUD Jurusan.
+     */
+    public function jurusanStore(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'nama_jurusan' => ['required', 'string', 'max:100'],
+            'daya_tampung' => ['required', 'integer', 'min:0'],
+        ], [
+            'nama_jurusan.required' => 'Nama jurusan wajib diisi.',
+            'nama_jurusan.max' => 'Nama jurusan maksimal 100 karakter.',
+            'daya_tampung.required' => 'Daya tampung wajib diisi.',
+            'daya_tampung.integer' => 'Daya tampung harus berupa angka.',
+            'daya_tampung.min' => 'Daya tampung minimal 0.',
+        ]);
+
+        Ppdb_jurusan::create($validated);
+
+        return redirect()
+            ->back()
+            ->withFragment('section-jurusan')
+            ->with('success', 'Jurusan berhasil ditambahkan.');
+    }
+
+    public function jurusanUpdate(Request $request, Ppdb_jurusan $jurusan): RedirectResponse
+    {
+        $validated = $request->validate([
+            'nama_jurusan' => ['required', 'string', 'max:100'],
+            'daya_tampung' => ['required', 'integer', 'min:0'],
+        ], [
+            'nama_jurusan.required' => 'Nama jurusan wajib diisi.',
+            'nama_jurusan.max' => 'Nama jurusan maksimal 100 karakter.',
+            'daya_tampung.required' => 'Daya tampung wajib diisi.',
+            'daya_tampung.integer' => 'Daya tampung harus berupa angka.',
+            'daya_tampung.min' => 'Daya tampung minimal 0.',
+        ]);
+
+        $jurusan->update($validated);
+
+        return redirect()
+            ->back()
+            ->withFragment('section-jurusan')
+            ->with('success', 'Jurusan berhasil diperbarui.');
+    }
+
+    public function jurusanDestroy(Ppdb_jurusan $jurusan): RedirectResponse
+    {
+        if ($jurusan->img) {
+            if (Storage::disk('public')->exists($jurusan->img)) {
+                Storage::disk('public')->delete($jurusan->img);
+            } elseif (Storage::exists($jurusan->img)) {
+                Storage::delete($jurusan->img);
+            }
+        }
+        $jurusan->delete();
+
+        return redirect()
+            ->back()
+            ->withFragment('section-jurusan')
+            ->with('success', 'Jurusan berhasil dihapus.');
+    }
+
+    /**
+     * Update gambar jurusan.
+     */
+    public function jurusanImageUpdate(Request $request, Ppdb_jurusan $jurusan): RedirectResponse
+    {
+        $validated = $request->validate([
+            'img' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+        ], [
+            'img.required' => 'Gambar wajib dipilih.',
+            'img.image' => 'File harus berupa gambar.',
+            'img.mimes' => 'Format gambar harus JPG, JPEG, PNG, atau WEBP.',
+            'img.max' => 'Ukuran gambar maksimal 2 MB.',
+        ]);
+
+        if ($jurusan->img) {
+            if (Storage::disk('public')->exists($jurusan->img)) {
+                Storage::disk('public')->delete($jurusan->img);
+            } elseif (Storage::exists($jurusan->img)) {
+                Storage::delete($jurusan->img);
+            }
+        }
+
+        $path = $request->file('img')->store('ppdb/jurusan', 'public');
+        $jurusan->img = $path;
+        $jurusan->save();
+
+        return redirect()
+            ->back()
+            ->withFragment('section-gambar-jurusan')
+            ->with('success', 'Gambar jurusan berhasil diperbarui.');
+    }
+
+    /**
+     * Hapus gambar jurusan.
+     */
+    public function jurusanImageDestroy(Ppdb_jurusan $jurusan): RedirectResponse
+    {
+        if ($jurusan->img) {
+            if (Storage::disk('public')->exists($jurusan->img)) {
+                Storage::disk('public')->delete($jurusan->img);
+            } elseif (Storage::exists($jurusan->img)) {
+                Storage::delete($jurusan->img);
+            }
+            $jurusan->img = null;
+            $jurusan->save();
+        }
+
+        return redirect()
+            ->back()
+            ->withFragment('section-gambar-jurusan')
+            ->with('success', 'Gambar jurusan berhasil dihapus.');
+    }
+
+    /**
+     * CRUD Jalur Seleksi.
+     */
+    public function jalurStore(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'nama_jalur' => ['required', 'string', 'max:100'],
+            'percentase' => ['required', 'numeric', 'min:0', 'max:100'],
+        ], [
+            'nama_jalur.required' => 'Nama jalur wajib diisi.',
+            'nama_jalur.max' => 'Nama jalur maksimal 100 karakter.',
+            'percentase.required' => 'Persentase wajib diisi.',
+            'percentase.numeric' => 'Persentase harus berupa angka.',
+            'percentase.min' => 'Persentase minimal 0.',
+            'percentase.max' => 'Persentase maksimal 100.',
+        ]);
+
+        $totalSekarang = Ppdb_jalur::sum('percentase');
+        $totalBaru = $totalSekarang + (float) $validated['percentase'];
+
+        if ($totalBaru > 100) {
+            return redirect()
+                ->back()
+                ->withFragment('section-jalur')
+                ->withInput()
+                ->withErrors([
+                    'percentase' => 'Total persentase jalur seleksi tidak boleh melebihi 100%.',
+                ]);
+        }
+
+        Ppdb_jalur::create($validated);
+
+        return redirect()
+            ->back()
+            ->withFragment('section-jalur')
+            ->with('success', 'Jalur seleksi berhasil ditambahkan.');
+    }
+
+    public function jalurUpdate(Request $request, Ppdb_jalur $jalur): RedirectResponse
+    {
+        $validated = $request->validate([
+            'nama_jalur' => ['required', 'string', 'max:100'],
+            'percentase' => ['required', 'numeric', 'min:0', 'max:100'],
+        ], [
+            'nama_jalur.required' => 'Nama jalur wajib diisi.',
+            'nama_jalur.max' => 'Nama jalur maksimal 100 karakter.',
+            'percentase.required' => 'Persentase wajib diisi.',
+            'percentase.numeric' => 'Persentase harus berupa angka.',
+            'percentase.min' => 'Persentase minimal 0.',
+            'percentase.max' => 'Persentase maksimal 100.',
+        ]);
+
+        $totalLain = Ppdb_jalur::where('id', '!=', $jalur->id)->sum('percentase');
+        $totalBaru = $totalLain + (float) $validated['percentase'];
+
+        if ($totalBaru > 100) {
+            return redirect()
+                ->back()
+                ->withFragment('section-jalur')
+                ->withInput()
+                ->withErrors([
+                    'percentase' => 'Total persentase jalur seleksi tidak boleh melebihi 100%.',
+                ]);
+        }
+
+        $jalur->update($validated);
+
+        return redirect()
+            ->back()
+            ->withFragment('section-jalur')
+            ->with('success', 'Jalur seleksi berhasil diperbarui.');
+    }
+
+    public function jalurDestroy(Ppdb_jalur $jalur): RedirectResponse
+    {
+        $jalur->delete();
+
+        return redirect()
+            ->back()
+            ->withFragment('section-jalur')
+            ->with('success', 'Jalur seleksi berhasil dihapus.');
     }
 }

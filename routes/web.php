@@ -33,6 +33,18 @@ Route::middleware('auth')->group(function () {
         Route::delete('/tanggal-penting/{agenda}', [PpdbInformasiController::class, 'tanggalPentingDelete'])->name('delete.tanggal-penting.ppdb');
         Route::delete('/persyaratan-file', [PpdbInformasiController::class, 'persyaratanFileDelete'])->name('delete.persyaratan.file.ppdb');
         Route::get('/persyaratan/{id}', [PpdbInformasiController::class, 'persyaratanDelete'])->name('delete.persyaratan.ppdb');
+
+        // Jurusan
+        Route::post('/jurusan', [PpdbInformasiController::class, 'jurusanStore'])->name('post.jurusan.ppdb');
+        Route::put('/jurusan/{jurusan}', [PpdbInformasiController::class, 'jurusanUpdate'])->name('update.jurusan.ppdb');
+        Route::post('/jurusan/{jurusan}/image', [PpdbInformasiController::class, 'jurusanImageUpdate'])->name('update.jurusan.image.ppdb');
+        Route::delete('/jurusan/{jurusan}/image', [PpdbInformasiController::class, 'jurusanImageDestroy'])->name('delete.jurusan.image.ppdb');
+        Route::delete('/jurusan/{jurusan}', [PpdbInformasiController::class, 'jurusanDestroy'])->name('delete.jurusan.ppdb');
+
+        // Jalur Seleksi
+        Route::post('/jalur', [PpdbInformasiController::class, 'jalurStore'])->name('post.jalur.ppdb');
+        Route::put('/jalur/{jalur}', [PpdbInformasiController::class, 'jalurUpdate'])->name('update.jalur.ppdb');
+        Route::delete('/jalur/{jalur}', [PpdbInformasiController::class, 'jalurDestroy'])->name('delete.jalur.ppdb');
     });
 });
 

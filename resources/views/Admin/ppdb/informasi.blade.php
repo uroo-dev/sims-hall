@@ -197,12 +197,14 @@
                     class="fa-solid fa-plus"></i></button>
         </form>
         {{-- Form Upload File Persyaratan --}}
-        <form action="{{ route('upload.persyaratan.file.ppdb') }}" method="POST" enctype="multipart/form-data" class="flex flex-col mt-5 gap-3">
+        <form action="{{ route('upload.persyaratan.file.ppdb') }}" method="POST" enctype="multipart/form-data"
+            class="flex flex-col mt-5 gap-3">
             @csrf
             <label for="path_file" class="text-gray-600 font-medium">Upload file persyaratan</label>
-            @if($informasi && $informasi->path_file)
+            @if ($informasi && $informasi->path_file)
                 <div class="flex items-center gap-3 text-sm">
-                    <a href="{{ asset('storage/' . $informasi->path_file) }}" target="_blank" class="text-brand-600 hover:text-brand-700 underline truncate max-w-xs">
+                    <a href="{{ asset('storage/' . $informasi->path_file) }}" target="_blank"
+                        class="text-brand-600 hover:text-brand-700 underline truncate max-w-xs">
                         Lihat file persyaratan saat ini
                     </a>
                 </div>
@@ -219,7 +221,7 @@
                 <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
             @enderror
         </form>
-        @if($informasi && $informasi->path_file)
+        @if ($informasi && $informasi->path_file)
             <form action="{{ route('delete.persyaratan.file.ppdb') }}" method="POST" class="mt-2">
                 @csrf
                 @method('DELETE')
@@ -230,6 +232,258 @@
                 </button>
             </form>
         @endif
+    </div>
+    <div class="bg-white rounded-2xl p-6 figma-card-shadow border border-slate-100">
+        <span class="text-gray-600 font-semibold text-lg">Jurusan</span>
+        <div class="flex w-full gap-5 mt-5">
+            <div class="w-[35%] flex-initial flex flex-col gap-5">
+                {{-- Daya Tampung (Jurusan) --}}
+                <div id="section-jurusan" class="bg-white rounded-2xl p-5 figma-card-shadow border border-slate-100 shadow">
+                    <div class="flex items-center justify-between mb-6">
+                        <span class="text-gray-600 font-semibold text-base">Daya Tampung</span>
+                    </div>
+
+                    <div class="flex justify-between my-5 pt-3 border-t border-slate-100">
+                        <label class="text-xs text-gray-500">Total Daya Tampung</label>
+                        <span type="number" readonly value="">{{ $totalDayaTampung ?? 0 }}</span>
+                    </div>
+
+                    <div class="flex flex-col gap-2 max-h-[220px] overflow-y-auto pr-1 mb-5">
+                        @foreach ($jurusans as $jurusan)
+                            <div class="flex gap-2 items-center">
+                                <form action="{{ route('update.jurusan.ppdb', $jurusan) }}" method="POST" class="flex flex-1 gap-2 items-center">
+                                    @csrf
+                                    @method('PUT')
+                                    <input type="text" name="nama_jurusan" value="{{ $jurusan->nama_jurusan }}"
+                                        class="flex-1 px-2.5 py-2 bg-white text-slate-800 text-xs font-medium rounded-lg border border-slate-200 focus:border-brand-600 focus:ring-2 focus:ring-brand-100 focus:outline-none transition"
+                                        placeholder="Nama Jurusan">
+                                    <input type="number" name="daya_tampung" value="{{ $jurusan->daya_tampung }}" min="0"
+                                        class="w-20 px-2.5 py-2 bg-white text-slate-800 text-xs font-medium rounded-lg border border-slate-200 focus:border-brand-600 focus:ring-2 focus:ring-brand-100 focus:outline-none transition"
+                                        placeholder="0">
+                                    <button type="submit" title="Simpan"
+                                        class="px-2 py-2 text-slate-600 hover:text-brand-700 transition">
+                                        <i class="fa-solid fa-floppy-disk text-xs"></i>
+                                    </button>
+                                </form>
+                                <form action="{{ route('delete.jurusan.ppdb', $jurusan) }}" method="POST">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" title="Hapus" onclick="return confirm('Yakin ingin menghapus jurusan ini?')"
+                                        class="px-2 py-2 text-red-500 hover:text-red-700 transition">
+                                        <i class="fa-solid fa-trash text-xs"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        @endforeach
+                    </div>
+
+
+
+                    <form id="form-jurusan-tambah" action="{{ route('post.jurusan.ppdb') }}" method="POST" class="mt-3 flex gap-2 items-center">
+                        @csrf
+                        <input type="text" name="nama_jurusan" required
+                            class="flex-1 px-2.5 py-2 bg-slate-50 text-slate-800 text-xs font-medium rounded-lg border border-slate-200 focus:border-brand-600 focus:ring-2 focus:ring-brand-100 focus:outline-none transition"
+                            placeholder="Tambah Nama Jurusan">
+                        <input type="number" name="daya_tampung" required min="0"
+                            class="w-20 px-2.5 py-2 bg-slate-50 text-slate-800 text-xs font-medium rounded-lg border border-slate-200 focus:border-brand-600 focus:ring-2 focus:ring-brand-100 focus:outline-none transition"
+                            placeholder="0">
+                        <button type="submit" title="Tambah"
+                            class="px-2 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition">
+                            <i class="fa-solid fa-plus text-xs"></i>
+                        </button>
+                    </form>
+                    @error('nama_jurusan')
+                        <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
+                    @enderror
+                    @error('daya_tampung')
+                        <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                {{-- Jalur Seleksi --}}
+                <div id="section-jalur" class="bg-white rounded-2xl p-5 figma-card-shadow border border-slate-100 shadow">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-gray-600 font-semibold text-base">Jalur Seleksi</span>
+                    </div>
+
+                    <div class="flex justify-between my-5 pt-3 border-t border-slate-100">
+                        <label class="text-xs text-gray-500">Total Persentase</label>
+                        <span type="number" readonly value="">{{ $totalPercentase ?? 0 }}%</span>
+                    </div>
+
+                    <div class="flex flex-col gap-2 max-h-[220px] overflow-y-auto pr-1">
+                        @foreach ($jalurs as $jalur)
+                            <div class="flex gap-2 items-center">
+                                <form action="{{ route('update.jalur.ppdb', $jalur) }}" method="POST" class="flex flex-1 gap-2 items-center">
+                                    @csrf
+                                    @method('PUT')
+                                    <input type="text" name="nama_jalur" value="{{ $jalur->nama_jalur }}"
+                                        class="flex-1 px-2.5 py-2 bg-white text-slate-800 text-xs font-medium rounded-lg border border-slate-200 focus:border-brand-600 focus:ring-2 focus:ring-brand-100 focus:outline-none transition"
+                                        placeholder="Nama Jalur">
+                                    <input type="number" step="0.01" name="percentase" value="{{ $jalur->percentase }}" min="0" max="100"
+                                        class="w-20 px-2.5 py-2 bg-white text-slate-800 text-xs font-medium rounded-lg border border-slate-200 focus:border-brand-600 focus:ring-2 focus:ring-brand-100 focus:outline-none transition"
+                                        placeholder="0">
+                                        <span>%</span>
+                                    <button type="submit" title="Simpan"
+                                        class="px-2 py-2 text-slate-600 hover:text-brand-700 transition">
+                                        <i class="fa-solid fa-floppy-disk text-xs"></i>
+                                    </button>
+                                </form>
+                                <form action="{{ route('delete.jalur.ppdb', $jalur) }}" method="POST">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" title="Hapus" onclick="return confirm('Yakin ingin menghapus jalur ini?')"
+                                        class="px-2 py-2 text-red-500 hover:text-red-700 transition">
+                                        <i class="fa-solid fa-trash text-xs"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        @endforeach
+                    </div>
+
+                    <form id="form-jalur-tambah" action="{{ route('post.jalur.ppdb') }}" method="POST" class="mt-3 flex gap-2 items-center">
+                        @csrf
+                        <input type="text" name="nama_jalur" required value="{{ old('nama_jalur') }}"
+                            class="flex-1 px-2.5 py-2 bg-slate-50 text-slate-800 text-xs font-medium rounded-lg border border-slate-200 focus:border-brand-600 focus:ring-2 focus:ring-brand-100 focus:outline-none transition"
+                            placeholder="Tambah Nama Jalur">
+                        <input type="number" step="0.01" name="percentase" required min="0" max="100" value="{{ old('percentase') }}"
+                            class="w-20 px-2.5 py-2 bg-slate-50 text-slate-800 text-xs font-medium rounded-lg border border-slate-200 focus:border-brand-600 focus:ring-2 focus:ring-brand-100 focus:outline-none transition"
+                            placeholder="0">
+                        <button type="submit" title="Tambah" @if(($totalPercentase ?? 0) >= 100) disabled @endif
+                            class="px-2 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                            <i class="fa-solid fa-plus text-xs"></i>
+                        </button>
+                    </form>
+                    @error('nama_jalur')
+                        <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
+                    @enderror
+                    @error('percentase')
+                        <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+            </div>
+            <div id="section-gambar-jurusan" class="flex-1 bg-white rounded-2xl p-6 figma-card-shadow border border-slate-100 shadow">
+                <span class="text-gray-600 font-semibold text-lg mb-4 block">Gambar Jurusan</span>
+                <div class="flex flex-col gap-3 h-[400px]">
+                    {{-- Baris 1 --}}
+                    <div class="flex gap-3 h-1/2">
+                        {{-- Slot 1 - 70% --}}
+                        @php
+                            $slot1 = $jurusans->get(0);
+                            $slot2 = $jurusans->get(1);
+                            $slot3 = $jurusans->get(2);
+                            $slot4 = $jurusans->get(3);
+                        @endphp
+                        <div class="w-[70%] relative group cursor-pointer border-2 border-dashed border-slate-300 rounded-xl overflow-hidden hover:border-brand-600 transition"
+                            onclick="openImageModal(0)">
+                            @if ($slot1 && $slot1->img)
+                                <img src="{{ asset('storage/' . $slot1->img) }}" alt="{{ $slot1->nama_jurusan }}"
+                                    class="w-full h-full object-cover">
+                            @else
+                                <div class="w-full h-full flex flex-col items-center justify-center text-slate-400">
+                                    <i class="fa-solid fa-image text-2xl mb-2"></i>
+                                    <span class="text-xs text-center px-2">Slot 1<br>{{ $slot1?->nama_jurusan ?? 'Pilih Jurusan' }}</span>
+                                </div>
+                            @endif
+                            <div class="absolute inset-0 bg-black/0 group-hover:bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+                                <i class="fa-solid fa-camera text-white text-2xl"></i>
+                            </div>
+                            @if ($slot1 && $slot1->img)
+                                <button type="button" onclick="event.stopPropagation(); if(confirm('Hapus gambar {{ $slot1->nama_jurusan }}?')) { document.getElementById('delete-img-{{ $slot1->id }}').submit(); }"
+                                    class="absolute top-2 right-2 bg-red-500/80 hover:bg-red-600 text-white rounded-full w-7 h-7 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+                                    <i class="fa-solid fa-trash text-xs"></i>
+                                </button>
+                                <form id="delete-img-{{ $slot1->id }}" action="{{ route('delete.jurusan.image.ppdb', $slot1) }}" method="POST" class="hidden">
+                                    @csrf
+                                    @method('DELETE')
+                                </form>
+                            @endif
+                        </div>
+                        {{-- Slot 2 - 30% --}}
+                        <div class="w-[30%] relative group cursor-pointer border-2 border-dashed border-slate-300 rounded-xl overflow-hidden hover:border-brand-600 transition"
+                            onclick="openImageModal(1)">
+                            @if ($slot2 && $slot2->img)
+                                <img src="{{ asset('storage/' . $slot2->img) }}" alt="{{ $slot2->nama_jurusan }}"
+                                    class="w-full h-full object-cover">
+                            @else
+                                <div class="w-full h-full flex flex-col items-center justify-center text-slate-400">
+                                    <i class="fa-solid fa-image text-2xl mb-2"></i>
+                                    <span class="text-xs text-center px-2">Slot 2<br>{{ $slot2?->nama_jurusan ?? 'Pilih Jurusan' }}</span>
+                                </div>
+                            @endif
+                            <div class="absolute inset-0 bg-black/0 group-hover:bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+                                <i class="fa-solid fa-camera text-white text-2xl"></i>
+                            </div>
+                            @if ($slot2 && $slot2->img)
+                                <button type="button" onclick="event.stopPropagation(); if(confirm('Hapus gambar {{ $slot2->nama_jurusan }}?')) { document.getElementById('delete-img-{{ $slot2->id }}').submit(); }"
+                                    class="absolute top-2 right-2 bg-red-500/80 hover:bg-red-600 text-white rounded-full w-7 h-7 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+                                    <i class="fa-solid fa-trash text-xs"></i>
+                                </button>
+                                <form id="delete-img-{{ $slot2->id }}" action="{{ route('delete.jurusan.image.ppdb', $slot2) }}" method="POST" class="hidden">
+                                    @csrf
+                                    @method('DELETE')
+                                </form>
+                            @endif
+                        </div>
+                    </div>
+                    {{-- Baris 2 --}}
+                    <div class="flex gap-3 h-1/2">
+                        {{-- Slot 3 - 30% --}}
+                        <div class="w-[30%] relative group cursor-pointer border-2 border-dashed border-slate-300 rounded-xl overflow-hidden hover:border-brand-600 transition"
+                            onclick="openImageModal(2)">
+                            @if ($slot3 && $slot3->img)
+                                <img src="{{ asset('storage/' . $slot3->img) }}" alt="{{ $slot3->nama_jurusan }}"
+                                    class="w-full h-full object-cover">
+                            @else
+                                <div class="w-full h-full flex flex-col items-center justify-center text-slate-400">
+                                    <i class="fa-solid fa-image text-2xl mb-2"></i>
+                                    <span class="text-xs text-center px-2">Slot 3<br>{{ $slot3?->nama_jurusan ?? 'Pilih Jurusan' }}</span>
+                                </div>
+                            @endif
+                            <div class="absolute inset-0 bg-black/0 group-hover:bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+                                <i class="fa-solid fa-camera text-white text-2xl"></i>
+                            </div>
+                            @if ($slot3 && $slot3->img)
+                                <button type="button" onclick="event.stopPropagation(); if(confirm('Hapus gambar {{ $slot3->nama_jurusan }}?')) { document.getElementById('delete-img-{{ $slot3->id }}').submit(); }"
+                                    class="absolute top-2 right-2 bg-red-500/80 hover:bg-red-600 text-white rounded-full w-7 h-7 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+                                    <i class="fa-solid fa-trash text-xs"></i>
+                                </button>
+                                <form id="delete-img-{{ $slot3->id }}" action="{{ route('delete.jurusan.image.ppdb', $slot3) }}" method="POST" class="hidden">
+                                    @csrf
+                                    @method('DELETE')
+                                </form>
+                            @endif
+                        </div>
+                        {{-- Slot 4 - 70% --}}
+                        <div class="w-[70%] relative group cursor-pointer border-2 border-dashed border-slate-300 rounded-xl overflow-hidden hover:border-brand-600 transition"
+                            onclick="openImageModal(3)">
+                            @if ($slot4 && $slot4->img)
+                                <img src="{{ asset('storage/' . $slot4->img) }}" alt="{{ $slot4->nama_jurusan }}"
+                                    class="w-full h-full object-cover">
+                            @else
+                                <div class="w-full h-full flex flex-col items-center justify-center text-slate-400">
+                                    <i class="fa-solid fa-image text-2xl mb-2"></i>
+                                    <span class="text-xs text-center px-2">Slot 4<br>{{ $slot4?->nama_jurusan ?? 'Pilih Jurusan' }}</span>
+                                </div>
+                            @endif
+                            <div class="absolute inset-0 bg-black/0 group-hover:bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+                                <i class="fa-solid fa-camera text-white text-2xl"></i>
+                            </div>
+                            @if ($slot4 && $slot4->img)
+                                <button type="button" onclick="event.stopPropagation(); if(confirm('Hapus gambar {{ $slot4->nama_jurusan }}?')) { document.getElementById('delete-img-{{ $slot4->id }}').submit(); }"
+                                    class="absolute top-2 right-2 bg-red-500/80 hover:bg-red-600 text-white rounded-full w-7 h-7 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+                                    <i class="fa-solid fa-trash text-xs"></i>
+                                </button>
+                                <form id="delete-img-{{ $slot4->id }}" action="{{ route('delete.jurusan.image.ppdb', $slot4) }}" method="POST" class="hidden">
+                                    @csrf
+                                    @method('DELETE')
+                                </form>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 @endsection
 
@@ -636,5 +890,86 @@
 
             renderCalendar();
         })();
+    </script>
+    <!-- Modal Upload Gambar Jurusan -->
+    <div id="modalImageJurusan" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-md mx-4">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-gray-800">Upload Gambar Jurusan</h3>
+                <button type="button" onclick="closeImageModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            <form id="formImageJurusan" action="" method="POST" enctype="multipart/form-data">
+                @csrf
+                <div class="flex flex-col gap-4">
+                    <div>
+                        <label for="jurusanSelect" class="block text-sm font-medium text-gray-700 mb-2">Pilih Jurusan</label>
+                        <select id="jurusanSelect" name="jurusan_id" required
+                            class="w-full px-4 py-3 bg-white text-slate-800 text-sm font-medium rounded-xl border-2 border-slate-200 focus:border-brand-600 focus:ring-4 focus:ring-brand-100 focus:outline-none transition">
+                            <option value="">-- Pilih Jurusan --</option>
+                            @foreach ($jurusans as $jurusan)
+                                <option value="{{ $jurusan->id }}" data-route="{{ route('update.jurusan.image.ppdb', $jurusan) }}">
+                                    {{ $jurusan->nama_jurusan }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label for="imgInput" class="block text-sm font-medium text-gray-700 mb-2">Pilih Gambar</label>
+                        <input type="file" id="imgInput" name="img" accept="image/jpeg,image/jpg,image/png,image/webp" required
+                            class="w-full px-4 py-3 bg-slate-50 text-slate-800 text-sm font-medium rounded-xl border-2 border-slate-200 focus:border-brand-600 focus:ring-4 focus:ring-brand-100 focus:outline-none transition">
+                        <p class="text-xs text-gray-500 mt-1">Format: JPG, JPEG, PNG, WEBP. Maksimal 2 MB.</p>
+                    </div>
+                    <div class="flex gap-3 mt-4">
+                        <button type="button" onclick="closeImageModal()"
+                            class="flex-1 px-4 py-3 bg-slate-100 text-slate-800 text-sm font-medium rounded-xl border-2 border-slate-200 hover:bg-slate-200 focus:ring-4 focus:ring-slate-100 focus:outline-none transition">
+                            Batal
+                        </button>
+                        <button type="submit"
+                            class="flex-1 px-4 py-3 bg-brand-600 text-white text-sm font-medium rounded-xl border-2 border-brand-600 hover:bg-brand-700 focus:ring-4 focus:ring-brand-100 focus:outline-none transition">
+                            Upload
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openImageModal() {
+            const modal = document.getElementById('modalImageJurusan');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeImageModal() {
+            const modal = document.getElementById('modalImageJurusan');
+            const form = document.getElementById('formImageJurusan');
+            const select = document.getElementById('jurusanSelect');
+            const imgInput = document.getElementById('imgInput');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            form.reset();
+            select.value = '';
+            form.action = '';
+        }
+
+        document.getElementById('jurusanSelect').addEventListener('change', function() {
+            const selected = this.options[this.selectedIndex];
+            const route = selected.dataset.route;
+            const form = document.getElementById('formImageJurusan');
+            if (route) {
+                form.action = route;
+            } else {
+                form.action = '';
+            }
+        });
+
+        document.getElementById('modalImageJurusan').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeImageModal();
+            }
+        });
     </script>
 @endpush

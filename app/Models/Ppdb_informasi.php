@@ -12,10 +12,5 @@ class Ppdb_informasi extends Model
         'judul',
         'keterangan',
         'path_file',
-        'img',
-    ];
-
-    protected $casts = [
-        'img' => 'array',
     ];
 }
