@@ -21,6 +21,11 @@
             </p>
         </div>
         <div class="flex flex-wrap items-center gap-2">
+            <button type="submit" form="form-konfigurasi-aula"
+                class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#0073c6] hover:bg-[#005fa4] active:scale-95 text-white text-xs md:text-sm font-bold shadow-sm shadow-blue-500/20 transition cursor-pointer">
+                <i class="fa-solid fa-floppy-disk text-xs"></i>
+                <span>Simpan Konfigurasi</span>
+            </button>
             <a href="{{ route('layanan-peminjaman') }}" target="_blank"
                 class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand-50 text-brand-600 hover:bg-brand-100 text-xs md:text-sm font-semibold transition border border-brand-200">
                 <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
@@ -67,7 +72,7 @@
     @endif
 
     <!-- FORM KONFIGURASI AULA -->
-    <form action="{{ route('admin.aula.update') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
+    <form id="form-konfigurasi-aula" action="{{ route('admin.aula.update') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
         @csrf
         @method('PUT')
 
@@ -216,13 +221,6 @@
                         </div>
                     </div>
 
-                        <div class="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center pointer-events-none">
-                            <span class="text-white text-xs font-semibold px-3 py-1.5 rounded-lg bg-black/50 backdrop-blur-sm">
-                                <i class="fa-solid fa-camera mr-1.5"></i> Ganti Foto Pendukung
-                            </span>
-                        </div>
-                    </div>
-
                     <!-- FILE INPUT PENDUKUNG -->
                     <div>
                         <label class="block text-xs font-semibold text-slate-700 mb-1">Unggah Foto Pendukung Baru</label>
@@ -234,13 +232,25 @@
                 </div>
 
                 <!-- SUBMIT BUTTON CARD -->
-                <div class="bg-white rounded-2xl p-5 figma-card-shadow border border-slate-100 space-y-3">
+                <div class="bg-white rounded-2xl p-5 md:p-6 figma-card-shadow border border-slate-100 space-y-3.5">
+                    <div class="flex items-center gap-2.5 pb-3 border-b border-slate-100">
+                        <div class="w-8 h-8 rounded-lg bg-blue-50 text-[#0073c6] flex items-center justify-center text-sm font-bold">
+                            <i class="fa-solid fa-sliders"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Aksi Konfigurasi</h3>
+                            <p class="text-[11px] text-slate-400">Simpan perubahan data aula</p>
+                        </div>
+                    </div>
+
                     <button type="submit"
-                        class="w-full py-3 px-5 rounded-xl bg-[#0073c6] hover:bg-[#005fa4] active:scale-[0.99] text-white font-bold text-sm shadow-md shadow-blue-500/20 transition flex items-center justify-center gap-2 cursor-pointer">
+                        class="w-full py-3.5 px-5 rounded-xl bg-[#0073c6] hover:bg-[#005fa4] active:scale-[0.98] text-white font-extrabold text-xs md:text-sm shadow-md shadow-blue-500/25 transition-all flex items-center justify-center gap-2.5 cursor-pointer">
                         <i class="fa-solid fa-floppy-disk text-base"></i>
                         <span>Simpan Konfigurasi Aula</span>
                     </button>
-                    <p class="text-[11px] text-slate-400 text-center">Pastikan data dan foto yang diunggah telah sesuai sebelum menyimpan.</p>
+                    <p class="text-[11px] text-slate-400 text-center leading-relaxed">
+                        Pastikan data dan foto yang diunggah telah sesuai sebelum menyimpan.
+                    </p>
                 </div>
 
             </div>

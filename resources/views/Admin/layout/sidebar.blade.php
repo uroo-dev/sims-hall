@@ -196,8 +196,8 @@ Navigasi diatur menggunakan Blade if-else berdasarkan role user autentikasi:
                 @else
                     @if(in_array($userRole, ['admin', 'admin_aula', 'super_admin', 'super_duper_admin']))
                         <!-- 1. DASHBOARD ADMIN (AULA) -->
-                        <a href="{{ route('dashboard') }}"
-                            class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('dashboard') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
+                        <a href="{{ route('admin.peminjaman.dashboard') }}"
+                            class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('admin.peminjaman.dashboard') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
                             <i class="fa-solid fa-table-cells-large text-base w-5 text-center"></i>
                             <span>Dashboard</span>
                         </a>
@@ -222,6 +222,15 @@ Navigasi diatur menggunakan Blade if-else berdasarkan role user autentikasi:
                             <span>Konfigurasi Aula</span>
                         </a>
 
+                        @if(in_array($userRole, ['super_admin', 'super_duper_admin']))
+                            <!-- KONFIGURASI PEMINJAMAN (SUPER ADMIN) -->
+                            <a href="{{ route('admin.payment-configuration.index') }}"
+                                class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('admin.payment-configuration.*') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
+                                <i class="fa-solid fa-sliders text-base w-5 text-center"></i>
+                                <span>Konfigurasi Peminjaman</span>
+                            </a>
+                        @endif
+
                         <!-- 3. FASILITAS -->
                         <a href="{{ route('admin.fasilitas.index') }}"
                             class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('admin.fasilitas.*') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
@@ -238,7 +247,7 @@ Navigasi diatur menggunakan Blade if-else berdasarkan role user autentikasi:
 
                         <!-- 4. DAFTAR PEMINJAMAN -->
                         <a href="{{ route('admin.peminjaman.index') }}"
-                            class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('admin.peminjaman.*') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
+                            class="flex items-center gap-3 px-5 py-3.5 {{ (request()->routeIs('admin.peminjaman.*') && !request()->routeIs('admin.peminjaman.dashboard')) ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
                             <i class="fa-solid fa-clipboard-list text-base w-5 text-center"></i>
                             <span>Daftar Peminjaman</span>
                         </a>
@@ -316,14 +325,6 @@ Navigasi diatur menggunakan Blade if-else berdasarkan role user autentikasi:
                             class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('datamaster.siswa.*') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
                             <i class="fa-solid fa-user-graduate text-base w-5 text-center"></i>
                             <span>Data Siswa</span>
-                        </a>
-                    @endif
-
-                    @if(in_array($userRole, ['super_admin', 'super_duper_admin']))
-                        <a href="{{ route('admin.payment-configuration.index') }}"
-                            class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('admin.payment-configuration.*') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
-                            <i class="fa-solid fa-sliders text-base w-5 text-center"></i>
-                            <span>Konfigurasi Peminjaman</span>
                         </a>
                     @endif
 
