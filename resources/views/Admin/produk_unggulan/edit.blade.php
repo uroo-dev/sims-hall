@@ -6,9 +6,7 @@
 @section('breadcrumb-page', 'Edit Produk')
 
 @section('content')
-    <main class="flex-1 p-6 lg:p-8 overflow-y-auto space-y-6">
-
-        @include('Admin.layout.header')
+    <div class="space-y-6">
 
         @if ($errors->any())
             <div class="rounded-2xl border border-red-100 bg-red-50 px-5 py-3 text-sm font-semibold text-red-700 flex items-center gap-2.5" role="alert">
@@ -43,5 +41,5 @@
             </form>
         </section>
 
-    </main>
+    </div>
 @endsection

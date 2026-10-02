@@ -6,9 +6,7 @@
 @section('breadcrumb-page', 'Dashboard PU')
 
 @section('content')
-    <main class="flex-1 p-6 lg:p-8 overflow-y-auto space-y-6">
-
-        @include('Admin.layout.header')
+    <div class="space-y-6">
 
         @if (session('success'))
             <div class="rounded-2xl border border-emerald-100 bg-emerald-50 px-5 py-3 text-sm font-semibold text-emerald-700 flex items-center gap-2.5" role="status">
@@ -243,7 +241,7 @@
             @endif
         </section>
 
-    </main>
+    </div>
 
     <script>
         document.getElementById('dokumentasi').addEventListener('change', function (e) {
