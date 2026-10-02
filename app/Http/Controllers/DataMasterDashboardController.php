@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Guru;
+use App\Models\Jurusan;
 use App\Models\Sekolah;
+use App\Models\Siswa;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -17,8 +20,10 @@ class DataMasterDashboardController extends Controller
 
         $totalUsers = User::count();
         $totalSekolah = Sekolah::count();
+        $totalGuru = Guru::count();
+        $totalSiswa = Siswa::count();
 
-        return view('Admin.datamaster.index', compact('sekolah', 'totalUsers', 'totalSekolah'));
+        return view('Admin.datamaster.index', compact('sekolah', 'totalUsers', 'totalSekolah', 'totalGuru', 'totalSiswa'));
     }
 
     // ==========================================
@@ -154,5 +159,166 @@ class DataMasterDashboardController extends Controller
         $user->delete();
 
         return redirect()->back()->with('success', 'User berhasil dihapus!');
+    }
+
+    // ==========================================
+    // BAGIAN DATA GURU (CRUD)
+    // ==========================================
+    public function guru()
+    {
+        $gurus = Guru::orderBy('nama', 'asc')->get();
+        $jurusans = Jurusan::pluck('nama')->all();
+        if (empty($jurusans)) {
+            $jurusans = [
+                'Rekayasa Perangkat Lunak (RPL)',
+                'Teknik Komputer dan Jaringan (TKJ)',
+                'Teknik Pemesinan (TP)',
+                'Teknik Kendaraan Ringan Otomotif (TKRO)',
+                'Teknik Pembuatan Kain (TPK)',
+            ];
+        }
+
+        return view('Admin.datamaster.guru', compact('gurus', 'jurusans'));
+    }
+
+    public function storeGuru(Request $request)
+    {
+        $request->validate([
+            'nama' => 'required|string|max:255',
+            'nip' => 'nullable|string|max:50|unique:gurus,nip',
+            'jurusan' => 'required|string|max:255',
+            'no_hp' => 'nullable|string|max:20',
+        ], [
+            'nama.required' => 'Nama guru wajib diisi.',
+            'nip.unique' => 'NIP sudah terdaftar untuk guru lain.',
+            'jurusan.required' => 'Jurusan wajib dipilih/diisi.',
+        ]);
+
+        Guru::create([
+            'nama' => $request->nama,
+            'nip' => $request->nip ?: null,
+            'jurusan' => $request->jurusan,
+            'no_hp' => $request->no_hp ?: null,
+        ]);
+
+        return redirect()->back()->with('success', 'Data Guru berhasil ditambahkan!');
+    }
+
+    public function updateGuru(Request $request, $id)
+    {
+        $guru = Guru::findOrFail($id);
+
+        $request->validate([
+            'nama' => 'required|string|max:255',
+            'nip' => 'nullable|string|max:50|unique:gurus,nip,'.$id,
+            'jurusan' => 'required|string|max:255',
+            'no_hp' => 'nullable|string|max:20',
+        ], [
+            'nama.required' => 'Nama guru wajib diisi.',
+            'nip.unique' => 'NIP sudah terdaftar untuk guru lain.',
+            'jurusan.required' => 'Jurusan wajib dipilih/diisi.',
+        ]);
+
+        $guru->update([
+            'nama' => $request->nama,
+            'nip' => $request->nip ?: null,
+            'jurusan' => $request->jurusan,
+            'no_hp' => $request->no_hp ?: null,
+        ]);
+
+        return redirect()->back()->with('success', 'Data Guru berhasil diperbarui!');
+    }
+
+    public function destroyGuru($id)
+    {
+        $guru = Guru::findOrFail($id);
+        $guru->delete();
+
+        return redirect()->back()->with('success', 'Data Guru berhasil dihapus!');
+    }
+
+    // ==========================================
+    // BAGIAN DATA SISWA (CRUD)
+    // ==========================================
+    public function siswa()
+    {
+        $siswas = Siswa::orderBy('nama', 'asc')->get();
+        $jurusans = Jurusan::pluck('nama')->all();
+        if (empty($jurusans)) {
+            $jurusans = [
+                'Rekayasa Perangkat Lunak (RPL)',
+                'Teknik Komputer dan Jaringan (TKJ)',
+                'Teknik Pemesinan (TP)',
+                'Teknik Kendaraan Ringan Otomotif (TKRO)',
+                'Teknik Pembuatan Kain (TPK)',
+            ];
+        }
+        $kelas = Siswa::select('kelas')->distinct()->pluck('kelas')->all();
+
+        return view('Admin.datamaster.siswa', compact('siswas', 'jurusans', 'kelas'));
+    }
+
+    public function storeSiswa(Request $request)
+    {
+        $request->validate([
+            'nama' => 'required|string|max:255',
+            'nis' => 'required|string|max:50|unique:siswas,nis',
+            'kelas' => 'required|string|max:50',
+            'jurusan' => 'required|string|max:255',
+            'no_hp' => 'nullable|string|max:20',
+        ], [
+            'nama.required' => 'Nama siswa wajib diisi.',
+            'nis.required' => 'NIS wajib diisi.',
+            'nis.unique' => 'NIS sudah terdaftar untuk siswa lain.',
+            'kelas.required' => 'Kelas wajib diisi.',
+            'jurusan.required' => 'Jurusan wajib dipilih/diisi.',
+        ]);
+
+        Siswa::create([
+            'nama' => $request->nama,
+            'nis' => $request->nis,
+            'kelas' => $request->kelas,
+            'jurusan' => $request->jurusan,
+            'no_hp' => $request->no_hp ?: null,
+        ]);
+
+        return redirect()->back()->with('success', 'Data Siswa berhasil ditambahkan!');
+    }
+
+    public function updateSiswa(Request $request, $id)
+    {
+        $siswa = Siswa::findOrFail($id);
+
+        $request->validate([
+            'nama' => 'required|string|max:255',
+            'nis' => 'required|string|max:50|unique:siswas,nis,'.$id,
+            'kelas' => 'required|string|max:50',
+            'jurusan' => 'required|string|max:255',
+            'no_hp' => 'nullable|string|max:20',
+        ], [
+            'nama.required' => 'Nama siswa wajib diisi.',
+            'nis.required' => 'NIS wajib diisi.',
+            'nis.unique' => 'NIS sudah terdaftar untuk siswa lain.',
+            'kelas.required' => 'Kelas wajib diisi.',
+            'jurusan.required' => 'Jurusan wajib dipilih/diisi.',
+        ]);
+
+        $siswa->update([
+            'nama' => $request->nama,
+            'nis' => $request->nis,
+            'kelas' => $request->kelas,
+            'jurusan' => $request->jurusan,
+            'no_hp' => $request->no_hp ?: null,
+        ]);
+
+        return redirect()->back()->with('success', 'Data Siswa berhasil diperbarui!');
+    }
+
+    public function destroySiswa($id)
+    {
+        $siswa = Siswa::findOrFail($id);
+        $siswa->delete();
+
+        return redirect()->back()->with('success', 'Data Siswa berhasil dihapus!');
     }
 }

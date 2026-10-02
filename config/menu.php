@@ -47,6 +47,8 @@ return [
                 ['label' => 'Dashboard Sekolah', 'icon' => 'fa-comment-dots', 'route' => 'datamaster.index'],
                 ['label' => 'Data Sekolah', 'icon' => 'fa-school', 'route' => 'datamaster.sekolah.edit'],
                 ['label' => 'Users', 'icon' => 'fa-users-gear', 'route' => 'datamaster.users'],
+                ['label' => 'Data Guru', 'icon' => 'fa-chalkboard-user', 'route' => 'datamaster.guru.index'],
+                ['label' => 'Data Siswa', 'icon' => 'fa-user-graduate', 'route' => 'datamaster.siswa.index'],
             ],
         ],
 

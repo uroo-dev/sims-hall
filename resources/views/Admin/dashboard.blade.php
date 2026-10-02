@@ -321,13 +321,13 @@
                         </a>
                     </div>
 
-                    <!-- Profile Image Frame (Figma Vector Silhouette Accent) -->
+                    <!-- Profile Image Frame -->
                     <div class="flex flex-col items-center justify-center my-4">
-                        <div class="w-48 h-56 rounded-2xl border-2 border-slate-200 bg-slate-50 p-2 flex items-center justify-center shadow-inner overflow-hidden relative">
-                            <!-- Dark Silhouette Vector Illustration -->
-                            <svg class="w-full h-full text-slate-700 transform scale-105 translate-y-2" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                            </svg>
+                        <div class="w-48 h-56 rounded-2xl border-2 border-slate-200 bg-slate-50 p-1.5 flex items-center justify-center shadow-inner overflow-hidden relative">
+                            <img src="{{ asset('assets/default-avatar.png') }}"
+                                alt="Foto Profil {{ auth()->user()->name }}"
+                                class="w-full h-full object-cover rounded-xl"
+                                onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}&background=0073c6&color=fff&size=256';">
                         </div>
 
                         <!-- Name & Email Subtitle -->

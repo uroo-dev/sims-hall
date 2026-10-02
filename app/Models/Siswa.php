@@ -6,22 +6,13 @@ use Database\Factories\SiswaFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['user_id', 'nis', 'nama', 'kelas', 'jurusan', 'no_hp'])]
+#[Fillable(['nis', 'nama', 'kelas', 'jurusan', 'no_hp'])]
 class Siswa extends Model
 {
     /** @use HasFactory<SiswaFactory> */
     use HasFactory;
-
-    /**
-     * Akun login siswa (opsional).
-     */
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class);
-    }
 
     /**
      * Seluruh riwayat penempatan PKL siswa ini.

@@ -247,5 +247,39 @@ Route::middleware('auth')->group(function () {
         Route::delete('/users/{id}', [DataMasterDashboardController::class, 'destroyUser'])
             ->middleware('role:admin_master,super_admin,super_duper_admin')
             ->name('datamaster.users.destroy');
+
+        // Data Guru
+        Route::get('/guru', [DataMasterDashboardController::class, 'guru'])
+            ->middleware('role:admin_master,super_admin,super_duper_admin')
+            ->name('datamaster.guru.index');
+
+        Route::post('/guru', [DataMasterDashboardController::class, 'storeGuru'])
+            ->middleware('role:admin_master,super_admin,super_duper_admin')
+            ->name('datamaster.guru.store');
+
+        Route::put('/guru/{id}', [DataMasterDashboardController::class, 'updateGuru'])
+            ->middleware('role:admin_master,super_admin,super_duper_admin')
+            ->name('datamaster.guru.update');
+
+        Route::delete('/guru/{id}', [DataMasterDashboardController::class, 'destroyGuru'])
+            ->middleware('role:admin_master,super_admin,super_duper_admin')
+            ->name('datamaster.guru.destroy');
+
+        // Data Siswa
+        Route::get('/siswa', [DataMasterDashboardController::class, 'siswa'])
+            ->middleware('role:admin_master,super_admin,super_duper_admin')
+            ->name('datamaster.siswa.index');
+
+        Route::post('/siswa', [DataMasterDashboardController::class, 'storeSiswa'])
+            ->middleware('role:admin_master,super_admin,super_duper_admin')
+            ->name('datamaster.siswa.store');
+
+        Route::put('/siswa/{id}', [DataMasterDashboardController::class, 'updateSiswa'])
+            ->middleware('role:admin_master,super_admin,super_duper_admin')
+            ->name('datamaster.siswa.update');
+
+        Route::delete('/siswa/{id}', [DataMasterDashboardController::class, 'destroySiswa'])
+            ->middleware('role:admin_master,super_admin,super_duper_admin')
+            ->name('datamaster.siswa.destroy');
     });
 });

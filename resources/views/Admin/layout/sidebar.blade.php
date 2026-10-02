@@ -223,6 +223,18 @@
                         <i class="fa-solid fa-users-gear text-base w-5 text-center"></i>
                         <span>Data Users</span>
                     </a>
+
+                    <a href="{{ route('datamaster.guru.index') }}"
+                        class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('datamaster.guru.*') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
+                        <i class="fa-solid fa-chalkboard-user text-base w-5 text-center"></i>
+                        <span>Data Guru</span>
+                    </a>
+
+                    <a href="{{ route('datamaster.siswa.index') }}"
+                        class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('datamaster.siswa.*') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
+                        <i class="fa-solid fa-user-graduate text-base w-5 text-center"></i>
+                        <span>Data Siswa</span>
+                    </a>
                 @endif
 
                 @if(in_array($userRole, ['super_admin', 'super_duper_admin']))
