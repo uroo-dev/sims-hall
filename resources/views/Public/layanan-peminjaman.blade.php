@@ -217,10 +217,17 @@
 
                                 <div class="pt-2">
                                     @auth
-                                        <a href="{{ route('customer.peminjaman.create') }}"
-                                            class="inline-block bg-[#0066B2] hover:bg-blue-700 text-white font-semibold text-xs sm:text-sm px-6 py-2.5 rounded-full transition-all duration-200 shadow-md">
-                                            Mulai Pengajuan Sekarang
-                                        </a>
+                                        @if(auth()->user()->role === 'pelanggan')
+                                            <a href="{{ route('customer.peminjaman.create') }}"
+                                                class="inline-block bg-[#0066B2] hover:bg-blue-700 text-white font-semibold text-xs sm:text-sm px-6 py-2.5 rounded-full transition-all duration-200 shadow-md">
+                                                Mulai Pengajuan Sekarang
+                                            </a>
+                                        @else
+                                            <a href="{{ route('dashboard') }}"
+                                                class="inline-block bg-slate-700 hover:bg-slate-800 text-white font-semibold text-xs sm:text-sm px-6 py-2.5 rounded-full transition-all duration-200 shadow-md">
+                                                Buka Dashboard Internal
+                                            </a>
+                                        @endif
                                     @else
                                         <a href="{{ route('login') }}"
                                             class="inline-block bg-[#0066B2] hover:bg-blue-700 text-white font-semibold text-xs sm:text-sm px-6 py-2.5 rounded-full transition-all duration-200 shadow-md">
@@ -276,14 +283,24 @@
                         </p>
 
                         <div class="space-y-3">
-                            <a href="{{ route('customer.peminjaman.create') }}"
-                                class="w-full bg-white text-brand-blue font-bold text-sm py-3.5 px-4 rounded-xl hover:bg-blue-50 transition text-center block shadow-md">
-                                <i class="fa-solid fa-calendar-plus mr-1.5"></i> Buat Pengajuan Peminjaman
-                            </a>
-                            <a href="{{ route('customer.dashboard') }}"
-                                class="w-full border-2 border-white/40 text-white font-bold text-sm py-3.5 px-4 rounded-xl hover:bg-white/10 transition text-center block">
-                                <i class="fa-solid fa-gauge mr-1.5"></i> Buka Dashboard Pelanggan
-                            </a>
+                            @if(auth()->user()->role === 'pelanggan')
+                                <a href="{{ route('customer.peminjaman.create') }}"
+                                    class="w-full bg-white text-brand-blue font-bold text-sm py-3.5 px-4 rounded-xl hover:bg-blue-50 transition text-center block shadow-md">
+                                    <i class="fa-solid fa-calendar-plus mr-1.5"></i> Buat Pengajuan Peminjaman
+                                </a>
+                                <a href="{{ route('customer.dashboard') }}"
+                                    class="w-full border-2 border-white/40 text-white font-bold text-sm py-3.5 px-4 rounded-xl hover:bg-white/10 transition text-center block">
+                                    <i class="fa-solid fa-gauge mr-1.5"></i> Buka Dashboard Pelanggan
+                                </a>
+                            @else
+                                <div class="bg-white/15 rounded-xl p-3.5 text-xs text-blue-100 border border-white/20">
+                                    <i class="fa-solid fa-circle-info mr-1 text-white"></i> Anda masuk sebagai <strong class="text-white">{{ ucwords(str_replace('_', ' ', auth()->user()->role)) }}</strong>. Pengajuan sewa aula dikhususkan bagi akun peminjam (role <strong>Pelanggan</strong>).
+                                </div>
+                                <a href="{{ route('dashboard') }}"
+                                    class="w-full bg-white text-brand-blue font-bold text-sm py-3.5 px-4 rounded-xl hover:bg-blue-50 transition text-center block shadow-md">
+                                    <i class="fa-solid fa-gauge mr-1.5"></i> Buka Dashboard Sistem
+                                </a>
+                            @endif
                         </div>
                     @else
                         <h3 class="text-2xl font-bold mb-3">Mulai Peminjaman</h3>
@@ -403,14 +420,21 @@
 
                             <div class="pt-4 border-t border-slate-100">
                                 @auth
-                                    <a href="{{ route('customer.peminjaman.create', ['paket' => $paket->id]) }}"
-                                        class="w-full {{ $isUnggulan ? 'bg-brand-blue text-white hover:bg-brand-darkBlue shadow-md' : 'bg-white border-2 border-brand-blue text-brand-blue hover:bg-brand-blue hover:text-white' }} text-xs font-bold py-3 rounded-xl transition text-center block">
-                                        Pilih Paket Ini
-                                    </a>
+                                    @if(auth()->user()->role === 'pelanggan')
+                                        <a href="{{ route('customer.peminjaman.create', ['paket' => $paket->id]) }}"
+                                            class="w-full {{ $isUnggulan ? 'bg-brand-blue text-white hover:bg-brand-darkBlue shadow-md' : 'bg-white border-2 border-brand-blue text-brand-blue hover:bg-brand-blue hover:text-white' }} text-xs font-bold py-3 rounded-xl transition text-center block">
+                                            Pesan Paket Ini
+                                        </a>
+                                    @else
+                                        <button type="button" onclick="openModal('Pengajuan Khusus Pelanggan', 'Akun Anda saat ini memiliki role {{ ucwords(str_replace('_', ' ', auth()->user()->role)) }}. Pengajuan dan pemesanan aula hanya dapat dilakukan oleh akun dengan role Pelanggan.')"
+                                            class="w-full bg-slate-100 border border-slate-300 text-slate-600 hover:bg-slate-200 text-xs font-bold py-3 rounded-xl transition text-center block">
+                                            Pesan Paket Ini
+                                        </button>
+                                    @endif
                                 @else
                                     <a href="{{ route('login') }}"
                                         class="w-full {{ $isUnggulan ? 'bg-brand-blue text-white hover:bg-brand-darkBlue shadow-md' : 'bg-white border-2 border-brand-blue text-brand-blue hover:bg-brand-blue hover:text-white' }} text-xs font-bold py-3 rounded-xl transition text-center block">
-                                        Pilih Paket Ini
+                                        Pesan Paket Ini
                                     </a>
                                 @endauth
                             </div>
@@ -438,10 +462,24 @@
                                 <li class="flex items-center gap-2.5"><i class="fa-regular fa-circle-check text-brand-blue text-lg"></i> Proyektor 2 Unit</li>
                             </ul>
                         </div>
-                        <a href="{{ auth()->check() ? route('customer.peminjaman.create') : route('login') }}"
-                            class="w-full bg-brand-blue hover:bg-brand-darkBlue text-white text-sm font-bold py-3.5 rounded-xl transition text-center block shadow-md">
-                            Pilih Paket
-                        </a>
+                        @auth
+                            @if(auth()->user()->role === 'pelanggan')
+                                <a href="{{ route('customer.peminjaman.create') }}"
+                                    class="w-full bg-brand-blue hover:bg-brand-darkBlue text-white text-sm font-bold py-3.5 rounded-xl transition text-center block shadow-md">
+                                    Pilih Paket
+                                </a>
+                            @else
+                                <button type="button" onclick="openModal('Pengajuan Khusus Pelanggan', 'Pengajuan aula hanya dapat dilakukan oleh akun dengan role Pelanggan.')"
+                                    class="w-full bg-slate-100 text-slate-600 text-sm font-bold py-3.5 rounded-xl transition text-center block border border-slate-300">
+                                    Pilih Paket
+                                </button>
+                            @endif
+                        @else
+                            <a href="{{ route('login') }}"
+                                class="w-full bg-brand-blue hover:bg-brand-darkBlue text-white text-sm font-bold py-3.5 rounded-xl transition text-center block shadow-md">
+                                Pilih Paket
+                            </a>
+                        @endauth
                     </div>
 
                     <!-- Paket Terjangkau -->
@@ -462,10 +500,24 @@
                                 <li class="flex items-center gap-2"><i class="fa-regular fa-circle-check text-brand-blue"></i> Proyektor 1 Unit</li>
                             </ul>
                         </div>
-                        <a href="{{ auth()->check() ? route('customer.peminjaman.create') : route('login') }}"
-                            class="w-full bg-white border-2 border-brand-blue text-brand-blue hover:bg-brand-blue hover:text-white text-xs font-bold py-3 rounded-xl transition text-center block">
-                            Pilih Paket
-                        </a>
+                        @auth
+                            @if(auth()->user()->role === 'pelanggan')
+                                <a href="{{ route('customer.peminjaman.create') }}"
+                                    class="w-full bg-white border-2 border-brand-blue text-brand-blue hover:bg-brand-blue hover:text-white text-xs font-bold py-3 rounded-xl transition text-center block">
+                                    Pilih Paket
+                                </a>
+                            @else
+                                <button type="button" onclick="openModal('Pengajuan Khusus Pelanggan', 'Pengajuan aula hanya dapat dilakukan oleh akun dengan role Pelanggan.')"
+                                    class="w-full bg-slate-100 text-slate-600 text-xs font-bold py-3 rounded-xl transition text-center block border border-slate-300">
+                                    Pilih Paket
+                                </button>
+                            @endif
+                        @else
+                            <a href="{{ route('login') }}"
+                                class="w-full bg-white border-2 border-brand-blue text-brand-blue hover:bg-brand-blue hover:text-white text-xs font-bold py-3 rounded-xl transition text-center block">
+                                Pilih Paket
+                            </a>
+                        @endauth
                     </div>
 
                     <!-- Paket Standar -->
@@ -486,10 +538,24 @@
                                 <li class="flex items-center gap-2"><i class="fa-regular fa-circle-check text-brand-blue"></i> Proyektor 1 Unit</li>
                             </ul>
                         </div>
-                        <a href="{{ auth()->check() ? route('customer.peminjaman.create') : route('login') }}"
-                            class="w-full bg-white border-2 border-brand-blue text-brand-blue hover:bg-brand-blue hover:text-white text-xs font-bold py-3 rounded-xl transition text-center block">
-                            Pilih Paket
-                        </a>
+                        @auth
+                            @if(auth()->user()->role === 'pelanggan')
+                                <a href="{{ route('customer.peminjaman.create') }}"
+                                    class="w-full bg-white border-2 border-brand-blue text-brand-blue hover:bg-brand-blue hover:text-white text-xs font-bold py-3 rounded-xl transition text-center block">
+                                    Pilih Paket
+                                </a>
+                            @else
+                                <button type="button" onclick="openModal('Pengajuan Khusus Pelanggan', 'Pengajuan aula hanya dapat dilakukan oleh akun dengan role Pelanggan.')"
+                                    class="w-full bg-slate-100 text-slate-600 text-xs font-bold py-3 rounded-xl transition text-center block border border-slate-300">
+                                    Pilih Paket
+                                </button>
+                            @endif
+                        @else
+                            <a href="{{ route('login') }}"
+                                class="w-full bg-white border-2 border-brand-blue text-brand-blue hover:bg-brand-blue hover:text-white text-xs font-bold py-3 rounded-xl transition text-center block">
+                                Pilih Paket
+                            </a>
+                        @endauth
                     </div>
                 </div>
             @endif
@@ -497,10 +563,25 @@
             <!-- Bottom Action Button -->
             <div class="text-center relative pt-4">
                 <div class="absolute inset-x-0 top-1/2 h-px bg-slate-200 -z-10"></div>
-                <a href="{{ auth()->check() ? route('customer.peminjaman.create') : route('login') }}"
-                    class="inline-block bg-brand-blue hover:bg-brand-darkBlue text-white font-bold text-sm px-10 py-3.5 rounded-full transition-all duration-200 shadow-lg relative z-10">
-                    <i class="fa-solid fa-paper-plane mr-2"></i> Pinjam Sekarang
-                </a>
+                @auth
+                    @if(auth()->user()->role === 'pelanggan')
+                        <a href="{{ route('customer.peminjaman.create') }}"
+                            class="inline-block bg-brand-blue hover:bg-brand-darkBlue text-white font-bold text-sm px-10 py-3.5 rounded-full transition-all duration-200 shadow-lg relative z-10">
+                            <i class="fa-solid fa-paper-plane mr-2"></i> Pinjam Sekarang
+                        </a>
+                    @else
+                        <button type="button" onclick="openModal('Pengajuan Khusus Pelanggan', 'Akun Anda saat ini memiliki role {{ ucwords(str_replace('_', ' ', auth()->user()->role)) }}. Pengajuan aula hanya dapat dilakukan oleh akun dengan role Pelanggan.')"
+                            class="inline-block bg-slate-600 hover:bg-slate-700 text-white font-bold text-sm px-10 py-3.5 rounded-full transition-all duration-200 shadow-lg relative z-10">
+                            <i class="fa-solid fa-circle-info mr-2"></i> Pengajuan Khusus Pelanggan
+                        </button>
+                    @endif
+                @else
+                    <a href="{{ route('login') }}"
+                        class="inline-block bg-brand-blue hover:bg-brand-darkBlue text-white font-bold text-sm px-10 py-3.5 rounded-full transition-all duration-200 shadow-lg relative z-10">
+                        <i class="fa-solid fa-paper-plane mr-2"></i> Pinjam Sekarang
+                    </a>
+                @endauth
+            </div>
             </div>
         </div>
     </section>
@@ -719,9 +800,15 @@
                                 </div>
                                 <div id="info-action-btn">
                                     @auth
-                                        <a href="{{ route('customer.peminjaman.create') }}" class="bg-brand-blue hover:bg-brand-darkBlue text-white text-xs font-bold px-4 py-2 rounded-xl transition shadow-xs">
-                                            Booking Sekarang
-                                        </a>
+                                        @if(auth()->user()->role === 'pelanggan')
+                                            <a href="{{ route('customer.peminjaman.create') }}" class="bg-brand-blue hover:bg-brand-darkBlue text-white text-xs font-bold px-4 py-2 rounded-xl transition shadow-xs">
+                                                Booking Sekarang
+                                            </a>
+                                        @else
+                                            <button type="button" onclick="openModal('Pengajuan Khusus Pelanggan', 'Akun Anda saat ini memiliki role {{ ucwords(str_replace('_', ' ', auth()->user()->role)) }}. Pengajuan sewa aula hanya dapat dilakukan oleh akun dengan role Pelanggan.')" class="bg-slate-100 border border-slate-300 text-slate-700 text-xs font-bold px-4 py-2 rounded-xl transition shadow-xs">
+                                                Booking Sekarang
+                                            </button>
+                                        @endif
                                     @else
                                         <a href="{{ route('login') }}" class="bg-brand-blue hover:bg-brand-darkBlue text-white text-xs font-bold px-4 py-2 rounded-xl transition shadow-xs">
                                             Login untuk Booking
@@ -837,11 +924,19 @@
                 badge.innerText = 'Tersedia untuk Dipinjam';
 
                 @auth
-                    actionBtn.innerHTML = `
-                        <a href="{{ route('customer.peminjaman.create') }}?tgl=${dateStr}" class="bg-brand-blue hover:bg-brand-darkBlue text-white text-xs font-bold px-4 py-2 rounded-xl transition shadow-xs inline-block">
-                            Ajukan Tanggal Ini
-                        </a>
-                    `;
+                    @if(auth()->user()->role === 'pelanggan')
+                        actionBtn.innerHTML = `
+                            <a href="{{ route('customer.peminjaman.create') }}?tgl=${dateStr}" class="bg-brand-blue hover:bg-brand-darkBlue text-white text-xs font-bold px-4 py-2 rounded-xl transition shadow-xs inline-block">
+                                Ajukan Tanggal Ini
+                            </a>
+                        `;
+                    @else
+                        actionBtn.innerHTML = `
+                            <button type="button" onclick="openModal('Pengajuan Khusus Pelanggan', 'Pengajuan sewa aula pada tanggal ${day} ${monthNames[activeMonth]} ${activeYear} hanya dapat dilakukan oleh akun dengan role Pelanggan.')" class="bg-slate-100 border border-slate-300 text-slate-700 text-xs font-bold px-4 py-2 rounded-xl transition shadow-xs inline-block">
+                                Ajukan Tanggal Ini
+                            </button>
+                        `;
+                    @endif
                 @else
                     actionBtn.innerHTML = `
                         <a href="{{ route('login') }}" class="bg-brand-blue hover:bg-brand-darkBlue text-white text-xs font-bold px-4 py-2 rounded-xl transition shadow-xs inline-block">

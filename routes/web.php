@@ -192,7 +192,8 @@ Route::middleware('auth')->group(function () {
         Route::put('/payment-configuration', [PaymentConfigurationController::class, 'update'])->name('payment-configuration.update');
     });
 
-    Route::prefix('customer')->name('customer.')->group(function () {
+    // Customer Panel: Hanya role pelanggan yang diizinkan mengajukan peminjaman & mengakses panel pelanggan
+    Route::middleware('role:pelanggan')->prefix('customer')->name('customer.')->group(function () {
         Route::get('/', function () {
             return redirect()->route('customer.dashboard');
         });

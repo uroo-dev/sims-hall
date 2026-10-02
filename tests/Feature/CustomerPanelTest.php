@@ -1008,7 +1008,7 @@ class CustomerPanelTest extends TestCase
     public function test_halaman_pembayaran_setelah_admin_menolak_dp_menampilkan_form_transfer_ulang_bukan_refund(): void
     {
         $pelanggan = User::factory()->create([
-            'role' => 'user',
+            'role' => 'pelanggan',
             'email' => 'buyer@example.com',
             'name' => 'Buyer Test',
         ]);
