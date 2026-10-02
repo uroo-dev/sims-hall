@@ -152,11 +152,17 @@ Route::middleware(['auth', 'role:bkk,admin_pklbkk,super_admin,super_duper_admin'
 Route::middleware('auth')->group(function () {
     Route::match(['get', 'post'], '/logout', [AuthController::class, 'destroy'])->name('logout');
 
-    // --- DASHBOARD UTAMA ---
-
-    Route::get('/dashboard', [DashboardController::class, 'index'])
-        ->middleware('role:admin,admin_aula,admin_master,admin_kesiswaan,admin_produk,admin_produk_unggulan,admin_ppdb,admin_pklbkk,admin_sekolah,super_admin,super_duper_admin,pelanggan,kepala_sekolah')
+    // --- DASHBOARD DISPATCHER BERDASARKAN ROLE ---
+    Route::get('/dashboard', [DashboardController::class, 'dispatch'])
         ->name('dashboard');
+
+    // Admin Aula: Dashboard Peminjaman Aula (hanya admin aula, admin, dan super admin via middleware)
+    Route::middleware('role:admin_aula,admin,super_admin,super_duper_admin')
+        ->prefix('admin/peminjaman')
+        ->name('admin.peminjaman.')
+        ->group(function () {
+            Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+        });
 
     // Admin Sekolah / Super Admin: CRUD Kategori Artikel & Artikel
     Route::middleware('role:admin_sekolah,super_admin,super_duper_admin')->prefix('admin')->name('admin.')->group(function () {

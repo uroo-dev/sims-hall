@@ -14,26 +14,31 @@ use Illuminate\View\View;
 class DashboardController extends Controller
 {
     /**
-     * Tampilkan dashboard sesuai role user.
+     * Dispatch user ke dashboard / panel masing-masing sesuai role.
      */
-    public function index(Request $request): View|RedirectResponse
+    public function dispatch(Request $request): RedirectResponse
     {
-        if ($request->user()?->role === 'pelanggan') {
-            return redirect()->route('customer.dashboard');
-        }
+        $role = $request->user()?->role;
 
-        if ($request->user()?->role === 'kepala_sekolah') {
-            return redirect()->route('kepala-sekolah.dashboard');
-        }
+        return match ($role) {
+            'pelanggan' => redirect()->route('customer.dashboard'),
+            'kepala_sekolah' => redirect()->route('kepala-sekolah.dashboard'),
+            'bkk', 'admin_pklbkk' => redirect()->route('pkl.dashboard'),
+            'admin_produk', 'admin_produk_unggulan' => redirect()->route('produk-unggulan.index'),
+            'admin_ppdb' => redirect()->route('index.dashboard.ppdb'),
+            'admin_kesiswaan' => redirect()->route('admin.kesiswaan.index'),
+            'admin_master' => redirect()->route('datamaster.index'),
+            'admin_sekolah' => redirect()->route('admin.artikel.index'),
+            'admin_aula', 'admin', 'super_admin', 'super_duper_admin' => redirect()->route('admin.peminjaman.dashboard'),
+            default => redirect()->route('admin.peminjaman.dashboard'),
+        };
+    }
 
-        if (in_array($request->user()?->role, ['bkk', 'admin_pklbkk'], true)) {
-            return redirect()->route('pkl.dashboard');
-        }
-
-        if (in_array($request->user()?->role, ['admin_produk', 'admin_produk_unggulan'], true)) {
-            return redirect()->route('produk-unggulan.index');
-        }
-
+    /**
+     * Tampilkan dashboard peminjaman aula (khusus admin aula & super admin, dilindungi middleware).
+     */
+    public function index(Request $request): View
+    {
         Peminjaman::syncExpiredDeadlines();
 
         $isSuperAdmin = in_array($request->user()?->role, ['super_admin', 'super_duper_admin'], true);
@@ -95,7 +100,7 @@ class DashboardController extends Controller
             'pembayaran.details',
         ])->latest()->take(5)->get();
 
-        return view('Admin.dashboard', compact(
+        return view('Admin.peminjaman.dashboard', compact(
             'paymentConfig',
             'isSuperAdmin',
             'peminjamanTerverifikasiCount',

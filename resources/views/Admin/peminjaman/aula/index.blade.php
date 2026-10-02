@@ -26,7 +26,7 @@
                 <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
                 <span>Lihat Halaman Publik</span>
             </a>
-            <a href="{{ route('dashboard') }}"
+            <a href="{{ route('admin.peminjaman.dashboard') }}"
                 class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs md:text-sm font-semibold transition">
                 <i class="fa-solid fa-arrow-left text-xs"></i>
                 <span>Dashboard</span>

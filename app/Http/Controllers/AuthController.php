@@ -93,27 +93,22 @@ class AuthController extends Controller
 
         $request->session()->regenerate();
 
-        if (Auth::user()?->role === 'pelanggan') {
-            return redirect()->intended(route('customer.dashboard'));
-        }
+        $role = Auth::user()?->role;
 
-        if (Auth::user()?->role === 'kepala_sekolah') {
-            return redirect()->intended(route('kepala-sekolah.dashboard'));
-        }
-        if (in_array(Auth::user()?->role, ['bkk', 'admin_pklbkk'], true)) {
-            return redirect()->intended(route('pkl.dashboard'));
-        }
-        if (in_array(Auth::user()?->role, ['admin_produk', 'admin_produk_unggulan'], true)) {
-            return redirect()->intended(route('produk-unggulan.index'));
-        }
-        if (in_array(Auth::user()?->role, ['admin_ppdb'], true)) {
-            return redirect()->intended(route('index.dashboard.ppdb'));
-        }
-        if (in_array(Auth::user()?->role, ['admin_kesiswaan'], true)) {
-            return redirect()->intended(route('admin.kesiswaan.index'));
-        }
-        return redirect()->intended(route('dashboard'));
+        $targetRoute = match ($role) {
+            'pelanggan' => route('customer.dashboard'),
+            'kepala_sekolah' => route('kepala-sekolah.dashboard'),
+            'bkk', 'admin_pklbkk' => route('pkl.dashboard'),
+            'admin_produk', 'admin_produk_unggulan' => route('produk-unggulan.index'),
+            'admin_ppdb' => route('index.dashboard.ppdb'),
+            'admin_kesiswaan' => route('admin.kesiswaan.index'),
+            'admin_master' => route('datamaster.index'),
+            'admin_sekolah' => route('admin.artikel.index'),
+            'admin_aula', 'admin', 'super_admin', 'super_duper_admin' => route('admin.peminjaman.dashboard'),
+            default => route('dashboard'),
+        };
 
+        return redirect()->intended($targetRoute);
     }
 
     /**
