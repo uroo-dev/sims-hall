@@ -50,10 +50,6 @@ Route::get('/layanan-peminjaman', [PublicController::class, 'layananPeminjaman']
 
 Route::get('/pkl-bkk', [PublicController::class, 'pklBkk'])->name('pkl-bkk');
 
-Route::get('/registrasi', function () {
-    return view('Public.registrasi');
-})->name('registrasi');
-
 /*
 |--------------------------------------------------------------------------
  | Chatbot "Nanya AI"
@@ -79,6 +75,10 @@ Route::middleware('guest')->group(function () {
     Route::get('/login/admin', function () {
         return view('Auth.login-admin');
     })->name('login.admin');
+
+    Route::get('/registrasi', [AuthController::class, 'register'])->name('registrasi');
+    Route::post('/registrasi', [AuthController::class, 'registerStore'])->name('registrasi.store')->middleware('throttle:6,1');
+    Route::get('/register', fn () => redirect()->route('registrasi'))->name('register');
 });
 
 /*
