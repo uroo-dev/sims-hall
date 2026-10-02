@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use App\Observers\ProdukObserver;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Storage;
 
 #[Fillable(['kode_produk', 'nama', 'deskripsi', 'dokumentasi', 'jurusanID'])]
+#[ObservedBy(ProdukObserver::class)]
 class Produk extends Model
 {
     protected $table = 'produk';

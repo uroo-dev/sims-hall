@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\Jurusan;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -19,6 +21,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        View::composer('Public.layout.header', function ($view): void {
+            $view->with('navJurusan', Jurusan::query()->orderBy('jurusanID')->get(['jurusanID', 'nama']));
+        });
     }
 }

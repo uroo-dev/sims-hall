@@ -7,7 +7,6 @@ use App\Models\Jurusan;
 use App\Models\Produk;
 use App\Models\ProdukUnggulan;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
@@ -57,7 +56,6 @@ class ProdukUnggulanController extends Controller
         $produkUnggulan = ProdukUnggulan::current();
 
         $paths = $request->dokumentasiTetap();
-        $terhapus = array_diff($produkUnggulan->dokumentasi_list, $paths);
 
         foreach ((array) $request->file('dokumentasi', []) as $file) {
             $paths[] = $file->store('produk-unggulan', 'public');
@@ -66,10 +64,6 @@ class ProdukUnggulanController extends Controller
         $data['dokumentasi'] = implode(',', $paths);
 
         $produkUnggulan->fill($data)->save();
-
-        foreach ($terhapus as $path) {
-            Storage::disk('public')->delete($path);
-        }
 
         return redirect()
             ->route('produk-unggulan.index')
@@ -83,15 +77,7 @@ class ProdukUnggulanController extends Controller
     {
         $produkUnggulan = ProdukUnggulan::query()->first();
 
-        if ($produkUnggulan) {
-            DB::transaction(function () use ($produkUnggulan): void {
-                foreach ($produkUnggulan->dokumentasi_list as $path) {
-                    Storage::disk('public')->delete($path);
-                }
-
-                $produkUnggulan->delete();
-            });
-        }
+        $produkUnggulan?->delete();
 
         return redirect()
             ->route('produk-unggulan.index')

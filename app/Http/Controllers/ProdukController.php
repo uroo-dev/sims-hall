@@ -7,7 +7,6 @@ use App\Models\Jurusan;
 use App\Models\Produk;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class ProdukController extends Controller
@@ -79,17 +78,8 @@ class ProdukController extends Controller
         $data = $request->safe()->only(['nama', 'deskripsi', 'jurusanID']);
 
         if ($request->boolean('hapus_dokumentasi')) {
-            if ($produk->dokumentasi) {
-                Storage::disk('public')->delete($produk->dokumentasi);
-            }
-
-            unset($data['dokumentasi']);
-            $produk->dokumentasi = null;
+            $data['dokumentasi'] = null;
         } elseif ($request->hasFile('dokumentasi')) {
-            if ($produk->dokumentasi) {
-                Storage::disk('public')->delete($produk->dokumentasi);
-            }
-
             $data['dokumentasi'] = $request->file('dokumentasi')->store('produk', 'public');
         }
 
@@ -105,10 +95,6 @@ class ProdukController extends Controller
      */
     public function destroy(Produk $produk): RedirectResponse
     {
-        if ($produk->dokumentasi) {
-            Storage::disk('public')->delete($produk->dokumentasi);
-        }
-
         $produk->delete();
 
         return redirect()

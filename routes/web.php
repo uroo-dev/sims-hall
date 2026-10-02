@@ -4,11 +4,18 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProdukController;
 use App\Http\Controllers\ProdukUnggulanController;
+use App\Http\Controllers\Public\ProdukUnggulanController as PublicProdukUnggulanController;
 use Illuminate\Support\Facades\Route;
 
-// Route::get('/', function () {
-//     return view('welcome');
-// });
+/*
+|--------------------------------------------------------------------------
+| Landing Page Publik
+|--------------------------------------------------------------------------
+*/
+
+Route::get('/', [PublicProdukUnggulanController::class, 'index'])->name('home');
+Route::get('/produk-unggulan-publik', [PublicProdukUnggulanController::class, 'index'])
+    ->name('public.produk-unggulan');
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'create'])->name('login');
