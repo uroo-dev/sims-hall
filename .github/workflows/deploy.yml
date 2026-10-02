@@ -4,18 +4,33 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
+
+# Least privilege: repo ini hanya butuh baca isi repo.
+permissions:
+  contents: read
+
+# Cegah dua deploy menumpuk di VPS yang sama.
+# cancel-in-progress: false -> kalau ada push baru, deploy yang sedang jalan
+# dibiarkan selesai supaya tidak setengah-setengah (git switch + migrate).
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   test:
     name: Test Laravel
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: '22'
           cache: 'npm'
@@ -27,7 +42,7 @@ jobs:
         run: npm run build
 
       - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
         with:
           php-version: '8.4'
           extensions: mbstring, bcmath, pdo, pdo_mysql
@@ -44,14 +59,46 @@ jobs:
       - name: Run tests
         run: php artisan test
 
+      # Aset yang diuji = aset yang dideploy. Dipindah sebagai artifact supaya
+      # deploy job tidak perlu build ulang (dan tidak perlu Node di VPS).
+      - name: Upload built assets
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: frontend-build
+          path: public/build
+          retention-days: 1
+          if-no-files-found: error
+
   deploy:
     name: Deploy to VPS
     needs: test
+    # Job test juga jalan untuk pull_request; deploy hanya untuk push ke main.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: production
 
     steps:
+      - name: Download built assets
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: frontend-build
+          path: public/build
+
+      - name: Upload frontend assets to VPS (staging)
+        uses: appleboy/scp-action@ff85246acaad7bdce478db94a363cd2bf7c90345 # v1.0.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          source: public/build/*
+          target: /tmp/sims-hall-build
+          strip_components: 1
+          rm: true
+
       - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1.2.0
+        uses: appleboy/ssh-action@7eaf76671a0d7eec5d98ee897acda4f968735a17 # v1.2.0
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
@@ -59,3 +106,28 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script: |
             /home/gajagohosting/apps/sims-hall/deploy.sh
+
+      # Dipisah dari deploy.sh supaya aset frontend bisa ikut di-version control
+      # bersama commit yang sama. Swap via rename supaya tidak ada momen di mana
+      # manifest.json menunjuk file yang sudah terhapus.
+      - name: Swap frontend assets into place
+        uses: appleboy/ssh-action@7eaf76671a0d7eec5d98ee897acda4f968735a17 # v1.2.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            set -e
+            cd /home/gajagohosting/apps/sims-hall
+
+            rm -rf public/build.prev
+            if [ -d public/build ]; then
+              mv public/build public/build.prev
+            fi
+            mv /tmp/sims-hall-build public/build
+            rm -rf public/build.prev /tmp/sims-hall-build
+
+            echo "== aset frontend aktif =="
+            ls -l public/build/manifest.json
+            ls -l public/build/assets/
