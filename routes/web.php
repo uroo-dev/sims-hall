@@ -290,68 +290,34 @@ Route::middleware('auth')->group(function () {
     |----------------------------------------------------------------------
     */
     Route::prefix('dashboard/data-master')->group(function () {
-        Route::get('/', [DataMasterDashboardController::class, 'index'])
-            ->middleware('role:admin_master,admin_sekolah,super_admin,super_duper_admin')
-            ->name('datamaster.index');
+        // Akses penuh: Data Sekolah & Users — hanya admin_master ke atas
+        Route::middleware('role:admin_master,super_admin,super_duper_admin')->group(function () {
+            Route::get('/sekolah', [DataMasterDashboardController::class, 'editSekolah'])->name('datamaster.sekolah.edit');
+            Route::put('/sekolah', [DataMasterDashboardController::class, 'updateSekolah'])->name('datamaster.sekolah.update');
 
-        Route::get('/sekolah', [DataMasterDashboardController::class, 'editSekolah'])
-            ->middleware('role:admin_master,super_admin,super_duper_admin')
-            ->name('datamaster.sekolah.edit');
-
-        Route::put('/sekolah', [DataMasterDashboardController::class, 'updateSekolah'])
-            ->middleware('role:admin_master,super_admin,super_duper_admin')
-            ->name('datamaster.sekolah.update');
-
-        Route::get('/users', [DataMasterDashboardController::class, 'users'])
-            ->middleware('role:admin_master,super_admin,super_duper_admin')
-            ->name('datamaster.users');
-
-        Route::post('/users', [DataMasterDashboardController::class, 'storeUser'])
-            ->middleware('role:admin_master,super_admin,super_duper_admin')
-            ->name('datamaster.users.store');
-
-        Route::put('/users/{id}', [DataMasterDashboardController::class, 'updateUser'])
-            ->middleware('role:admin_master,super_admin,super_duper_admin')
-            ->name('datamaster.users.update');
-
-        Route::delete('/users/{id}', [DataMasterDashboardController::class, 'destroyUser'])
-            ->middleware('role:admin_master,super_admin,super_duper_admin')
-            ->name('datamaster.users.destroy');
-
-        // Data Guru
-        Route::get('/guru', [DataMasterDashboardController::class, 'guru'])
-            ->middleware('role:admin_master,admin_sekolah,super_admin,super_duper_admin')
-            ->name('datamaster.guru.index');
-
-        Route::post('/guru', [DataMasterDashboardController::class, 'storeGuru'])
-            ->middleware('role:admin_master,admin_sekolah,super_admin,super_duper_admin')
-            ->name('datamaster.guru.store');
-
-        Route::put('/guru/{id}', [DataMasterDashboardController::class, 'updateGuru'])
-            ->middleware('role:admin_master,admin_sekolah,super_admin,super_duper_admin')
-            ->name('datamaster.guru.update');
-
-        Route::delete('/guru/{id}', [DataMasterDashboardController::class, 'destroyGuru'])
-            ->middleware('role:admin_master,admin_sekolah,super_admin,super_duper_admin')
-            ->name('datamaster.guru.destroy');
-
-        // Data Siswa
-        Route::get('/siswa', [DataMasterDashboardController::class, 'siswa'])
-            ->middleware('role:admin_master,admin_sekolah,super_admin,super_duper_admin')
-            ->name('datamaster.siswa.index');
-
-        Route::post('/siswa', [DataMasterDashboardController::class, 'storeSiswa'])
-            ->middleware('role:admin_master,admin_sekolah,super_admin,super_duper_admin')
-            ->name('datamaster.siswa.store');
-
-        Route::put('/siswa/{id}', [DataMasterDashboardController::class, 'updateSiswa'])
-            ->middleware('role:admin_master,admin_sekolah,super_admin,super_duper_admin')
-            ->name('datamaster.siswa.update');
-
-        Route::delete('/siswa/{id}', [DataMasterDashboardController::class, 'destroySiswa'])
-            ->middleware('role:admin_master,admin_sekolah,super_admin,super_duper_admin')
-            ->name('datamaster.siswa.destroy');
+            Route::get('/users', [DataMasterDashboardController::class, 'users'])->name('datamaster.users');
+            Route::post('/users', [DataMasterDashboardController::class, 'storeUser'])->name('datamaster.users.store');
+            Route::put('/users/{id}', [DataMasterDashboardController::class, 'updateUser'])->name('datamaster.users.update');
+            Route::delete('/users/{id}', [DataMasterDashboardController::class, 'destroyUser'])->name('datamaster.users.destroy');
         });
+
+        // Akses shared: Dashboard, Data Guru, Data Siswa — admin_master & admin_sekolah
+        Route::middleware('role:admin_master,admin_sekolah,super_admin,super_duper_admin')->group(function () {
+            Route::get('/', [DataMasterDashboardController::class, 'index'])->name('datamaster.index');
+
+            // Data Guru
+            Route::get('/guru', [DataMasterDashboardController::class, 'guru'])->name('datamaster.guru.index');
+            Route::post('/guru', [DataMasterDashboardController::class, 'storeGuru'])->name('datamaster.guru.store');
+            Route::put('/guru/{id}', [DataMasterDashboardController::class, 'updateGuru'])->name('datamaster.guru.update');
+            Route::delete('/guru/{id}', [DataMasterDashboardController::class, 'destroyGuru'])->name('datamaster.guru.destroy');
+
+            // Data Siswa
+            Route::get('/siswa', [DataMasterDashboardController::class, 'siswa'])->name('datamaster.siswa.index');
+            Route::post('/siswa', [DataMasterDashboardController::class, 'storeSiswa'])->name('datamaster.siswa.store');
+            Route::put('/siswa/{id}', [DataMasterDashboardController::class, 'updateSiswa'])->name('datamaster.siswa.update');
+            Route::delete('/siswa/{id}', [DataMasterDashboardController::class, 'destroySiswa'])->name('datamaster.siswa.destroy');
+        });
+    });
         Route::middleware('role:admin_ppdb,super_admin,super_duper_admin')->prefix('admin/ppdb')->group(function () {
             Route::get('/dashboard', [PpdbDashboardController::class, 'index'])->name('index.dashboard.ppdb');
             Route::get('/informasi', [PpdbInformasiController::class, 'index'])->name('index.informasi.ppdb');

@@ -93,22 +93,7 @@ class AuthController extends Controller
 
         $request->session()->regenerate();
 
-        $role = Auth::user()?->role;
-
-        $targetRoute = match ($role) {
-            'pelanggan' => route('customer.dashboard'),
-            'kepala_sekolah' => route('kepala-sekolah.dashboard'),
-            'bkk', 'admin_pklbkk' => route('pkl.dashboard'),
-            'admin_produk', 'admin_produk_unggulan' => route('produk-unggulan.index'),
-            'admin_ppdb' => route('index.dashboard.ppdb'),
-            'admin_kesiswaan' => route('admin.kesiswaan.index'),
-            'admin_master' => route('datamaster.index'),
-            'admin_sekolah' => route('admin.artikel.index'),
-            'admin_aula', 'admin', 'super_admin', 'super_duper_admin' => route('admin.peminjaman.dashboard'),
-            default => route('dashboard'),
-        };
-
-        return redirect()->intended($targetRoute);
+        return redirect()->intended(Auth::user()->dashboardRoute());
     }
 
     /**
