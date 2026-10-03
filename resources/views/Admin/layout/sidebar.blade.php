@@ -145,11 +145,276 @@ Navigasi diatur menggunakan Blade if-elseif berdasarkan role user autentikasi:
                     <span>Data Tata Tertib</span>
                 </a>
 
-            @else
-                {{-- =================== PANEL: ADMIN AULA / SUPER ADMIN =================== --}}
-                {{-- admin_sekolah juga masuk sini karena hanya butuh section Artikel --}}
+            @elseif(in_array($userRole, ['super_admin', 'super_duper_admin']))
+                {{-- =================== PANEL: SUPER ADMIN (ACCORDION DROPDOWN) =================== --}}
+                
+                <!-- DASHBOARD UTAMA -->
+                <a href="{{ route('admin.peminjaman.dashboard') }}"
+                    class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('admin.peminjaman.dashboard') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
+                    <i class="fa-solid fa-table-cells-large text-base w-5 text-center"></i>
+                    <span>Dashboard</span>
+                </a>
 
-                @if(in_array($userRole, ['admin', 'admin_aula', 'super_admin', 'super_duper_admin']))
+                <!-- 1. SUBMENU: PEMINJAMAN AULA -->
+                @php
+                    $isAulaActive = request()->routeIs('admin.aula.*') || request()->routeIs('admin.payment-configuration.*') || request()->routeIs('admin.fasilitas.*') || request()->routeIs('admin.paket.*') || (request()->routeIs('admin.peminjaman.*') && !request()->routeIs('admin.peminjaman.dashboard')) || request()->routeIs('admin.laporan.*');
+                @endphp
+                <div class="space-y-1">
+                    <button type="button"
+                        onclick="toggleSidebarDropdown('submenu-aula')"
+                        class="w-full flex items-center justify-between px-5 py-3.5 rounded-full font-bold text-sm transition transform active:scale-95 cursor-pointer {{ $isAulaActive ? 'bg-white/15 text-white shadow-xs' : 'text-white hover:bg-white/10' }}">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-hotel text-base w-5 text-center"></i>
+                            <span>Peminjaman Aula</span>
+                        </div>
+                        <i id="chevron-submenu-aula" class="fa-solid fa-chevron-down text-xs transition-transform duration-200 {{ $isAulaActive ? 'rotate-180' : '' }}"></i>
+                    </button>
+                    <div id="submenu-aula" class="{{ $isAulaActive ? '' : 'hidden' }} pl-4 pr-1 py-1 space-y-1">
+                        <a href="{{ route('admin.aula.index') }}"
+                            class="flex items-center gap-3 px-4 py-2.5 rounded-full text-xs font-semibold transition transform active:scale-95 {{ request()->routeIs('admin.aula.*') ? 'bg-white text-[#0073c6] font-bold shadow-sm' : 'text-blue-100 hover:text-white hover:bg-white/10' }}">
+                            <i class="fa-solid fa-hotel text-xs w-4 text-center"></i>
+                            <span>Konfigurasi Aula</span>
+                        </a>
+                        <a href="{{ route('admin.payment-configuration.index') }}"
+                            class="flex items-center gap-3 px-4 py-2.5 rounded-full text-xs font-semibold transition transform active:scale-95 {{ request()->routeIs('admin.payment-configuration.*') ? 'bg-white text-[#0073c6] font-bold shadow-sm' : 'text-blue-100 hover:text-white hover:bg-white/10' }}">
+                            <i class="fa-solid fa-sliders text-xs w-4 text-center"></i>
+                            <span>Konfigurasi Peminjaman</span>
+                        </a>
+                        <a href="{{ route('admin.fasilitas.index') }}"
+                            class="flex items-center gap-3 px-4 py-2.5 rounded-full text-xs font-semibold transition transform active:scale-95 {{ request()->routeIs('admin.fasilitas.*') ? 'bg-white text-[#0073c6] font-bold shadow-sm' : 'text-blue-100 hover:text-white hover:bg-white/10' }}">
+                            <i class="fa-solid fa-box text-xs w-4 text-center"></i>
+                            <span>Fasilitas</span>
+                        </a>
+                        <a href="{{ route('admin.paket.index') }}"
+                            class="flex items-center gap-3 px-4 py-2.5 rounded-full text-xs font-semibold transition transform active:scale-95 {{ request()->routeIs('admin.paket.*') ? 'bg-white text-[#0073c6] font-bold shadow-sm' : 'text-blue-100 hover:text-white hover:bg-white/10' }}">
+                            <i class="fa-solid fa-boxes-packing text-xs w-4 text-center"></i>
+                            <span>Paket Peminjaman</span>
+                        </a>
+                        <a href="{{ route('admin.peminjaman.index') }}"
+                            class="flex items-center gap-3 px-4 py-2.5 rounded-full text-xs font-semibold transition transform active:scale-95 {{ (request()->routeIs('admin.peminjaman.*') && !request()->routeIs('admin.peminjaman.dashboard')) ? 'bg-white text-[#0073c6] font-bold shadow-sm' : 'text-blue-100 hover:text-white hover:bg-white/10' }}">
+                            <i class="fa-solid fa-clipboard-list text-xs w-4 text-center"></i>
+                            <span>Daftar Peminjaman</span>
+                        </a>
+                        <a href="{{ route('admin.laporan.index') }}"
+                            class="flex items-center gap-3 px-4 py-2.5 rounded-full text-xs font-semibold transition transform active:scale-95 {{ request()->routeIs('admin.laporan.*') ? 'bg-white text-[#0073c6] font-bold shadow-sm' : 'text-blue-100 hover:text-white hover:bg-white/10' }}">
+                            <i class="fa-solid fa-file-invoice-dollar text-xs w-4 text-center"></i>
+                            <span>Laporan Pemasukan</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 2. SUBMENU: ARTIKEL SEKOLAH -->
+                @php
+                    $isArtikelActive = request()->routeIs('admin.kategori-artikel.*') || request()->routeIs('admin.artikel.*');
+                @endphp
+                <div class="space-y-1">
+                    <button type="button"
+                        onclick="toggleSidebarDropdown('submenu-artikel')"
+                        class="w-full flex items-center justify-between px-5 py-3.5 rounded-full font-bold text-sm transition transform active:scale-95 cursor-pointer {{ $isArtikelActive ? 'bg-white/15 text-white shadow-xs' : 'text-white hover:bg-white/10' }}">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-newspaper text-base w-5 text-center"></i>
+                            <span>Artikel Sekolah</span>
+                        </div>
+                        <i id="chevron-submenu-artikel" class="fa-solid fa-chevron-down text-xs transition-transform duration-200 {{ $isArtikelActive ? 'rotate-180' : '' }}"></i>
+                    </button>
+                    <div id="submenu-artikel" class="{{ $isArtikelActive ? '' : 'hidden' }} pl-4 pr-1 py-1 space-y-1">
+                        <a href="{{ route('admin.kategori-artikel.index') }}"
+                            class="flex items-center gap-3 px-4 py-2.5 rounded-full text-xs font-semibold transition transform active:scale-95 {{ request()->routeIs('admin.kategori-artikel.*') ? 'bg-white text-[#0073c6] font-bold shadow-sm' : 'text-blue-100 hover:text-white hover:bg-white/10' }}">
+                            <i class="fa-solid fa-tags text-xs w-4 text-center"></i>
+                            <span>Kategori Artikel</span>
+                        </a>
+                        <a href="{{ route('admin.artikel.index') }}"
+                            class="flex items-center gap-3 px-4 py-2.5 rounded-full text-xs font-semibold transition transform active:scale-95 {{ request()->routeIs('admin.artikel.*') ? 'bg-white text-[#0073c6] font-bold shadow-sm' : 'text-blue-100 hover:text-white hover:bg-white/10' }}">
+                            <i class="fa-solid fa-newspaper text-xs w-4 text-center"></i>
+                            <span>Daftar Artikel</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 3. SUBMENU: DATA MASTER SEKOLAH -->
+                @php
+                    $isMasterActive = request()->routeIs('datamaster.*');
+                @endphp
+                <div class="space-y-1">
+                    <button type="button"
+                        onclick="toggleSidebarDropdown('submenu-master')"
+                        class="w-full flex items-center justify-between px-5 py-3.5 rounded-full font-bold text-sm transition transform active:scale-95 cursor-pointer {{ $isMasterActive ? 'bg-white/15 text-white shadow-xs' : 'text-white hover:bg-white/10' }}">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-graduation-cap text-base w-5 text-center"></i>
+                            <span>Data Master Sekolah</span>
+                        </div>
+                        <i id="chevron-submenu-master" class="fa-solid fa-chevron-down text-xs transition-transform duration-200 {{ $isMasterActive ? 'rotate-180' : '' }}"></i>
+                    </button>
+                    <div id="submenu-master" class="{{ $isMasterActive ? '' : 'hidden' }} pl-4 pr-1 py-1 space-y-1">
+                        <a href="{{ route('datamaster.index') }}"
+                            class="flex items-center gap-3 px-4 py-2.5 rounded-full text-xs font-semibold transition transform active:scale-95 {{ request()->routeIs('datamaster.index') ? 'bg-white text-[#0073c6] font-bold shadow-sm' : 'text-blue-100 hover:text-white hover:bg-white/10' }}">
+                            <i class="fa-solid fa-graduation-cap text-xs w-4 text-center"></i>
+                            <span>Dashboard Master</span>
+                        </a>
+                        <a href="{{ route('datamaster.sekolah.edit') }}"
+                            class="flex items-center gap-3 px-4 py-2.5 rounded-full text-xs font-semibold transition transform active:scale-95 {{ request()->routeIs('datamaster.sekolah.*') ? 'bg-white text-[#0073c6] font-bold shadow-sm' : 'text-blue-100 hover:text-white hover:bg-white/10' }}">
+                            <i class="fa-solid fa-school text-xs w-4 text-center"></i>
+                            <span>Data Sekolah</span>
+                        </a>
+                        <a href="{{ route('datamaster.users') }}"
+                            class="flex items-center gap-3 px-4 py-2.5 rounded-full text-xs font-semibold transition transform active:scale-95 {{ request()->routeIs('datamaster.users*') ? 'bg-white text-[#0073c6] font-bold shadow-sm' : 'text-blue-100 hover:text-white hover:bg-white/10' }}">
+                            <i class="fa-solid fa-users-gear text-xs w-4 text-center"></i>
+                            <span>Data Users</span>
+                        </a>
+                        <a href="{{ route('datamaster.guru.index') }}"
+                            class="flex items-center gap-3 px-4 py-2.5 rounded-full text-xs font-semibold transition transform active:scale-95 {{ request()->routeIs('datamaster.guru.*') ? 'bg-white text-[#0073c6] font-bold shadow-sm' : 'text-blue-100 hover:text-white hover:bg-white/10' }}">
+                            <i class="fa-solid fa-chalkboard-user text-xs w-4 text-center"></i>
+                            <span>Data Guru</span>
+                        </a>
+                        <a href="{{ route('datamaster.siswa.index') }}"
+                            class="flex items-center gap-3 px-4 py-2.5 rounded-full text-xs font-semibold transition transform active:scale-95 {{ request()->routeIs('datamaster.siswa.*') ? 'bg-white text-[#0073c6] font-bold shadow-sm' : 'text-blue-100 hover:text-white hover:bg-white/10' }}">
+                            <i class="fa-solid fa-user-graduate text-xs w-4 text-center"></i>
+                            <span>Data Siswa</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 4. SUBMENU: PKL & BKK -->
+                @php
+                    $isPklActive = request()->routeIs('pkl.*');
+                @endphp
+                <div class="space-y-1">
+                    <button type="button"
+                        onclick="toggleSidebarDropdown('submenu-pkl')"
+                        class="w-full flex items-center justify-between px-5 py-3.5 rounded-full font-bold text-sm transition transform active:scale-95 cursor-pointer {{ $isPklActive ? 'bg-white/15 text-white shadow-xs' : 'text-white hover:bg-white/10' }}">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-briefcase text-base w-5 text-center"></i>
+                            <span>PKL & BKK</span>
+                        </div>
+                        <i id="chevron-submenu-pkl" class="fa-solid fa-chevron-down text-xs transition-transform duration-200 {{ $isPklActive ? 'rotate-180' : '' }}"></i>
+                    </button>
+                    <div id="submenu-pkl" class="{{ $isPklActive ? '' : 'hidden' }} pl-4 pr-1 py-1 space-y-1">
+                        <a href="{{ route('pkl.dashboard') }}"
+                            class="flex items-center gap-3 px-4 py-2.5 rounded-full text-xs font-semibold transition transform active:scale-95 {{ request()->routeIs('pkl.dashboard') ? 'bg-white text-[#0073c6] font-bold shadow-sm' : 'text-blue-100 hover:text-white hover:bg-white/10' }}">
+                            <i class="fa-solid fa-chart-pie text-xs w-4 text-center"></i>
+                            <span>Dashboard PKL</span>
+                        </a>
+                        <a href="{{ route('pkl.dudi.index') }}"
+                            class="flex items-center gap-3 px-4 py-2.5 rounded-full text-xs font-semibold transition transform active:scale-95 {{ request()->routeIs('pkl.dudi.*') ? 'bg-white text-[#0073c6] font-bold shadow-sm' : 'text-blue-100 hover:text-white hover:bg-white/10' }}">
+                            <i class="fa-solid fa-building text-xs w-4 text-center"></i>
+                            <span>Data DUDI</span>
+                        </a>
+                        <a href="{{ route('pkl.lowongan.index') }}"
+                            class="flex items-center gap-3 px-4 py-2.5 rounded-full text-xs font-semibold transition transform active:scale-95 {{ request()->routeIs('pkl.lowongan.*') ? 'bg-white text-[#0073c6] font-bold shadow-sm' : 'text-blue-100 hover:text-white hover:bg-white/10' }}">
+                            <i class="fa-solid fa-laptop-code text-xs w-4 text-center"></i>
+                            <span>Lowongan Kerja</span>
+                        </a>
+                        <a href="{{ route('pkl.siswa.index') }}"
+                            class="flex items-center gap-3 px-4 py-2.5 rounded-full text-xs font-semibold transition transform active:scale-95 {{ request()->routeIs('pkl.siswa.*') ? 'bg-white text-[#0073c6] font-bold shadow-sm' : 'text-blue-100 hover:text-white hover:bg-white/10' }}">
+                            <i class="fa-solid fa-user-graduate text-xs w-4 text-center"></i>
+                            <span>Data Siswa PKL</span>
+                        </a>
+                        <a href="{{ route('pkl.index') }}"
+                            class="flex items-center gap-3 px-4 py-2.5 rounded-full text-xs font-semibold transition transform active:scale-95 {{ request()->routeIs('pkl.index') || request()->routeIs('pkl.penempatan.*') ? 'bg-white text-[#0073c6] font-bold shadow-sm' : 'text-blue-100 hover:text-white hover:bg-white/10' }}">
+                            <i class="fa-solid fa-address-card text-xs w-4 text-center"></i>
+                            <span>Penempatan PKL</span>
+                        </a>
+                        <a href="{{ route('pkl.create') }}"
+                            class="flex items-center gap-3 px-4 py-2.5 rounded-full text-xs font-semibold transition transform active:scale-95 {{ request()->routeIs('pkl.create') || request()->routeIs('pkl.store') ? 'bg-white text-[#0073c6] font-bold shadow-sm' : 'text-blue-100 hover:text-white hover:bg-white/10' }}">
+                            <i class="fa-solid fa-file-signature text-xs w-4 text-center"></i>
+                            <span>Buat Pengajuan</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 5. SUBMENU: PPDB -->
+                @php
+                    $isPpdbActive = request()->routeIs('index.dashboard.ppdb') || request()->routeIs('index.informasi.ppdb');
+                @endphp
+                <div class="space-y-1">
+                    <button type="button"
+                        onclick="toggleSidebarDropdown('submenu-ppdb')"
+                        class="w-full flex items-center justify-between px-5 py-3.5 rounded-full font-bold text-sm transition transform active:scale-95 cursor-pointer {{ $isPpdbActive ? 'bg-white/15 text-white shadow-xs' : 'text-white hover:bg-white/10' }}">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-user-plus text-base w-5 text-center"></i>
+                            <span>PPDB</span>
+                        </div>
+                        <i id="chevron-submenu-ppdb" class="fa-solid fa-chevron-down text-xs transition-transform duration-200 {{ $isPpdbActive ? 'rotate-180' : '' }}"></i>
+                    </button>
+                    <div id="submenu-ppdb" class="{{ $isPpdbActive ? '' : 'hidden' }} pl-4 pr-1 py-1 space-y-1">
+                        <a href="{{ route('index.dashboard.ppdb') }}"
+                            class="flex items-center gap-3 px-4 py-2.5 rounded-full text-xs font-semibold transition transform active:scale-95 {{ request()->routeIs('index.dashboard.ppdb') ? 'bg-white text-[#0073c6] font-bold shadow-sm' : 'text-blue-100 hover:text-white hover:bg-white/10' }}">
+                            <i class="fa-solid fa-table-cells-large text-xs w-4 text-center"></i>
+                            <span>Dashboard PPDB</span>
+                        </a>
+                        <a href="{{ route('index.informasi.ppdb') }}"
+                            class="flex items-center gap-3 px-4 py-2.5 rounded-full text-xs font-semibold transition transform active:scale-95 {{ request()->routeIs('index.informasi.ppdb') ? 'bg-white text-[#0073c6] font-bold shadow-sm' : 'text-blue-100 hover:text-white hover:bg-white/10' }}">
+                            <i class="fa-solid fa-file-lines text-xs w-4 text-center"></i>
+                            <span>Informasi & Persyaratan</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 6. SUBMENU: PRODUK UNGGULAN -->
+                @php
+                    $isProdukActive = request()->routeIs('produk-unggulan.*') || request()->routeIs('produk.*');
+                @endphp
+                <div class="space-y-1">
+                    <button type="button"
+                        onclick="toggleSidebarDropdown('submenu-produk')"
+                        class="w-full flex items-center justify-between px-5 py-3.5 rounded-full font-bold text-sm transition transform active:scale-95 cursor-pointer {{ $isProdukActive ? 'bg-white/15 text-white shadow-xs' : 'text-white hover:bg-white/10' }}">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-store text-base w-5 text-center"></i>
+                            <span>Produk Unggulan</span>
+                        </div>
+                        <i id="chevron-submenu-produk" class="fa-solid fa-chevron-down text-xs transition-transform duration-200 {{ $isProdukActive ? 'rotate-180' : '' }}"></i>
+                    </button>
+                    <div id="submenu-produk" class="{{ $isProdukActive ? '' : 'hidden' }} pl-4 pr-1 py-1 space-y-1">
+                        <a href="{{ route('produk-unggulan.index') }}"
+                            class="flex items-center gap-3 px-4 py-2.5 rounded-full text-xs font-semibold transition transform active:scale-95 {{ request()->routeIs('produk-unggulan.*') ? 'bg-white text-[#0073c6] font-bold shadow-sm' : 'text-blue-100 hover:text-white hover:bg-white/10' }}">
+                            <i class="fa-solid fa-store text-xs w-4 text-center"></i>
+                            <span>Dashboard Produk</span>
+                        </a>
+                        <a href="{{ route('produk.index') }}"
+                            class="flex items-center gap-3 px-4 py-2.5 rounded-full text-xs font-semibold transition transform active:scale-95 {{ request()->routeIs('produk.*') ? 'bg-white text-[#0073c6] font-bold shadow-sm' : 'text-blue-100 hover:text-white hover:bg-white/10' }}">
+                            <i class="fa-solid fa-basket-shopping text-xs w-4 text-center"></i>
+                            <span>Data Produk</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 7. SUBMENU: KESISWAAN -->
+                @php
+                    $isKesiswaanActive = request()->routeIs('admin.kesiswaan.*');
+                @endphp
+                <div class="space-y-1">
+                    <button type="button"
+                        onclick="toggleSidebarDropdown('submenu-kesiswaan')"
+                        class="w-full flex items-center justify-between px-5 py-3.5 rounded-full font-bold text-sm transition transform active:scale-95 cursor-pointer {{ $isKesiswaanActive ? 'bg-white/15 text-white shadow-xs' : 'text-white hover:bg-white/10' }}">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-users text-base w-5 text-center"></i>
+                            <span>Kesiswaan</span>
+                        </div>
+                        <i id="chevron-submenu-kesiswaan" class="fa-solid fa-chevron-down text-xs transition-transform duration-200 {{ $isKesiswaanActive ? 'rotate-180' : '' }}"></i>
+                    </button>
+                    <div id="submenu-kesiswaan" class="{{ $isKesiswaanActive ? '' : 'hidden' }} pl-4 pr-1 py-1 space-y-1">
+                        <a href="{{ route('admin.kesiswaan.index') }}"
+                            class="flex items-center gap-3 px-4 py-2.5 rounded-full text-xs font-semibold transition transform active:scale-95 {{ request()->routeIs('admin.kesiswaan.index') ? 'bg-white text-[#0073c6] font-bold shadow-sm' : 'text-blue-100 hover:text-white hover:bg-white/10' }}">
+                            <i class="fa-solid fa-users text-xs w-4 text-center"></i>
+                            <span>Dashboard Kesiswaan</span>
+                        </a>
+                        <a href="{{ route('admin.kesiswaan.ekstrakurikuler.index') }}"
+                            class="flex items-center gap-3 px-4 py-2.5 rounded-full text-xs font-semibold transition transform active:scale-95 {{ request()->routeIs('admin.kesiswaan.ekstrakurikuler.*') ? 'bg-white text-[#0073c6] font-bold shadow-sm' : 'text-blue-100 hover:text-white hover:bg-white/10' }}">
+                            <i class="fa-solid fa-icons text-xs w-4 text-center"></i>
+                            <span>Data Ekstrakulikuler</span>
+                        </a>
+                        <a href="{{ route('admin.kesiswaan.tata-tertib.index') }}"
+                            class="flex items-center gap-3 px-4 py-2.5 rounded-full text-xs font-semibold transition transform active:scale-95 {{ request()->routeIs('admin.kesiswaan.tata-tertib.*') ? 'bg-white text-[#0073c6] font-bold shadow-sm' : 'text-blue-100 hover:text-white hover:bg-white/10' }}">
+                            <i class="fa-solid fa-book-bookmark text-xs w-4 text-center"></i>
+                            <span>Data Tata Tertib</span>
+                        </a>
+                    </div>
+                </div>
+
+            @else
+                {{-- =================== PANEL: ROLE SPESIFIK LAINNYA (ADMIN AULA / ADMIN MASTER / ADMIN SEKOLAH) =================== --}}
+
+                @if(in_array($userRole, ['admin', 'admin_aula']))
                     <!-- DASHBOARD ADMIN AULA -->
                     <a href="{{ route('admin.peminjaman.dashboard') }}"
                         class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('admin.peminjaman.dashboard') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
@@ -158,30 +423,13 @@ Navigasi diatur menggunakan Blade if-elseif berdasarkan role user autentikasi:
                     </a>
                 @endif
 
-                @if(in_array($userRole, ['admin_aula', 'super_admin', 'super_duper_admin']))
-                    <!-- SECTION: PEMINJAMAN AULA -->
-                    @if(in_array($userRole, ['super_admin', 'super_duper_admin']))
-                        <div class="pt-3 pb-1">
-                            <div class="flex items-center justify-between text-[11px] font-bold text-blue-100/80 tracking-wider uppercase px-2 mb-2">
-                                <span>Peminjaman Aula</span>
-                                <span class="w-12 h-[1px] bg-white/30"></span>
-                            </div>
-                        </div>
-                    @endif
-
+                @if($userRole === 'admin_aula')
+                    <!-- SECTION: PEMINJAMAN AULA (ADMIN AULA) -->
                     <a href="{{ route('admin.aula.index') }}"
                         class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('admin.aula.*') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
                         <i class="fa-solid fa-hotel text-base w-5 text-center"></i>
                         <span>Konfigurasi Aula</span>
                     </a>
-
-                    @if(in_array($userRole, ['super_admin', 'super_duper_admin']))
-                        <a href="{{ route('admin.payment-configuration.index') }}"
-                            class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('admin.payment-configuration.*') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
-                            <i class="fa-solid fa-sliders text-base w-5 text-center"></i>
-                            <span>Konfigurasi Peminjaman</span>
-                        </a>
-                    @endif
 
                     <a href="{{ route('admin.fasilitas.index') }}"
                         class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('admin.fasilitas.*') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
@@ -208,7 +456,7 @@ Navigasi diatur menggunakan Blade if-elseif berdasarkan role user autentikasi:
                     </a>
                 @endif
 
-                @if(in_array($userRole, ['admin_sekolah', 'super_admin', 'super_duper_admin']))
+                @if($userRole === 'admin_sekolah')
                     <!-- SECTION: ARTIKEL SEKOLAH -->
                     <div class="pt-3 pb-1">
                         <div class="flex items-center justify-between text-[11px] font-bold text-blue-100/80 tracking-wider uppercase px-2 mb-2">
@@ -230,7 +478,7 @@ Navigasi diatur menggunakan Blade if-elseif berdasarkan role user autentikasi:
                     </a>
                 @endif
 
-                @if(in_array($userRole, ['admin_master', 'admin_sekolah', 'super_admin', 'super_duper_admin']))
+                @if(in_array($userRole, ['admin_master', 'admin_sekolah']))
                     <!-- SECTION: DATA MASTER SEKOLAH -->
                     <div class="pt-3 pb-1">
                         <div class="flex items-center justify-between text-[11px] font-bold text-blue-100/80 tracking-wider uppercase px-2 mb-2">
@@ -239,7 +487,7 @@ Navigasi diatur menggunakan Blade if-elseif berdasarkan role user autentikasi:
                         </div>
                     </div>
 
-                    @if(in_array($userRole, ['admin_master', 'super_admin', 'super_duper_admin']))
+                    @if($userRole === 'admin_master')
                         <a href="{{ route('datamaster.index') }}"
                             class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('datamaster.index') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
                             <i class="fa-solid fa-graduation-cap text-base w-5 text-center"></i>
@@ -271,90 +519,6 @@ Navigasi diatur menggunakan Blade if-elseif berdasarkan role user autentikasi:
                         <span>Data Siswa</span>
                     </a>
                 @endif
-
-                @if(in_array($userRole, ['super_admin', 'super_duper_admin']))
-                    <!-- SECTION: PKL & BKK (Super Admin) -->
-                    <div class="pt-3 pb-1">
-                        <div class="flex items-center justify-between text-[11px] font-bold text-blue-100/80 tracking-wider uppercase px-2 mb-2">
-                            <span>PKL & BKK</span>
-                            <span class="w-12 h-[1px] bg-white/30"></span>
-                        </div>
-                    </div>
-
-                    @include('Admin.layout.partials.menu-pkl-bkk')
-                @endif
-
-                @if(in_array($userRole, ['super_admin', 'super_duper_admin']))
-                    <!-- SECTION: PPDB -->
-                    <div class="pt-3 pb-1">
-                        <div class="flex items-center justify-between text-[11px] font-bold text-blue-100/80 tracking-wider uppercase px-2 mb-2">
-                            <span>PPDB</span>
-                            <span class="w-12 h-[1px] bg-white/30"></span>
-                        </div>
-                    </div>
-
-                    <a href="{{ route('index.dashboard.ppdb') }}"
-                        class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('index.dashboard.ppdb') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
-                        <i class="fa-solid fa-user-plus text-base w-5 text-center"></i>
-                        <span>Dashboard PPDB</span>
-                    </a>
-
-                    <a href="{{ route('index.informasi.ppdb') }}"
-                        class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('index.informasi.ppdb') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
-                        <i class="fa-solid fa-file-lines text-base w-5 text-center"></i>
-                        <span>Informasi & Persyaratan</span>
-                    </a>
-                @endif
-
-                @if(in_array($userRole, ['super_admin', 'super_duper_admin']))
-                    <!-- SECTION: PRODUK UNGGULAN -->
-                    <div class="pt-3 pb-1">
-                        <div class="flex items-center justify-between text-[11px] font-bold text-blue-100/80 tracking-wider uppercase px-2 mb-2">
-                            <span>Produk Unggulan</span>
-                            <span class="w-12 h-[1px] bg-white/30"></span>
-                        </div>
-                    </div>
-
-                    <a href="{{ route('produk-unggulan.index') }}"
-                        class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('produk-unggulan.*') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
-                        <i class="fa-solid fa-store text-base w-5 text-center"></i>
-                        <span>Dashboard Produk</span>
-                    </a>
-
-                    <a href="{{ route('produk.index') }}"
-                        class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('produk.*') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
-                        <i class="fa-solid fa-basket-shopping text-base w-5 text-center"></i>
-                        <span>Data Produk</span>
-                    </a>
-                @endif
-
-                @if(in_array($userRole, ['super_admin', 'super_duper_admin']))
-                    <!-- SECTION: KESISWAAN -->
-                    <div class="pt-3 pb-1">
-                        <div class="flex items-center justify-between text-[11px] font-bold text-blue-100/80 tracking-wider uppercase px-2 mb-2">
-                            <span>Kesiswaan</span>
-                            <span class="w-12 h-[1px] bg-white/30"></span>
-                        </div>
-                    </div>
-
-                    <a href="{{ route('admin.kesiswaan.index') }}"
-                        class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('admin.kesiswaan.index') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
-                        <i class="fa-solid fa-users text-base w-5 text-center"></i>
-                        <span>Dashboard Kesiswaan</span>
-                    </a>
-
-                    <a href="{{ route('admin.kesiswaan.ekstrakurikuler.index') }}"
-                        class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('admin.kesiswaan.ekstrakurikuler.*') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
-                        <i class="fa-solid fa-icons text-base w-5 text-center"></i>
-                        <span>Data Ekstrakulikuler</span>
-                    </a>
-
-                    <a href="{{ route('admin.kesiswaan.tata-tertib.index') }}"
-                        class="flex items-center gap-3 px-5 py-3.5 {{ request()->routeIs('admin.kesiswaan.tata-tertib.*') ? 'bg-white text-[#0073c6] shadow-sm' : 'text-white hover:bg-white/10' }} rounded-full font-bold text-sm transition transform active:scale-95">
-                        <i class="fa-solid fa-book-bookmark text-base w-5 text-center"></i>
-                        <span>Data Tata Tertib</span>
-                    </a>
-                @endif
             @endif
         </div>
 
@@ -369,3 +533,15 @@ Navigasi diatur menggunakan Blade if-elseif berdasarkan role user autentikasi:
 
     </div>
 </aside>
+
+<script>
+    function toggleSidebarDropdown(id) {
+        const el = document.getElementById(id);
+        const chevron = document.getElementById('chevron-' + id);
+        if (!el) return;
+        el.classList.toggle('hidden');
+        if (chevron) {
+            chevron.classList.toggle('rotate-180');
+        }
+    }
+</script>

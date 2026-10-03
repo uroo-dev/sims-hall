@@ -20,9 +20,6 @@ class Ekstrakurikuler extends Model
         'deskripsi',
         'logo',
         'dokumentasi',
-        'seleksi_insiatif',
-        'detail_uji',
-        'keterangan',
     ];
 
     public function getSekolahAttribute($value)

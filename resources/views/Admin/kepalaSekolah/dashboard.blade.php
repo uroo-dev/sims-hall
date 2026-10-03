@@ -6,20 +6,6 @@
 @section('content')
 <div class="space-y-6">
 
-    <!-- ALERT FLASH NOTIFIKASI -->
-    @if (session('success'))
-        <div class="bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl p-4 flex items-center justify-between shadow-xs">
-            <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold text-sm">
-                    <i class="fa-solid fa-check"></i>
-                </div>
-                <span class="text-xs md:text-sm font-medium">{{ session('success') }}</span>
-            </div>
-            <button type="button" onclick="this.parentElement.remove()" class="text-emerald-500 hover:text-emerald-700">
-                <i class="fa-solid fa-xmark text-sm"></i>
-            </button>
-        </div>
-    @endif
 
     <!-- BANNER SELAMAT DATANG KEPALA SEKOLAH -->
     <div class="rounded-3xl bg-white p-6 md:p-8 border border-slate-100 figma-card-shadow">

@@ -106,6 +106,11 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('login');
+        $redirectTo = $request->input('redirect_to', 'login');
+        if ($redirectTo === 'landing') {
+            return redirect()->route('landing')->with('success', 'Sesi Anda telah berhasil dihapus. Anda telah keluar dari sistem.');
+        }
+
+        return redirect()->route('login')->with('success', 'Sesi Anda telah berhasil dihapus. Anda telah keluar dari sistem.');
     }
 }

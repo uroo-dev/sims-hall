@@ -13,10 +13,9 @@
         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-gray-100">
             <div class="flex items-center gap-4">
                 <div class="w-16 h-16 rounded-2xl overflow-hidden border border-blue-200 shadow-sm flex-shrink-0">
-                    <img src="{{ asset('assets/default-avatar.png') }}"
+                    <img src="{{ $user->foto_profil_url }}"
                         alt="Foto Profil {{ $user->name ?? 'Pengguna' }}"
-                        class="w-full h-full object-cover"
-                        onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name={{ urlencode($user->name ?? 'Pengguna') }}&background=0070ba&color=fff&size=128';">
+                        class="w-full h-full object-cover">
                 </div>
                 <div>
                     <h2 class="text-xl font-bold text-gray-900">{{ $user->name ?? 'Pengguna' }}</h2>
@@ -28,6 +27,10 @@
             </div>
 
             <div class="flex items-center gap-2">
+                <a href="{{ route('profile.edit') }}" class="px-4 py-2 bg-[#0070ba] text-white text-xs font-semibold rounded-xl hover:bg-[#005c99] transition flex items-center gap-1.5 shadow-sm">
+                    <i class="fa-solid fa-pen-to-square text-xs"></i>
+                    <span>Edit Profil</span>
+                </a>
                 <a href="{{ route('customer.dashboard') }}" class="px-4 py-2 border border-gray-200 text-gray-700 text-xs font-semibold rounded-xl hover:bg-gray-50 transition">
                     Kembali ke Dashboard
                 </a>

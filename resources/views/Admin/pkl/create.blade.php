@@ -5,20 +5,6 @@
 
 @section('content')
 
-    @if ($errors->any())
-        <div
-            class="rounded-xl border border-red-200 bg-red-50 text-red-800 px-4 py-3 text-sm flex items-start gap-2">
-            <i class="fa-solid fa-circle-exclamation mt-0.5"></i>
-            <div>
-                <p class="font-semibold">Periksa kembali isian Anda:</p>
-                <ul class="list-disc list-inside mt-1 space-y-0.5">
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        </div>
-    @endif
 
     <form method="POST" action="{{ route('pkl.store') }}" id="form-pengajuan">
         @csrf

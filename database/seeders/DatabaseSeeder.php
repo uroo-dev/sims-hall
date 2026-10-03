@@ -35,6 +35,8 @@ class DatabaseSeeder extends Seeder
             DataMasterSeeder::class,
             JurusanSeeder::class,
             KategoriArtikelSeeder::class,
+            ArtikelSeeder::class,
+            PpdbSeeder::class,
             ProdukSeeder::class,
             ProdukUnggulanSeeder::class,
             KesiswaanSeeder::class,

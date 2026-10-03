@@ -4,37 +4,6 @@
 
 @section('content')
 
-    <!-- ALERT NOTIFIKASI -->
-    @if(session('success'))
-        <div class="mb-5 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs md:text-sm font-semibold flex items-center justify-between shadow-xs">
-            <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-xl bg-emerald-500 text-white flex items-center justify-center flex-shrink-0">
-                    <i class="fa-solid fa-circle-check text-sm"></i>
-                </div>
-                <span>{{ session('success') }}</span>
-            </div>
-            <button type="button" onclick="this.parentElement.remove()" class="text-emerald-500 hover:text-emerald-800 transition cursor-pointer">
-                <i class="fa-solid fa-xmark text-base"></i>
-            </button>
-        </div>
-    @endif
-
-    @if($errors->any())
-        <div class="mb-5 p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs md:text-sm font-medium shadow-xs">
-            <div class="flex items-center gap-3 mb-2 font-bold text-rose-900">
-                <div class="w-8 h-8 rounded-xl bg-rose-500 text-white flex items-center justify-center flex-shrink-0">
-                    <i class="fa-solid fa-triangle-exclamation text-sm"></i>
-                </div>
-                <span>Terdapat kesalahan validasi:</span>
-            </div>
-            <ul class="list-disc list-inside space-y-1 pl-11 text-xs">
-                @foreach($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
-
     <!-- MAIN CARD -->
     <div class="bg-white rounded-2xl p-6 card-shadow border border-gray-100/80">
         
@@ -42,7 +11,7 @@
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
             <div>
                 <div class="flex items-center gap-2">
-                    <div class="w-8 h-8 rounded-lg bg-sky-100 text-sky-700 flex items-center justify-center text-sm font-bold">
+                    <div class="w-8 h-8 rounded-lg bg-sky-100 text-[#0073c6] flex items-center justify-center text-sm font-bold">
                         <i class="fa-solid fa-tags"></i>
                     </div>
                     <h3 class="font-bold text-gray-800 text-base">Kategori Artikel</h3>
@@ -144,16 +113,16 @@
     </div>
 
     <!-- MODAL TAMBAH KATEGORI -->
-    <div id="addModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl relative transform transition-all animate-fade-in border border-gray-100">
+    <div id="addModal" class="hidden fixed inset-0 !m-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 transition-opacity" role="dialog" aria-modal="true">
+        <div id="addModalBox" class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 transform transition-all scale-95 duration-200">
             <div class="flex items-center justify-between pb-4 border-b border-gray-100 mb-5">
                 <div class="flex items-center gap-2.5">
-                    <div class="w-8 h-8 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center text-sm font-bold">
+                    <div class="w-8 h-8 rounded-xl bg-sky-100 text-[#0073c6] flex items-center justify-center text-sm font-bold">
                         <i class="fa-solid fa-plus"></i>
                     </div>
                     <h3 class="font-bold text-gray-900 text-sm md:text-base">Tambah Kategori Artikel</h3>
                 </div>
-                <button type="button" onclick="closeAddModal()" class="w-8 h-8 rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 flex items-center justify-center transition cursor-pointer">
+                <button type="button" onclick="closeAddModal()" class="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition cursor-pointer">
                     <i class="fa-solid fa-xmark text-sm"></i>
                 </button>
             </div>
@@ -178,13 +147,13 @@
                         class="w-full border border-gray-200 rounded-xl px-3.5 py-2.5 text-xs md:text-sm focus:outline-none focus:ring-2 focus:ring-[#0073c6]/20 focus:border-[#0073c6] transition"></textarea>
                 </div>
 
-                <div class="flex items-center justify-end gap-2 pt-3 border-t border-gray-100">
+                <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-gray-100">
                     <button type="button" onclick="closeAddModal()"
-                        class="px-4 py-2.5 text-xs font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl transition cursor-pointer">
+                        class="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 text-xs md:text-sm font-semibold transition cursor-pointer">
                         Batal
                     </button>
                     <button type="submit"
-                        class="px-5 py-2.5 text-xs font-bold text-white bg-[#0073c6] hover:bg-sky-700 rounded-xl transition shadow-xs cursor-pointer active:scale-95">
+                        class="px-5 py-2.5 rounded-xl bg-[#0073c6] hover:bg-[#005fa6] text-white text-xs md:text-sm font-bold shadow-md shadow-blue-500/20 active:scale-95 transition flex items-center justify-center gap-2 cursor-pointer">
                         Simpan Kategori
                     </button>
                 </div>
@@ -193,8 +162,8 @@
     </div>
 
     <!-- MODAL EDIT KATEGORI -->
-    <div id="editModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl relative transform transition-all animate-fade-in border border-gray-100">
+    <div id="editModal" class="hidden fixed inset-0 !m-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 transition-opacity" role="dialog" aria-modal="true">
+        <div id="editModalBox" class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 transform transition-all scale-95 duration-200">
             <div class="flex items-center justify-between pb-4 border-b border-gray-100 mb-5">
                 <div class="flex items-center gap-2.5">
                     <div class="w-8 h-8 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center text-sm font-bold">
@@ -202,7 +171,7 @@
                     </div>
                     <h3 class="font-bold text-gray-900 text-sm md:text-base">Edit Kategori Artikel</h3>
                 </div>
-                <button type="button" onclick="closeEditModal()" class="w-8 h-8 rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 flex items-center justify-center transition cursor-pointer">
+                <button type="button" onclick="closeEditModal()" class="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition cursor-pointer">
                     <i class="fa-solid fa-xmark text-sm"></i>
                 </button>
             </div>
@@ -226,13 +195,13 @@
                         class="w-full border border-gray-200 rounded-xl px-3.5 py-2.5 text-xs md:text-sm focus:outline-none focus:ring-2 focus:ring-[#0073c6]/20 focus:border-[#0073c6] transition"></textarea>
                 </div>
 
-                <div class="flex items-center justify-end gap-2 pt-3 border-t border-gray-100">
+                <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-gray-100">
                     <button type="button" onclick="closeEditModal()"
-                        class="px-4 py-2.5 text-xs font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl transition cursor-pointer">
+                        class="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 text-xs md:text-sm font-semibold transition cursor-pointer">
                         Batal
                     </button>
                     <button type="submit"
-                        class="px-5 py-2.5 text-xs font-bold text-white bg-amber-600 hover:bg-amber-700 rounded-xl transition shadow-xs cursor-pointer active:scale-95">
+                        class="px-5 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs md:text-sm font-bold shadow-md shadow-amber-500/20 active:scale-95 transition flex items-center justify-center gap-2 cursor-pointer">
                         Perbarui Kategori
                     </button>
                 </div>
@@ -241,25 +210,27 @@
     </div>
 
     <!-- MODAL KONFIRMASI HAPUS -->
-    <div id="deleteModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl relative text-center border border-gray-100">
-            <div class="w-12 h-12 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center mx-auto mb-4 text-xl">
+    <div id="deleteModal" class="hidden fixed inset-0 !m-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 transition-opacity" role="dialog" aria-modal="true">
+        <div id="deleteModalBox" class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-100 text-center transform transition-all scale-95 duration-200 space-y-4">
+            <div class="w-14 h-14 rounded-2xl bg-red-50 text-red-600 border border-red-100/80 flex items-center justify-center mx-auto text-2xl shadow-xs">
                 <i class="fa-solid fa-triangle-exclamation"></i>
             </div>
-            <h4 class="font-bold text-gray-900 text-base mb-1">Hapus Kategori?</h4>
-            <p class="text-xs text-gray-500 mb-4" id="deleteModalDesc">
-                Apakah Anda yakin ingin menghapus kategori ini?
-            </p>
+            <div>
+                <h4 class="font-extrabold text-slate-900 text-lg tracking-tight">Hapus Kategori?</h4>
+                <p class="text-xs md:text-sm text-slate-500 mt-1 leading-relaxed" id="deleteModalDesc">
+                    Apakah Anda yakin ingin menghapus kategori ini?
+                </p>
+            </div>
 
-            <form id="deleteForm" method="POST" class="flex gap-2 justify-center">
+            <form id="deleteForm" method="POST" class="pt-2 flex items-center justify-center gap-3">
                 @csrf
                 @method('DELETE')
                 <button type="button" onclick="closeDeleteModal()"
-                    class="px-4 py-2.5 text-xs font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl transition cursor-pointer">
+                    class="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 text-xs md:text-sm font-semibold transition cursor-pointer">
                     Batal
                 </button>
                 <button type="submit"
-                    class="px-5 py-2.5 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-xl transition shadow-xs cursor-pointer active:scale-95">
+                    class="flex-1 px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 active:scale-95 text-white text-xs md:text-sm font-bold shadow-md shadow-red-500/20 transition flex items-center justify-center gap-2 cursor-pointer">
                     Ya, Hapus
                 </button>
             </form>
@@ -271,20 +242,20 @@
 @push('scripts')
 <script>
     function openAddModal() {
-        document.getElementById('addModal').classList.remove('hidden');
+        window.openModal('addModal');
     }
     function closeAddModal() {
-        document.getElementById('addModal').classList.add('hidden');
+        window.closeModal('addModal');
     }
 
     function openEditModal(id, nama, deskripsi) {
         document.getElementById('editForm').action = "{{ url('admin/kategori-artikel') }}/" + id;
         document.getElementById('editNama').value = nama;
         document.getElementById('editDeskripsi').value = deskripsi;
-        document.getElementById('editModal').classList.remove('hidden');
+        window.openModal('editModal');
     }
     function closeEditModal() {
-        document.getElementById('editModal').classList.add('hidden');
+        window.closeModal('editModal');
     }
 
     function openDeleteModal(id, nama, count) {
@@ -294,10 +265,10 @@
             desc += ` Terdapat ${count} artikel yang bernaung di kategori ini yang juga akan terhapus.`;
         }
         document.getElementById('deleteModalDesc').textContent = desc;
-        document.getElementById('deleteModal').classList.remove('hidden');
+        window.openModal('deleteModal');
     }
     function closeDeleteModal() {
-        document.getElementById('deleteModal').classList.add('hidden');
+        window.closeModal('deleteModal');
     }
 </script>
 @endpush

@@ -18,7 +18,7 @@ class PpdbController extends Controller
      */
     public function index(): View
     {
-        $jurusans = Ppdb_jurusan::orderBy('id')->get();
+        $jurusans = Ppdb_jurusan::with('jurusan')->orderBy('id')->get();
         $jalurs = Ppdb_jalur::orderBy('id')->get();
 
         return view('Public.ppdb.index', [

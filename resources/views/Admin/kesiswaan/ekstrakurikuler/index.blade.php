@@ -8,19 +8,6 @@
 @section('content')
     <div class="space-y-6">
 
-        @if (session('success'))
-            <div class="rounded-2xl border border-emerald-100 bg-emerald-50 px-5 py-3 text-sm font-semibold text-emerald-700 flex items-center gap-2.5" role="status">
-                <i class="fa-solid fa-circle-check"></i>
-                <span>{{ session('success') }}</span>
-            </div>
-        @endif
-
-        @if ($errors->any())
-            <div class="rounded-2xl border border-red-100 bg-red-50 px-5 py-3 text-sm font-semibold text-red-700 flex items-center gap-2.5" role="alert">
-                <i class="fa-solid fa-circle-exclamation"></i>
-                <span>{{ $errors->first() }}</span>
-            </div>
-        @endif
 
         <!-- FORM TAMBAH EKSTRAKURIKULER -->
         <section class="bg-white rounded-2xl p-6 figma-card-shadow border border-slate-100">
@@ -202,32 +189,32 @@
     </div>
 
     <!-- MODAL MEDIA PREVIEW -->
-    <div id="mediaModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-2xl max-w-lg w-full overflow-hidden shadow-2xl relative">
+    <div id="mediaModal" class="fixed inset-0 !m-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-slate-100 relative">
             <div class="p-4 border-b border-slate-100 flex items-center justify-between">
                 <h4 id="mediaTitle" class="text-xs font-bold text-slate-800">Preview Media</h4>
-                <button onclick="closeMediaModal()" class="text-slate-400 hover:text-slate-600">
-                    <i class="fa-solid fa-xmark"></i>
+                <button onclick="closeMediaModal()" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition cursor-pointer">
+                    <i class="fa-solid fa-xmark text-sm"></i>
                 </button>
             </div>
             <div class="p-4 flex items-center justify-center bg-slate-50 min-h-[250px]">
-                <img id="mediaImage" src="" alt="Media" class="max-h-[70vh] object-contain rounded-lg">
+                <img id="mediaImage" src="" alt="Media" class="max-h-[70vh] object-contain rounded-2xl">
             </div>
         </div>
     </div>
 
     <!-- MODAL DETAIL -->
-    <div id="detailModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-2xl max-w-xl w-full overflow-hidden shadow-2xl relative">
-            <div class="p-4 border-b border-slate-100 flex items-center justify-between">
-                <h4 class="text-xs font-bold text-slate-800">Detail Ekstrakurikuler</h4>
-                <button onclick="closeDetailModal()" class="text-slate-400 hover:text-slate-600">
-                    <i class="fa-solid fa-xmark"></i>
+    <div id="detailModal" class="fixed inset-0 !m-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-xl w-full overflow-hidden shadow-2xl border border-slate-100 relative">
+            <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+                <h4 class="text-sm font-bold text-slate-800">Detail Ekstrakurikuler</h4>
+                <button onclick="closeDetailModal()" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition cursor-pointer">
+                    <i class="fa-solid fa-xmark text-sm"></i>
                 </button>
             </div>
             <div class="p-6 space-y-4">
                 <div class="flex items-center gap-4">
-                    <div id="detailLogoContainer" class="w-16 h-16 rounded-xl border border-slate-200 p-1 flex items-center justify-center bg-white shrink-0">
+                    <div id="detailLogoContainer" class="w-16 h-16 rounded-2xl border border-slate-200 p-1 flex items-center justify-center bg-white shrink-0">
                         <img id="detailLogo" src="" alt="Logo" class="max-h-full max-w-full object-contain">
                     </div>
                     <div>
@@ -238,24 +225,24 @@
 
                 <div>
                     <h5 class="text-xs font-bold text-slate-700 mb-1">Deskripsi</h5>
-                    <p id="detailDeskripsi" class="text-xs text-slate-600 leading-relaxed bg-slate-50 p-3 rounded-xl border border-slate-100"></p>
+                    <p id="detailDeskripsi" class="text-xs text-slate-600 leading-relaxed bg-slate-50 p-3.5 rounded-2xl border border-slate-100"></p>
                 </div>
 
                 <div id="detailDokumentasiContainer">
                     <h5 class="text-xs font-bold text-slate-700 mb-1">Dokumentasi</h5>
-                    <img id="detailDokumentasi" src="" alt="Dokumentasi" class="w-full h-44 object-cover rounded-xl border border-slate-200">
+                    <img id="detailDokumentasi" src="" alt="Dokumentasi" class="w-full h-44 object-cover rounded-2xl border border-slate-200">
                 </div>
             </div>
         </div>
     </div>
 
     <!-- MODAL EDIT -->
-    <div id="editModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-2xl max-w-2xl w-full overflow-hidden shadow-2xl relative max-h-[90vh] flex flex-col">
-            <div class="p-4 border-b border-slate-100 flex items-center justify-between">
-                <h4 class="text-xs font-bold text-slate-800">Edit Ekstrakulikuler</h4>
-                <button onclick="closeEditModal()" class="text-slate-400 hover:text-slate-600">
-                    <i class="fa-solid fa-xmark"></i>
+    <div id="editModal" class="fixed inset-0 !m-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-2xl w-full overflow-hidden shadow-2xl border border-slate-100 relative max-h-[90vh] flex flex-col">
+            <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+                <h4 class="text-sm font-bold text-slate-800">Edit Ekstrakulikuler</h4>
+                <button onclick="closeEditModal()" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition cursor-pointer">
+                    <i class="fa-solid fa-xmark text-sm"></i>
                 </button>
             </div>
             <form id="editForm" method="POST" enctype="multipart/form-data" class="p-6 space-y-4 overflow-y-auto">
@@ -291,11 +278,11 @@
                     </div>
                 </div>
 
-                <div class="pt-4 flex justify-end gap-2">
-                    <button type="button" onclick="closeEditModal()" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200">
+                <div class="pt-4 flex justify-end gap-2.5 border-t border-slate-100">
+                    <button type="button" onclick="closeEditModal()" class="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 text-xs md:text-sm font-semibold transition cursor-pointer">
                         Batal
                     </button>
-                    <button type="submit" class="px-5 py-2 rounded-xl text-xs font-bold text-white bg-[#0066C4] hover:bg-blue-700 shadow-md">
+                    <button type="submit" class="px-5 py-2.5 rounded-xl bg-[#0060ac] hover:bg-[#004f8f] active:scale-95 text-white text-xs md:text-sm font-bold shadow-md shadow-blue-500/20 transition flex items-center gap-2 cursor-pointer">
                         Simpan Perubahan
                     </button>
                 </div>
@@ -304,20 +291,20 @@
     </div>
 
     <!-- MODAL DELETE CONFIRMATION -->
-    <div id="deleteModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-2xl max-w-sm w-full p-6 text-center shadow-2xl relative">
-            <div class="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i class="fa-solid fa-triangle-exclamation text-xl"></i>
+    <div id="deleteModal" class="fixed inset-0 !m-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl border border-slate-100 relative">
+            <div class="w-14 h-14 bg-rose-50 text-rose-600 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-rose-100 text-2xl shadow-xs">
+                <i class="fa-regular fa-trash-can"></i>
             </div>
-            <h4 class="text-sm font-bold text-slate-900 mb-1">Konfirmasi Hapus</h4>
+            <h4 class="text-base font-extrabold text-slate-900 mb-1">Konfirmasi Hapus</h4>
             <p class="text-xs text-slate-500 mb-6">Apakah Anda yakin ingin menghapus ekstrakulikuler <span id="deleteItemName" class="font-bold text-slate-700"></span>?</p>
-            <form id="deleteForm" method="POST" class="flex justify-center gap-2">
+            <form id="deleteForm" method="POST" class="flex justify-center gap-2.5">
                 @csrf
                 @method('DELETE')
-                <button type="button" onclick="closeDeleteModal()" class="px-4 py-2 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-xl text-xs font-bold">
+                <button type="button" onclick="closeDeleteModal()" class="w-full py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 text-xs md:text-sm font-semibold transition cursor-pointer">
                     Batal
                 </button>
-                <button type="submit" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold shadow-md shadow-red-500/20">
+                <button type="submit" class="w-full py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 active:scale-95 text-white text-xs md:text-sm font-bold shadow-sm transition cursor-pointer">
                     Ya, Hapus
                 </button>
             </form>
@@ -334,11 +321,13 @@
         function openMediaModal(url, title) {
             document.getElementById('mediaImage').src = url;
             document.getElementById('mediaTitle').textContent = title;
-            document.getElementById('mediaModal').classList.remove('hidden');
+            if (window.openModal) window.openModal('mediaModal');
+            else document.getElementById('mediaModal').classList.remove('hidden');
         }
 
         function closeMediaModal() {
-            document.getElementById('mediaModal').classList.add('hidden');
+            if (window.closeModal) window.closeModal('mediaModal');
+            else document.getElementById('mediaModal').classList.add('hidden');
         }
 
         function openDetailModal(item) {
@@ -362,11 +351,13 @@
                 document.getElementById('detailDokumentasiContainer').classList.add('hidden');
             }
 
-            document.getElementById('detailModal').classList.remove('hidden');
+            if (window.openModal) window.openModal('detailModal');
+            else document.getElementById('detailModal').classList.remove('hidden');
         }
 
         function closeDetailModal() {
-            document.getElementById('detailModal').classList.add('hidden');
+            if (window.closeModal) window.closeModal('detailModal');
+            else document.getElementById('detailModal').classList.add('hidden');
         }
 
         function openEditModal(item) {
@@ -375,21 +366,25 @@
             document.getElementById('editNama').value = item.nama;
             document.getElementById('editSekolah').value = item.sekolah || 'SMKN 2 Karanganyar';
             document.getElementById('editDeskripsi').value = item.deskripsi || '';
-            document.getElementById('editModal').classList.remove('hidden');
+            if (window.openModal) window.openModal('editModal');
+            else document.getElementById('editModal').classList.remove('hidden');
         }
 
         function closeEditModal() {
-            document.getElementById('editModal').classList.add('hidden');
+            if (window.closeModal) window.closeModal('editModal');
+            else document.getElementById('editModal').classList.add('hidden');
         }
 
         function openDeleteModal(actionUrl, name) {
             document.getElementById('deleteForm').action = actionUrl;
             document.getElementById('deleteItemName').textContent = name;
-            document.getElementById('deleteModal').classList.remove('hidden');
+            if (window.openModal) window.openModal('deleteModal');
+            else document.getElementById('deleteModal').classList.remove('hidden');
         }
 
         function closeDeleteModal() {
-            document.getElementById('deleteModal').classList.add('hidden');
+            if (window.closeModal) window.closeModal('deleteModal');
+            else document.getElementById('deleteModal').classList.add('hidden');
         }
     </script>
 @endsection

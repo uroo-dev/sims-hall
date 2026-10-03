@@ -25,7 +25,7 @@
                     <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-[1.1]">
                         {{ $kesiswaan->judul ?: 'Kesiswaan SMKN 2 Karanganyar' }}
                     </h1>
-                    
+
                     <p class="text-slate-600 text-base sm:text-lg leading-relaxed max-w-xl">
                         {{ $kesiswaan->deskripsi ?: 'Membangun karakter unggul melalui integrasi nilai moral dan penguasaan teknologi. Kami berdedikasi untuk membina potensi setiap siswa dalam lingkungan yang inklusif, inovatif, dan disiplin.' }}
                     </p>
@@ -91,7 +91,7 @@
         <div class="absolute top-10 right-10 w-32 h-32 dot-pattern opacity-40 pointer-events-none"></div>
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            
+
             <!-- Header -->
             <div class="text-center max-w-3xl mx-auto mb-14">
                 <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
@@ -100,7 +100,7 @@
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
-                
+
                 <!-- LEFT: Text & Download Card (Buku Saku) -->
                 <div class="lg:col-span-5 space-y-6">
                     <p class="text-slate-600 text-base leading-relaxed">
@@ -111,6 +111,13 @@
                         $bukuSaku = $tataTertibs->first(function ($t) {
                             return str_contains(strtolower($t->judul ?? ''), 'buku saku') || !empty($t->file_pdf);
                         });
+
+                        // Landing page hanya menampilkan 3 aturan utama teratas (di luar Buku Saku jika ada)
+                        $tataTertibDisplay = $tataTertibs
+                            ->reject(function ($t) use ($bukuSaku, $tataTertibs) {
+                                return $bukuSaku && $t->tata_tertibID === $bukuSaku->tata_tertibID && $tataTertibs->count() > 1;
+                            })
+                            ->take(3);
                     @endphp
 
                     <!-- Download Card -->
@@ -135,12 +142,9 @@
                     </div>
                 </div>
 
-                <!-- RIGHT: Accordions / Dropdown (Daftar Tata Tertib Dinamis - Tanpa tombol download per butir) -->
+                <!-- RIGHT: Accordions / Dropdown (Hanya 3 Aturan Utama Teratas) -->
                 <div class="lg:col-span-7 space-y-4">
-                    @forelse ($tataTertibs as $item)
-                        @if ($bukuSaku && $item->tata_tertibID === $bukuSaku->tata_tertibID && $tataTertibs->count() > 1)
-                            @continue
-                        @endif
+                    @forelse ($tataTertibDisplay as $item)
                         <details class="group bg-brand-blue text-white rounded-2xl overflow-hidden shadow-md transition-all">
                             <summary class="flex items-center justify-between p-5 cursor-pointer font-bold text-lg">
                                 <span>{{ $item->judul }}</span>
@@ -196,7 +200,7 @@
         <div class="absolute bottom-4 left-4 sm:bottom-8 sm:left-8 w-32 h-32 sm:w-40 sm:h-40 plus-tex opacity-70 pointer-events-none z-0"></div>
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            
+
             <!-- Header -->
             <div class="text-center max-w-3xl mx-auto mb-14">
                 <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 mb-3 tracking-tight">
@@ -219,7 +223,7 @@
                         // Baris 1: Kartu Kiri PANJANG (col-span-7), Kartu Kanan PENDEK (col-span-5)
                         // Baris 2: Kartu Kiri PENDEK (col-span-5), Kartu Kanan PANJANG (col-span-7)
                         // Baris 3: Kartu Kiri PANJANG (col-span-7), Kartu Kanan PENDEK (col-span-5)
-                        $colSpan = $isEvenRow 
+                        $colSpan = $isEvenRow
                             ? ($isFirstInRow ? 'lg:col-span-7' : 'lg:col-span-5')
                             : ($isFirstInRow ? 'lg:col-span-5' : 'lg:col-span-7');
 
@@ -248,7 +252,8 @@
                         <!-- Informasi Organisasi -->
                         <div class="flex-1 flex flex-col justify-between self-stretch text-left">
                             <div>
-                                <h3 class="text-base sm:text-lg font-bold text-slate-900 tracking-tight leading-snug">
+                                <h3 class="text-base sm:text-lg font-bold text-slate-900 tracking-tight leading-snug cursor-pointer hover:text-[#0060ac] transition-colors"
+                                    onclick="openEskulModal(this.closest('.bg-white').querySelector('.btn-detail-eskul'))">
                                     {{ $prefix }}<span class="text-[#0066C4] font-black">{{ $highlightName }}</span>
                                 </h3>
                                 <p class="text-[11px] sm:text-xs font-semibold text-slate-800 mt-0.5 mb-2">
@@ -259,14 +264,16 @@
                                 </p>
                             </div>
                             <div class="pt-4">
-                                <button onclick="showDetailEskulDynamic({{ json_encode([
-                                    'nama' => $eskul->nama,
-                                    'sekolah' => $eskul->sekolah,
-                                    'deskripsi' => $eskul->deskripsi,
-                                    'logo' => $eskul->logoUrl(),
-                                    'dokumentasi' => $eskul->dokumentasiUrl()
-                                ]) }})" class="bg-[#0066C4] hover:bg-blue-700 text-white font-semibold text-xs px-5 py-2.5 rounded-lg shadow-sm transition-all transform active:scale-95 w-fit">
-                                    Selengkapnya
+                                <button type="button"
+                                    class="bg-[#0066C4] hover:bg-blue-700 text-white font-semibold text-xs px-5 py-2.5 rounded-lg shadow-sm transition-all transform active:scale-95 w-fit cursor-pointer flex items-center gap-1.5 btn-detail-eskul"
+                                    data-nama="{{ $eskul->nama }}"
+                                    data-sekolah="{{ $eskul->sekolah ?: 'SMKN 2 Karanganyar' }}"
+                                    data-deskripsi="{{ $eskul->deskripsi }}"
+                                    data-logo="{{ $eskul->logoUrl() }}"
+                                    data-dokumentasi="{{ $eskul->dokumentasiUrl() }}"
+                                    onclick="openEskulModal(this)">
+                                    <span>Selengkapnya</span>
+                                    <i class="fa-solid fa-arrow-right text-[10px]"></i>
                                 </button>
                             </div>
                         </div>
@@ -289,7 +296,7 @@
         <div class="absolute -left-2 bottom-12 w-28 h-36 plus-tex opacity-50 pointer-events-none hidden sm:block"></div>
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            
+
             <!-- Header with Badge (Hardcoded 100+) -->
             <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-6">
                 <div>
@@ -338,7 +345,7 @@
                         @endphp
                         @forelse ($bannerPrestasies as $banner)
                             <div class="min-w-[280px] sm:min-w-[420px] md:min-w-[calc(50%-12px)] flex-1 snap-start rounded-2xl overflow-hidden shadow-sm bg-slate-900 flex items-center justify-center cursor-pointer group"
-                                 onclick="openModal('{{ addslashes($banner->judul) }}', '{{ addslashes($banner->ringkasan ?: strip_tags($banner->konten)) }}', '{{ $banner->gambarUrl() }}')">
+                                 onclick="openPrestasiModal('{{ addslashes($banner->judul) }}', '{{ addslashes($banner->ringkasan ?: strip_tags($banner->konten)) }}', '{{ $banner->gambarUrl() }}')">
                                 <img src="{{ $banner->gambarUrl() }}" alt="{{ $banner->judul }}" class="w-full h-auto object-cover rounded-xl transition-transform duration-300 group-hover:scale-[1.02]">
                             </div>
                         @empty
@@ -400,65 +407,121 @@
         </div>
     </section>
 
-    <!-- ============================================================
-         MODAL DETAIL EKSTRAKURIKULER
+    <!-- ===========================================================    <!-- ============================================================
+         MODAL DETAIL ORGANISASI & EKSTRAKURIKULER
          ============================================================ -->
-    <div id="detail-eskul-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl relative transform transition-all scale-95 opacity-0" id="detail-eskul-content">
-            
+    <div id="detail-eskul-modal" class="fixed inset-0 !m-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden" role="dialog" aria-modal="true">
+        <div class="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-100 relative transform transition-all scale-95 opacity-0 duration-200" id="detail-eskul-content">
+
             <!-- Modal Header -->
-            <div class="sticky top-0 bg-white z-10 px-6 py-4 border-b border-slate-100 flex items-center justify-between rounded-t-3xl">
-                <h3 class="text-lg font-bold text-slate-800">Detail Ekstrakurikuler</h3>
-                <button onclick="closeDetailEskul()" class="text-slate-400 hover:text-slate-600 text-xl w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 transition-colors">
-                    <i class="fa-solid fa-xmark"></i>
+            <div class="sticky top-0 bg-white/95 backdrop-blur-xs z-10 px-6 py-4 border-b border-slate-100 flex items-center justify-between rounded-t-3xl">
+                <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-blue-50 text-[#0060ac] uppercase tracking-wider">
+                        <i class="fa-solid fa-users text-[10px]"></i>
+                        <span>Organisasi &amp; Ekstrakurikuler</span>
+                    </span>
+                </div>
+                <button onclick="closeDetailEskul()" type="button" aria-label="Tutup Modal"
+                    class="text-slate-400 hover:text-slate-600 text-xl w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 transition-colors cursor-pointer">
+                    <i class="fa-solid fa-xmark text-sm"></i>
                 </button>
             </div>
 
             <!-- Modal Body -->
-            <div class="p-6 sm:p-8">
-                <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-start mb-8">
+            <div class="p-6 sm:p-8 space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
                     <!-- Logo & Title -->
-                    <div class="md:col-span-4 flex flex-col items-center text-center">
-                        <div id="modalLogoWrap" class="w-32 h-32 rounded-full bg-slate-50 flex items-center justify-center border-4 border-brand-blue/30 p-2 mb-4 shadow-lg overflow-hidden">
-                            <img id="detail-eskul-logo" src="" alt="Logo Eskul" class="w-full h-full object-contain">
+                    <div class="md:col-span-4 flex flex-col items-center text-center p-5 bg-gradient-to-b from-blue-50/50 to-slate-50 rounded-2xl border border-blue-100/50">
+                        <div id="modalLogoWrap" class="w-32 h-32 rounded-full bg-white flex items-center justify-center border-4 border-[#0060ac]/20 p-2 mb-4 shadow-lg overflow-hidden shrink-0">
+                            <img id="detail-eskul-logo" src="" alt="Logo" class="max-w-full max-h-full object-contain">
+                            <div id="modalLogoFallback" class="w-full h-full flex items-center justify-center text-[#0060ac] text-4xl hidden">
+                                <i class="fa-solid fa-users"></i>
+                            </div>
                         </div>
-                        <h2 id="detail-eskul-title" class="text-2xl font-black text-slate-900 mb-1"></h2>
-                        <p id="detail-eskul-school" class="text-sm font-semibold text-brand-blue">SMKN 2 Karanganyar</p>
+                        <h2 id="detail-eskul-title" class="text-2xl font-black text-slate-900 mb-1 leading-tight"></h2>
+                        <p id="detail-eskul-school" class="text-sm font-semibold text-[#0060ac] flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-school text-xs"></i>
+                            <span>SMKN 2 Karanganyar</span>
+                        </p>
                     </div>
 
                     <!-- Deskripsi -->
-                    <div class="md:col-span-8">
-                        <h3 class="text-lg font-bold text-slate-800 mb-3 border-b-2 border-brand-blue inline-block pb-1">Deskripsi</h3>
-                        <div id="detail-eskul-desc" class="text-slate-600 text-sm leading-relaxed space-y-3 whitespace-pre-line"></div>
+                    <div class="md:col-span-8 space-y-4">
+                        <div>
+                            <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-2 border-b-2 border-[#0060ac] inline-flex items-center gap-1.5 pb-1">
+                                <i class="fa-solid fa-align-left text-[#0060ac]"></i>
+                                <span>Deskripsi Organisasi / Ekstrakurikuler</span>
+                            </h3>
+                            <div id="detail-eskul-desc" class="text-slate-600 text-xs sm:text-sm leading-relaxed p-4 bg-slate-50 rounded-2xl border border-slate-100 space-y-3 whitespace-pre-line font-normal"></div>
+                        </div>
+
+                        <!-- Dokumentasi Foto -->
+                        <div id="detail-eskul-doc-wrap" class="hidden">
+                            <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-2 inline-flex items-center gap-1.5">
+                                <i class="fa-solid fa-images text-[#0060ac]"></i>
+                                <span>Dokumentasi Kegiatan</span>
+                            </h3>
+                            <div class="rounded-2xl overflow-hidden shadow-sm max-h-72 bg-slate-100 border border-slate-200 flex items-center justify-center">
+                                <img id="detail-eskul-doc" src="" alt="Dokumentasi Kegiatan" class="w-full h-full object-cover">
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Dokumentasi Foto -->
-                <div id="detail-eskul-doc-wrap">
-                    <h3 class="text-lg font-bold text-slate-800 mb-4">Dokumentasi Kegiatan</h3>
-                    <div class="rounded-2xl overflow-hidden shadow-md max-h-72 bg-slate-100">
-                        <img id="detail-eskul-doc" src="" alt="Dokumentasi Kegiatan" class="w-full h-full object-cover">
+                <!-- Quick Switcher: Organisasi Lainnya -->
+                @if ($ekstrakurikulers->count() > 1)
+                    <div class="pt-6 border-t border-slate-100">
+                        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                            <i class="fa-solid fa-arrows-split-up-and-left text-[#0060ac]"></i>
+                            <span>Jelajahi Organisasi &amp; Ekstrakurikuler Lainnya</span>
+                        </h4>
+                        <div class="flex flex-wrap gap-2">
+                            @foreach ($ekstrakurikulers as $item)
+                                <button type="button"
+                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-[#0060ac] text-xs font-semibold transition border border-transparent hover:border-blue-200 cursor-pointer active:scale-95"
+                                    data-nama="{{ $item->nama }}"
+                                    data-sekolah="{{ $item->sekolah ?: 'SMKN 2 Karanganyar' }}"
+                                    data-deskripsi="{{ $item->deskripsi ?: 'Belum ada deskripsi untuk organisasi ini.' }}"
+                                    data-logo="{{ $item->logoUrl() }}"
+                                    data-dokumentasi="{{ $item->dokumentasiUrl() }}"
+                                    onclick="openEskulModal(this)">
+                                    @if ($item->logoUrl())
+                                        <img src="{{ $item->logoUrl() }}" alt="" class="w-3.5 h-3.5 object-contain">
+                                    @else
+                                        <i class="fa-solid fa-circle text-[5px] text-[#0060ac]"></i>
+                                    @endif
+                                    <span>{{ $item->nama }}</span>
+                                </button>
+                            @endforeach
+                        </div>
                     </div>
-                </div>
+                @endif
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="p-4 bg-slate-50 border-t border-slate-100 flex justify-end rounded-b-3xl">
+                <button type="button" onclick="closeDetailEskul()" class="px-5 py-2.5 rounded-xl bg-[#0060ac] hover:bg-[#004f8f] active:scale-95 text-white font-bold text-xs md:text-sm shadow-md shadow-blue-500/20 transition cursor-pointer">
+                    Tutup
+                </button>
             </div>
         </div>
     </div>
 
     <!-- GLOBAL INFO / PRESTASI MODAL -->
-    <div id="global-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl relative text-left transform transition-all">
-            <button onclick="closeModal()" type="button" aria-label="Tutup"
-                class="absolute top-3 right-3 z-20 w-8 h-8 rounded-full bg-slate-900/60 hover:bg-slate-900 text-white flex items-center justify-center transition shadow">
+    <div id="modalPrestasi" class="fixed inset-0 !m-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden" role="dialog" aria-modal="true">
+        <div id="modalPrestasiBox" class="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-slate-100 relative text-left transform transition-all scale-95 opacity-0 duration-200">
+            <button onclick="closePrestasiModal()" type="button" aria-label="Tutup"
+                class="absolute top-3 right-3 z-20 w-8 h-8 rounded-full bg-slate-900/60 hover:bg-slate-900 text-white flex items-center justify-center transition shadow cursor-pointer">
                 <i class="fa-solid fa-xmark text-sm"></i>
             </button>
-            <div id="global-modal-img-wrap" class="h-60 sm:h-64 bg-slate-100 hidden relative overflow-hidden flex items-center justify-center">
-                <img id="global-modal-img" src="" alt="Prestasi" class="w-full h-full object-cover">
+            <div id="modalPrestasiImgWrap" class="h-60 sm:h-64 bg-slate-100 hidden relative overflow-hidden flex items-center justify-center">
+                <img id="modalPrestasiImg" src="" alt="Prestasi" class="w-full h-full object-cover">
             </div>
             <div class="p-6">
-                <h4 id="global-modal-title" class="text-base sm:text-lg font-bold text-slate-900 mb-2 leading-snug"></h4>
-                <p id="global-modal-body" class="text-xs sm:text-sm text-slate-600 leading-relaxed mb-6"></p>
+                <h4 id="modalPrestasiTitle" class="text-base sm:text-lg font-bold text-slate-900 mb-2 leading-snug"></h4>
+                <p id="modalPrestasiBody" class="text-xs sm:text-sm text-slate-600 leading-relaxed mb-6"></p>
                 <div class="flex justify-end">
-                    <button onclick="closeModal()" class="px-5 py-2 bg-brand-blue hover:bg-brand-darkBlue text-white font-bold rounded-xl text-xs transition shadow-sm">
+                    <button onclick="closePrestasiModal()" class="px-5 py-2.5 bg-[#0060ac] hover:bg-[#004f8f] active:scale-95 text-white font-bold rounded-xl text-xs md:text-sm transition shadow-md shadow-blue-500/20 cursor-pointer">
                         Tutup
                     </button>
                 </div>
@@ -470,17 +533,69 @@
 
 @push('scripts')
     <script>
+        function openEskulModal(btn) {
+            if (!btn) return;
+            const nama = btn.getAttribute('data-nama') || '';
+            const sekolah = btn.getAttribute('data-sekolah') || 'SMKN 2 Karanganyar';
+            const deskripsi = btn.getAttribute('data-deskripsi') || 'Belum ada deskripsi untuk ekstrakurikuler ini.';
+            const logo = btn.getAttribute('data-logo');
+            const dokumentasi = btn.getAttribute('data-dokumentasi');
+
+            document.getElementById('detail-eskul-title').textContent = nama;
+            document.getElementById('detail-eskul-school').innerHTML = '<i class="fa-solid fa-school text-xs"></i> <span>' + sekolah + '</span>';
+            document.getElementById('detail-eskul-desc').textContent = deskripsi;
+
+            const logoEl = document.getElementById('detail-eskul-logo');
+            const logoFallback = document.getElementById('modalLogoFallback');
+            if (logo && logo.trim() !== '') {
+                logoEl.src = logo;
+                logoEl.classList.remove('hidden');
+                if (logoFallback) logoFallback.classList.add('hidden');
+            } else {
+                logoEl.src = '';
+                logoEl.classList.add('hidden');
+                if (logoFallback) logoFallback.classList.remove('hidden');
+            }
+
+            const docWrap = document.getElementById('detail-eskul-doc-wrap');
+            const docEl = document.getElementById('detail-eskul-doc');
+            if (dokumentasi && dokumentasi.trim() !== '') {
+                docEl.src = dokumentasi;
+                docWrap.classList.remove('hidden');
+            } else {
+                docWrap.classList.add('hidden');
+            }
+
+            if (typeof window.openModal === 'function') {
+                window.openModal('detail-eskul-modal');
+            } else if (typeof window.openModalElement === 'function') {
+                window.openModalElement(document.getElementById('detail-eskul-modal'));
+            } else {
+                const modal = document.getElementById('detail-eskul-modal');
+                if (modal) {
+                    modal.classList.remove('hidden');
+                    modal.classList.add('flex');
+                    document.body.classList.add('overflow-hidden');
+                }
+            }
+        }
+        window.openOrganisasiModal = openEskulModal;
+
         function showDetailEskulDynamic(item) {
             document.getElementById('detail-eskul-title').textContent = item.nama;
-            document.getElementById('detail-eskul-school').textContent = item.sekolah || 'SMKN 2 Karanganyar';
-            document.getElementById('detail-eskul-desc').textContent = item.deskripsi || 'Belum ada deskripsi untuk ekstrakurikuler ini.';
+            document.getElementById('detail-eskul-school').innerHTML = '<i class="fa-solid fa-school text-xs"></i> <span>' + (item.sekolah || 'SMKN 2 Karanganyar') + '</span>';
+            document.getElementById('detail-eskul-desc').textContent = item.deskripsi || 'Belum ada deskripsi untuk organisasi ini.';
 
             const logo = document.getElementById('detail-eskul-logo');
+            const logoFallback = document.getElementById('modalLogoFallback');
             if (item.logo) {
                 logo.src = item.logo;
-                document.getElementById('modalLogoWrap').classList.remove('hidden');
+                logo.classList.remove('hidden');
+                if (logoFallback) logoFallback.classList.add('hidden');
             } else {
-                document.getElementById('modalLogoWrap').classList.add('hidden');
+                logo.src = '';
+                logo.classList.add('hidden');
+                if (logoFallback) logoFallback.classList.remove('hidden');
             }
 
             const docWrap = document.getElementById('detail-eskul-doc-wrap');
@@ -492,33 +607,40 @@
                 docWrap.classList.add('hidden');
             }
 
-            const modal = document.getElementById('detail-eskul-modal');
-            const content = document.getElementById('detail-eskul-content');
-            modal.classList.remove('hidden');
-            setTimeout(() => {
-                content.classList.remove('scale-95', 'opacity-0');
-                content.classList.add('scale-100', 'opacity-100');
-            }, 10);
+            if (typeof window.openModal === 'function') {
+                window.openModal('detail-eskul-modal');
+            } else if (typeof window.openModalElement === 'function') {
+                window.openModalElement(document.getElementById('detail-eskul-modal'));
+            } else {
+                const modal = document.getElementById('detail-eskul-modal');
+                if (modal) {
+                    modal.classList.remove('hidden');
+                    modal.classList.add('flex');
+                    document.body.classList.add('overflow-hidden');
+                }
+            }
         }
 
         function closeDetailEskul() {
-            const modal = document.getElementById('detail-eskul-modal');
-            const content = document.getElementById('detail-eskul-content');
-            content.classList.remove('scale-100', 'opacity-100');
-            content.classList.add('scale-95', 'opacity-0');
-            setTimeout(() => {
-                modal.classList.add('hidden');
-            }, 200);
+            if (typeof window.closeModal === 'function') {
+                window.closeModal('detail-eskul-modal');
+            } else if (typeof window.closeModalElement === 'function') {
+                window.closeModalElement(document.getElementById('detail-eskul-modal'));
+            } else {
+                const modal = document.getElementById('detail-eskul-modal');
+                if (modal) {
+                    modal.classList.add('hidden');
+                    modal.classList.remove('flex');
+                    document.body.classList.remove('overflow-hidden');
+                }
+            }
         }
 
-        function openModal(title, body, imageUrl = null) {
-            document.getElementById('global-modal-title').textContent = title;
-            document.getElementById('global-modal-body').textContent = body;
-            const imgWrap = document.getElementById('global-modal-img-wrap');
-            const imgEl = document.getElementById('global-modal-img');
-            // Tanpa gambar, area gambar disembunyikan. Tidak ada lagi fallback ke
-            // foto prestasi tetap karena itu menampilkan materi yang bukan milik
-            // data yang sedang dibuka.
+        function openPrestasiModal(title, body, imageUrl = null) {
+            document.getElementById('modalPrestasiTitle').textContent = title;
+            document.getElementById('modalPrestasiBody').textContent = body;
+            const imgWrap = document.getElementById('modalPrestasiImgWrap');
+            const imgEl = document.getElementById('modalPrestasiImg');
             if (imgWrap && imgEl) {
                 if (imageUrl) {
                     imgEl.src = imageUrl;
@@ -529,11 +651,23 @@
                     imgWrap.classList.add('hidden');
                 }
             }
-            document.getElementById('global-modal').classList.remove('hidden');
+            if (typeof window.openModal === 'function') {
+                window.openModal('modalPrestasi');
+            } else if (typeof window.openModalElement === 'function') {
+                window.openModalElement(document.getElementById('modalPrestasi'));
+            } else {
+                document.getElementById('modalPrestasi')?.classList.remove('hidden');
+            }
         }
 
-        function closeModal() {
-            document.getElementById('global-modal').classList.add('hidden');
+        function closePrestasiModal() {
+            if (typeof window.closeModal === 'function') {
+                window.closeModal('modalPrestasi');
+            } else if (typeof window.closeModalElement === 'function') {
+                window.closeModalElement(document.getElementById('modalPrestasi'));
+            } else {
+                document.getElementById('modalPrestasi')?.classList.add('hidden');
+            }
         }
 
         function scrollPrestasiBanner(direction) {

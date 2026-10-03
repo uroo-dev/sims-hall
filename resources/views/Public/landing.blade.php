@@ -401,12 +401,12 @@
 
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
 
-                <!-- PAKET PEMINJAMAN (DINAMIS) -->
+                <!-- PAKET PEMINJAMAN (DINAMIS - 1 PAKET UNGGULAN TERBARU) -->
                 <div class="lg:col-span-4 flex flex-col justify-between gap-6">
                     @forelse($paketPeminjamans as $paket)
                         <div class="bg-white border-2 border-[#0066B2] rounded-2xl p-6 relative shadow-sm">
-                            <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-[#0066B2] text-white text-xs font-semibold px-8 py-1 rounded-full">
-                                {{ $paket->nama_paket }}
+                            <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-[#0066B2] text-white text-xs font-semibold px-8 py-1 rounded-full uppercase tracking-wider">
+                                {{ $paket->nama_paket ?: 'Paket '.ucfirst($paket->kategori) }}
                             </div>
 
                             <div class="mt-2 mb-5 flex items-baseline justify-center gap-1">
@@ -416,25 +416,36 @@
                             </div>
 
                             <ul class="space-y-2.5 mb-6 text-slate-700 text-xs sm:text-sm">
-                                @if($paket->fasilitas)
+                                @if($paket->facilities && $paket->facilities->isNotEmpty())
+                                    @foreach($paket->facilities as $fac)
+                                        <li class="flex items-center gap-2.5">
+                                            <i class="fa-regular fa-circle-check text-[#0066B2] text-base flex-shrink-0"></i>
+                                            <span>{{ $fac->judul }}</span>
+                                        </li>
+                                    @endforeach
+                                @elseif($paket->fasilitas)
                                     @foreach(explode(',', $paket->fasilitas) as $fasilitas)
                                         <li class="flex items-center gap-2.5">
-                                            <i class="fa-regular fa-circle-check text-[#0066B2] text-base"></i>
+                                            <i class="fa-regular fa-circle-check text-[#0066B2] text-base flex-shrink-0"></i>
                                             <span>{{ trim($fasilitas) }}</span>
                                         </li>
                                     @endforeach
+                                @elseif($paket->deskripsi)
+                                    <li class="text-xs text-slate-600 leading-relaxed">
+                                        {{ $paket->deskripsi }}
+                                    </li>
                                 @else
                                     <li class="text-xs text-slate-500">Detail fasilitas belum tersedia.</li>
                                 @endif
                             </ul>
 
-                            <a href="{{ route('customer.peminjaman.create', ['paket_id' => $paket->paketID ?? $paket->id]) }}"
+                            <a href="{{ route('customer.peminjaman.create', ['paket_id' => $paket->id]) }}"
                                 class="w-full text-center block bg-[#0066B2] hover:bg-blue-700 text-white text-xs sm:text-sm font-semibold py-2.5 rounded-full transition-all duration-200">
                                 Pilih Paket
                             </a>
                         </div>
                     @empty
-                        <div class="text-center py-6 text-slate-500 text-xs">Belum ada paket peminjaman.</div>
+                        <div class="text-center py-6 text-slate-500 text-xs bg-white rounded-2xl border border-slate-200 p-6">Belum ada paket peminjaman.</div>
                     @endforelse
                 </div>
 
@@ -586,12 +597,12 @@
                     @endphp
                     @forelse($listDayaTampung as $index => $item)
                         @php
-                            $namaJurusan = $item->nama_jurusan ?? ($item->nama_agenda ?? 'Kompetensi Keahlian');
+                            $namaJurusan = $item->jurusan?->nama ?? ($item->nama_jurusan ?? ($item->nama_agenda ?? 'Kompetensi Keahlian'));
                             $dayaTampung = $item->daya_tampung ?? 0;
                         @endphp
                         <div class="{{ $colorConfig[$index % 4] }} text-white rounded-2xl p-5 hover:scale-105 transition-transform">
                             <div class="text-xs font-extrabold uppercase mb-4 tracking-wider">{{ $namaJurusan }}</div>
-                            <div class="text-4xl font-black mb-1">{{ $dayaTampung }}</div>
+                            <div class="text-4xl font-black mb-1" data-counter-target="{{ $dayaTampung }}">{{ $dayaTampung }}</div>
                             <div class="text-xs font-medium">Siswa</div>
                         </div>
                     @empty

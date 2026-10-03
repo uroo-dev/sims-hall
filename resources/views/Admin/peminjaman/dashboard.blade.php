@@ -314,19 +314,18 @@
                                 <div class="h-0.5 w-full bg-brand-600 rounded-full mt-1"></div>
                             </h2>
                         </div>
-                        <a href="{{ route('customer.profil') }}" class="px-3.5 py-1 bg-brand-600 hover:bg-brand-700 text-white rounded-full text-[11px] font-semibold flex items-center space-x-1.5 transition-colors shadow-sm">
+                        <a href="{{ route('profile.edit') }}" class="px-3.5 py-1 bg-brand-600 hover:bg-brand-700 text-white rounded-full text-[11px] font-semibold flex items-center space-x-1.5 transition-colors shadow-sm">
                             <i class="fa-solid fa-user text-[10px]"></i>
-                            <span>Detail</span>
+                            <span>Edit Profil</span>
                         </a>
                     </div>
 
                     <!-- Profile Image Frame -->
                     <div class="flex flex-col items-center justify-center my-4">
                         <div class="w-48 h-56 rounded-2xl border-2 border-slate-200 bg-slate-50 p-1.5 flex items-center justify-center shadow-inner overflow-hidden relative">
-                            <img src="{{ asset('assets/default-avatar.png') }}"
+                            <img src="{{ auth()->user()->foto_profil_url }}"
                                 alt="Foto Profil {{ auth()->user()->name }}"
-                                class="w-full h-full object-cover rounded-xl"
-                                onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}&background=0073c6&color=fff&size=256';">
+                                class="w-full h-full object-cover rounded-xl">
                         </div>
 
                         <!-- Name & Email Subtitle -->

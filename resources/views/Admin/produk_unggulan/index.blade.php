@@ -8,19 +8,6 @@
 @section('content')
     <div class="space-y-6">
 
-        @if (session('success'))
-            <div class="rounded-2xl border border-emerald-100 bg-emerald-50 px-5 py-3 text-sm font-semibold text-emerald-700 flex items-center gap-2.5" role="status">
-                <i class="fa-solid fa-circle-check"></i>
-                <span>{{ session('success') }}</span>
-            </div>
-        @endif
-
-        @if ($errors->any())
-            <div class="rounded-2xl border border-red-100 bg-red-50 px-5 py-3 text-sm font-semibold text-red-700 flex items-center gap-2.5" role="alert">
-                <i class="fa-solid fa-circle-exclamation"></i>
-                <span>{{ $errors->first() }}</span>
-            </div>
-        @endif
 
         <!-- CARD: JUDUL, DESKRIPSI & DOKUMENTASI -->
         <section class="bg-white rounded-2xl p-6 figma-card-shadow border border-slate-100">

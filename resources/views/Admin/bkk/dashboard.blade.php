@@ -5,20 +5,6 @@
 
 @section('content')
 
-    {{-- NOTIFIKASI --}}
-    @if (session('success'))
-        <div class="rounded-xl border border-green-200 bg-green-50 text-green-800 px-4 py-3 text-sm flex items-start gap-2">
-            <i class="fa-solid fa-circle-check mt-0.5"></i>
-            <span>{{ session('success') }}</span>
-        </div>
-    @endif
-
-    @if (session('error'))
-        <div class="rounded-xl border border-red-200 bg-red-50 text-red-800 px-4 py-3 text-sm flex items-start gap-2">
-            <i class="fa-solid fa-circle-exclamation mt-0.5"></i>
-            <span>{{ session('error') }}</span>
-        </div>
-    @endif
 
     {{-- STATISTIC CARDS --}}
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">

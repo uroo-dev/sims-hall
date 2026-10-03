@@ -208,10 +208,9 @@
 
                 <!-- Avatar Profil Pengguna -->
                 <div class="w-full aspect-[4/5] max-h-[300px] border border-gray-200 rounded-lg overflow-hidden flex items-center justify-center bg-[#fdfdfd] relative shadow-inner">
-                    <img src="{{ asset('assets/default-avatar.png') }}"
+                    <img src="{{ $user?->foto_profil_url ?? asset('assets/default-avatar.png') }}"
                         alt="Foto Profil {{ $user?->name ?? 'Pengguna' }}"
-                        class="w-full h-full object-cover"
-                        onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name={{ urlencode($user?->name ?? 'Pengguna') }}&background=0070ba&color=fff&size=300';">
+                        class="w-full h-full object-cover">
                 </div>
 
                 <!-- Info User (Nama & Email Instansi) -->

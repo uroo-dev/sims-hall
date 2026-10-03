@@ -82,6 +82,8 @@
         <main class="flex-1 lg:ml-[270px] p-3 md:p-6 space-y-5 max-w-[1600px]">
             @include('Admin.layout.header')
             
+            @include('partials.alerts')
+
             @yield('content')
 
             @include('Admin.layout.footer')
@@ -92,7 +94,7 @@
     @stack('modals')
 
     <!-- MODAL: KONFIRMASI LOGOUT -->
-    <div id="modalLogout" class="fixed inset-0 !m-0 z-[100] hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity">
+    <div id="modalLogout" class="fixed inset-0 !m-0 z-[100] hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity" role="dialog" aria-modal="true">
         <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl border border-slate-100 overflow-hidden transform transition-all scale-95 duration-200" id="modalLogoutBox">
             <div class="p-6 text-center space-y-4">
                 <div class="w-14 h-14 mx-auto rounded-2xl bg-red-50 text-red-600 border border-red-100/80 flex items-center justify-center text-2xl shadow-xs">
@@ -112,7 +114,7 @@
                         Batal
                     </button>
                     <button type="submit"
-                        class="flex-1 px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 active:scale-95 text-white text-xs md:text-sm font-bold shadow-sm transition flex items-center justify-center gap-2 cursor-pointer">
+                        class="flex-1 px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 active:scale-95 text-white text-xs md:text-sm font-bold shadow-md shadow-red-500/20 transition flex items-center justify-center gap-2 cursor-pointer">
                         <i class="fa-solid fa-arrow-right-from-bracket text-xs"></i>
                         <span>Ya, Keluar</span>
                     </button>
@@ -120,6 +122,8 @@
             </div>
         </div>
     </div>
+
+    @include('partials.modals')
 
     @vite(['resources/js/app.js'])
 
@@ -140,46 +144,11 @@
 
         // Modal Logout Handlers
         function openLogoutModal() {
-            const modal = document.getElementById('modalLogout');
-            const box = document.getElementById('modalLogoutBox');
-            if (!modal || !box) return;
-
-            document.body.classList.add('overflow-hidden');
-            modal.classList.remove('hidden');
-            setTimeout(() => {
-                box.classList.remove('scale-95');
-                box.classList.add('scale-100');
-            }, 10);
+            window.openModal('modalLogout');
         }
 
         function closeLogoutModal() {
-            const modal = document.getElementById('modalLogout');
-            const box = document.getElementById('modalLogoutBox');
-            if (!modal || !box) return;
-
-            box.classList.remove('scale-100');
-            box.classList.add('scale-95');
-            setTimeout(() => {
-                modal.classList.add('hidden');
-                document.body.classList.remove('overflow-hidden');
-            }, 150);
-        }
-
-        // Close logout modal on escape key
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape') {
-                closeLogoutModal();
-            }
-        });
-
-        // Close logout modal on click outside box
-        const modalLogoutEl = document.getElementById('modalLogout');
-        if (modalLogoutEl) {
-            modalLogoutEl.addEventListener('click', function(event) {
-                if (event.target === modalLogoutEl) {
-                    closeLogoutModal();
-                }
-            });
+            window.closeModal('modalLogout');
         }
     </script>
 

@@ -3,36 +3,6 @@
 @section('title', 'Data Guru - Data Master')
 @section('content')
 
-    <!-- ALERT NOTIFIKASI -->
-    @if(session('success'))
-        <div class="mb-5 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs md:text-sm font-semibold flex items-center justify-between shadow-xs">
-            <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-xl bg-emerald-500 text-white flex items-center justify-center flex-shrink-0">
-                    <i class="fa-solid fa-circle-check text-sm"></i>
-                </div>
-                <span>{{ session('success') }}</span>
-            </div>
-            <button type="button" onclick="this.parentElement.remove()" class="text-emerald-500 hover:text-emerald-800 transition">
-                <i class="fa-solid fa-xmark text-base"></i>
-            </button>
-        </div>
-    @endif
-
-    @if($errors->any())
-        <div class="mb-5 p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs md:text-sm font-medium shadow-xs">
-            <div class="flex items-center gap-3 mb-2 font-bold text-rose-900">
-                <div class="w-8 h-8 rounded-xl bg-rose-500 text-white flex items-center justify-center flex-shrink-0">
-                    <i class="fa-solid fa-triangle-exclamation text-sm"></i>
-                </div>
-                <span>Terdapat kesalahan validasi input:</span>
-            </div>
-            <ul class="list-disc list-inside space-y-1 pl-11 text-xs">
-                @foreach($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
 
     <!-- CARD: DAFTAR GURU -->
     <div class="bg-white rounded-2xl p-6 card-shadow border border-gray-100/80">
@@ -379,23 +349,13 @@
 
         // ADD MODAL
         function openAddModal() {
-            const modal = document.getElementById('addGuruModal');
-            const box = document.getElementById('addGuruModalBox');
-            modal.classList.remove('hidden');
-            setTimeout(() => {
-                box.classList.remove('scale-95');
-                box.classList.add('scale-100');
-            }, 10);
+            if (window.openModal) window.openModal('addGuruModal');
+            else document.getElementById('addGuruModal')?.classList.remove('hidden');
         }
 
         function closeAddModal() {
-            const modal = document.getElementById('addGuruModal');
-            const box = document.getElementById('addGuruModalBox');
-            box.classList.remove('scale-100');
-            box.classList.add('scale-95');
-            setTimeout(() => {
-                modal.classList.add('hidden');
-            }, 150);
+            if (window.closeModal) window.closeModal('addGuruModal');
+            else document.getElementById('addGuruModal')?.classList.add('hidden');
         }
 
         // EDIT MODAL
@@ -408,23 +368,13 @@
             document.getElementById('edit_no_hp').value = guru.no_hp || '';
             document.getElementById('edit_jurusan').value = guru.jurusan || '';
 
-            const modal = document.getElementById('editGuruModal');
-            const box = document.getElementById('editGuruModalBox');
-            modal.classList.remove('hidden');
-            setTimeout(() => {
-                box.classList.remove('scale-95');
-                box.classList.add('scale-100');
-            }, 10);
+            if (window.openModal) window.openModal('editGuruModal');
+            else document.getElementById('editGuruModal')?.classList.remove('hidden');
         }
 
         function closeEditModal() {
-            const modal = document.getElementById('editGuruModal');
-            const box = document.getElementById('editGuruModalBox');
-            box.classList.remove('scale-100');
-            box.classList.add('scale-95');
-            setTimeout(() => {
-                modal.classList.add('hidden');
-            }, 150);
+            if (window.closeModal) window.closeModal('editGuruModal');
+            else document.getElementById('editGuruModal')?.classList.add('hidden');
         }
 
         // DELETE MODAL
@@ -433,38 +383,13 @@
             form.action = `{{ url('dashboard/data-master/guru') }}/${id}`;
             document.getElementById('deleteGuruName').innerText = nama;
 
-            const modal = document.getElementById('deleteGuruModal');
-            const box = document.getElementById('deleteGuruModalBox');
-            modal.classList.remove('hidden');
-            setTimeout(() => {
-                box.classList.remove('scale-95');
-                box.classList.add('scale-100');
-            }, 10);
+            if (window.openModal) window.openModal('deleteGuruModal');
+            else document.getElementById('deleteGuruModal')?.classList.remove('hidden');
         }
 
         function closeDeleteModal() {
-            const modal = document.getElementById('deleteGuruModal');
-            const box = document.getElementById('deleteGuruModalBox');
-            box.classList.remove('scale-100');
-            box.classList.add('scale-95');
-            setTimeout(() => {
-                modal.classList.add('hidden');
-            }, 150);
+            if (window.closeModal) window.closeModal('deleteGuruModal');
+            else document.getElementById('deleteGuruModal')?.classList.add('hidden');
         }
-
-        // Close on backdrop click or Escape
-        window.addEventListener('click', function(e) {
-            if (e.target.id === 'addGuruModal') closeAddModal();
-            if (e.target.id === 'editGuruModal') closeEditModal();
-            if (e.target.id === 'deleteGuruModal') closeDeleteModal();
-        });
-
-        window.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                closeAddModal();
-                closeEditModal();
-                closeDeleteModal();
-            }
-        });
     </script>
 @endsection

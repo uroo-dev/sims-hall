@@ -63,6 +63,10 @@
         href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
 
+    <!-- GSAP & ScrollTrigger Animation Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
     <script>
         tailwind.config = {
             theme: {
@@ -115,6 +119,13 @@
     <!-- HEADER -->
     @include('Public.layout.header')
 
+    <!-- Floating Toast Alert Container (Public / Landing) -->
+    <div id="unified-alert-floating-wrapper" class="fixed top-24 right-4 sm:right-8 z-[110] max-w-md w-[calc(100%-2rem)] sm:w-full pointer-events-none transition-all duration-300">
+        <div class="pointer-events-auto">
+            @include('partials.alerts')
+        </div>
+    </div>
+
     @yield('content')
     
     @include('Public.layout.footer')
@@ -128,23 +139,27 @@
 
     <!-- GLOBAL MODAL DIALOG -->
     <div id="global-modal"
-        class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl relative transform transition-all scale-95 opacity-0"
+        class="fixed inset-0 !m-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden" role="dialog" aria-modal="true">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 md:p-7 shadow-2xl border border-slate-100 relative transform transition-all scale-95 opacity-0 duration-200"
             id="modal-content">
             <div class="flex items-center justify-between mb-4">
-                <h3 id="modal-title" class="text-lg font-bold text-slate-900">Modal Title</h3>
-                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 text-xl"><i
-                        class="fa-solid fa-xmark"></i></button>
+                <h3 id="modal-title" class="text-base md:text-lg font-extrabold text-slate-900 tracking-tight">Informasi</h3>
+                <button onclick="closeModal()" class="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition cursor-pointer">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
             </div>
-            <p id="modal-body" class="text-slate-600 text-sm leading-relaxed mb-6">Modal body text...</p>
+            <p id="modal-body" class="text-slate-600 text-xs md:text-sm leading-relaxed mb-6">Memuat...</p>
             <div class="text-right">
                 <button onclick="closeModal()"
-                    class="bg-brand-blue text-white font-semibold text-xs px-5 py-2.5 rounded-lg hover:bg-brand-darkBlue">
+                    class="px-5 py-2.5 rounded-xl bg-[#0060ac] hover:bg-[#004f8f] active:scale-95 text-white font-bold text-xs md:text-sm shadow-md shadow-blue-500/20 transition cursor-pointer">
                     Tutup
                 </button>
             </div>
         </div>
     </div>
+
+    @include('partials.modals')
+    @stack('modals')
 
     <!-- JAVASCRIPT INTERACTIVE LOGIC -->
     <script>
@@ -201,48 +216,6 @@
             mobileMenu.classList.toggle('hidden');
         });
 
-        // Global Modal Logic
-        const globalModal = document.getElementById('global-modal');
-        const modalContent = document.getElementById('modal-content');
-        const modalTitle = document.getElementById('modal-title');
-        const modalBody = document.getElementById('modal-body');
-
-        function openModal(title, body) {
-            modalTitle.innerText = title;
-            modalBody.innerText = body;
-            globalModal.classList.remove('hidden');
-            setTimeout(() => {
-                modalContent.classList.remove('scale-95', 'opacity-0');
-                modalContent.classList.add('scale-100', 'opacity-100');
-            }, 10);
-        }
-
-        function closeModal() {
-            modalContent.classList.remove('scale-100', 'opacity-100');
-            modalContent.classList.add('scale-95', 'opacity-0');
-            setTimeout(() => {
-                globalModal.classList.add('hidden');
-            }, 200);
-        }
-
-        // Tutup modal dengan klik area gelap atau tombol Escape.
-        // Diambil dari Public/partials/scripts.blade.php versi lama.
-        if (globalModal) {
-            globalModal.addEventListener('click', (e) => {
-                if (e.target === globalModal) closeModal();
-            });
-        }
-
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && globalModal && !globalModal.classList.contains('hidden')) {
-                closeModal();
-            }
-        });
-
-        // Chatbot: TIDAK handled di layout ini. Widget Nanya AI berdiri sendiri
-        // di resources/views/components/chatbot.blade.php (backend Laravel +
-        // Gemini). Fungsi toggleChatbot()/sendChatMessage() versi lama dihapus
-        // karena hanya mencocokkan keyword tanpa menyentuh server.
 
         // News Carousel Interactions
         const prevNews = document.getElementById('prev-news');
@@ -262,12 +235,7 @@
         }
     </script>
 
-    {{-- Layout ini sudah punya sendiri seluruh logika yang biasanya ada di
-         Public/partials/scripts.blade.php (mobile menu, global modal, news
-         carousel). Partial itu sengaja TIDAK di-include: kedua file
-         mendeklarasikan const global dengan nama sama (globalModal, modalContent,
-         modalTitle, modalBody, prevNews, nextNews, newsContainer), sehingga
-         keduanya digabung akan melempar SyntaxError dan mematikan seluruh JS. --}}
+    @include('Public.partials.animations')
     @stack('scripts')
 </body>
 

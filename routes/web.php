@@ -22,6 +22,7 @@ use App\Http\Controllers\PaymentConfigurationController;
 use App\Http\Controllers\PklController;
 use App\Http\Controllers\ProdukController;
 use App\Http\Controllers\ProdukUnggulanController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Public\Ppdb\PpdbController;
 use App\Http\Controllers\Public\ProdukUnggulanController as PublicProdukUnggulanController;
 use App\Http\Controllers\PublicController;
@@ -123,6 +124,11 @@ Route::middleware(['auth', 'role:bkk,admin_pklbkk,super_admin,super_duper_admin'
 // Dashboard utama & modul admin
 Route::middleware('auth')->group(function () {
     Route::match(['get', 'post'], '/logout', [AuthController::class, 'destroy'])->name('logout');
+
+    // Profil Pengguna (Semua Role)
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile/foto', [ProfileController::class, 'destroyPhoto'])->name('profile.destroy-photo');
 
     // Dashboard Dispatcher
     Route::get('/dashboard', [DashboardController::class, 'dispatch'])

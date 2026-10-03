@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 
-#[Fillable(['judul', 'deskripsi', 'dokumentasi', 'jurusan_id'])]
+#[Fillable(['judul', 'deskripsi', 'dokumentasi'])]
 #[ObservedBy(ProdukUnggulanObserver::class)]
 class ProdukUnggulan extends Model
 {

@@ -6,34 +6,6 @@
 @section('content')
 <div class="space-y-6">
 
-    <!-- ALERT FLASH NOTIFIKASI -->
-    @if (session('success'))
-        <div class="bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl p-4 flex items-center justify-between shadow-xs">
-            <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold text-sm">
-                    <i class="fa-solid fa-check"></i>
-                </div>
-                <span class="text-xs md:text-sm font-medium">{{ session('success') }}</span>
-            </div>
-            <button type="button" onclick="this.parentElement.remove()" class="text-emerald-500 hover:text-emerald-700">
-                <i class="fa-solid fa-xmark text-sm"></i>
-            </button>
-        </div>
-    @endif
-
-    @if (session('error'))
-        <div class="bg-red-50 border border-red-200 text-red-800 rounded-2xl p-4 flex items-center justify-between shadow-xs">
-            <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-full bg-red-500 text-white flex items-center justify-center font-bold text-sm">
-                    <i class="fa-solid fa-triangle-exclamation"></i>
-                </div>
-                <span class="text-xs md:text-sm font-medium">{{ session('error') }}</span>
-            </div>
-            <button type="button" onclick="this.parentElement.remove()" class="text-red-500 hover:text-red-700">
-                <i class="fa-solid fa-xmark text-sm"></i>
-            </button>
-        </div>
-    @endif
 
     <!-- FILTER TAB STATUS -->
     <div class="flex items-center gap-2 overflow-x-auto pb-1">
@@ -353,40 +325,13 @@
 @push('scripts')
 <script>
     function openExportModal() {
-        const modal = document.getElementById('exportPdfModal');
-        const box = document.getElementById('exportPdfModalBox');
-        if (!modal || !box) return;
-
-        document.body.classList.add('overflow-hidden');
-        modal.classList.remove('hidden');
-        setTimeout(() => {
-            box.classList.remove('scale-95');
-            box.classList.add('scale-100');
-        }, 10);
+        if (window.openModal) window.openModal('exportPdfModal');
+        else document.getElementById('exportPdfModal')?.classList.remove('hidden');
     }
 
     function closeExportModal() {
-        const modal = document.getElementById('exportPdfModal');
-        const box = document.getElementById('exportPdfModalBox');
-        if (!modal || !box) return;
-
-        box.classList.remove('scale-100');
-        box.classList.add('scale-95');
-        setTimeout(() => {
-            modal.classList.add('hidden');
-            document.body.classList.remove('overflow-hidden');
-        }, 150);
-    }
-
-    // Close on escape & backdrop click
-    document.addEventListener('keydown', function(event) {
-        if (event.key === 'Escape') closeExportModal();
-    });
-    const exportPdfModalEl = document.getElementById('exportPdfModal');
-    if (exportPdfModalEl) {
-        exportPdfModalEl.addEventListener('click', function(e) {
-            if (e.target === exportPdfModalEl) closeExportModal();
-        });
+        if (window.closeModal) window.closeModal('exportPdfModal');
+        else document.getElementById('exportPdfModal')?.classList.add('hidden');
     }
 
     function setExportPreset(preset) {

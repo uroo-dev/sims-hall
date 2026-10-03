@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin\Ppdb;
 
 use App\Http\Controllers\Controller;
+use App\Models\Jurusan;
 use App\Models\Ppdb_informasi;
 use App\Models\Ppdb_jalur;
 use App\Models\Ppdb_jurusan;
@@ -20,8 +21,9 @@ class PpdbInformasiController extends Controller
      */
     public function index(): View
     {
-        $jurusans = Ppdb_jurusan::orderBy('id')->get();
+        $jurusans = Ppdb_jurusan::with('jurusan')->orderBy('id')->get();
         $jalurs = Ppdb_jalur::orderBy('id')->get();
+        $daftarJurusan = Jurusan::orderBy('nama')->get();
 
         return view('Admin.ppdb.informasi', [
             'informasi' => Ppdb_informasi::first(),
@@ -31,6 +33,7 @@ class PpdbInformasiController extends Controller
             'jalurs' => $jalurs,
             'totalDayaTampung' => $jurusans->sum('daya_tampung'),
             'totalPercentase' => $jalurs->sum('percentase'),
+            'daftarJurusan' => $daftarJurusan,
         ]);
     }
 
@@ -301,12 +304,19 @@ class PpdbInformasiController extends Controller
      */
     public function jurusanStore(Request $request): RedirectResponse
     {
+        if (! $request->filled('jurusan_id') && $request->filled('nama_jurusan')) {
+            $found = Jurusan::where('nama', $request->input('nama_jurusan'))->first();
+            if ($found) {
+                $request->merge(['jurusan_id' => $found->jurusanID]);
+            }
+        }
+
         $validated = $request->validate([
-            'nama_jurusan' => ['required', 'string', 'max:100'],
+            'jurusan_id' => ['required', 'exists:jurusan,jurusanID'],
             'daya_tampung' => ['required', 'integer', 'min:0'],
         ], [
-            'nama_jurusan.required' => 'Nama jurusan wajib diisi.',
-            'nama_jurusan.max' => 'Nama jurusan maksimal 100 karakter.',
+            'jurusan_id.required' => 'Jurusan wajib dipilih.',
+            'jurusan_id.exists' => 'Jurusan yang dipilih tidak valid.',
             'daya_tampung.required' => 'Daya tampung wajib diisi.',
             'daya_tampung.integer' => 'Daya tampung harus berupa angka.',
             'daya_tampung.min' => 'Daya tampung minimal 0.',
@@ -322,12 +332,19 @@ class PpdbInformasiController extends Controller
 
     public function jurusanUpdate(Request $request, Ppdb_jurusan $jurusan): RedirectResponse
     {
+        if (! $request->filled('jurusan_id') && $request->filled('nama_jurusan')) {
+            $found = Jurusan::where('nama', $request->input('nama_jurusan'))->first();
+            if ($found) {
+                $request->merge(['jurusan_id' => $found->jurusanID]);
+            }
+        }
+
         $validated = $request->validate([
-            'nama_jurusan' => ['required', 'string', 'max:100'],
+            'jurusan_id' => ['required', 'exists:jurusan,jurusanID'],
             'daya_tampung' => ['required', 'integer', 'min:0'],
         ], [
-            'nama_jurusan.required' => 'Nama jurusan wajib diisi.',
-            'nama_jurusan.max' => 'Nama jurusan maksimal 100 karakter.',
+            'jurusan_id.required' => 'Jurusan wajib dipilih.',
+            'jurusan_id.exists' => 'Jurusan yang dipilih tidak valid.',
             'daya_tampung.required' => 'Daya tampung wajib diisi.',
             'daya_tampung.integer' => 'Daya tampung harus berupa angka.',
             'daya_tampung.min' => 'Daya tampung minimal 0.',

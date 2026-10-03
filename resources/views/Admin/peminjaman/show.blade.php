@@ -49,67 +49,60 @@
             $isNeedSetCustomPrice = $peminjaman->is_custom && (!$peminjaman->harga_custom || !$pembayaran || (float) $pembayaran->total_tagihan <= 0);
         @endphp
         @if (!in_array($peminjaman->status, ['rejected', 'cancelled']))
-            @if(!auth()->user()->isSuperAdmin())
-                <div class="flex items-center gap-2">
-                    @if ($hasPendingPayment)
-                        <button type="button" onclick="alert('Harap verifikasi bukti pembayaran pemohon terlebih dahulu (apakah valid atau ditolak) sebelum menolak permohonan peminjaman.')"
-                            class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-500 border border-slate-300 rounded-xl text-xs md:text-sm font-bold shadow-2xs transition flex items-center gap-2 cursor-pointer"
-                            title="Verifikasi pembayaran terlebih dahulu">
-                            <i class="fa-solid fa-ban text-xs"></i>
-                            <span>Tolak Pengajuan</span>
+            <div class="flex items-center gap-2">
+                @if ($hasPendingPayment)
+                    <button type="button" onclick="alert('Harap verifikasi bukti pembayaran pemohon terlebih dahulu (apakah valid atau ditolak) sebelum menolak permohonan peminjaman.')"
+                        class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-500 border border-slate-300 rounded-xl text-xs md:text-sm font-bold shadow-2xs transition flex items-center gap-2 cursor-pointer"
+                        title="Verifikasi pembayaran terlebih dahulu">
+                        <i class="fa-solid fa-ban text-xs"></i>
+                        <span>Tolak Pengajuan</span>
+                    </button>
+                @else
+                    <button type="button" onclick="openModalReject()"
+                        class="px-4 py-2 bg-white hover:bg-red-50 text-red-600 border border-red-200 rounded-xl text-xs md:text-sm font-bold shadow-2xs transition flex items-center gap-2 cursor-pointer">
+                        <i class="fa-solid fa-ban text-xs"></i>
+                        <span>Tolak Pengajuan</span>
+                    </button>
+                @endif
+
+                @if (!in_array($peminjaman->status, ['approved_1', 'approved_final']))
+                    @if (isset($conflictingApproved) && $conflictingApproved)
+                        <button type="button" onclick="alert('Tidak dapat menyetujui peminjaman: Jadwal bentrok dengan peminjaman yang sudah disetujui (#{{ $conflictingApproved->id }} - {{ $conflictingApproved->nama }}).')"
+                            title="Jadwal peminjaman bentrok dengan peminjaman lain yang sudah disetujui"
+                            class="px-5 py-2 bg-slate-200 text-slate-500 cursor-not-allowed rounded-xl text-xs md:text-sm font-bold shadow-xs transition flex items-center gap-2">
+                            <i class="fa-solid fa-triangle-exclamation text-amber-500 text-xs"></i>
+                            <span>Jadwal Bentrok</span>
+                        </button>
+                    @elseif ($isNeedSetCustomPrice)
+                        <button type="button" onclick="document.getElementById('formTetapkanHargaCustom')?.scrollIntoView({behavior: 'smooth'})"
+                            title="Tetapkan harga sewa paket custom terlebih dahulu sebelum persetujuan"
+                            class="px-5 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs md:text-sm font-bold shadow-xs transition flex items-center gap-2 cursor-pointer">
+                            <i class="fa-solid fa-tag text-xs"></i>
+                            <span>Tetapkan Harga Dulu</span>
+                        </button>
+                    @elseif ($hasPendingPayment)
+                        <button type="button" onclick="alert('Tidak dapat menyetujui peminjaman: Terdapat bukti transfer pembayaran yang belum diverifikasi. Harap verifikasi bukti pembayaran pemohon terlebih dahulu.')"
+                            title="Harap verifikasi bukti pembayaran terlebih dahulu"
+                            class="px-5 py-2 bg-slate-200 text-slate-500 hover:bg-slate-300 rounded-xl text-xs md:text-sm font-bold shadow-xs transition flex items-center gap-2 cursor-pointer">
+                            <i class="fa-solid fa-clock text-amber-500 text-xs"></i>
+                            <span>Verifikasi Pembayaran Dulu</span>
+                        </button>
+                    @elseif (!$hasVerifiedPayment)
+                        <button type="button" onclick="alert('Tidak dapat menyetujui peminjaman: Pembayaran belum diverifikasi benar (valid). Pastikan pemohon telah membayar dan bukti pembayaran telah diverifikasi valid sebelum menyetujui peminjaman.')"
+                            title="Pembayaran belum diverifikasi valid"
+                            class="px-5 py-2 bg-slate-200 text-slate-500 hover:bg-slate-300 rounded-xl text-xs md:text-sm font-bold shadow-xs transition flex items-center gap-2 cursor-pointer">
+                            <i class="fa-solid fa-shield-halved text-slate-400 text-xs"></i>
+                            <span>Belum Ada Pembayaran Valid</span>
                         </button>
                     @else
-                        <button type="button" onclick="openModalReject()"
-                            class="px-4 py-2 bg-white hover:bg-red-50 text-red-600 border border-red-200 rounded-xl text-xs md:text-sm font-bold shadow-2xs transition flex items-center gap-2 cursor-pointer">
-                            <i class="fa-solid fa-ban text-xs"></i>
-                            <span>Tolak Pengajuan</span>
+                        <button type="button" onclick="openModalApprove()"
+                            class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs md:text-sm font-bold shadow-xs transition flex items-center gap-2 cursor-pointer">
+                            <i class="fa-solid fa-check text-xs"></i>
+                            <span>Setujui (Approve)</span>
                         </button>
                     @endif
-
-                    @if (!in_array($peminjaman->status, ['approved_1', 'approved_final']))
-                        @if (isset($conflictingApproved) && $conflictingApproved)
-                            <button type="button" onclick="alert('Tidak dapat menyetujui peminjaman: Jadwal bentrok dengan peminjaman yang sudah disetujui (#{{ $conflictingApproved->id }} - {{ $conflictingApproved->nama }}).')"
-                                title="Jadwal peminjaman bentrok dengan peminjaman lain yang sudah disetujui"
-                                class="px-5 py-2 bg-slate-200 text-slate-500 cursor-not-allowed rounded-xl text-xs md:text-sm font-bold shadow-xs transition flex items-center gap-2">
-                                <i class="fa-solid fa-triangle-exclamation text-amber-500 text-xs"></i>
-                                <span>Jadwal Bentrok</span>
-                            </button>
-                        @elseif ($isNeedSetCustomPrice)
-                            <button type="button" onclick="document.getElementById('formTetapkanHargaCustom')?.scrollIntoView({behavior: 'smooth'})"
-                                title="Tetapkan harga sewa paket custom terlebih dahulu sebelum persetujuan"
-                                class="px-5 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs md:text-sm font-bold shadow-xs transition flex items-center gap-2 cursor-pointer">
-                                <i class="fa-solid fa-tag text-xs"></i>
-                                <span>Tetapkan Harga Dulu</span>
-                            </button>
-                        @elseif ($hasPendingPayment)
-                            <button type="button" onclick="alert('Tidak dapat menyetujui peminjaman: Terdapat bukti transfer pembayaran yang belum diverifikasi. Harap verifikasi bukti pembayaran pemohon terlebih dahulu.')"
-                                title="Harap verifikasi bukti pembayaran terlebih dahulu"
-                                class="px-5 py-2 bg-slate-200 text-slate-500 hover:bg-slate-300 rounded-xl text-xs md:text-sm font-bold shadow-xs transition flex items-center gap-2 cursor-pointer">
-                                <i class="fa-solid fa-clock text-amber-500 text-xs"></i>
-                                <span>Verifikasi Pembayaran Dulu</span>
-                            </button>
-                        @elseif (!$hasVerifiedPayment)
-                            <button type="button" onclick="alert('Tidak dapat menyetujui peminjaman: Pembayaran belum diverifikasi benar (valid). Pastikan pemohon telah membayar dan bukti pembayaran telah diverifikasi valid sebelum menyetujui peminjaman.')"
-                                title="Pembayaran belum diverifikasi valid"
-                                class="px-5 py-2 bg-slate-200 text-slate-500 hover:bg-slate-300 rounded-xl text-xs md:text-sm font-bold shadow-xs transition flex items-center gap-2 cursor-pointer">
-                                <i class="fa-solid fa-shield-halved text-slate-400 text-xs"></i>
-                                <span>Belum Ada Pembayaran Valid</span>
-                            </button>
-                        @else
-                            <button type="button" onclick="openModalApprove()"
-                                class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs md:text-sm font-bold shadow-xs transition flex items-center gap-2 cursor-pointer">
-                                <i class="fa-solid fa-check text-xs"></i>
-                                <span>Setujui (Approve)</span>
-                            </button>
-                        @endif
-                    @endif
-                </div>
-            @else
-                <span class="inline-flex items-center gap-1.5 px-3.5 py-2.5 bg-amber-50 text-amber-800 border border-amber-200 text-xs md:text-sm font-semibold rounded-xl">
-                    <i class="fa-solid fa-lock text-amber-600 text-xs"></i>
-                    <span>Mode Baca (Super Admin)</span>
-                </span>
-            @endif
+                @endif
+            </div>
         @endif
     </div>
 
@@ -155,49 +148,6 @@
                     @endif
                 </p>
             </div>
-        </div>
-    @endif
-
-    <!-- FLASH MESSAGES -->
-    @if (session('success'))
-        <div class="bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl p-4 flex items-center justify-between shadow-xs">
-            <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold text-sm">
-                    <i class="fa-solid fa-check"></i>
-                </div>
-                <span class="text-xs md:text-sm font-medium">{{ session('success') }}</span>
-            </div>
-            <button type="button" onclick="this.parentElement.remove()" class="text-emerald-500 hover:text-emerald-700">
-                <i class="fa-solid fa-xmark text-sm"></i>
-            </button>
-        </div>
-    @endif
-
-    @if (session('error'))
-        <div class="bg-red-50 border border-red-200 text-red-800 rounded-2xl p-4 flex items-center justify-between shadow-xs">
-            <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-full bg-red-500 text-white flex items-center justify-center font-bold text-sm">
-                    <i class="fa-solid fa-triangle-exclamation"></i>
-                </div>
-                <span class="text-xs md:text-sm font-medium">{{ session('error') }}</span>
-            </div>
-            <button type="button" onclick="this.parentElement.remove()" class="text-red-500 hover:text-red-700">
-                <i class="fa-solid fa-xmark text-sm"></i>
-            </button>
-        </div>
-    @endif
-
-    @if ($errors->any())
-        <div class="bg-red-50 border border-red-200 text-red-800 rounded-2xl p-4 space-y-1 shadow-xs">
-            <div class="font-bold text-xs md:text-sm flex items-center gap-2">
-                <i class="fa-solid fa-circle-exclamation"></i>
-                <span>Terdapat kesalahan pengisian data:</span>
-            </div>
-            <ul class="list-disc list-inside text-xs space-y-0.5">
-                @foreach ($errors->all() as $err)
-                    <li>{{ $err }}</li>
-                @endforeach
-            </ul>
         </div>
     @endif
 
@@ -380,7 +330,7 @@
                                 </div>
                             </div>
                         </div>
-                    @elseif (!auth()->user()->isSuperAdmin())
+                    @else
                         <div id="formTetapkanHargaCustom" class="mt-4 p-5 bg-gradient-to-br from-amber-50/80 to-purple-50/50 rounded-2xl border-2 border-amber-300 space-y-4">
                             <div class="flex items-start justify-between gap-3">
                                 <div class="flex items-center gap-2.5">
@@ -711,42 +661,40 @@
                                 @endif
 
                                 <!-- AKSI VERIFIKASI / TOLAK BUKTI TRANSFER -->
-                                @if(!auth()->user()->isSuperAdmin())
-                                    @if ($trx->status === 'pending')
-                                        <div class="pt-3 border-t border-slate-200/60 flex items-stretch gap-2">
-                                            <form action="{{ route('admin.peminjaman.verifikasi-pembayaran', [$peminjaman->id, $trx->id]) }}" method="POST" class="flex-1 m-0 flex">
-                                                @csrf
-                                                <button type="submit"
-                                                    class="w-full h-9 px-3 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer whitespace-nowrap">
-                                                    <i class="fa-solid fa-circle-check text-xs"></i>
-                                                    <span>Verifikasi benar</span>
-                                                </button>
-                                            </form>
+                                @if ($trx->status === 'pending')
+                                    <div class="pt-3 border-t border-slate-200/60 flex items-stretch gap-2">
+                                        <form action="{{ route('admin.peminjaman.verifikasi-pembayaran', [$peminjaman->id, $trx->id]) }}" method="POST" class="flex-1 m-0 flex">
+                                            @csrf
+                                            <button type="submit"
+                                                class="w-full h-9 px-3 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer whitespace-nowrap">
+                                                <i class="fa-solid fa-circle-check text-xs"></i>
+                                                <span>Verifikasi benar</span>
+                                            </button>
+                                        </form>
 
-                                            <button type="button" onclick="openModalRejectPayment('{{ $trx->id }}')"
-                                                class="flex-1 h-9 px-3 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap">
-                                                <i class="fa-solid fa-triangle-exclamation text-xs"></i>
-                                                <span>Tolak Bukti</span>
-                                            </button>
-                                        </div>
-                                    @elseif ($trx->status === 'verified' && !in_array($peminjaman->status, ['rejected', 'cancelled']))
-                                        <div class="pt-2 border-t border-slate-200/60 flex items-center justify-between">
-                                            <span class="text-[11px] text-emerald-700 font-bold flex items-center gap-1">
-                                                <i class="fa-solid fa-circle-check"></i> Pembayaran Terverifikasi Benar
-                                            </span>
-                                            <button type="button" onclick="openModalRejectPayment('{{ $trx->id }}')"
-                                                class="text-xs text-red-600 hover:text-red-800 font-semibold transition flex items-center gap-1 cursor-pointer">
-                                                <i class="fa-solid fa-triangle-exclamation text-[10px]"></i>
-                                                <span>Tolak Pembayaran</span>
-                                            </button>
-                                        </div>
-                                    @elseif ($trx->status === 'verified')
-                                        <div class="pt-2 border-t border-slate-200/60 flex items-center justify-between">
-                                            <span class="text-[11px] text-emerald-700 font-bold flex items-center gap-1">
-                                                <i class="fa-solid fa-circle-check"></i> Pembayaran Terverifikasi Benar
-                                            </span>
-                                        </div>
-                                    @endif
+                                        <button type="button" onclick="openModalRejectPayment('{{ $trx->id }}')"
+                                            class="flex-1 h-9 px-3 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap">
+                                            <i class="fa-solid fa-triangle-exclamation text-xs"></i>
+                                            <span>Tolak Bukti</span>
+                                        </button>
+                                    </div>
+                                @elseif ($trx->status === 'verified' && !in_array($peminjaman->status, ['rejected', 'cancelled']))
+                                    <div class="pt-2 border-t border-slate-200/60 flex items-center justify-between">
+                                        <span class="text-[11px] text-emerald-700 font-bold flex items-center gap-1">
+                                            <i class="fa-solid fa-circle-check"></i> Pembayaran Terverifikasi Benar
+                                        </span>
+                                        <button type="button" onclick="openModalRejectPayment('{{ $trx->id }}')"
+                                            class="text-xs text-red-600 hover:text-red-800 font-semibold transition flex items-center gap-1 cursor-pointer">
+                                            <i class="fa-solid fa-triangle-exclamation text-[10px]"></i>
+                                            <span>Tolak Pembayaran</span>
+                                        </button>
+                                    </div>
+                                @elseif ($trx->status === 'verified')
+                                    <div class="pt-2 border-t border-slate-200/60 flex items-center justify-between">
+                                        <span class="text-[11px] text-emerald-700 font-bold flex items-center gap-1">
+                                            <i class="fa-solid fa-circle-check"></i> Pembayaran Terverifikasi Benar
+                                        </span>
+                                    </div>
                                 @endif
                             </div>
                         @endforeach
@@ -807,41 +755,33 @@
                                 </p>
                             </div>
                         @else
-                            @if(!auth()->user()->isSuperAdmin())
-                                <!-- Formulir Admin Upload Bukti Transfer Refund -->
-                                <form action="{{ route('admin.peminjaman.upload-refund', $peminjaman->id) }}" method="POST" enctype="multipart/form-data" class="space-y-3 pt-1">
-                                    @csrf
-                                    <div class="space-y-1">
-                                        <label class="block text-xs font-bold text-slate-700 uppercase">Bank Asal Sekolah</label>
-                                        <input type="text" name="bank_pengirim" value="{{ $config?->bank_utama ?: 'Bank Jateng' }}"
-                                            class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-purple-500">
-                                    </div>
-
-                                    <div class="space-y-1">
-                                        <label class="block text-xs font-bold text-slate-700 uppercase">Unggah Bukti Transfer Refund <span class="text-red-500">*</span></label>
-                                        <input type="file" name="bukti_refund" required accept="image/jpeg,image/png,image/webp"
-                                            class="w-full text-xs text-slate-500 file:mr-2 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-purple-600 file:text-white hover:file:bg-purple-700">
-                                    </div>
-
-                                    <div class="space-y-1">
-                                        <label class="block text-xs font-bold text-slate-700 uppercase">Catatan Tambahan (Opsional)</label>
-                                        <textarea name="catatan" rows="2" placeholder="Catatan ke pemohon..."
-                                            class="w-full bg-white border border-slate-200 rounded-xl p-2.5 text-xs focus:ring-2 focus:ring-purple-500"></textarea>
-                                    </div>
-
-                                    <button type="submit"
-                                        class="w-full py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold shadow-xs transition flex items-center justify-center gap-1.5">
-                                        <i class="fa-solid fa-paper-plane text-xs"></i>
-                                        <span>Kirim Bukti Transfer Refund</span>
-                                    </button>
-                                </form>
-                            @else
-                                <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200 text-center space-y-1 text-xs text-slate-500">
-                                    <i class="fa-solid fa-lock text-slate-400 block mb-1"></i>
-                                    <p class="font-semibold text-slate-700">Mode Baca (Super Admin)</p>
-                                    <p class="text-[11px]">Pengunggahan bukti transfer refund diproses oleh Admin Aula.</p>
+                            <!-- Formulir Admin Upload Bukti Transfer Refund -->
+                            <form action="{{ route('admin.peminjaman.upload-refund', $peminjaman->id) }}" method="POST" enctype="multipart/form-data" class="space-y-3 pt-1">
+                                @csrf
+                                <div class="space-y-1">
+                                    <label class="block text-xs font-bold text-slate-700 uppercase">Bank Asal Sekolah</label>
+                                    <input type="text" name="bank_pengirim" value="{{ $config?->bank_utama ?: 'Bank Jateng' }}"
+                                        class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-purple-500">
                                 </div>
-                            @endif
+
+                                <div class="space-y-1">
+                                    <label class="block text-xs font-bold text-slate-700 uppercase">Unggah Bukti Transfer Refund <span class="text-red-500">*</span></label>
+                                    <input type="file" name="bukti_refund" required accept="image/jpeg,image/png,image/webp"
+                                        class="w-full text-xs text-slate-500 file:mr-2 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-purple-600 file:text-white hover:file:bg-purple-700">
+                                </div>
+
+                                <div class="space-y-1">
+                                    <label class="block text-xs font-bold text-slate-700 uppercase">Catatan Tambahan (Opsional)</label>
+                                    <textarea name="catatan" rows="2" placeholder="Catatan ke pemohon..."
+                                        class="w-full bg-white border border-slate-200 rounded-xl p-2.5 text-xs focus:ring-2 focus:ring-purple-500"></textarea>
+                                </div>
+
+                                <button type="submit"
+                                    class="w-full py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer">
+                                    <i class="fa-solid fa-paper-plane text-xs"></i>
+                                    <span>Kirim Bukti Transfer Refund</span>
+                                </button>
+                            </form>
                         @endif
                     @else
                         <!-- Pemohon Belum Mengisi Rekening -->
@@ -864,7 +804,6 @@
 @endsection
 
 @push('modals')
-@if(!auth()->user()->isSuperAdmin())
 <!-- ============================================================== -->
 <!-- MODAL: APPROVE PENGAJUAN -->
 <!-- ============================================================== -->
@@ -1067,56 +1006,28 @@
 <script>
     // Modal Approve Handlers
     function openModalApprove() {
-        const modal = document.getElementById('modalApprove');
-        const box = document.getElementById('modalApproveBox');
-        if (!modal || !box) return;
-        document.body.classList.add('overflow-hidden');
-        modal.classList.remove('hidden');
+        window.openModal('modalApprove');
         setTimeout(() => {
-            box.classList.remove('scale-95');
-            box.classList.add('scale-100');
             const input = document.getElementById('catatan_approval');
             if (input) input.focus();
-        }, 10);
+        }, 50);
     }
 
     function closeModalApprove() {
-        const modal = document.getElementById('modalApprove');
-        const box = document.getElementById('modalApproveBox');
-        if (!modal || !box) return;
-        box.classList.remove('scale-100');
-        box.classList.add('scale-95');
-        setTimeout(() => {
-            modal.classList.add('hidden');
-            document.body.classList.remove('overflow-hidden');
-        }, 150);
+        window.closeModal('modalApprove');
     }
 
     // Modal Reject Handlers
     function openModalReject() {
-        const modal = document.getElementById('modalReject');
-        const box = document.getElementById('modalRejectBox');
-        if (!modal || !box) return;
-        document.body.classList.add('overflow-hidden');
-        modal.classList.remove('hidden');
+        window.openModal('modalReject');
         setTimeout(() => {
-            box.classList.remove('scale-95');
-            box.classList.add('scale-100');
             const input = document.getElementById('alasan_penolakan');
             if (input) input.focus();
-        }, 10);
+        }, 50);
     }
 
     function closeModalReject() {
-        const modal = document.getElementById('modalReject');
-        const box = document.getElementById('modalRejectBox');
-        if (!modal || !box) return;
-        box.classList.remove('scale-100');
-        box.classList.add('scale-95');
-        setTimeout(() => {
-            modal.classList.add('hidden');
-            document.body.classList.remove('overflow-hidden');
-        }, 150);
+        window.closeModal('modalReject');
     }
 
     // Modal Reject Payment Handlers
@@ -1125,53 +1036,15 @@
         if (inputDetail) {
             inputDetail.value = detailId || '';
         }
-        const modal = document.getElementById('modalRejectPayment');
-        const box = document.getElementById('modalRejectPaymentBox');
-        if (!modal || !box) return;
-        document.body.classList.add('overflow-hidden');
-        modal.classList.remove('hidden');
+        window.openModal('modalRejectPayment');
         setTimeout(() => {
-            box.classList.remove('scale-95');
-            box.classList.add('scale-100');
             const input = document.getElementById('alasan_penolakan_pembayaran');
             if (input) input.focus();
-        }, 10);
+        }, 50);
     }
 
     function closeModalRejectPayment() {
-        const modal = document.getElementById('modalRejectPayment');
-        const box = document.getElementById('modalRejectPaymentBox');
-        if (!modal || !box) return;
-        box.classList.remove('scale-100');
-        box.classList.add('scale-95');
-        setTimeout(() => {
-            modal.classList.add('hidden');
-            document.body.classList.remove('overflow-hidden');
-        }, 150);
+        window.closeModal('modalRejectPayment');
     }
-
-    // Close modal on escape key
-    document.addEventListener('keydown', function(event) {
-        if (event.key === 'Escape') {
-            closeModalApprove();
-            closeModalReject();
-            closeModalRejectPayment();
-        }
-    });
-
-    // Close modal on click outside box
-    ['modalApprove', 'modalReject', 'modalRejectPayment'].forEach(modalId => {
-        const modal = document.getElementById(modalId);
-        if (modal) {
-            modal.addEventListener('click', function(event) {
-                if (event.target === modal) {
-                    if (modalId === 'modalApprove') closeModalApprove();
-                    if (modalId === 'modalReject') closeModalReject();
-                    if (modalId === 'modalRejectPayment') closeModalRejectPayment();
-                }
-            });
-        }
-    });
 </script>
-@endif
 @endpush

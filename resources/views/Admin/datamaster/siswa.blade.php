@@ -3,36 +3,6 @@
 @section('title', 'Data Siswa - Data Master')
 @section('content')
 
-    <!-- ALERT NOTIFIKASI -->
-    @if(session('success'))
-        <div class="mb-5 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs md:text-sm font-semibold flex items-center justify-between shadow-xs">
-            <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-xl bg-emerald-500 text-white flex items-center justify-center flex-shrink-0">
-                    <i class="fa-solid fa-circle-check text-sm"></i>
-                </div>
-                <span>{{ session('success') }}</span>
-            </div>
-            <button type="button" onclick="this.parentElement.remove()" class="text-emerald-500 hover:text-emerald-800 transition">
-                <i class="fa-solid fa-xmark text-base"></i>
-            </button>
-        </div>
-    @endif
-
-    @if($errors->any())
-        <div class="mb-5 p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs md:text-sm font-medium shadow-xs">
-            <div class="flex items-center gap-3 mb-2 font-bold text-rose-900">
-                <div class="w-8 h-8 rounded-xl bg-rose-500 text-white flex items-center justify-center flex-shrink-0">
-                    <i class="fa-solid fa-triangle-exclamation text-sm"></i>
-                </div>
-                <span>Terdapat kesalahan validasi input:</span>
-            </div>
-            <ul class="list-disc list-inside space-y-1 pl-11 text-xs">
-                @foreach($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
 
     <!-- CARD: DAFTAR SISWA -->
     <div class="bg-white rounded-2xl p-6 card-shadow border border-gray-100/80">
@@ -411,23 +381,13 @@
 
         // ADD MODAL
         function openAddModal() {
-            const modal = document.getElementById('addSiswaModal');
-            const box = document.getElementById('addSiswaModalBox');
-            modal.classList.remove('hidden');
-            setTimeout(() => {
-                box.classList.remove('scale-95');
-                box.classList.add('scale-100');
-            }, 10);
+            if (window.openModal) window.openModal('addSiswaModal');
+            else document.getElementById('addSiswaModal')?.classList.remove('hidden');
         }
 
         function closeAddModal() {
-            const modal = document.getElementById('addSiswaModal');
-            const box = document.getElementById('addSiswaModalBox');
-            box.classList.remove('scale-100');
-            box.classList.add('scale-95');
-            setTimeout(() => {
-                modal.classList.add('hidden');
-            }, 150);
+            if (window.closeModal) window.closeModal('addSiswaModal');
+            else document.getElementById('addSiswaModal')?.classList.add('hidden');
         }
 
         // EDIT MODAL
@@ -441,23 +401,13 @@
             document.getElementById('edit_no_hp').value = siswa.no_hp || '';
             document.getElementById('edit_jurusan').value = siswa.jurusan || '';
 
-            const modal = document.getElementById('editSiswaModal');
-            const box = document.getElementById('editSiswaModalBox');
-            modal.classList.remove('hidden');
-            setTimeout(() => {
-                box.classList.remove('scale-95');
-                box.classList.add('scale-100');
-            }, 10);
+            if (window.openModal) window.openModal('editSiswaModal');
+            else document.getElementById('editSiswaModal')?.classList.remove('hidden');
         }
 
         function closeEditModal() {
-            const modal = document.getElementById('editSiswaModal');
-            const box = document.getElementById('editSiswaModalBox');
-            box.classList.remove('scale-100');
-            box.classList.add('scale-95');
-            setTimeout(() => {
-                modal.classList.add('hidden');
-            }, 150);
+            if (window.closeModal) window.closeModal('editSiswaModal');
+            else document.getElementById('editSiswaModal')?.classList.add('hidden');
         }
 
         // DELETE MODAL
@@ -466,38 +416,13 @@
             form.action = `{{ url('dashboard/data-master/siswa') }}/${id}`;
             document.getElementById('deleteSiswaName').innerText = nama;
 
-            const modal = document.getElementById('deleteSiswaModal');
-            const box = document.getElementById('deleteSiswaModalBox');
-            modal.classList.remove('hidden');
-            setTimeout(() => {
-                box.classList.remove('scale-95');
-                box.classList.add('scale-100');
-            }, 10);
+            if (window.openModal) window.openModal('deleteSiswaModal');
+            else document.getElementById('deleteSiswaModal')?.classList.remove('hidden');
         }
 
         function closeDeleteModal() {
-            const modal = document.getElementById('deleteSiswaModal');
-            const box = document.getElementById('deleteSiswaModalBox');
-            box.classList.remove('scale-100');
-            box.classList.add('scale-95');
-            setTimeout(() => {
-                modal.classList.add('hidden');
-            }, 150);
+            if (window.closeModal) window.closeModal('deleteSiswaModal');
+            else document.getElementById('deleteSiswaModal')?.classList.add('hidden');
         }
-
-        // Close on backdrop click or Escape
-        window.addEventListener('click', function(e) {
-            if (e.target.id === 'addSiswaModal') closeAddModal();
-            if (e.target.id === 'editSiswaModal') closeEditModal();
-            if (e.target.id === 'deleteSiswaModal') closeDeleteModal();
-        });
-
-        window.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                closeAddModal();
-                closeEditModal();
-                closeDeleteModal();
-            }
-        });
     </script>
 @endsection

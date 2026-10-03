@@ -73,20 +73,6 @@
         </div>
     </div>
 
-    <!-- NOTIFIKASI ERROR VALIDASI -->
-    @if ($errors->any())
-        <div class="bg-red-50 border border-red-200 text-red-800 rounded-2xl p-4 space-y-2 shadow-sm animate-fade-in">
-            <div class="flex items-center gap-2 font-bold text-xs md:text-sm text-red-700">
-                <i class="fa-solid fa-triangle-exclamation"></i>
-                <span>Terdapat kesalahan pada isian formulir:</span>
-            </div>
-            <ul class="list-disc list-inside text-xs text-red-600 space-y-1">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
 
     <!-- FORM PENGAJUAN -->
     <form action="{{ route('customer.peminjaman.store') }}" method="POST" enctype="multipart/form-data">
