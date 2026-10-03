@@ -30,14 +30,7 @@ use App\Http\Controllers\TataTertibController;
 use App\Models\Sekolah;
 use Illuminate\Support\Facades\Route;
 
-/*
-|--------------------------------------------------------------------------
-| Halaman Publik
-|--------------------------------------------------------------------------
-|
-| Landing dan profil memakai PublicController karena view-nya butuh data
-| sekolah, mitra industri, prestasi, dan produk unggulan.
-*/
+// Halaman Publik
 Route::get('/', [PublicController::class, 'landing'])->name('landing');
 
 Route::get('/profil', function () {
@@ -65,24 +58,12 @@ Route::get('/pkl-bkk', [PublicController::class, 'pklBkk'])->name('pkl-bkk');
 Route::get('/informasi', [PublicController::class, 'informasi'])->name('informasi');
 Route::get('/informasi/{slug}', [PublicController::class, 'informasiDetail'])->name('informasi.show');
 
-/*
-|--------------------------------------------------------------------------
- | Chatbot "Nanya AI"
-|
-| Endpoint publik, dipanggil widget chatbot di seluruh halaman website.
-| CSRF otomatis aktif karena berada di routes/web.php (grup middleware web).
-| throttle:20,1 = maksimal 20 permintaan per menit per IP.
-|--------------------------------------------------------------------------
-*/
+// Chatbot Nanya AI
 Route::post('/chatbot/send', [ChatbotController::class, 'send'])
     ->middleware('throttle:20,1')
     ->name('chatbot.send');
 
-/*
-|--------------------------------------------------------------------------
-| Auth
-|--------------------------------------------------------------------------
-*/
+// Auth & PPDB
 Route::get('/ppdb', [PpdbController::class, 'index'])->name('ppdb');
 
 Route::middleware('guest')->group(function () {
@@ -98,19 +79,13 @@ Route::middleware('guest')->group(function () {
     Route::get('/register', fn () => redirect()->route('registrasi'))->name('register');
 });
 
-/*
-|--------------------------------------------------------------------------
-| Admin - Modul PKL & BKK
-|
-| Role yang boleh akses: bkk, admin, super_admin, super_duper_admin
-|--------------------------------------------------------------------------
-*/
+// Admin - Modul PKL & BKK
 Route::middleware(['auth', 'role:bkk,admin_pklbkk,super_admin,super_duper_admin'])
     ->prefix('dashboard/pkl-bkk')
     ->name('pkl.')
     ->group(function () {
 
-        // --- BKK: Career Center & Master DUDI ---
+        // BKK: Career Center & Master DUDI
         Route::get('/', [BkkController::class, 'index'])->name('dashboard');
 
         Route::get('/dudi', [BkkController::class, 'dudi'])->name('dudi.index');
@@ -127,7 +102,7 @@ Route::middleware(['auth', 'role:bkk,admin_pklbkk,super_admin,super_duper_admin'
 
         Route::get('/siswa', [BkkController::class, 'siswa'])->name('siswa.index');
 
-        // --- PKL: Pengajuan & Penempatan ---
+        // PKL: Pengajuan & Penempatan
         Route::get('/penempatan', [PklController::class, 'index'])->name('index');
         Route::get('/pengajuan/create', [PklController::class, 'create'])->name('create');
         Route::post('/pengajuan', [PklController::class, 'store'])->name('store');
@@ -143,15 +118,11 @@ Route::middleware(['auth', 'role:bkk,admin_pklbkk,super_admin,super_duper_admin'
         Route::patch('/dudi/{dudi}/acc-landing', [PklController::class, 'accLanding'])->name('dudi.acc-landing');
     });
 
-/*
-|--------------------------------------------------------------------------
-| Dashboard utama (role admin & super admin)
-|--------------------------------------------------------------------------
-*/
+// Dashboard utama & modul admin
 Route::middleware('auth')->group(function () {
     Route::match(['get', 'post'], '/logout', [AuthController::class, 'destroy'])->name('logout');
 
-    // --- DASHBOARD DISPATCHER BERDASARKAN ROLE ---
+    // Dashboard Dispatcher
     Route::get('/dashboard', [DashboardController::class, 'dispatch'])
         ->name('dashboard');
 
@@ -283,11 +254,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/profil', [CustomerPanelController::class, 'profil'])->name('profil');
     });
 
-    /*
-    |----------------------------------------------------------------------
-    | Data Master Sekolah
-    |----------------------------------------------------------------------
-    */
+    // Data Master Sekolah
     Route::prefix('dashboard/data-master')->group(function () {
         // Akses penuh: Data Sekolah & Users — hanya admin_master ke atas
         Route::middleware('role:admin_master,super_admin,super_duper_admin')->group(function () {
