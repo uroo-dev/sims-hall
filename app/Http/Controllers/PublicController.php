@@ -43,9 +43,18 @@ class PublicController extends Controller
         // ikut bocor ke halaman publik.
         $dudis = Dudi::forLandingPage()->orderBy('nama_dudi')->get();
 
-        // Data Peminjaman Aula (Display Only)
+        // Data Peminjaman Aula (Hanya 1 Paket Unggulan Terbaru untuk Landing Page)
         $aulas = Aula::all();
-        $paketPeminjamans = PaketPeminjaman::all();
+        $paketUnggulan = PaketPeminjaman::with('facilities')
+            ->where('kategori', 'unggulan')
+            ->latest('id')
+            ->first();
+
+        if (!$paketUnggulan) {
+            $paketUnggulan = PaketPeminjaman::with('facilities')->latest('id')->first();
+        }
+
+        $paketPeminjamans = $paketUnggulan ? collect([$paketUnggulan]) : collect();
 
         // Data PPDB (Gunakan master & jurusan dari modul PPDB baru, dengan fallback model lama)
         $ppdbMaster = Ppdb_master::first();

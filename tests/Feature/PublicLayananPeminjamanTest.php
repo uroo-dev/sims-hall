@@ -117,17 +117,45 @@ class PublicLayananPeminjamanTest extends TestCase
         $responseLayanan->assertSee('logosmkk.png');
     }
 
-    public function test_aula_model_resolves_image_urls_correctly(): void
+    public function test_landing_page_renders_only_latest_unggulan_paket_with_facilities(): void
     {
-        $aula = new Aula([
-            'nama' => 'Aula 1',
-            'dokumentasi' => 'https://example.com/foto1.jpg',
-            'dokumentasi_2' => null,
+        $facility1 = Facility::create(['judul' => 'Sound System Konser']);
+        $facility2 = Facility::create(['judul' => 'Genset Cadangan 50KVA']);
+
+        $paket1 = PaketPeminjaman::create([
+            'nama_paket' => 'Paket Standar 1',
+            'kategori' => 'standar 1',
+            'harga' => 3000000,
+            'durasi' => '4 Jam',
+        ]);
+        $paket1->facilities()->attach($facility1->id);
+
+        $paketUnggulanLama = PaketPeminjaman::create([
+            'nama_paket' => 'Paket Unggulan Lama',
+            'kategori' => 'unggulan',
+            'harga' => 7000000,
+            'durasi' => '6 Jam',
         ]);
 
-        $this->assertSame('https://example.com/foto1.jpg', $aula->foto_dokumentasi_url);
-        $this->assertStringContainsString('logosmkk.png', $aula->foto_dokumentasi_2_url);
-        $this->assertTrue($aula->has_custom_dokumentasi);
-        $this->assertFalse($aula->has_custom_dokumentasi_2);
+        $paketUnggulanTerbaru = PaketPeminjaman::create([
+            'nama_paket' => 'Paket Unggulan Terbaru',
+            'kategori' => 'unggulan',
+            'harga' => 10000000,
+            'durasi' => '8 Jam',
+        ]);
+        $paketUnggulanTerbaru->facilities()->attach([$facility1->id, $facility2->id]);
+
+        $response = $this->get(route('landing'));
+        $response->assertStatus(200);
+
+        // Hanya paket unggulan terbaru yang tampil
+        $response->assertSee('Paket Unggulan Terbaru');
+        $response->assertDontSee('Paket Unggulan Lama');
+        $response->assertDontSee('Paket Standar 1');
+
+        // Fasilitasnya tampil dengan benar
+        $response->assertSee('Sound System Konser');
+        $response->assertSee('Genset Cadangan 50KVA');
+        $response->assertDontSee('Detail fasilitas belum tersedia.');
     }
 }
