@@ -1,7 +1,7 @@
 @extends('Public.layout.app')
 
 @section('title', 'Layanan Peminjaman Aula - SMK Negeri 2 Karanganyar')
-@section('description', 'Informasi dan reservasi online peminjaman Aula SMKN 2 Karanganyar: cek ketersediaan jadwal, paket tarif, dan fasilitas lengkap.')
+@section('meta_description', 'Informasi dan reservasi online peminjaman Aula SMKN 2 Karanganyar: cek ketersediaan jadwal, paket tarif, dan fasilitas lengkap.')
 
 @section('content')
 

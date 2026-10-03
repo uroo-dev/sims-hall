@@ -1,6 +1,8 @@
 @extends('Public.layout.app')
 
 @section('title', 'Bursa Kerja Khusus (BKK) — SMK Negeri 2 Karanganyar')
+@section('meta_description', 'Pusat Karir & Bursa Kerja Khusus (BKK) SMK Negeri 2 Karanganyar. Informasi lowongan kerja terpercaya bagi alumni dan pencari kerja.')
+@section('meta_keywords', 'BKK SMKN 2 Karanganyar, Bursa Kerja Khusus, Lowongan Kerja SMK, Karir Alumni Skandakra')
 
 @section('content')
     {{-- ============================================================

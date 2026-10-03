@@ -23,6 +23,7 @@ use App\Models\Sekolah;
 use App\Models\Siswa;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 class PublicController extends Controller
 {
@@ -342,5 +343,59 @@ class PublicController extends Controller
         $ppdbMaster = Ppdb_master::first();
 
         return view('Public.informasi-detail', compact('artikel', 'artikelPopulers', 'ppdbMaster'));
+    }
+
+    /**
+     * XML Sitemap Dinamis untuk Mesin Pencari (Google, Bing, dll).
+     */
+    public function sitemap(): Response
+    {
+        $urls = [
+            ['loc' => url('/'), 'lastmod' => now()->toDateString(), 'changefreq' => 'daily', 'priority' => '1.0'],
+            ['loc' => route('profil'), 'lastmod' => now()->toDateString(), 'changefreq' => 'monthly', 'priority' => '0.8'],
+            ['loc' => route('kesiswaan'), 'lastmod' => now()->toDateString(), 'changefreq' => 'weekly', 'priority' => '0.8'],
+            ['loc' => route('produk-unggulan'), 'lastmod' => now()->toDateString(), 'changefreq' => 'weekly', 'priority' => '0.8'],
+            ['loc' => route('layanan-peminjaman'), 'lastmod' => now()->toDateString(), 'changefreq' => 'weekly', 'priority' => '0.8'],
+            ['loc' => route('ppdb'), 'lastmod' => now()->toDateString(), 'changefreq' => 'weekly', 'priority' => '0.9'],
+            ['loc' => route('pkl'), 'lastmod' => now()->toDateString(), 'changefreq' => 'weekly', 'priority' => '0.8'],
+            ['loc' => route('bkk'), 'lastmod' => now()->toDateString(), 'changefreq' => 'daily', 'priority' => '0.9'],
+            ['loc' => route('informasi'), 'lastmod' => now()->toDateString(), 'changefreq' => 'daily', 'priority' => '0.9'],
+        ];
+
+        // Artikel Berita / Pengumuman Terbit
+        $artikels = Artikel::where('status', 'published')->latest('published_at')->get(['slug', 'updated_at']);
+        foreach ($artikels as $artikel) {
+            $urls[] = [
+                'loc' => route('informasi.show', $artikel->slug),
+                'lastmod' => $artikel->updated_at ? $artikel->updated_at->toDateString() : now()->toDateString(),
+                'changefreq' => 'weekly',
+                'priority' => '0.7',
+            ];
+        }
+
+        // Lowongan Kerja BKK Aktif
+        $lowongans = Lowongan::active()->get(['id', 'updated_at']);
+        foreach ($lowongans as $lowongan) {
+            $urls[] = [
+                'loc' => route('bkk.detail', $lowongan->id),
+                'lastmod' => $lowongan->updated_at ? $lowongan->updated_at->toDateString() : now()->toDateString(),
+                'changefreq' => 'weekly',
+                'priority' => '0.7',
+            ];
+        }
+
+        // Mitra DUDI / PKL Landing
+        $dudis = Dudi::forLandingPage()->get(['id', 'updated_at']);
+        foreach ($dudis as $dudi) {
+            $urls[] = [
+                'loc' => route('pkl.detail', $dudi->id),
+                'lastmod' => $dudi->updated_at ? $dudi->updated_at->toDateString() : now()->toDateString(),
+                'changefreq' => 'monthly',
+                'priority' => '0.6',
+            ];
+        }
+
+        return response()->view('Public.sitemap', compact('urls'))
+            ->header('Content-Type', 'text/xml; charset=utf-8');
     }
 }

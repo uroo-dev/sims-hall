@@ -1,7 +1,8 @@
 @extends('Public.layout.app')
 
 @section('title', 'Kesiswaan & Prestasi - SMK Negeri 2 Karanganyar')
-@section('description', 'Tata tertib dan norma sekolah, ekstrakurikuler, serta prestasi siswa SMK Negeri 2 Karanganyar.')
+@section('meta_description', 'Tata tertib dan norma sekolah, ekstrakurikuler, serta prestasi siswa SMK Negeri 2 Karanganyar.')
+@section('meta_keywords', 'Kesiswaan SMKN 2 Karanganyar, Ekstrakurikuler SMK, Prestasi Siswa Skandakra, Tata Tertib Sekolah')
 
 @section('content')
 

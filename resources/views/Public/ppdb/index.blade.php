@@ -1,7 +1,7 @@
 @extends('Public.layout.app')
 
 @section('title', $master?->judul ? $master->judul . ' - SMK Negeri 2 Karanganyar' : 'PPDB 2026 - SMK Negeri 2 Karanganyar')
-@section('description', 'Informasi PPDB SMKN 2 Karanganyar: persyaratan pendaftaran, tanggal penting, daya tampung, jalur seleksi, dan pilihan kompetensi keahlian.')
+@section('meta_description', 'Informasi PPDB SMKN 2 Karanganyar: persyaratan pendaftaran, tanggal penting, daya tampung, jalur seleksi, dan pilihan kompetensi keahlian.')
 
 @section('content')
 

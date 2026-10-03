@@ -1,5 +1,9 @@
 @extends('Public.layout.app')
 
+@section('title', 'Profil & Sejarah — SMK Negeri 2 Karanganyar')
+@section('meta_description', 'Profil lengkap, sejarah pendirian, visi dan misi, serta sarana dan prasarana SMK Negeri 2 Karanganyar.')
+@section('meta_keywords', 'Profil SMKN 2 Karanganyar, Visi Misi SMK Negeri 2 Karanganyar, Sejarah Skandakra, Sarana Prasarana')
+
 @section('content')
     <!-- ============================================================
          KONTEN PROFILE — BAGIAN 1: SEJARAH SEKOLAH

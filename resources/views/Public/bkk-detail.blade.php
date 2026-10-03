@@ -1,6 +1,36 @@
 @extends('Public.layout.app')
 
 @section('title', 'Detail Lowongan: ' . $lowongan->posisi . ' — BKK SMKN 2 Karanganyar')
+@section('meta_description', 'Info Lowongan Kerja ' . $lowongan->posisi . ' di ' . $lowongan->nama_perusahaan . ' (' . $lowongan->tipe . '). Batas pendaftaran ' . \Carbon\Carbon::parse($lowongan->deadline)->translatedFormat('d F Y') . ' melalui BKK SMKN 2 Karanganyar.')
+@section('og_type', 'article')
+
+@section('structured_data')
+<script type="application/ld+json">
+{
+    "@@context": "https://schema.org",
+    "@type": "JobPosting",
+    "title": {{ json_encode($lowongan->posisi) }},
+    "description": {{ json_encode($lowongan->deskripsi) }},
+    "datePosted": "{{ $lowongan->created_at->toIso8601String() }}",
+    "validThrough": "{{ \Carbon\Carbon::parse($lowongan->deadline)->endOfDay()->toIso8601String() }}",
+    "employmentType": "{{ $lowongan->tipe === 'Magang' ? 'INTERN' : 'FULL_TIME' }}",
+    "hiringOrganization": {
+        "@type": "Organization",
+        "name": {{ json_encode($lowongan->nama_perusahaan) }},
+        "sameAs": "{{ url('/bkk') }}"
+    },
+    "jobLocation": {
+        "@type": "Place",
+        "address": {
+            "@type": "PostalAddress",
+            "addressLocality": {{ json_encode($lowongan->dudi?->kota ?? 'Karanganyar') }},
+            "addressRegion": "Jawa Tengah",
+            "addressCountry": "ID"
+        }
+    }
+}
+</script>
+@endsection
 
 @section('content')
     <div class="py-10 bg-[#F8FAFC]">

@@ -58,6 +58,8 @@ Route::get('/pkl-bkk', [PublicController::class, 'pklBkk'])->name('pkl-bkk');
 Route::get('/informasi', [PublicController::class, 'informasi'])->name('informasi');
 Route::get('/informasi/{slug}', [PublicController::class, 'informasiDetail'])->name('informasi.show');
 
+Route::get('/sitemap.xml', [PublicController::class, 'sitemap'])->name('sitemap');
+
 // Chatbot Nanya AI
 Route::post('/chatbot/send', [ChatbotController::class, 'send'])
     ->middleware('throttle:20,1')

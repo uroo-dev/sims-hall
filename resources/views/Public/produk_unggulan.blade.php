@@ -1,7 +1,8 @@
 @extends('Public.layout.app')
 
 @section('title', ($produkUnggulan->judul ?: 'Produk Unggulan').' - '.config('sekolah.nama'))
-@section('description', \Illuminate\Support\Str::limit($produkUnggulan->deskripsi ?: 'Produk unggulan karya siswa '.config('sekolah.nama'), 155))
+@section('meta_description', \Illuminate\Support\Str::limit($produkUnggulan->deskripsi ?: 'Produk unggulan karya siswa '.config('sekolah.nama'), 155))
+@section('meta_keywords', 'Produk Unggulan SMK, Teaching Factory SMKN 2 Karanganyar, TeFa, Produk Siswa SMK')
 
 @section('content')
 

@@ -1,6 +1,8 @@
 @extends('Public.layout.app')
 
 @section('title', 'Detail Mitra DUDI: ' . $dudi->nama_dudi . ' — SMKN 2 Karanganyar')
+@section('meta_description', 'Informasi detail kemitraan DUDI ' . $dudi->nama_dudi . ' untuk program Praktik Kerja Lapangan (PKL) SMK Negeri 2 Karanganyar.')
+@section('meta_keywords', 'DUDI ' . $dudi->nama_dudi . ', Mitra PKL SMKN 2 Karanganyar, Lowongan PKL SMK')
 
 @section('content')
     <div class="py-10 bg-[#F8FAFC]">

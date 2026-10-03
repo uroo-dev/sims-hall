@@ -1,2 +1,9 @@
 User-agent: *
-Disallow:
+Allow: /
+Disallow: /admin/
+Disallow: /dashboard/
+Disallow: /login
+Disallow: /registrasi
+Disallow: /customer/
+
+Sitemap: https://smkn2kra.sch.id/sitemap.xml

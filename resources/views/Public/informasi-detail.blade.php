@@ -1,6 +1,35 @@
 @extends('Public.layout.app')
 
 @section('title', $artikel->judul . ' - SKANDAKRA News')
+@section('meta_description', \Illuminate\Support\Str::limit(strip_tags($artikel->ringkasan ?: $artikel->konten), 160))
+@section('og_type', 'article')
+@section('og_image', $artikel->gambar ? asset('storage/' . $artikel->gambar) : asset('assets/logosmkk.png'))
+
+@section('structured_data')
+<script type="application/ld+json">
+{
+    "@@context": "https://schema.org",
+    "@type": "NewsArticle",
+    "headline": {{ json_encode($artikel->judul) }},
+    "description": {{ json_encode(\Illuminate\Support\Str::limit(strip_tags($artikel->ringkasan ?: $artikel->konten), 160)) }},
+    "image": [{{ json_encode($artikel->gambar ? asset('storage/' . $artikel->gambar) : asset('assets/logosmkk.png')) }}],
+    "datePublished": "{{ $artikel->published_at ? $artikel->published_at->toIso8601String() : $artikel->created_at->toIso8601String() }}",
+    "dateModified": "{{ $artikel->updated_at->toIso8601String() }}",
+    "author": {
+        "@type": "Person",
+        "name": {{ json_encode($artikel->author?->name ?? 'Tim Humas SMKN 2 Karanganyar') }}
+    },
+    "publisher": {
+        "@type": "EducationalOrganization",
+        "name": "SMK Negeri 2 Karanganyar",
+        "logo": {
+            "@type": "ImageObject",
+            "url": "{{ asset('assets/logosmkk.png') }}"
+        }
+    }
+}
+</script>
+@endsection
 
 @push('styles')
 <style>

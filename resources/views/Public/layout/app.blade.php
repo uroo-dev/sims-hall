@@ -4,10 +4,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    {{-- Default-nya judul utama sekolah supaya halaman yang tidak menentukan
-         `@section('title')` tetap tampil seperti sebelumnya. --}}
     <title>@yield('title', 'SMK Negeri 2 Karanganyar - Sekolah Pusat Keunggulan')</title>
-    <link rel="icon" type="image/x-icon" href="assets/logosmkk.png">
+
+    <!-- Meta SEO Dasar -->
+    <meta name="description" content="@yield('meta_description', 'Official Website SMK Negeri 2 Karanganyar - Sekolah Pusat Keunggulan. Portal informasi resmi, PPDB, Teaching Factory, PKL, Career Center (BKK), dan Layanan Sewa Aula.')">
+    <meta name="keywords" content="@yield('meta_keywords', 'SMK Negeri 2 Karanganyar, SMKN 2 Kra, Skandakra, PPDB Karanganyar, PKL SMK, BKK Karanganyar, Teaching Factory, Sewa Aula Karanganyar')">
+    <meta name="author" content="SMK Negeri 2 Karanganyar">
+    <meta name="robots" content="@yield('meta_robots', 'index, follow')">
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="@yield('canonical_url', url()->current())">
+
+    <!-- Open Graph / Facebook / WhatsApp -->
+    <meta property="og:type" content="@yield('og_type', 'website')">
+    <meta property="og:url" content="@yield('canonical_url', url()->current())">
+    <meta property="og:title" content="@yield('og_title', View::hasSection('title') ? View::getSection('title') : 'SMK Negeri 2 Karanganyar - Sekolah Pusat Keunggulan')">
+    <meta property="og:description" content="@yield('meta_description', 'Official Website SMK Negeri 2 Karanganyar - Sekolah Pusat Keunggulan. Portal informasi resmi, PPDB, Teaching Factory, PKL, Career Center (BKK), dan Layanan Sewa Aula.')">
+    <meta property="og:image" content="@yield('og_image', asset('assets/logosmkk.png'))">
+    <meta property="og:site_name" content="SMK Negeri 2 Karanganyar">
+    <meta property="og:locale" content="id_ID">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="@yield('twitter_card', 'summary_large_image')">
+    <meta name="twitter:url" content="@yield('canonical_url', url()->current())">
+    <meta name="twitter:title" content="@yield('og_title', View::hasSection('title') ? View::getSection('title') : 'SMK Negeri 2 Karanganyar - Sekolah Pusat Keunggulan')">
+    <meta name="twitter:description" content="@yield('meta_description', 'Official Website SMK Negeri 2 Karanganyar - Sekolah Pusat Keunggulan. Portal informasi resmi, PPDB, Teaching Factory, PKL, Career Center (BKK), dan Layanan Sewa Aula.')">
+    <meta name="twitter:image" content="@yield('og_image', asset('assets/logosmkk.png'))">
+
+    <!-- Favicon & Icons -->
+    <link rel="icon" type="image/png" href="{{ asset('assets/logosmkk.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('assets/logosmkk.png') }}">
+
+    <!-- Schema.org JSON-LD Structured Data for Google Search -->
+    <script type="application/ld+json">
+    {
+        "@@context": "https://schema.org",
+        "@type": "EducationalOrganization",
+        "name": "SMK Negeri 2 Karanganyar",
+        "alternateName": ["SMKN 2 Karanganyar", "Skandakra"],
+        "url": "{{ url('/') }}",
+        "logo": "{{ asset('assets/logosmkk.png') }}",
+        "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "Karanganyar",
+            "addressRegion": "Jawa Tengah",
+            "addressCountry": "ID"
+        }
+    }
+    </script>
+    @yield('structured_data')
 
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>

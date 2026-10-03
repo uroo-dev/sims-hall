@@ -1,6 +1,8 @@
 @extends('Public.layout.app')
 
 @section('title', 'Praktik Kerja Lapangan (PKL) — SMK Negeri 2 Karanganyar')
+@section('meta_description', 'Informasi Praktik Kerja Lapangan (PKL) dan daftar kemitraan Dunia Usaha & Dunia Industri (DUDI) SMK Negeri 2 Karanganyar.')
+@section('meta_keywords', 'PKL SMKN 2 Karanganyar, Praktik Kerja Lapangan SMK, Mitra DUDI, Magang SMK Karanganyar')
 
 @section('content')
     {{-- ============================================================

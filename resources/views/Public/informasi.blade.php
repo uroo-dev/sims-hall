@@ -1,6 +1,8 @@
 @extends('Public.layout.app')
 
 @section('title', 'Artikel & Informasi SKANDAKRA - SMK Negeri 2 Karanganyar')
+@section('meta_description', 'Portal berita resmi, artikel edukatif, warta kegiatan, dan kabar prestasi SMK Negeri 2 Karanganyar.')
+@section('meta_keywords', 'Berita SMKN 2 Karanganyar, Artikel Skandakra, Warta Sekolah, Prestasi Siswa SMK')
 
 @section('content')
 
