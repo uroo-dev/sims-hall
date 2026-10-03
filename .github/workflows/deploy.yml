@@ -7,6 +7,7 @@ on:
   pull_request:
     branches:
       - main
+  workflow_dispatch:
 
 # Least privilege: repo ini hanya butuh baca isi repo.
 permissions:
@@ -21,7 +22,7 @@ concurrency:
 
 jobs:
   test:
-    name: Test Laravel
+    name: Test & Build Frontend
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -45,7 +46,7 @@ jobs:
         uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
         with:
           php-version: '8.4'
-          extensions: mbstring, bcmath, pdo, pdo_mysql
+          extensions: mbstring, bcmath, pdo, pdo_mysql, pdo_sqlite, sqlite3, dom, curl, libxml, fileinfo, zip, gd
           coverage: none
 
       - name: Install Composer dependencies
@@ -72,11 +73,10 @@ jobs:
   deploy:
     name: Deploy to VPS
     needs: test
-    # Job test juga jalan untuk pull_request; deploy hanya untuk push ke main.
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    # Job test juga jalan untuk pull_request; deploy hanya untuk push ke main atau manual dispatch di main.
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    environment: production
 
     steps:
       - name: Download built assets
@@ -91,53 +91,65 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.SSH_PORT }}
-          # strip_components: 2 buang "public/build" dari path hasil glob,
-          # jadi assets/ dan manifest.json mendarat langsung di root target.
-          # (Strip 1 hanya membuang "public" dan menyisakan build/... ->
-          #  manifest.json tidak ditemukan dan @vite meledak dengan
-          #  ViteManifestNotFoundException.)
+          port: ${{ secrets.SSH_PORT || '22' }}
           source: public/build/*
           target: /tmp/sims-hall-build
           strip_components: 2
           rm: true
 
-      - name: Deploy via SSH
+      - name: Deploy application via SSH
         uses: appleboy/ssh-action@7eaf76671a0d7eec5d98ee897acda4f968735a17 # v1.2.0
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.SSH_PORT }}
+          port: ${{ secrets.SSH_PORT || '22' }}
           script: |
-            /home/gajagohosting/apps/sims-hall/deploy.sh
+            set -e
+            APP_DIR="${{ secrets.APP_DIR || '/home/gajagohosting/apps/sims-hall' }}"
 
-      # Dipisah dari deploy.sh supaya aset frontend bisa ikut di-version control
-      # bersama commit yang sama. Swap via rename supaya tidak ada momen di mana
-      # manifest.json menunjuk file yang sudah terhapus.
+            if [ ! -d "$APP_DIR" ]; then
+              echo "FATAL: Direktori aplikasi $APP_DIR tidak ditemukan di VPS." >&2
+              exit 1
+            fi
+
+            cd "$APP_DIR"
+
+            # Jika file deploy.sh tersedia di VPS, eksekusi file tersebut
+            if [ -f "$APP_DIR/deploy.sh" ]; then
+              echo "Menjalankan deploy.sh..."
+              chmod +x "$APP_DIR/deploy.sh"
+              "$APP_DIR/deploy.sh"
+            else
+              echo "Menjalankan standard Laravel deployment..."
+              git fetch origin main
+              git reset --hard origin/main
+              composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+              php artisan migrate --force
+              php artisan optimize:clear
+              php artisan optimize
+              php artisan queue:restart || true
+            fi
+
+      # Swap aset frontend ke public/build di VPS
       - name: Swap frontend assets into place
         uses: appleboy/ssh-action@7eaf76671a0d7eec5d98ee897acda4f968735a17 # v1.2.0
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.SSH_PORT }}
+          port: ${{ secrets.SSH_PORT || '22' }}
           script: |
             set -e
-            cd /home/gajagohosting/apps/sims-hall
+            APP_DIR="${{ secrets.APP_DIR || '/home/gajagohosting/apps/sims-hall' }}"
+            cd "$APP_DIR"
 
-            # --- Validasi staging DULU, sebelum public/build yang sedang
-            # --- serving disentuh. Kalau staging salah, public_html/build
-            # --- (symlink ke sini) tetap menunjuk build lama yang masih utuh.
             if [ ! -f /tmp/sims-hall-build/manifest.json ]; then
-              echo "FATAL: /tmp/sims-hall-build/manifest.json tidak ada." >&2
-              echo "Isi staging:" >&2
-              find /tmp/sims-hall-build -maxdepth 3 >&2
+              echo "FATAL: /tmp/sims-hall-build/manifest.json tidak ada di staging." >&2
               exit 1
             fi
 
-            # Pastikan file yang disebut manifest benar-benar ada dan tidak nol
-            # byte. Ini yang dulu diam-diam rusak: JS 0 byte tapi HTTP tetap 200.
+            # Validasi aset file di manifest
             for entry in resources/js/app.js resources/css/app.css; do
               rel=$(php -r '$m=json_decode(file_get_contents("/tmp/sims-hall-build/manifest.json"),true);$k=$argv[1];echo $m[$k]["file"]??"";' "$entry")
               if [ -z "$rel" ] || [ ! -s "/tmp/sims-hall-build/$rel" ]; then
@@ -147,8 +159,8 @@ jobs:
               echo "OK: $entry -> $rel ($(wc -c < "/tmp/sims-hall-build/$rel") byte)"
             done
 
-            # --- Baru swapping. Dua mv berurutan; selanya hanya(rename),
-            # --- jadi tidak pernah ada keadaan setengah tertulis.
+            # Swapping direktori secara atomik
+            mkdir -p public
             rm -rf public/build.prev
             if [ -d public/build ]; then
               mv public/build public/build.prev
@@ -156,8 +168,6 @@ jobs:
             mv /tmp/sims-hall-build public/build
             rm -rf public/build.prev /tmp/sims-hall-build
 
-            # public_html/build adalah symlink ke public/build, jadi web root
-            # langsung ikut berubah tanpa langkah sync terpisah.
-            echo "== aset frontend aktif =="
-            ls -l public/build/manifest.json
-            ls -l public/build/assets/
+            echo "== Aset frontend berhasil di-deploy =="
+            ls -la public/build/manifest.json
+            ls -la public/build/assets/
