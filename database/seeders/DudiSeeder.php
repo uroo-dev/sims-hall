@@ -16,8 +16,8 @@ class DudiSeeder extends Seeder
 {
     public function run(): void
     {
-        $jurusanRpl = Jurusan::where('nama', Kelas::JURUSAN['R'])->value('id');
-        $jurusanMesin = Jurusan::where('nama', Kelas::JURUSAN['M'])->value('id');
+        $jurusanRpl = Jurusan::where('nama', Kelas::JURUSAN['R'])->value('jurusanID');
+        $jurusanMesin = Jurusan::where('nama', Kelas::JURUSAN['M'])->value('jurusanID');
 
         $dudi = [
             [
