@@ -54,7 +54,7 @@
                                     MITRA RESMI INDUSTRI
                                 </span>
                                 <h4 class="text-xl sm:text-2xl font-black leading-tight mb-2">
-                                    {{ $rekap['total_dudi'] }} Perusahaan Mitra
+                                    {{ $rekap['total_dudi_resmi'] }} Mitra Resmi
                                 </h4>
                                 <p class="text-xs text-blue-200">Terhubung langsung dengan kurikulum industri dan penempatan magang siswa.</p>
                             </div>
@@ -71,10 +71,20 @@
                                 <h4 class="text-lg font-black tracking-wide text-amber-300">
                                     {{ $rekap['siswa_fix'] }} Siswa FIX
                                 </h4>
-                                <p class="text-[11px] text-emerald-100 mt-1">Siswa telah ditempatkan di DUDI mitra resmi Karanganyar &amp; sekitarnya.</p>
+                                <p class="text-[11px] text-emerald-100 mt-1">
+                                    @if ($rekap['siswa_fix'] > 0)
+                                        Siswa telah ditempatkan pada mitra industri yang tampil di halaman ini.
+                                    @else
+                                        Belum ada siswa yang berstatus FIX pada periode berjalan.
+                                    @endif
+                                </p>
                             </div>
                             <div class="text-[10px] text-emerald-200 flex items-center gap-1.5">
-                                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Periode Berjalan 2026
+                                @if ($rekap['siswa_fix'] > 0)
+                                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Penempatan Berjalan
+                                @else
+                                    Periode Belum Berjalan
+                                @endif
                             </div>
                         </div>
 
@@ -268,17 +278,19 @@
                                         {{ $dudi->nama_dudi }}
                                     </h3>
                                     <p class="text-xs font-semibold text-slate-500 truncate">
-                                        {{ $dudi->kota ?? 'Karanganyar' }} &bull; {{ $dudi->bidang_usaha ?? 'Industri' }}
+                                        {{ collect([$dudi->kota, $dudi->bidang_usaha])->filter()->implode(' • ') }}
                                     </p>
                                 </div>
                             </div>
 
-                            <p class="text-slate-600 text-sm leading-relaxed mb-4">
-                                Mitra DUDI Jurusan
-                                <span class="font-bold text-brand-blue">
-                                    {{ $dudi->jurusan?->nama ?? $dudi->bidang_usaha }}
-                                </span>
-                            </p>
+                            @if ($dudi->jurusan?->nama || $dudi->bidang_usaha)
+                                <p class="text-slate-600 text-sm leading-relaxed mb-4">
+                                    Mitra DUDI Jurusan
+                                    <span class="font-bold text-brand-blue">
+                                        {{ $dudi->jurusan?->nama ?? $dudi->bidang_usaha }}
+                                    </span>
+                                </p>
+                            @endif
 
                             <div class="flex items-center justify-between text-xs text-slate-500 mb-6 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
                                 <span><i class="fa-solid fa-users text-brand-blue mr-1"></i> Kuota: <strong>{{ $dudi->kuota_maksimal }}</strong></span>

@@ -87,6 +87,17 @@ class DashboardController extends Controller
             'pembayaran.details',
         ])->latest()->take(5)->get();
 
+        // Hitung statistik peminjaman per paket untuk grafik batang Chart.js
+        $paketStats = PaketPeminjaman::withCount('peminjamans')->get();
+        $paketChartLabels = $paketStats->pluck('nama_paket')->toArray();
+        $paketChartData = $paketStats->pluck('peminjamans_count')->toArray();
+
+        $customCount = Peminjaman::where('is_custom', true)->count();
+        if ($customCount > 0 || empty($paketChartLabels)) {
+            $paketChartLabels[] = 'Kustom / Mandiri';
+            $paketChartData[] = $customCount;
+        }
+
         return view('Admin.peminjaman.dashboard', compact(
             'paymentConfig',
             'isSuperAdmin',
@@ -95,7 +106,9 @@ class DashboardController extends Controller
             'facilityCount',
             'recentPeminjamans',
             'calendarDate',
-            'bookedDays'
+            'bookedDays',
+            'paketChartLabels',
+            'paketChartData'
         ));
     }
 }

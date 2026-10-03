@@ -24,7 +24,7 @@
                     PKL &amp; BKK
                 </h1>
                 <p class="mt-4 text-slate-600 text-base sm:text-lg leading-relaxed">
-                    SMKN 2 Karanganyar bekerja sama dengan {{ $rekap['total_dudi'] }} mitra industri resmi
+                    SMKN 2 Karanganyar bekerja sama dengan {{ $rekap['total_dudi_resmi'] }} mitra industri resmi
                     untuk menempatkan siswa pada lingkungan kerja yang relevan dengan bidang studi mereka.
                     Semua posisi dan kuota di bawah ini bersumber langsung dari data penempatan PKL &amp; BKK sekolah.
                 </p>
@@ -46,7 +46,7 @@
     <!-- REKAP ANGKA -->
     <section class="py-12 bg-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-2 lg:grid-cols-5 gap-5">
+            <div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-5">
                 @php
                     $statistik = [
                         [
@@ -72,6 +72,12 @@
                             'label' => 'Mitra DUDI',
                             'ikon' => 'fa-handshake',
                             'warna' => 'text-brand-blue',
+                        ],
+                        [
+                            'nilai' => $rekap['total_dudi_resmi'],
+                            'label' => 'Mitra Resmi',
+                            'ikon' => 'fa-certificate',
+                            'warna' => 'text-emerald-600',
                         ],
                         [
                             'nilai' => $rekap['total_lowongan'],
@@ -140,8 +146,8 @@
                     <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
                         {{-- Logo --}}
                         <div class="md:col-span-2 flex md:justify-center items-start">
-                            @if ($dudi->logo)
-                                <img src="{{ asset('assets/' . $dudi->logo) }}" alt="Logo {{ $dudi->nama }}"
+                            @if ($dudi->logo_url)
+                                <img src="{{ $dudi->logo_url }}" alt="Logo {{ $dudi->nama_dudi }}"
                                     class="h-20 w-auto object-contain filter drop-shadow-md select-none">
                             @else
                                 <div class="font-black text-lg text-blue-800 tracking-tighter border-4 border-blue-800 px-3 py-2 rounded-xl bg-blue-50/50 shadow-sm text-center">

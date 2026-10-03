@@ -121,10 +121,7 @@ class DashboardTest extends TestCase
             'status' => 'approved_final',
         ]);
 
-        $response = $this->actingAs($admin)->get(route('admin.peminjaman.dashboard', [
-            'month' => $tanggalAcara->month,
-            'year' => $tanggalAcara->year,
-        ]));
+        $response = $this->actingAs($admin)->get(route('admin.peminjaman.dashboard', ['month' => $tanggalAcara->month, 'year' => $tanggalAcara->year]));
 
         $response->assertOk();
         $response->assertViewHas('calendarDate');

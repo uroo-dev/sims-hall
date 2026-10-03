@@ -158,7 +158,14 @@
                 Profile
             </a>
 
-            <a href="{{ route('kesiswaan') }}" class="hover:text-brand-blue py-1 {{ request()->routeIs('kesiswaan') ? 'text-brand-blue font-bold' : '' }}">Kesiswaan</a>
+            <a href="{{ route('kesiswaan') }}" 
+                class="py-1 transition-colors
+                {{ request()->routeIs('kesiswaan') 
+                    ? 'text-brand-blue font-bold' 
+                    : 'hover:text-brand-blue' }}">
+                Kesiswaan
+            </a>
+
             <a href="{{ route('produk-unggulan') }}" 
                 class="py-1 transition-colors
                 {{ request()->routeIs('produk-unggulan*') 
@@ -173,13 +180,6 @@
                     @endforeach
                 </div>
             @endif
-            <a href="{{ route('kesiswaan') }}" 
-                class="py-1 transition-colors
-                {{ request()->routeIs('kesiswaan') 
-                    ? 'text-brand-blue font-bold' 
-                    : 'hover:text-brand-blue' }}">
-                Kesiswaan
-            </a>
 
             <a href="{{ route('layanan-peminjaman') }}" 
                 class="py-1 transition-colors
@@ -207,7 +207,7 @@
                 {{ request()->routeIs('ppdb') 
                     ? 'text-brand-blue font-bold' 
                     : 'hover:text-brand-blue' }}">
-                PPDB 2026
+                PPDB
             </a>
         </div>
     </div>

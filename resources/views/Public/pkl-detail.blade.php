@@ -51,22 +51,28 @@
 
                     <div class="flex-grow pr-0 md:pr-28">
                         <div class="flex flex-wrap items-center gap-2 mb-1.5">
-                            <span class="text-xs font-bold uppercase tracking-wider text-brand-blue bg-blue-50 px-2.5 py-0.5 rounded border border-blue-100">
-                                {{ $dudi->jurusan?->nama ?? $dudi->bidang_usaha ?? 'Umum' }}
-                            </span>
-                            <span class="text-xs text-slate-400">&bull;</span>
-                            <span class="text-xs text-slate-500 font-medium">
-                                <i class="fa-solid fa-location-dot text-brand-blue mr-1"></i> {{ $dudi->kota ?? 'Karanganyar' }}
-                            </span>
+                            @if ($dudi->jurusan?->nama || $dudi->bidang_usaha)
+                                <span class="text-xs font-bold uppercase tracking-wider text-brand-blue bg-blue-50 px-2.5 py-0.5 rounded border border-blue-100">
+                                    {{ $dudi->jurusan?->nama ?? $dudi->bidang_usaha }}
+                                </span>
+                            @endif
+                            @if ($dudi->kota)
+                                <span class="text-xs text-slate-400">&bull;</span>
+                                <span class="text-xs text-slate-500 font-medium">
+                                    <i class="fa-solid fa-location-dot text-brand-blue mr-1"></i> {{ $dudi->kota }}
+                                </span>
+                            @endif
                         </div>
 
                         <h1 class="text-2xl sm:text-3xl font-black text-slate-900 mb-2">
                             {{ $dudi->nama_dudi }}
                         </h1>
 
-                        <p class="text-sm text-slate-600 leading-relaxed mb-4 max-w-3xl">
-                            {{ $dudi->deskripsi ?? 'Mitra industri resmi yang bekerja sama dengan SMK Negeri 2 Karanganyar dalam program Praktik Kerja Lapangan (PKL) dan sinkronisasi kurikulum berbasis industri.' }}
-                        </p>
+                        @if ($dudi->deskripsi)
+                            <p class="text-sm text-slate-600 leading-relaxed mb-4 max-w-3xl">
+                                {{ $dudi->deskripsi }}
+                            </p>
+                        @endif
 
                         <div class="flex flex-wrap items-center gap-3">
                             @if (!empty($dudi->no_hp))
@@ -121,7 +127,7 @@
                                     @php
                                         $siswa = $penempatan->siswa;
                                         $surat = $penempatan->suratPengajuan;
-                                        $jurusanNama = $siswa?->jurusan ?? 'Teknik';
+                                        $jurusanNama = $siswa?->jurusan;
 
                                         // Badge styling jurusan
                                         $badgeBg = 'bg-blue-100 text-blue-800';
@@ -137,19 +143,26 @@
                                     @endphp
                                     <tr class="hover:bg-slate-50/80 transition-colors">
                                         <td class="py-3.5 px-3">
-                                            <div class="font-bold text-slate-900">{{ $siswa->nama ?? 'Siswa SMKN 2' }}</div>
-                                            <div class="text-[11px] text-slate-400">NIS: {{ $siswa->nis ?? '-' }} &bull; Kelas {{ $siswa->kelas ?? 'XII' }}</div>
+                                            <div class="font-bold text-slate-900">{{ $siswa?->nama ?? '-' }}</div>
+                                            <div class="text-[11px] text-slate-400">
+                                            @if ($siswa?->nis)
+                                                NIS: {{ $siswa->nis }}
+                                            @endif
+                                            @if ($siswa?->kelas)
+                                                <span class="{{ $siswa?->nis ? '&bull; ' : '' }}">Kelas {{ $siswa->kelas }}</span>
+                                            @endif
+                                        </div>
                                         </td>
                                         <td class="py-3.5 px-3">
                                             <span class="{{ $badgeBg }} text-[11px] font-bold px-2.5 py-1 rounded-md">
-                                                {{ $jurusanNama }}
+                                                {{ $jurusanNama ?? '-' }}
                                             </span>
                                         </td>
                                         <td class="py-3.5 px-3 text-xs text-slate-600 font-medium whitespace-nowrap">
                                             @if ($surat && $surat->tgl_mulai_pkl && $surat->tgl_selesai_pkl)
                                                 {{ $surat->tgl_mulai_pkl->translatedFormat('M Y') }} - {{ $surat->tgl_selesai_pkl->translatedFormat('M Y') }}
                                             @else
-                                                Periode 2026
+                                                <span class="text-slate-400">-</span>
                                             @endif
                                         </td>
                                         <td class="py-3.5 px-3 whitespace-nowrap">
@@ -186,30 +199,36 @@
                 <!-- RIGHT (4 COLS): PROGRAM TERSEDIA & KONTAK -->
                 <div class="lg:col-span-4 space-y-6">
 
-                    <!-- Program Tersedia -->
-                    <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
-                        <div class="flex items-center gap-2 mb-4">
-                            <i class="fa-solid fa-clipboard-check text-brand-blue text-lg"></i>
-                            <h3 class="text-lg font-bold text-slate-900">Program Tersedia</h3>
-                        </div>
+                    @php
+                            // Program diambil dari kolom program_1..3 milik mitra.
+                            // Kalau kosong, blok ini disembunyikan — bukan diisi
+                            // program contoh.
+                            $programs = collect([
+                                $dudi->program_1,
+                                $dudi->program_2,
+                                $dudi->program_3,
+                            ])->filter();
+                        @endphp
 
-                        <div class="space-y-3">
-                            @foreach ($programs as $prog)
-                                @php
-                                    $judul = is_array($prog) ? ($prog['judul'] ?? 'Program Spesialisasi') : $prog;
-                                    $deskripsi = is_array($prog) ? ($prog['deskripsi'] ?? 'Program peningkatan kompetensi siswa terstandar industri.') : 'Program pelatihan dan praktik kerja langsung di lingkungan industri mitra.';
-                                @endphp
-                                <div class="bg-blue-50/70 border border-blue-100 rounded-2xl p-4 transition-all hover:bg-blue-50">
-                                    <h4 class="text-sm font-bold text-brand-blue mb-1">
-                                        {{ $judul }}
-                                    </h4>
-                                    <p class="text-xs text-slate-600 leading-relaxed">
-                                        {{ $deskripsi }}
-                                    </p>
+                        @if ($programs->isNotEmpty())
+                            <!-- Program Tersedia -->
+                            <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
+                                <div class="flex items-center gap-2 mb-4">
+                                    <i class="fa-solid fa-clipboard-check text-brand-blue text-lg"></i>
+                                    <h3 class="text-lg font-bold text-slate-900">Program Tersedia</h3>
                                 </div>
-                            @endforeach
-                        </div>
-                    </div>
+
+                                <div class="space-y-3">
+                                    @foreach ($programs as $program)
+                                        <div class="bg-blue-50/70 border border-blue-100 rounded-2xl p-4 transition-all hover:bg-blue-50">
+                                            <h4 class="text-sm font-bold text-brand-blue mb-1">
+                                                {{ $program }}
+                                            </h4>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
 
                     <!-- Informasi Lokasi & Kontak -->
                     <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
@@ -219,29 +238,35 @@
                         </div>
 
                         <div class="space-y-3 text-xs text-slate-600">
-                            <div class="flex items-start gap-2.5">
-                                <i class="fa-solid fa-map-location-dot text-brand-blue mt-0.5"></i>
-                                <div>
-                                    <span class="block font-bold text-slate-800">Alamat Perusahaan:</span>
-                                    <span>{{ $dudi->alamat ?? 'Jl. Raya Industri' }}, {{ $dudi->kota ?? 'Karanganyar' }}</span>
+                            @if ($dudi->alamat || $dudi->kota)
+                                <div class="flex items-start gap-2.5">
+                                    <i class="fa-solid fa-map-location-dot text-brand-blue mt-0.5"></i>
+                                    <div>
+                                        <span class="block font-bold text-slate-800">Alamat Perusahaan:</span>
+                                        <span>{{ collect([$dudi->alamat, $dudi->kota])->filter()->implode(', ') }}</span>
+                                    </div>
                                 </div>
-                            </div>
+                            @endif
 
-                            <div class="flex items-start gap-2.5">
-                                <i class="fa-solid fa-user-tie text-brand-blue mt-0.5"></i>
-                                <div>
-                                    <span class="block font-bold text-slate-800">Kontak Person:</span>
-                                    <span>{{ $dudi->kontak_person ?? 'Koordinator PKL Perusahaan' }}</span>
+                            @if ($dudi->kontak_person)
+                                <div class="flex items-start gap-2.5">
+                                    <i class="fa-solid fa-user-tie text-brand-blue mt-0.5"></i>
+                                    <div>
+                                        <span class="block font-bold text-slate-800">Kontak Person:</span>
+                                        <span>{{ $dudi->kontak_person }}</span>
+                                    </div>
                                 </div>
-                            </div>
+                            @endif
 
-                            <div class="flex items-start gap-2.5">
-                                <i class="fa-solid fa-briefcase text-brand-blue mt-0.5"></i>
-                                <div>
-                                    <span class="block font-bold text-slate-800">Bidang Usaha:</span>
-                                    <span>{{ $dudi->bidang_usaha ?? $dudi->jurusan?->nama ?? 'Industri & Manufaktur' }}</span>
+                            @if ($dudi->bidang_usaha || $dudi->jurusan?->nama)
+                                <div class="flex items-start gap-2.5">
+                                    <i class="fa-solid fa-briefcase text-brand-blue mt-0.5"></i>
+                                    <div>
+                                        <span class="block font-bold text-slate-800">Bidang Usaha:</span>
+                                        <span>{{ $dudi->bidang_usaha ?? $dudi->jurusan?->nama }}</span>
+                                    </div>
                                 </div>
-                            </div>
+                            @endif
                         </div>
                     </div>
 

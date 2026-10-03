@@ -327,11 +327,20 @@
                     @endif
 
                     <!-- Sidebar Card 3: Banner PPDB / Call to Action -->
+                    @php
+                        $ppdbMaster = $ppdbMaster ?? \App\Models\Ppdb_master::first();
+                    @endphp
                     <div class="bg-gradient-to-br from-brand-blue to-brand-darkBlue text-white rounded-2xl p-6 shadow-md relative overflow-hidden">
                         <div class="relative z-10 space-y-3">
-                            <span class="text-[10px] uppercase tracking-wider font-extrabold bg-white/20 px-2.5 py-1 rounded">SPMB 2026</span>
-                            <h4 class="font-extrabold text-lg leading-snug">Ingin Menjadi Bagian dari SKANDAKRA?</h4>
-                            <p class="text-xs text-blue-100 leading-relaxed">Daftarkan diri Anda pada Penerimaan Murid Baru SMKN 2 Karanganyar Tahun Ajaran 2026/2027.</p>
+                            <span class="text-[10px] uppercase tracking-wider font-extrabold bg-white/20 px-2.5 py-1 rounded">
+                                PPDB SKANDAKRA
+                            </span>
+                            <h4 class="font-extrabold text-lg leading-snug">
+                                {{ $ppdbMaster?->judul ?: 'Ingin Menjadi Bagian dari SKANDAKRA?' }}
+                            </h4>
+                            <p class="text-xs text-blue-100 leading-relaxed">
+                                {{ $ppdbMaster?->deskripsi ?: 'Daftarkan diri Anda pada Penerimaan Peserta Didik Baru SMKN 2 Karanganyar.' }}
+                            </p>
                             <a href="{{ route('ppdb') }}" class="inline-block bg-white text-brand-blue font-bold text-xs px-4 py-2.5 rounded-lg shadow hover:bg-slate-100 transition-colors mt-2">
                                 Info PPDB Selengkapnya
                             </a>

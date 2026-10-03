@@ -54,29 +54,31 @@ class Kesiswaan extends Model
     }
 
     /**
-     * URLs for documentation
+     * URLs untuk foto dokumentasi kesiswaan.
+     *
+     * Hanya berisi entri yang benar-benar diisi admin. Versi lama mengunduh
+     * `assets/prestasi/banner_terbaru_*.png` sebagai cadangan, sehingga halaman
+     * publik menampilkan foto prestasi sebagai dokumentasi kesiswaan walaupun
+     * belum ada data — sekarang array-nya bisa kosong dan pemanggil yang
+     * menentukan tampil-tidaknya kolase.
+     *
+     * @return list<string>
      */
     public function getDokumentasiUrlsAttribute(): array
     {
-        $list = $this->dokumentasi_list;
-        $defaults = [
-            asset('assets/prestasi/banner_terbaru_2.png'),
-            asset('assets/prestasi/banner_terbaru_1.png'),
-        ];
-
         $urls = [];
-        for ($i = 0; $i < 2; $i++) {
-            if (isset($list[$i]) && ! blank($list[$i])) {
-                $path = $list[$i];
-                if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
-                    $urls[$i] = $path;
-                } elseif (str_starts_with($path, 'assets/')) {
-                    $urls[$i] = asset($path);
-                } else {
-                    $urls[$i] = Storage::disk('public')->url($path);
-                }
+
+        foreach ($this->dokumentasi_list as $path) {
+            if (blank($path)) {
+                continue;
+            }
+
+            if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+                $urls[] = $path;
+            } elseif (str_starts_with($path, 'assets/')) {
+                $urls[] = asset($path);
             } else {
-                $urls[$i] = $defaults[$i];
+                $urls[] = Storage::disk('public')->url($path);
             }
         }
 

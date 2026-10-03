@@ -68,16 +68,33 @@
                         </div>
 
                         <div class="flex flex-wrap items-center gap-4 text-xs text-slate-500 font-semibold mb-4">
-                            <span class="flex items-center gap-1.5 text-slate-700">
-                                <i class="fa-solid fa-building text-brand-blue"></i>
-                                {{ $lowongan->dudi?->nama_dudi ?? $lowongan->nama_perusahaan }}
-                            </span>
-                            <span>&bull;</span>
-                            <span class="flex items-center gap-1.5">
-                                <i class="fa-solid fa-location-dot text-brand-blue"></i>
-                                {{ $lowongan->dudi?->kota ?? 'Karanganyar, Jawa Tengah' }}
-                            </span>
-                            <span>&bull;</span>
+                            @php
+                                // Pemisah bullet hanya muncul kalau ada isi di
+                                // sebelah kanannya, supaya tidak ada "• •".
+                                $adaNama = (bool) $lowongan->dudi?->nama_dudi;
+                                $adaKota = (bool) $lowongan->dudi?->kota;
+                            @endphp
+
+                            @if ($adaNama)
+                                <span class="flex items-center gap-1.5 text-slate-700">
+                                    <i class="fa-solid fa-building text-brand-blue"></i>
+                                    {{ $lowongan->dudi->nama_dudi }}
+                                </span>
+                            @endif
+
+                            @if ($adaKota)
+                                @if ($adaNama)
+                                    <span>&bull;</span>
+                                @endif
+                                <span class="flex items-center gap-1.5">
+                                    <i class="fa-solid fa-location-dot text-brand-blue"></i>
+                                    {{ $lowongan->dudi->kota }}
+                                </span>
+                            @endif
+
+                            @if ($adaNama || $adaKota)
+                                <span>&bull;</span>
+                            @endif
                             <span class="flex items-center gap-1.5 text-amber-600">
                                 <i class="fa-regular fa-clock"></i>
                                 Batas: {{ $lowongan->deadline->locale('id')->translatedFormat('d F Y') }}
@@ -118,7 +135,7 @@
                         </div>
 
                         <p class="text-sm text-slate-600 leading-relaxed">
-                            {{ $lowongan->dudi?->deskripsi ?? 'Perusahaan mitra industri terverifikasi yang bekerja sama dengan Bursa Kerja Khusus (BKK) SMKN 2 Karanganyar untuk penyerapan tenaga kerja terampil dan alumni berprestasi.' }}
+                            {{ $lowongan->dudi?->deskripsi ?: ($lowongan->deskripsi ?: 'Profil perusahaan belum diisi oleh BKK.') }}
                         </p>
                     </div>
 

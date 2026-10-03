@@ -23,7 +23,51 @@ class DataMasterDashboardController extends Controller
         $totalGuru = Guru::count();
         $totalSiswa = Siswa::count();
 
-        return view('Admin.datamaster.index', compact('sekolah', 'totalUsers', 'totalSekolah', 'totalGuru', 'totalSiswa'));
+        // Hitung sebaran pengguna per peran dari tabel users
+        $userRoleCounts = User::selectRaw('role, count(*) as total')
+            ->groupBy('role')
+            ->pluck('total', 'role')
+            ->toArray();
+
+        $roleLabelsMap = [
+            'super_admin' => 'Super Admin',
+            'super_duper_admin' => 'Super Duper Admin',
+            'admin_aula' => 'Admin Aula',
+            'admin_master' => 'Admin Master',
+            'admin_kesiswaan' => 'Admin Kesiswaan',
+            'admin_ppdb' => 'Admin PPDB',
+            'admin_pklbkk' => 'Admin PKL/BKK',
+            'bkk' => 'BKK',
+            'guru' => 'Guru',
+            'kepala_sekolah' => 'Kepala Sekolah',
+            'organisasi' => 'Organisasi',
+            'instansi_luar_terikat' => 'Instansi Luar Terikat',
+            'instansi_luar' => 'Instansi Luar',
+            'pelanggan' => 'Pelanggan',
+            'user' => 'Pengguna',
+        ];
+
+        $userChartLabels = [];
+        $userChartData = [];
+        foreach ($userRoleCounts as $role => $count) {
+            $userChartLabels[] = $roleLabelsMap[$role] ?? ucwords(str_replace('_', ' ', $role));
+            $userChartData[] = $count;
+        }
+
+        if (empty($userChartLabels)) {
+            $userChartLabels = ['Admin', 'Guru', 'Kepala Sekolah', 'Pelanggan'];
+            $userChartData = [0, 0, 0, 0];
+        }
+
+        return view('Admin.datamaster.index', compact(
+            'sekolah',
+            'totalUsers',
+            'totalSekolah',
+            'totalGuru',
+            'totalSiswa',
+            'userChartLabels',
+            'userChartData'
+        ));
     }
 
     // ==========================================

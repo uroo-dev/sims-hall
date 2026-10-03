@@ -78,28 +78,36 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 pt-12 mb-20">
 
                 @php
-                    // Warna dan konfigurasi per jurusan (bisa disesuaikan berdasarkan nama jurusan)
+                    // Warna kartu per jurusan (konfigurasi tampilan, bukan data).
+                    // Kalau `$jurusan->warna` sudah diisi di dashboard, warna itu
+                    // yang dipakai supaya kartu ikut berubah otomatis.
                     $jurusanConfig = [
-                        'Teknik Pemesinan' => ['bg' => 'bg-[#5FB0FF]', 'shadow' => 'shadow-blue-500/20', 'logo' => 'logo_mesin.png'],
-                        'Teknik Pembuatan Kain' => ['bg' => 'bg-[#FCE055]', 'shadow' => 'shadow-amber-500/20', 'logo' => 'logo_tekstil.png'],
-                        'Teknik Ototronik' => ['bg' => 'bg-[#FF5A5F]', 'shadow' => 'shadow-red-500/20', 'logo' => 'logo_oto.png'],
-                        'Rekayasa Perangkat Lunak' => ['bg' => 'bg-[#10C863]', 'shadow' => 'shadow-emerald-500/20', 'logo' => 'logo_rpl.png'],
+                        'Teknik Pemesinan' => ['bg' => 'bg-[#5FB0FF]', 'shadow' => 'shadow-blue-500/20'],
+                        'Teknik Pembuatan Kain' => ['bg' => 'bg-[#FCE055]', 'shadow' => 'shadow-amber-500/20'],
+                        'Teknik Ototronik' => ['bg' => 'bg-[#FF5A5F]', 'shadow' => 'shadow-red-500/20'],
+                        'Rekayasa Perangkat Lunak' => ['bg' => 'bg-[#10C863]', 'shadow' => 'shadow-emerald-500/20'],
                     ];
                 @endphp
 
                 @forelse($jurusans as $jurusan)
                     @php
-                        $config = $jurusanConfig[$jurusan->nama] ?? ['bg' => 'bg-blue-300', 'shadow' => 'shadow-blue-500/20', 'logo' => 'logo_mesin.png'];
+                        $config = $jurusanConfig[$jurusan->nama] ?? ['bg' => 'bg-blue-300', 'shadow' => 'shadow-blue-500/20'];
                     @endphp
                     <div class="relative group cursor-pointer pt-16">
                         <div class="{{ $config['bg'] }} rounded-b-3xl rounded-t-[40px] p-6 text-slate-900 flex flex-col justify-between shadow-xl {{ $config['shadow'] }} group-hover:-translate-y-3 transition-all duration-300 relative z-10 min-h-[380px]">
                             <div class="absolute -top-16 left-0 right-0 flex justify-center pointer-events-none">
-                                @if($jurusan->logo)
+                                @if ($jurusan->logo)
                                     <img src="{{ asset('assets/' . $jurusan->logo) }}" alt="{{ $jurusan->nama }}"
                                         class="w-52 h-auto object-contain filter drop-shadow-xl group-hover:scale-110 group-hover:-translate-y-2 transition-all duration-300 transform-gpu">
-                                @else
-                                    <img src="{{ asset('assets/' . $config['logo']) }}" alt="{{ $jurusan->nama }}"
+                                @elseif ($jurusan->dokumentasiUrl())
+                                    <img src="{{ $jurusan->dokumentasiUrl() }}" alt="{{ $jurusan->nama }}"
                                         class="w-52 h-auto object-contain filter drop-shadow-xl group-hover:scale-110 group-hover:-translate-y-2 transition-all duration-300 transform-gpu">
+                                @else
+                                    {{-- Logo belum diisi: tampilkan inisial, bukan logo
+                                         jurusan lain yang menyesatkan. --}}
+                                    <span class="w-32 h-32 rounded-2xl bg-white/60 text-slate-500 flex items-center justify-center font-black text-4xl shadow-inner">
+                                        {{ strtoupper(substr($jurusan->nama, 0, 2)) }}
+                                    </span>
                                 @endif
                             </div>
                             <div class="mt-28 space-y-3">
@@ -183,22 +191,22 @@
                 <div class="lg:col-span-6 bg-white border border-slate-200 rounded-2xl p-6 card-shadow flex flex-col justify-between">
                     <div>
                         <div class="bg-blue-900 text-white font-bold text-center py-2.5 rounded-lg mb-6 tracking-wide text-sm sm:text-base">
-                            {{ $prestasis->first()->judul ?? 'PRESTASI TERBARU SISWA' }}
+                            PRESTASI TERBARU SISWA
                         </div>
 
                         <div class="space-y-4 mb-6">
-                            @forelse($prestasis as $prestasi)
+                            @forelse($prestasies->take(4) as $prestasi)
                                 <div class="flex gap-4 items-start bg-slate-50 rounded-lg p-3 border border-slate-100">
-                                    @if($prestasi->dokumentasi)
-                                        <img src="{{ asset('assets/' . $prestasi->dokumentasi) }}" alt="{{ $prestasi->judul }}" class="w-16 h-16 object-cover rounded-lg">
+                                    @if($prestasi->gambarUrl())
+                                        <img src="{{ $prestasi->gambarUrl() }}" alt="{{ $prestasi->judul }}" class="w-16 h-16 object-cover rounded-lg">
                                     @else
                                         <div class="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600">
                                             <i class="fa-solid fa-trophy text-xl"></i>
                                         </div>
                                     @endif
                                     <div class="flex-1">
-                                        <div class="text-xs font-bold text-slate-800">{{ $prestasi->judul ?? 'Prestasi Siswa' }}</div>
-                                        <div class="text-[10px] text-slate-500 mt-1">{{ Str::limit($prestasi->deskripsi ?? '-', 100) }}</div>
+                                        <div class="text-xs font-bold text-slate-800">{{ $prestasi->judul }}</div>
+                                        <div class="text-[10px] text-slate-500 mt-1">{{ Str::limit($prestasi->ringkasan ?: strip_tags($prestasi->konten), 100) }}</div>
                                     </div>
                                 </div>
                             @empty
@@ -208,9 +216,10 @@
                     </div>
 
                     <div class="text-right mt-4">
-                        <span class="inline-block bg-brand-blue text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase">
-                            AKADEMIK
-                        </span>
+                        <a href="{{ route('informasi') }}?kategori={{ \App\Models\Artikel::KATEGORI_PRESTASI }}#daftar-artikel"
+                            class="inline-block bg-brand-blue text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase hover:bg-brand-darkBlue transition-colors">
+                            LIHAT SEMUA PRESTASI
+                        </a>
                     </div>
                 </div>
 
@@ -259,43 +268,45 @@
 
             <!-- PRESTASI TERBARU (DINAMIS) -->
             <div class="bg-white rounded-2xl p-6 sm:p-8 card-shadow border border-slate-100 relative">
-                <div class="mb-6">
+                <div class="mb-6 flex items-center justify-between gap-4">
                     <h4 class="text-lg font-bold text-slate-800 border-b-2 border-brand-blue inline-block pb-1">Prestasi Terbaru</h4>
+                    <a href="{{ route('informasi') }}?kategori={{ \App\Models\Artikel::KATEGORI_PRESTASI }}#daftar-artikel"
+                        class="inline-flex items-center text-brand-blue font-bold text-xs hover:translate-x-1 transition-transform">
+                        Semua Prestasi <i class="fa-solid fa-chevron-right text-[10px] ml-1"></i>
+                    </a>
                 </div>
 
-                <div class="relative">
-                    <div id="news-container" class="grid grid-cols-1 md:grid-cols-2 gap-6 transition-all duration-300">
-                        @forelse($prestasis as $index => $prestasi)
-                            @if($index == 0)
-                                <div class="bg-gradient-to-r from-blue-900 to-indigo-900 rounded-xl overflow-hidden p-6 text-white relative group">
-                                    <span class="inline-block bg-blue-600 text-white text-[10px] font-bold px-2.5 py-1 rounded mb-3 uppercase">
-                                        BERITA HARI INI
-                                    </span>
-                                    <h4 class="text-lg sm:text-xl font-bold leading-snug mb-4 group-hover:text-blue-200 transition-colors">
-                                        {{ $prestasi->judul ?? 'Prestasi Terbaru Siswa' }}
-                                    </h4>
-                                    <p class="text-xs text-blue-100">{{ Str::limit($prestasi->deskripsi ?? '', 120) }}</p>
-                                </div>
-                            @else
-                                <div class="bg-gradient-to-r from-emerald-800 to-teal-900 rounded-xl overflow-hidden p-6 text-white relative group">
-                                    <div class="text-xs font-semibold text-emerald-300 mb-1">{{ $sekolah->profil_judul ?? 'SMKN 2 KARANGANYAR' }} MENGUCAPKAN</div>
-                                    <h4 class="text-2xl sm:text-3xl font-black italic tracking-wide text-amber-300 group-hover:scale-105 transition-transform">
-                                        SELAMAT DAN SUKSES !
-                                    </h4>
-                                    <p class="text-xs text-emerald-100 mt-2">{{ $prestasi->judul ?? '' }} - {{ Str::limit($prestasi->deskripsi ?? '', 80) }}</p>
-                                </div>
-                            @endif
-                        @empty
-                            <div class="col-span-2 text-center py-6 text-slate-500">Belum ada prestasi terbaru.</div>
-                        @endforelse
-                    </div>
-
-                    <button id="prev-news" class="absolute -left-4 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white shadow-md border border-slate-200 flex items-center justify-center text-slate-700 hover:text-brand-blue transition-colors">
-                        <i class="fa-solid fa-chevron-left text-xs"></i>
-                    </button>
-                    <button id="next-news" class="absolute -right-4 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white shadow-md border border-slate-200 flex items-center justify-center text-slate-700 hover:text-brand-blue transition-colors">
-                        <i class="fa-solid fa-chevron-right text-xs"></i>
-                    </button>
+                <div id="news-container" class="grid grid-cols-1 md:grid-cols-2 gap-6 transition-all duration-300">
+                    @forelse($prestasies as $index => $prestasi)
+                        @php
+                            // Kartu pertama dibedakan supaya hierarki visual tetap sama
+                            // seperti desain asli, selebihnya seragam agar tidak
+                            // memakai warna random per indeks.
+                            $gradien = $index === 0
+                                ? 'from-blue-900 to-indigo-900'
+                                : 'from-slate-800 to-slate-700';
+                            $label = $index === 0
+                                ? 'PRESTASI TERBARU'
+                                : ($index === 1 ? 'PRESTASI TERLAMBANG' : 'PRESTASI SISWA');
+                        @endphp
+                        <a href="{{ route('informasi.show', $prestasi->slug) }}"
+                            class="bg-gradient-to-r {{ $gradien }} rounded-xl overflow-hidden p-6 text-white relative group">
+                            <span class="inline-block bg-white/15 text-white text-[10px] font-bold px-2.5 py-1 rounded mb-3 uppercase">
+                                {{ $label }}
+                            </span>
+                            <h4 class="text-lg sm:text-xl font-bold leading-snug mb-2 group-hover:text-blue-200 transition-colors">
+                                {{ $prestasi->judul }}
+                            </h4>
+                            <p class="text-xs text-white/80 leading-relaxed">
+                                {{ Str::limit($prestasi->ringkasan ?: strip_tags($prestasi->konten), 120) }}
+                            </p>
+                            <span class="mt-4 inline-flex items-center text-[10px] font-bold uppercase tracking-wider text-white/70 group-hover:text-white transition-colors">
+                                Baca Selengkapnya <i class="fa-solid fa-arrow-right text-[9px] ml-1"></i>
+                            </span>
+                        </a>
+                    @empty
+                        <div class="col-span-2 text-center py-6 text-slate-500">Belum ada prestasi terbaru.</div>
+                    @endforelse
                 </div>
             </div>
 
@@ -306,13 +317,23 @@
     <section id="produk" class="py-16 bg-white relative">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
+            @php
+                // Judul & deskripsi section diambil dari baris pengaturan
+                // `produk_unggulan` (singleton), sama seperti halaman katalog.
+                $produkUnggulan = $produkUnggulan ?? null;
+                $judulProduk = $produkUnggulan?->judul ?: 'Produk Unggulan';
+                $deskripsiProduk = $produkUnggulan?->deskripsi
+                    ?: 'Beragam produk unggulan berbasis teknologi dan industri yang mencerminkan keterampilan siswa sesuai kebutuhan dunia kerja.';
+                $jurusanBerproduk = $jurusans->filter(fn ($j) => $j->produk->isNotEmpty())->values();
+            @endphp
+
             <div class="mb-12 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
                 <div>
                     <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 mb-2">
-                        Produk Unggulan
+                        {{ $judulProduk }}
                     </h2>
-                    <p class="text-slate-600 text-base">
-                        Beragam produk unggulan berbasis teknologi dan industri yang mencerminkan keterampilan siswa sesuai kebutuhan dunia kerja.
+                    <p class="text-slate-600 text-base max-w-3xl leading-relaxed">
+                        {{ $deskripsiProduk }}
                     </p>
                 </div>
                 <a href="{{ route('produk-unggulan') }}" class="inline-flex items-center gap-1.5 text-sm font-bold text-brand-blue hover:text-brand-darkBlue transition">
@@ -322,89 +343,42 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div id="produk-mesin"
-                    class="bg-gradient-to-r from-blue-300 via-blue-200 to-slate-200 rounded-2xl p-8 flex flex-col justify-between relative overflow-hidden shadow-sm hover:shadow-lg transition-shadow">
-                    <div class="pr-24 z-10">
-                        <h3 class="text-xl sm:text-2xl font-extrabold text-slate-900 mb-3">
-                            TEKNIK PERMESINAN
-                        </h3>
-                        <p
-                            class="text-slate-700 text-xs sm:text-sm uppercase tracking-wide leading-relaxed mb-6 font-semibold">
-                            DIPROSES MENGGUNAKAN MESIN MODERN YANG MENGHASILKAN PRODUK DENGAN KUALITAS TINGGI, PRESISI,
-                            DAN HASIL YANG KONSISTEN.
-                        </p>
-                        <a href="#"
-                            class="bg-slate-900 text-white text-xs font-bold px-5 py-2.5 rounded-lg uppercase tracking-wider hover:bg-slate-800 transition-colors">
-                            SEMUA PRODUK
-                        </a>
-                    </div>
-                    <div class="absolute right-5 bottom-10 w-32 h-32 opacity-90">
-                        <img src="{{ asset('assets/produk mesin.png') }}" alt="Bolt / Hardware" class="w-full h-full object-contain">
-                    </div>
-                </div>
+                @forelse ($jurusanBerproduk as $jurusan)
+                    @php
+                        // Gradien diturunkan dari warna aksen jurusan supaya kartu
+                        // otomatis ikut berubah kalau admin mengganti warnanya.
+                        $warna = $jurusan->warna;
+                    @endphp
+                    <div id="produk-{{ \Illuminate\Support\Str::slug($jurusan->nama) }}"
+                        class="rounded-2xl p-8 flex flex-col justify-between relative overflow-hidden shadow-sm hover:shadow-lg transition-shadow"
+                        style="background: linear-gradient(135deg, {{ $warna }}26 0%, {{ $warna }}0d 55%, #f1f5f9 100%);">
 
-                <div id="produk-tpk"
-                    class="bg-gradient-to-r from-amber-200 via-amber-100 to-yellow-50 rounded-2xl p-8 flex flex-col justify-between relative overflow-hidden shadow-sm hover:shadow-lg transition-shadow">
-                    <div class="pr-28 z-10">
-                        <h3 class="text-xl sm:text-2xl font-extrabold text-slate-900 mb-3">
-                            TEKNIK PEMBUATAN KAIN
-                        </h3>
-                        <p
-                            class="text-slate-700 text-xs sm:text-sm uppercase tracking-wide leading-relaxed mb-6 font-semibold">
-                            DARI KAIN BATIK, TENUN, HINGGA KAIN ECOPRINT SEMUA DIPRODUKSI OLEH SISWA JURUSAN TEKSTIL.
-                        </p>
-                        <a href="#"
-                            class="bg-slate-900 text-white text-xs font-bold px-5 py-2.5 rounded-lg uppercase tracking-wider hover:bg-slate-800 transition-colors">
-                            SEMUA PRODUK
-                        </a>
-                    </div>
-                    <div class="absolute right-5 bottom-10 w-32 h-36 flex items-center justify-center opacity-90">
-                        <img src="{{ asset('assets/produk tpk.png') }}" alt="Bolt / Hardware" class="w-full h-full object-contain">
-                    </div>
-                </div>
+                        <div class="pr-24 z-10">
+                            <h3 class="text-xl sm:text-2xl font-extrabold text-slate-900 mb-3 uppercase">
+                                {{ $jurusan->nama }}
+                            </h3>
+                            <p class="text-slate-700 text-xs sm:text-sm leading-relaxed mb-6 font-semibold line-clamp-3">
+                                {{ $jurusan->deskripsi ?: 'Karya siswa jurusan ' . $jurusan->nama . '.' }}
+                            </p>
+                            <a href="{{ route('produk-unggulan') }}#jurusan-{{ $jurusan->jurusanID }}"
+                                class="inline-block bg-slate-900 text-white text-xs font-bold px-5 py-2.5 rounded-lg uppercase tracking-wider hover:bg-slate-800 transition-colors">
+                                Semua Produk ({{ $jurusan->produk->count() }})
+                            </a>
+                        </div>
 
-                <div id="produk-rpl"
-                    class="bg-gradient-to-r from-emerald-200 via-teal-100 to-emerald-50 rounded-2xl p-8 flex flex-col justify-between relative overflow-hidden shadow-sm hover:shadow-lg transition-shadow">
-                    <div class="pr-32 z-10">
-                        <h3 class="text-xl sm:text-2xl font-extrabold text-slate-900 mb-3">
-                            REKAYASA PERANGKAT LUNAK
-                        </h3>
-                        <p
-                            class="text-slate-700 text-xs sm:text-sm uppercase tracking-wide leading-relaxed mb-6 font-semibold">
-                            DARI COMPANY PROFILE, E-COMMERCE, HINGGA APLIKASI ONLINE
-                        </p>
-                        <a href="#"
-                            class="bg-slate-900 text-white text-xs font-bold px-5 py-2.5 rounded-lg uppercase tracking-wider hover:bg-slate-800 transition-colors">
-                            SEMUA PRODUK
-                        </a>
+                        <div class="absolute right-5 bottom-6 w-28 h-28 opacity-95">
+                            @if ($jurusan->dokumentasiUrl())
+                                <img src="{{ $jurusan->dokumentasiUrl() }}" alt="{{ $jurusan->nama }}" class="w-full h-full object-contain">
+                            @elseif ($jurusan->logo)
+                                <img src="{{ asset('assets/' . $jurusan->logo) }}" alt="{{ $jurusan->nama }}" class="w-full h-full object-contain">
+                            @endif
+                        </div>
                     </div>
-                    <div class="absolute right-5 bottom-10 w-32 h-36 flex items-center justify-center opacity-90">
-                        <img src="{{ asset('assets/produk rpl.png') }}" alt="Bolt / Hardware" class="w-full h-full object-contain">
+                @empty
+                    <div class="col-span-2 text-center py-10 text-slate-500 text-sm">
+                        Belum ada produk unggulan yang dipublikasikan.
                     </div>
-
-                </div>
-
-                <div id="produk-oto"
-                    class="bg-gradient-to-r from-red-300 via-pink-200 to-rose-100 rounded-2xl p-8 flex flex-col justify-between relative overflow-hidden shadow-sm hover:shadow-lg transition-shadow">
-                    <div class="pr-28 z-10">
-                        <h3 class="text-xl sm:text-2xl font-extrabold text-slate-900 mb-3">
-                            TEKNIK OTOTRONIK
-                        </h3>
-                        <p
-                            class="text-slate-700 text-xs sm:text-sm uppercase tracking-wide leading-relaxed mb-6 font-semibold">
-                            TEKNOLOGI OTOTRONIK MODERN DALAM PERAWATAN DAN PERBAIKAN KENDARAAN UNTUK MENGHASILKAN
-                            PERFORMA YANG OPTIMAL DAN BERKUALITAS.
-                        </p>
-                        <a href="#"
-                            class="bg-slate-900 text-white text-xs font-bold px-5 py-2.5 rounded-lg uppercase tracking-wider hover:bg-slate-800 transition-colors">
-                            SEMUA PRODUK
-                        </a>
-                    </div>
-                    <div class="absolute right-5 bottom-10 w-32 h-36 flex items-center justify-center opacity-90">
-                        <img src="{{ asset('assets/produk oto.png') }}" alt="Bolt / Hardware" class="w-full h-full object-contain">
-                    </div>
-
-                </div>
+                @endforelse
             </div>
 
         </div>
@@ -454,10 +428,10 @@
                                 @endif
                             </ul>
 
-                            <button onclick="openModal('Pemesanan {{ $paket->nama_paket }}', 'Form reservasi Aula {{ $paket->durasi ?? '' }} (Rp {{ number_format($paket->harga, 0, ',', '.') }}).')"
-                                class="w-full bg-[#0066B2] hover:bg-blue-700 text-white text-xs sm:text-sm font-semibold py-2.5 rounded-full transition-all duration-200">
+                            <a href="{{ route('customer.peminjaman.create', ['paket_id' => $paket->paketID ?? $paket->id]) }}"
+                                class="w-full text-center block bg-[#0066B2] hover:bg-blue-700 text-white text-xs sm:text-sm font-semibold py-2.5 rounded-full transition-all duration-200">
                                 Pilih Paket
-                            </button>
+                            </a>
                         </div>
                     @empty
                         <div class="text-center py-6 text-slate-500 text-xs">Belum ada paket peminjaman.</div>
@@ -568,22 +542,23 @@
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center mb-16">
                 <div class="lg:col-span-6">
                     <div class="rounded-2xl overflow-hidden shadow-xl border border-slate-100 bg-slate-100">
-                        @if($ppdb && $ppdb->dokumentasi)
-                            <img src="{{ asset('assets/' . $ppdb->dokumentasi) }}" alt="Banner PPDB" class="w-full h-56 sm:h-64 md:h-80 object-cover">
-                        @else
-                            <img src="{{ asset('assets/ppdb.png') }}" alt="Banner SPMB" class="w-full h-56 sm:h-64 md:h-80 object-cover">
-                        @endif
+                        @php
+                            $bannerPpdbSrc = $ppdbMaster?->banner_img 
+                                ? asset('storage/' . $ppdbMaster->banner_img) 
+                                : (!empty($ppdb?->dokumentasi) ? asset('assets/' . $ppdb->dokumentasi) : asset('assets/ppdb.png'));
+                        @endphp
+                        <img src="{{ $bannerPpdbSrc }}" alt="Banner PPDB" class="w-full h-56 sm:h-64 md:h-80 object-cover">
                     </div>
                 </div>
 
                 <div class="lg:col-span-6 space-y-4">
                     <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 leading-tight">
-                        {{ $ppdb->judul ?? 'INFORMASI PPDB SMKN 2 KARANGANYAR' }}
+                        {{ $ppdbMaster?->judul ?? ($ppdb?->judul ?? 'INFORMASI PPDB SMKN 2 KARANGANYAR') }}
                     </h2>
                     <p class="text-slate-600 text-sm leading-relaxed">
-                        {{ $ppdb->deskripsi ?? 'Calon Murid Baru diharapkan menyiapkan seluruh dokumen persyaratan sebelum melakukan pengajuan akun.' }}
+                        {{ $ppdbMaster?->deskripsi ?? ($ppdb?->deskripsi ?? 'Calon Murid Baru diharapkan menyiapkan seluruh dokumen persyaratan sebelum melakukan pengajuan akun.') }}
                     </p>
-                    @if($ppdb && $ppdb->persyaratan)
+                    @if(!empty($ppdb?->persyaratan))
                         <p class="text-slate-500 text-xs leading-relaxed underline">
                             Persyaratan: {{ $ppdb->persyaratan }}
                         </p>
@@ -597,7 +572,7 @@
                 </div>
             </div>
 
-            <!-- DAYA TAMPUNG (DINAMIS dari InformasiPpdb) -->
+            <!-- DAYA TAMPUNG (DINAMIS dari ppdb_jurusan) -->
             <div class="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 card-shadow">
                 <div class="mb-6 flex items-center gap-3">
                     <h4 class="text-base font-bold text-slate-800">Daya Tampung — Kompetensi Keahlian</h4>
@@ -607,11 +582,16 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     @php
                         $colorConfig = ['bg-[#2B89FF]', 'bg-[#FF982B]', 'bg-[#FF3B3B]', 'bg-[#28C76F]'];
+                        $listDayaTampung = $ppdbJurusans->isNotEmpty() ? $ppdbJurusans : $informasiPpdbs;
                     @endphp
-                    @forelse($informasiPpdbs as $index => $info)
+                    @forelse($listDayaTampung as $index => $item)
+                        @php
+                            $namaJurusan = $item->nama_jurusan ?? ($item->nama_agenda ?? 'Kompetensi Keahlian');
+                            $dayaTampung = $item->daya_tampung ?? 0;
+                        @endphp
                         <div class="{{ $colorConfig[$index % 4] }} text-white rounded-2xl p-5 hover:scale-105 transition-transform">
-                            <div class="text-xs font-extrabold uppercase mb-4 tracking-wider">{{ $info->nama_agenda }}</div>
-                            <div class="text-4xl font-black mb-1">{{ $info->daya_tampung ?? '108' }}</div>
+                            <div class="text-xs font-extrabold uppercase mb-4 tracking-wider">{{ $namaJurusan }}</div>
+                            <div class="text-4xl font-black mb-1">{{ $dayaTampung }}</div>
                             <div class="text-xs font-medium">Siswa</div>
                         </div>
                     @empty
