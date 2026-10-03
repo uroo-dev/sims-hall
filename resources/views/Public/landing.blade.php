@@ -9,7 +9,7 @@
                 <!-- Left Text Content -->
                 <div class="lg:col-span-6 space-y-6 z-10">
                     <span class="inline-block text-brand-blue font-bold tracking-wide text-base sm:text-lg">
-                        Sekolah Pusat Keunggulan
+                        Sekolah Pusat Unggulan
                     </span>
                     <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-tight">
                         {{ $sekolah->profil_judul ?? 'SMKN 2' }}<br />
@@ -543,8 +543,8 @@
                 <div class="lg:col-span-6">
                     <div class="rounded-2xl overflow-hidden shadow-xl border border-slate-100 bg-slate-100">
                         @php
-                            $bannerPpdbSrc = $ppdbMaster?->banner_img 
-                                ? asset('storage/' . $ppdbMaster->banner_img) 
+                            $bannerPpdbSrc = $ppdbMaster?->banner_img
+                                ? asset('storage/' . $ppdbMaster->banner_img)
                                 : (!empty($ppdb?->dokumentasi) ? asset('assets/' . $ppdb->dokumentasi) : asset('assets/ppdb.png'));
                         @endphp
                         <img src="{{ $bannerPpdbSrc }}" alt="Banner PPDB" class="w-full h-56 sm:h-64 md:h-80 object-cover">

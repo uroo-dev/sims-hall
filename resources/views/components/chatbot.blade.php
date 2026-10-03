@@ -791,7 +791,8 @@
             try {
                 window.localStorage.removeItem(STORAGE_KEY);
             } catch (e) {
-                /* abaikan */ }
+                /* abaikan */
+            }
             messages = [];
             renderAll();
             inputEl.focus();
