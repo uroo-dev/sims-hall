@@ -46,7 +46,9 @@ echo ">> Run migrations"
 "$PHP" artisan migrate --force
 
 echo ">> Ensure storage link"
-"$PHP" artisan storage:link || true
+if [ ! -L "$APP_DIR/public/storage" ]; then
+    "$PHP" artisan storage:link || true
+fi
 
 echo ">> Clear cache"
 "$PHP" artisan optimize:clear

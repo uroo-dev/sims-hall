@@ -130,7 +130,9 @@ jobs:
               git fetch origin "$TARGET_BRANCH"
               git checkout -B "$TARGET_BRANCH" "origin/$TARGET_BRANCH" || git reset --hard "origin/$TARGET_BRANCH"
               composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
-              php artisan storage:link || true
+              if [ ! -L "$APP_DIR/public/storage" ]; then
+                php artisan storage:link || true
+              fi
               php artisan migrate --force
               php artisan optimize:clear
               php artisan optimize
