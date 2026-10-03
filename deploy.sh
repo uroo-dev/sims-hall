@@ -32,7 +32,8 @@ trap cleanup EXIT
 
 echo ">> Update source from origin/$TARGET_BRANCH"
 git fetch origin "$TARGET_BRANCH"
-git switch -C "$TARGET_BRANCH" "origin/$TARGET_BRANCH"
+git checkout -f -B "$TARGET_BRANCH" "origin/$TARGET_BRANCH"
+git reset --hard "origin/$TARGET_BRANCH"
 
 echo ">> Install Composer dependencies"
 if [ -f "$COMPOSER" ] && [[ "$COMPOSER" == *.phar ]]; then
