@@ -9,154 +9,130 @@ use App\Models\Ppdb_jurusan;
 use App\Models\Ppdb_master;
 use App\Models\Ppdb_persyaratan;
 use App\Models\Ppdb_tanggal_penting;
-use Carbon\Carbon;
+use App\Support\Kelas;
+use Database\Seeders\Concerns\MenyalinAset;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Carbon;
 
 class PpdbSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
+    use MenyalinAset;
+
     public function run(): void
     {
-        $dummyImage = 'dummy/dummy.jpg';
+        $dummy = $this->salinKeStoragePublik('assets/dummy/dummy.jpg');
 
-        // 1. PPDB Master Header & Banner
+        $this->seedMaster($dummy);
+        $this->seedInformasi($dummy);
+        $this->seedJurusan($dummy);
+        $this->seedJalur();
+        $this->seedPersyaratan();
+        $this->seedTanggalPenting();
+    }
+
+    private function seedMaster(?string $dummy): void
+    {
         Ppdb_master::updateOrCreate(
             ['id' => 1],
             [
                 'judul' => "PPDB SMKN 2\nKARANGANYAR",
-                'deskripsi' => 'Bersama SMKN 2 Karanganyar untuk mencetak generasi unggul yang kompeten dan berkarakter siap di dunia industri.',
-                'banner_img' => $dummyImage,
+                'deskripsi' => 'Penerimaan peserta didik baru SMKN 2 Karanganyar.',
+                'banner_img' => $dummy,
             ]
         );
+    }
 
-        // 2. PPDB Informasi Panduan & Berkas Hasil
-        Ppdb_informasi::updateOrCreate(
-            ['id' => 1],
+    private function seedInformasi(?string $dummy): void
+    {
+        $informasi = [
             [
-                'judul' => 'Petunjuk Teknis PPDB Resmi SMKN 2 Karanganyar',
-                'keterangan' => 'Unduh berkas panduan lengkap, jadwal verifikasi berkas, dan pengumuman hasil seleksi.',
-                'path_file' => $dummyImage,
-                'path_file_hasil' => $dummyImage,
-            ]
-        );
-
-        // 3. PPDB Jurusan
-        $jurusanList = [
-            [
-                'nama' => 'Teknik Pemesinan',
-                'daya_tampung' => 108,
-                'img' => $dummyImage,
+                'judul' => 'Petunjuk Teknis PPDB',
+                'keterangan' => 'Unduh berkas panduan pendaftaran PPDB.',
+                'path_file' => $dummy,
+                'path_file_hasil' => $dummy,
             ],
             [
-                'nama' => 'Teknik Pembuatan Kain',
-                'daya_tampung' => 72,
-                'img' => $dummyImage,
-            ],
-            [
-                'nama' => 'Teknik Ototronik',
-                'daya_tampung' => 72,
-                'img' => $dummyImage,
-            ],
-            [
-                'nama' => 'Rekayasa Perangkat Lunak',
-                'daya_tampung' => 72,
-                'img' => $dummyImage,
-            ],
-            [
-                'nama' => 'Desain Komunikasi Visual',
-                'daya_tampung' => 36,
-                'img' => $dummyImage,
+                'judul' => 'Pengumuman Hasil Seleksi',
+                'keterangan' => 'Pengumuman resmi hasil seleksi PPDB.',
+                'path_file' => $dummy,
+                'path_file_hasil' => $dummy,
             ],
         ];
 
-        foreach ($jurusanList as $jur) {
-            $jurusan = Jurusan::firstOrCreate(
-                ['nama' => $jur['nama']],
-                ['deskripsi' => 'Kompetensi keahlian '.$jur['nama'].' di SMK Negeri 2 Karanganyar.']
-            );
+        foreach ($informasi as $data) {
+            Ppdb_informasi::updateOrCreate(['judul' => $data['judul']], $data);
+        }
+    }
+
+    private function seedJurusan(?string $dummy): void
+    {
+        $dayaTampung = [
+            Kelas::JURUSAN['R'] => 72,
+            Kelas::JURUSAN['T'] => 36,
+            Kelas::JURUSAN['O'] => 36,
+            Kelas::JURUSAN['M'] => 36,
+        ];
+
+        foreach ($dayaTampung as $namaJurusan => $daya) {
+            $jurusan = Jurusan::where('nama', $namaJurusan)->first();
+
+            if ($jurusan === null) {
+                continue;
+            }
 
             Ppdb_jurusan::updateOrCreate(
-                ['jurusan_id' => $jurusan->jurusanID],
+                ['jurusan_id' => $jurusan->getKey()],
                 [
-                    'daya_tampung' => $jur['daya_tampung'],
-                    'img' => $jur['img'],
+                    'daya_tampung' => $daya,
+                    'img' => $dummy,
                 ]
             );
         }
+    }
 
-        // 4. PPDB Jalur Seleksi
-        $jalurList = [
+    private function seedJalur(): void
+    {
+        $jalur = [
             ['nama_jalur' => 'Jalur Zonasi Reguler', 'percentase' => 50.00],
-            ['nama_jalur' => 'Jalur Prestasi Akademik & Kejuaraan', 'percentase' => 20.00],
-            ['nama_jalur' => 'Jalur Afirmasi Keluarga Kurang Mampu', 'percentase' => 15.00],
-            ['nama_jalur' => 'Jalur Domisili Terdekat Sekolah', 'percentase' => 10.00],
-            ['nama_jalur' => 'Jalur Perpindahan Tugas Orang Tua / Wali', 'percentase' => 5.00],
+            ['nama_jalur' => 'Jalur Prestasi Akademik', 'percentase' => 20.00],
         ];
 
-        foreach ($jalurList as $jl) {
-            Ppdb_jalur::updateOrCreate(
-                ['nama_jalur' => $jl['nama_jalur']],
-                $jl
-            );
+        foreach ($jalur as $data) {
+            Ppdb_jalur::updateOrCreate(['nama_jalur' => $data['nama_jalur']], $data);
         }
+    }
 
-        // 5. PPDB Persyaratan Pendaftaran
-        $syaratList = [
-            ['syarat' => 'Buku Rapor SMP/MTs sederajat semester 1 sampai dengan 5 (asli & fotokopi legalisir).'],
-            ['syarat' => 'Ijazah SMP atau Surat Keterangan Lulus (SKL) resmi yang mencantumkan nilai asesmen akhir.'],
-            ['syarat' => 'Akta Kelahiran dan Kartu Keluarga (KK) yang diterbitkan paling singkat 1 tahun sebelum pendaftaran.'],
-            ['syarat' => 'Surat Pernyataan Sehat tidak buta warna dari fasilitas pelayanan kesehatan pemerintah.'],
-            ['syarat' => 'Piagam sertifikat kejuaraan/prestasi tingkat kabupaten, provinsi, atau nasional (jika memiliki).'],
+    private function seedPersyaratan(): void
+    {
+        $persyaratan = [
+            ['syarat' => 'Buku rapor SMP/MTs semester 1 sampai 5.'],
+            ['syarat' => 'Akta kelahiran dan kartu keluarga.'],
         ];
 
-        foreach ($syaratList as $sy) {
-            Ppdb_persyaratan::updateOrCreate(
-                ['syarat' => $sy['syarat']],
-                $sy
-            );
+        foreach ($persyaratan as $data) {
+            Ppdb_persyaratan::updateOrCreate(['syarat' => $data['syarat']], $data);
         }
+    }
 
-        // 6. PPDB Tanggal Penting / Jadwal Agenda
-        $tanggalList = [
+    private function seedTanggalPenting(): void
+    {
+        $agenda = [
             [
-                'nama_agenda' => 'Pembuatan Akun & Aktivasi Berkas Daring',
-                'tanggal_mulai' => Carbon::now()->addDays(5)->format('Y-m-d'),
-                'tanggal_selesai' => Carbon::now()->addDays(12)->format('Y-m-d'),
-                'keterangan' => 'Calon siswa mengunggah berkas scan rapor, KK, dan piagam di portal resmi.',
+                'nama_agenda' => 'Pendaftaran PPDB',
+                'tanggal_mulai' => Carbon::now()->addDays(5)->toDateString(),
+                'tanggal_selesai' => Carbon::now()->addDays(18)->toDateString(),
+                'keterangan' => 'Pendaftaran peserta didik baru.',
             ],
             [
-                'nama_agenda' => 'Pendaftaran & Pemilihan Kompetensi Keahlian',
-                'tanggal_mulai' => Carbon::now()->addDays(13)->format('Y-m-d'),
-                'tanggal_selesai' => Carbon::now()->addDays(18)->format('Y-m-d'),
-                'keterangan' => 'Memilih jurusan utama dan alternatif sesuai minat dan bakat kejuruan.',
-            ],
-            [
-                'nama_agenda' => 'Validasi Berkas & Masa Tenang Panitia',
-                'tanggal_mulai' => Carbon::now()->addDays(19)->format('Y-m-d'),
-                'tanggal_selesai' => Carbon::now()->addDays(21)->format('Y-m-d'),
-                'keterangan' => 'Panitia melakukan sinkronisasi data kuota jalur zonasi dan prestasi.',
-            ],
-            [
-                'nama_agenda' => 'Pengumuman Resmi Hasil Seleksi PPDB',
-                'tanggal_mulai' => Carbon::now()->addDays(22)->format('Y-m-d'),
-                'tanggal_selesai' => Carbon::now()->addDays(22)->format('Y-m-d'),
-                'keterangan' => 'Diumumkan secara online serentak pada pukul 10.00 WIB.',
-            ],
-            [
-                'nama_agenda' => 'Daftar Ulang Peserta Didik Baru Diterima',
-                'tanggal_mulai' => Carbon::now()->addDays(23)->format('Y-m-d'),
-                'tanggal_selesai' => Carbon::now()->addDays(27)->format('Y-m-d'),
-                'keterangan' => 'Penyerahan fisik berkas asli dan pengukuran seragam praktek kejuruan.',
+                'nama_agenda' => 'Pengumuman Hasil Seleksi',
+                'tanggal_mulai' => Carbon::now()->addDays(22)->toDateString(),
+                'tanggal_selesai' => Carbon::now()->addDays(22)->toDateString(),
+                'keterangan' => 'Pengumuman online pukul 10.00 WIB.',
             ],
         ];
 
-        foreach ($tanggalList as $tg) {
-            Ppdb_tanggal_penting::updateOrCreate(
-                ['nama_agenda' => $tg['nama_agenda']],
-                $tg
-            );
+        foreach ($agenda as $data) {
+            Ppdb_tanggal_penting::updateOrCreate(['nama_agenda' => $data['nama_agenda']], $data);
         }
     }
 }

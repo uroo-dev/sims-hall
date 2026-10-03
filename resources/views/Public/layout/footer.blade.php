@@ -3,11 +3,13 @@
         'nama' => 'SMK Negeri 2 Karanganyar',
         'nama_pendek' => 'SMKN 2 Karanganyar',
         'alamat' => 'Jl. Yos Sudarso, Jengglong, Bejen, Kec. Karanganyar, Jawa Tengah 57716',
-        'tentang' => 'SMK Negeri 2 Karanganyar adalah salah satu Sekolah Menengah Kejuruan favorit di Kabupaten Karanganyar. Serta merupakan sekolah yang berpendidikan karakter, berwawasan, disiplin, tanggung jawab, dan bermoral baik.',
+        'tentang' =>
+            'SMK Negeri 2 Karanganyar adalah salah satu Sekolah Menengah Kejuruan favorit di Kabupaten Karanganyar. Serta merupakan sekolah yang berpendidikan karakter, berwawasan, disiplin, tanggung jawab, dan bermoral baik.',
         'rating' => 4.6,
         'jumlah_ulasan' => 217,
         'maps_url' => 'https://maps.google.com/?q=SMK+Negeri+2+Karanganyar',
-        'maps_embed_url' => 'https://maps.google.com/maps?q=SMK%20Negeri%202%20Karanganyar&t=&z=15&ie=UTF8&iwloc=&output=embed',
+        'maps_embed_url' =>
+            'https://maps.google.com/maps?q=SMK%20Negeri%202%20Karanganyar&t=&z=15&ie=UTF8&iwloc=&output=embed',
     ];
 @endphp
 
@@ -30,6 +32,29 @@
                 <p class="text-blue-100 text-sm leading-relaxed max-w-md">
                     {{ $sekolah['tentang'] ?? 'SMK Negeri 2 Karanganyar adalah salah satu Sekolah Menengah Kejuruan favorit di Kabupaten Karanganyar. Serta merupakan sekolah yang berpendidikan karakter, berwawasan, disiplin, tanggung jawab, dan bermoral baik.' }}
                 </p>
+                <div class="pt-2 flex flex-wrap items-center gap-2.5">
+                    <a href="https://facebook.com/smkn2kra" target="_blank" rel="noopener" aria-label="Facebook"
+                        class="w-9 h-9 rounded-lg bg-white/10 hover:bg-white hover:text-brand-blue text-white flex items-center justify-center transition-all border border-white/10">
+                        <i class="fa-brands fa-facebook-f text-base"></i>
+                    </a>
+                    <a href="https://instagram.com/smkn2kra" target="_blank" rel="noopener" aria-label="Instagram"
+                        class="w-9 h-9 rounded-lg bg-white/10 hover:bg-pink-600 hover:text-white text-white flex items-center justify-center transition-all border border-white/10">
+                        <i class="fa-brands fa-instagram text-base"></i>
+                    </a>
+                    <a href="https://www.youtube.com/@smkn2kra" target="_blank" rel="noopener" aria-label="YouTube"
+                        class="w-9 h-9 rounded-lg bg-white/10 hover:bg-red-600 hover:text-white text-white flex items-center justify-center transition-all border border-white/10">
+                        <i class="fa-brands fa-youtube text-base"></i>
+                    </a>
+                    <a href="https://www.tiktok.com/@smkn2kra" target="_blank" rel="noopener" aria-label="TikTok"
+                        class="w-9 h-9 rounded-lg bg-white/10 hover:bg-black hover:text-white text-white flex items-center justify-center transition-all border border-white/10">
+                        <i class="fa-brands fa-tiktok text-base"></i>
+                    </a>
+                    <a href="https://www.linkedin.com/school/smkn2karanganyar" target="_blank" rel="noopener"
+                        aria-label="LinkedIn"
+                        class="w-9 h-9 rounded-lg bg-white/10 hover:bg-blue-600 hover:text-white text-white flex items-center justify-center transition-all border border-white/10">
+                        <i class="fa-brands fa-linkedin-in text-base"></i>
+                    </a>
+                </div>
             </div>
 
             <!-- Right Footer Google Maps -->
@@ -37,11 +62,15 @@
                 <div class="bg-white text-slate-800 rounded-2xl p-4 shadow-2xl relative overflow-hidden">
                     <div class="flex justify-between items-start mb-3 border-b border-slate-100 pb-2">
                         <div>
-                            <h4 class="font-bold text-sm text-slate-900">{{ $sekolah['nama_pendek'] ?? 'SMKN 2 Karanganyar' }}</h4>
-                            <p class="text-[11px] text-slate-500">{{ $sekolah['alamat'] ?? 'Jl. Yos Sudarso, Jengglong, Bejen, Kec. Karanganyar, Jawa Tengah 57716' }}</p>
+                            <h4 class="font-bold text-sm text-slate-900">
+                                {{ $sekolah['nama_pendek'] ?? 'SMKN 2 Karanganyar' }}</h4>
+                            <p class="text-[11px] text-slate-500">
+                                {{ $sekolah['alamat'] ?? 'Jl. Yos Sudarso, Jengglong, Bejen, Kec. Karanganyar, Jawa Tengah 57716' }}
+                            </p>
                             <div class="flex items-center gap-1 mt-1">
                                 <span class="text-xs font-bold text-amber-500">{{ $sekolah['rating'] ?? '4.6' }}</span>
-                                <div class="text-amber-400 text-[10px]" aria-label="Rating {{ $sekolah['rating'] ?? 4.6 }} dari 5">
+                                <div class="text-amber-400 text-[10px]"
+                                    aria-label="Rating {{ $sekolah['rating'] ?? 4.6 }} dari 5">
                                     @php $rating = (float) ($sekolah['rating'] ?? 4.6); @endphp
                                     @for ($bintang = 1; $bintang <= 5; $bintang++)
                                         @if ($rating >= $bintang)
@@ -53,18 +82,23 @@
                                         @endif
                                     @endfor
                                 </div>
-                                <span class="text-[10px] text-blue-600">{{ $sekolah['jumlah_ulasan'] ?? 217 }} reviews</span>
+                                <span class="text-[10px] text-blue-600">{{ $sekolah['jumlah_ulasan'] ?? 217 }}
+                                    reviews</span>
                             </div>
                         </div>
-                        <a href="{{ $sekolah['maps_url'] ?? 'https://maps.google.com/?q=SMK+Negeri+2+Karanganyar' }}" target="_blank" rel="noopener"
+                        <a href="{{ $sekolah['maps_url'] ?? 'https://maps.google.com/?q=SMK+Negeri+2+Karanganyar' }}"
+                            target="_blank" rel="noopener"
                             class="bg-blue-50 text-brand-blue hover:bg-blue-100 p-2 rounded-lg text-xs font-semibold flex items-center gap-1">
                             <i class="fa-solid fa-diamond-turn-right"></i> Directions
                         </a>
                     </div>
 
-                    <div class="w-full h-44 bg-slate-200 rounded-lg relative overflow-hidden flex items-center justify-center">
-                        <iframe title="Peta {{ $sekolah['nama_pendek'] ?? 'SMKN 2 Karanganyar' }}" class="w-full h-full border-0 rounded-lg"
-                            src="{{ $sekolah['maps_embed_url'] ?? 'https://maps.google.com/maps?q=SMK%20Negeri%202%20Karanganyar&t=&z=15&ie=UTF8&iwloc=&output=embed' }}" loading="lazy" referrerpolicy="no-referrer-when-downgrade">
+                    <div
+                        class="w-full h-44 bg-slate-200 rounded-lg relative overflow-hidden flex items-center justify-center">
+                        <iframe title="Peta {{ $sekolah['nama_pendek'] ?? 'SMKN 2 Karanganyar' }}"
+                            class="w-full h-full border-0 rounded-lg"
+                            src="{{ $sekolah['maps_embed_url'] ?? 'https://maps.google.com/maps?q=SMK%20Negeri%202%20Karanganyar&t=&z=15&ie=UTF8&iwloc=&output=embed' }}"
+                            loading="lazy" referrerpolicy="no-referrer-when-downgrade">
                         </iframe>
                     </div>
                 </div>

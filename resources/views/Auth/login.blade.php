@@ -235,19 +235,7 @@
                             </span>
                         </label>
 
-                        <label class="inline-flex items-center cursor-pointer group">
-                            <input
-                                type="checkbox"
-                                name="remember"
-                                id="remember"
-                                value="1"
-                                class="rounded border-slate-300 text-sky-600 focus:ring-sky-500 w-4 h-4 cursor-pointer transition"
-                            >
-                            <span class="ml-2 text-xs text-slate-500 font-medium group-hover:text-slate-700 transition">
-                                Ingat Saya
-                            </span>
-                        </label>
-                    </div>
+                        </div>
 
                     <button
                         type="submit"

@@ -5,106 +5,54 @@ namespace Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
+/**
+ * Akun admin. Setiap admin bagian memakai username `admin_<bagian>` dan
+ * password `password`, sehingga mudah diingat saat login di menu Dashboard.
+ */
 class UserSeeder extends Seeder
 {
     /**
-     * Run the database seeds.
+     * Role admin per bagian dan label yang ditampilkan di halaman login.
+     *
+     * @var array<string, string>
      */
+    private const ADMIN_BAGIAN = [
+        'admin_aula' => 'Admin Aula',
+        'admin_master' => 'Admin Data Master',
+        'admin_kesiswaan' => 'Admin Kesiswaan',
+        'admin_produk' => 'Admin Produk',
+        'admin_produk_unggulan' => 'Admin Produk Unggulan',
+        'admin_ppdb' => 'Admin PPDB',
+        'admin_pklbkk' => 'Admin PKL BKK',
+        'admin_sekolah' => 'Admin Sekolah',
+    ];
+
     public function run(): void
     {
-        User::firstOrCreate(
-            ['username' => 'root'],
-            [
-                'name' => 'super admin',
-                'email' => 'super@gmail.com',
-                'role' => 'super_admin',
-                'password' => '1234',
-            ]
-        );
-        User::firstOrCreate(
-            ['username' => 'admin_produk'],
-            [
-                'name' => 'produk',
-                'email' => 'produk@gmail.com',
-                'role' => 'admin_produk',
-                'password' => '1234',
-            ]
-        );
-        User::firstOrCreate(
-            ['username' => 'admin_ppdb'],
-            [
-                'name' => 'ppdb',
-                'email' => 'ppdb@gmail.com',
-                'role' => 'admin_ppdb',
-                'password' => '1234',
-            ]
-        );
-        User::firstOrCreate(
-            ['username' => 'dwika'],
-            [
-                'name' => 'dwika',
-                'email' => 'dwika@gmail.com',
-                'role' => 'pelanggan',
-                'password' => '1234',
-            ]
-        );
-        User::firstOrCreate(
-            ['username' => 'kepsek'],
-            [
-                'name' => 'Kepala Sekolah',
-                'email' => 'kepsek@smk2nkra.sch.id',
-                'role' => 'kepala_sekolah',
-                'password' => '1234',
-            ]
-        );
+        $this->buatAkun('root', 'Super Admin', 'super_admin');
+        $this->buatAkun('super_duper', 'Super Duper Admin', 'super_duper_admin');
 
-        User::firstOrCreate(
-            ['username' => 'uroo'],
-            [
-                'name' => 'Admin BKK & PKL',
-                'email' => 'pklbkk@smk2nkra.sch.id',
-                'role' => 'bkk',
-                'password' => '1234',
-            ]
-        );
+        foreach (self::ADMIN_BAGIAN as $bagian => $nama) {
+            $this->buatAkun($bagian, $nama, $bagian);
+        }
 
-        User::firstOrCreate(
-            ['username' => 'bkk'],
-            [
-                'name' => 'Operator BKK',
-                'email' => 'bkk@smk2nkra.sch.id',
-                'role' => 'bkk',
-                'password' => '1234',
-            ]
-        );
+        $this->buatAkun('bkk', 'Bursa Kerja Khusus', 'bkk');
+        $this->buatAkun('uroo', 'Bursa Kerja Khusus', 'bkk');
+    }
 
-        User::firstOrCreate(
-            ['username' => 'dafin'],
+    /**
+     * Buat satu akun. Data yang sudah ada hanya diperbarui password, role, dan
+     * nama supaya admin tidak terkunci setelah seeding ulang.
+     */
+    private function buatAkun(string $username, string $nama, string $role): void
+    {
+        User::updateOrCreate(
+            ['username' => $username],
             [
-                'name' => 'Admin Data Master Sekolah',
-                'email' => 'datamastersekolah@smk2nkra.sch.id',
-                'role' => 'admin_master',
-                'password' => '1234',
-            ]
-        );
-
-        User::firstOrCreate(
-            ['username' => 'admin_sekolah'],
-            [
-                'name' => 'Admin Sekolah',
-                'email' => 'adminsekolah@smk2nkra.sch.id',
-                'role' => 'admin_sekolah',
-                'password' => '1234',
-            ]
-        );
-
-        User::firstOrCreate(
-            ['username' => 'admin_kesiswaan'],
-            [
-                'name' => 'Admin Kesiswaan',
-                'email' => 'kesiswaan@smk2nkra.sch.id',
-                'role' => 'admin_kesiswaan',
-                'password' => '1234',
+                'name' => $nama,
+                'email' => $username.'@sims-hall.test',
+                'role' => $role,
+                'password' => 'password',
             ]
         );
     }
