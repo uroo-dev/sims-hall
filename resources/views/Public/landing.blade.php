@@ -428,10 +428,10 @@
                                 @endif
                             </ul>
 
-                            <button onclick="openModal('Pemesanan {{ $paket->nama_paket }}', 'Form reservasi Aula {{ $paket->durasi ?? '' }} (Rp {{ number_format($paket->harga, 0, ',', '.') }}).')"
-                                class="w-full bg-[#0066B2] hover:bg-blue-700 text-white text-xs sm:text-sm font-semibold py-2.5 rounded-full transition-all duration-200">
+                            <a href="{{ route('customer.peminjaman.create', ['paket_id' => $paket->paketID ?? $paket->id]) }}"
+                                class="w-full text-center block bg-[#0066B2] hover:bg-blue-700 text-white text-xs sm:text-sm font-semibold py-2.5 rounded-full transition-all duration-200">
                                 Pilih Paket
-                            </button>
+                            </a>
                         </div>
                     @empty
                         <div class="text-center py-6 text-slate-500 text-xs">Belum ada paket peminjaman.</div>

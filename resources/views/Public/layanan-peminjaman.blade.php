@@ -442,121 +442,18 @@
                     @endforeach
                 </div>
             @else
-                <!-- Fallback Rich Templates if database table is empty -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-                    <!-- Paket Unggulan -->
-                    <div class="bg-white border-2 border-brand-blue rounded-3xl p-6 relative shadow-lg flex flex-col justify-between">
-                        <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-brand-blue text-white text-xs font-bold px-6 py-1.5 rounded-full whitespace-nowrap shadow-md">
-                            Unggulan
-                        </div>
-                        <div class="mt-4">
-                            <div class="flex items-baseline justify-center gap-1 mb-6">
-                                <span class="text-sm font-medium text-slate-400">Rp.</span>
-                                <span class="text-4xl sm:text-5xl font-black text-brand-blue">6.000.000</span>
-                                <span class="text-xs text-slate-400 font-medium">/ 12 Jam</span>
-                            </div>
-                            <ul class="space-y-3 mb-6 text-slate-700 text-xs sm:text-sm font-medium">
-                                <li class="flex items-center gap-2.5"><i class="fa-regular fa-circle-check text-brand-blue text-lg"></i> Sound System Medium</li>
-                                <li class="flex items-center gap-2.5"><i class="fa-regular fa-circle-check text-brand-blue text-lg"></i> Mic Wireless 4 Unit</li>
-                                <li class="flex items-center gap-2.5"><i class="fa-regular fa-circle-check text-brand-blue text-lg"></i> 500 Kursi + Cover</li>
-                                <li class="flex items-center gap-2.5"><i class="fa-regular fa-circle-check text-brand-blue text-lg"></i> Proyektor 2 Unit</li>
-                            </ul>
-                        </div>
-                        @auth
-                            @if(auth()->user()->role === 'pelanggan')
-                                <a href="{{ route('customer.peminjaman.create') }}"
-                                    class="w-full bg-brand-blue hover:bg-brand-darkBlue text-white text-sm font-bold py-3.5 rounded-xl transition text-center block shadow-md">
-                                    Pilih Paket
-                                </a>
-                            @else
-                                <button type="button" onclick="openModal('Pengajuan Khusus Pelanggan', 'Pengajuan aula hanya dapat dilakukan oleh akun dengan role Pelanggan.')"
-                                    class="w-full bg-slate-100 text-slate-600 text-sm font-bold py-3.5 rounded-xl transition text-center block border border-slate-300">
-                                    Pilih Paket
-                                </button>
-                            @endif
-                        @else
-                            <a href="{{ route('login') }}"
-                                class="w-full bg-brand-blue hover:bg-brand-darkBlue text-white text-sm font-bold py-3.5 rounded-xl transition text-center block shadow-md">
-                                Pilih Paket
-                            </a>
-                        @endauth
+                <!-- Empty State jika paket peminjaman belum tersedia di database -->
+                <div class="bg-white border border-slate-200 rounded-3xl p-10 sm:p-14 text-center max-w-2xl mx-auto mb-10 shadow-sm">
+                    <div class="w-16 h-16 rounded-full bg-blue-50 text-brand-blue flex items-center justify-center mx-auto mb-4 text-2xl">
+                        <i class="fa-solid fa-box-open"></i>
                     </div>
-
-                    <!-- Paket Terjangkau -->
-                    <div class="bg-white border-2 border-slate-200 rounded-3xl p-6 relative shadow-sm flex flex-col justify-between">
-                        <div class="mb-4">
-                            <span class="bg-blue-50 text-brand-blue text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wider inline-block">Terjangkau</span>
-                        </div>
-                        <div>
-                            <div class="flex items-baseline gap-1 mb-4">
-                                <span class="text-xs font-medium text-slate-400">Rp.</span>
-                                <span class="text-3xl font-bold text-brand-blue">1.500.000</span>
-                                <span class="text-xs text-slate-400">/ 4 Jam</span>
-                            </div>
-                            <ul class="space-y-2 mb-5 text-slate-700 text-xs font-medium">
-                                <li class="flex items-center gap-2"><i class="fa-regular fa-circle-check text-brand-blue"></i> Sound System Standar</li>
-                                <li class="flex items-center gap-2"><i class="fa-regular fa-circle-check text-brand-blue"></i> Mic Wireless 2 Unit</li>
-                                <li class="flex items-center gap-2"><i class="fa-regular fa-circle-check text-brand-blue"></i> 100 Kursi</li>
-                                <li class="flex items-center gap-2"><i class="fa-regular fa-circle-check text-brand-blue"></i> Proyektor 1 Unit</li>
-                            </ul>
-                        </div>
-                        @auth
-                            @if(auth()->user()->role === 'pelanggan')
-                                <a href="{{ route('customer.peminjaman.create') }}"
-                                    class="w-full bg-white border-2 border-brand-blue text-brand-blue hover:bg-brand-blue hover:text-white text-xs font-bold py-3 rounded-xl transition text-center block">
-                                    Pilih Paket
-                                </a>
-                            @else
-                                <button type="button" onclick="openModal('Pengajuan Khusus Pelanggan', 'Pengajuan aula hanya dapat dilakukan oleh akun dengan role Pelanggan.')"
-                                    class="w-full bg-slate-100 text-slate-600 text-xs font-bold py-3 rounded-xl transition text-center block border border-slate-300">
-                                    Pilih Paket
-                                </button>
-                            @endif
-                        @else
-                            <a href="{{ route('login') }}"
-                                class="w-full bg-white border-2 border-brand-blue text-brand-blue hover:bg-brand-blue hover:text-white text-xs font-bold py-3 rounded-xl transition text-center block">
-                                Pilih Paket
-                            </a>
-                        @endauth
-                    </div>
-
-                    <!-- Paket Standar -->
-                    <div class="bg-white border-2 border-slate-200 rounded-3xl p-6 relative shadow-sm flex flex-col justify-between">
-                        <div class="mb-4">
-                            <span class="bg-blue-50 text-brand-blue text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wider inline-block">Standar</span>
-                        </div>
-                        <div>
-                            <div class="flex items-baseline gap-1 mb-4">
-                                <span class="text-xs font-medium text-slate-400">Rp.</span>
-                                <span class="text-3xl font-bold text-brand-blue">3.500.000</span>
-                                <span class="text-xs text-slate-400">/ 12 Jam</span>
-                            </div>
-                            <ul class="space-y-2 mb-5 text-slate-700 text-xs font-medium">
-                                <li class="flex items-center gap-2"><i class="fa-regular fa-circle-check text-brand-blue"></i> Sound System Medium</li>
-                                <li class="flex items-center gap-2"><i class="fa-regular fa-circle-check text-brand-blue"></i> Mic Wireless 4 Unit</li>
-                                <li class="flex items-center gap-2"><i class="fa-regular fa-circle-check text-brand-blue"></i> 300 Kursi</li>
-                                <li class="flex items-center gap-2"><i class="fa-regular fa-circle-check text-brand-blue"></i> Proyektor 1 Unit</li>
-                            </ul>
-                        </div>
-                        @auth
-                            @if(auth()->user()->role === 'pelanggan')
-                                <a href="{{ route('customer.peminjaman.create') }}"
-                                    class="w-full bg-white border-2 border-brand-blue text-brand-blue hover:bg-brand-blue hover:text-white text-xs font-bold py-3 rounded-xl transition text-center block">
-                                    Pilih Paket
-                                </a>
-                            @else
-                                <button type="button" onclick="openModal('Pengajuan Khusus Pelanggan', 'Pengajuan aula hanya dapat dilakukan oleh akun dengan role Pelanggan.')"
-                                    class="w-full bg-slate-100 text-slate-600 text-xs font-bold py-3 rounded-xl transition text-center block border border-slate-300">
-                                    Pilih Paket
-                                </button>
-                            @endif
-                        @else
-                            <a href="{{ route('login') }}"
-                                class="w-full bg-white border-2 border-brand-blue text-brand-blue hover:bg-brand-blue hover:text-white text-xs font-bold py-3 rounded-xl transition text-center block">
-                                Pilih Paket
-                            </a>
-                        @endauth
-                    </div>
+                    <h3 class="text-xl font-bold text-slate-800 mb-2">Belum Ada Paket Peminjaman</h3>
+                    <p class="text-slate-500 text-sm leading-relaxed mb-6">
+                        Daftar paket peminjaman aula saat ini belum dipublikasikan atau sedang dalam penyesuaian oleh pihak pengelola. Silakan cek kembali dalam waktu dekat atau hubungi pihak sekolah.
+                    </p>
+                    <a href="#informasi" class="inline-flex items-center gap-2 text-xs font-bold text-brand-blue hover:text-brand-darkBlue">
+                        <i class="fa-solid fa-circle-info"></i> Lihat Ketentuan Peminjaman
+                    </a>
                 </div>
             @endif
 

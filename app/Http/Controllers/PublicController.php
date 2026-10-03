@@ -338,6 +338,9 @@ class PublicController extends Controller
             ->take(3)
             ->get();
 
-        return view('Public.informasi-detail', compact('artikel', 'artikelPopulers'));
+        // Data master PPDB untuk banner sidebar
+        $ppdbMaster = Ppdb_master::first();
+
+        return view('Public.informasi-detail', compact('artikel', 'artikelPopulers', 'ppdbMaster'));
     }
 }

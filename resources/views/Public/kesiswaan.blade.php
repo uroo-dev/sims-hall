@@ -299,12 +299,12 @@
                         Dedikasi dan kerja keras siswa-siswi terbaik kami dalam mengharumkan nama sekolah di kancah nasional maupun internasional.
                     </p>
                 </div>
-                <!-- Badge Hardcoded 100+ -->
+                <!-- Badge Prestasi Dinamis -->
                 <div class="bg-[#B9D5F9] border border-[#9AC5F4] rounded-2xl px-5 py-3 flex items-center gap-3.5 shadow-sm min-w-[130px] self-start md:self-auto">
                     <i class="fa-solid fa-trophy text-[#0066C4] text-2xl"></i>
                     <div class="text-left">
                         <span class="block text-[10px] font-bold text-slate-600 tracking-wider leading-none mb-1 uppercase">PRESTASI</span>
-                        <span class="block text-2xl font-black text-[#0066C4] leading-none">100+</span>
+                        <span class="block text-2xl font-black text-[#0066C4] leading-none">{{ $prestasies->count() }}</span>
                     </div>
                 </div>
             </div>
