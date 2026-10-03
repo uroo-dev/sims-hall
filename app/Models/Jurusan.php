@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Facades\Storage;
 
 #[Fillable(['nama', 'deskripsi', 'dokumentasi', 'logo'])]
@@ -42,6 +43,16 @@ class Jurusan extends Model
     public function produk(): HasMany
     {
         return $this->hasMany(Produk::class, 'jurusanID', 'jurusanID');
+    }
+
+    /**
+     * Data daya tampung dan gambar pada modul PPDB.
+     *
+     * @return HasOne<Ppdb_jurusan, $this>
+     */
+    public function ppdbJurusan(): HasOne
+    {
+        return $this->hasOne(Ppdb_jurusan::class, 'jurusan_id', 'jurusanID');
     }
 
     /**

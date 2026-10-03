@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Models\Ekstrakurikuler;
 use App\Models\TataTertib;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;

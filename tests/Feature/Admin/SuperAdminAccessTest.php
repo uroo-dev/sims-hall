@@ -8,8 +8,6 @@ use App\Models\Pembayaran;
 use App\Models\Peminjaman;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class SuperAdminAccessTest extends TestCase

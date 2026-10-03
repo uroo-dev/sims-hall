@@ -420,9 +420,14 @@
                                     class="flex flex-1 gap-2 items-center">
                                     @csrf
                                     @method('PUT')
-                                    <input type="text" name="nama_jurusan" value="{{ $jurusan->nama_jurusan }}" required
-                                        class="flex-1 px-3 py-1.5 bg-white text-slate-800 text-xs font-semibold rounded-lg border border-slate-200 focus:border-brand-500 focus:ring-1 focus:ring-brand-200 focus:outline-none transition shadow-2xs"
-                                        placeholder="Nama Jurusan">
+                                    <select name="jurusan_id" required
+                                        class="flex-1 px-3 py-1.5 bg-white text-slate-800 text-xs font-semibold rounded-lg border border-slate-200 focus:border-brand-500 focus:ring-1 focus:ring-brand-200 focus:outline-none transition shadow-2xs">
+                                        @foreach ($daftarJurusan as $dj)
+                                            <option value="{{ $dj->jurusanID }}" {{ (int) $jurusan->jurusan_id === (int) $dj->jurusanID ? 'selected' : '' }}>
+                                                {{ $dj->nama }}
+                                            </option>
+                                        @endforeach
+                                    </select>
                                     <input type="number" name="daya_tampung" value="{{ $jurusan->daya_tampung }}" required min="0"
                                         class="w-16 px-2 py-1.5 bg-white text-slate-800 text-xs font-bold rounded-lg border border-slate-200 focus:border-brand-500 focus:ring-1 focus:ring-brand-200 focus:outline-none transition text-center shadow-2xs"
                                         placeholder="0">
@@ -450,9 +455,13 @@
                     <form id="form-jurusan-tambah" action="{{ route('post.jurusan.ppdb') }}" method="POST"
                         class="pt-2 border-t border-slate-100 flex gap-2 items-center">
                         @csrf
-                        <input type="text" name="nama_jurusan" required
-                            class="flex-1 px-3 py-2 bg-slate-50 text-slate-800 text-xs font-medium rounded-xl border border-slate-200 focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-brand-100 focus:outline-none transition placeholder:text-slate-400"
-                            placeholder="Nama Jurusan Baru">
+                        <select name="jurusan_id" required
+                            class="flex-1 px-3 py-2 bg-slate-50 text-slate-800 text-xs font-medium rounded-xl border border-slate-200 focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-brand-100 focus:outline-none transition">
+                            <option value="">-- Pilih Jurusan --</option>
+                            @foreach ($daftarJurusan as $dj)
+                                <option value="{{ $dj->jurusanID }}">{{ $dj->nama }}</option>
+                            @endforeach
+                        </select>
                         <input type="number" name="daya_tampung" required min="0"
                             class="w-16 px-2 py-2 bg-slate-50 text-slate-800 text-xs font-medium rounded-xl border border-slate-200 focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-brand-100 focus:outline-none transition text-center placeholder:text-slate-400"
                             placeholder="Kuota">
@@ -822,7 +831,7 @@
                         @foreach ($jurusans as $jurusan)
                             <option value="{{ $jurusan->id }}"
                                 data-route="{{ route('update.jurusan.image.ppdb', $jurusan) }}">
-                                {{ $jurusan->nama_jurusan }}
+                                {{ $jurusan->jurusan?->nama ?? $jurusan->nama_jurusan }}
                             </option>
                         @endforeach
                     </select>

@@ -52,7 +52,7 @@ return new class extends Migration
             Schema::create('tata_tertib', function (Blueprint $table) {
                 $table->id('tata_tertibID');
                 $table->string('judul');
-                
+
                 $table->text('deskripsi')->nullable();
                 $table->string('file_pdf')->nullable();
                 $table->timestamps();

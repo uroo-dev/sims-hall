@@ -52,7 +52,7 @@
     window.closeModal = function(modalId) {
         if (!modalId) {
             // Close any currently active modal
-            const activeModals = document.querySelectorAll('.fixed.z-\\[100\\]:not(.hidden), #global-modal:not(.hidden), #detail-eskul-modal:not(.hidden), #modalDetailProduk:not(.hidden)');
+            const activeModals = document.querySelectorAll('.fixed.z-\\[100\\]:not(.hidden), #global-modal:not(.hidden), #detail-eskul-modal:not(.hidden), #modalDetailProduk:not(.hidden), #modalProgramProduk:not(.hidden)');
             activeModals.forEach(m => closeModalElement(m));
             return;
         }
@@ -64,9 +64,6 @@
     // Global function aliases for inline onclick callers
     window.openModalElement = openModalElement;
     window.closeModalElement = closeModalElement;
-    if (typeof openModal === 'undefined') {
-        window.openModal = window.openModal;
-    }
 
     function openModalElement(modal) {
         if (!modal) return;
@@ -77,19 +74,23 @@
         }
 
         const box = modal.querySelector('[id$="Box"], [id$="-content"], [id$="ModalBox"], .bg-white.rounded-3xl, .bg-white.rounded-2xl') || modal.firstElementChild;
+        if (box) {
+            box.classList.remove('scale-95', 'opacity-0');
+            box.classList.add('scale-100', 'opacity-100');
+        }
+
         if (window.gsap) {
-            gsap.killTweensOf([modal, box]);
-            gsap.fromTo(modal, { opacity: 0 }, { opacity: 1, duration: 0.2, ease: 'power2.out' });
-            if (box) {
-                gsap.fromTo(box, 
-                    { opacity: 0, scale: 0.92, y: 15 }, 
-                    { opacity: 1, scale: 1, y: 0, duration: 0.35, ease: 'back.out(1.4)' }
-                );
-            }
-        } else {
-            if (box) {
-                box.classList.remove('scale-95', 'opacity-0');
-                box.classList.add('scale-100', 'opacity-100');
+            try {
+                gsap.killTweensOf([modal, box]);
+                gsap.fromTo(modal, { opacity: 0 }, { opacity: 1, duration: 0.2, ease: 'power2.out' });
+                if (box) {
+                    gsap.fromTo(box, 
+                        { opacity: 0, scale: 0.92, y: 15 }, 
+                        { opacity: 1, scale: 1, y: 0, duration: 0.35, ease: 'back.out(1.4)' }
+                    );
+                }
+            } catch (err) {
+                console.warn('GSAP error during openModalElement:', err);
             }
         }
     }
@@ -102,7 +103,7 @@
             modal.classList.add('hidden');
             modal.classList.remove('flex');
             // Check if any other modal is still open
-            const anyOpen = document.querySelectorAll('.fixed.z-\\[100\\]:not(.hidden), #global-modal:not(.hidden), #detail-eskul-modal:not(.hidden), #modalDetailProduk:not(.hidden)');
+            const anyOpen = document.querySelectorAll('.fixed.z-\\[100\\]:not(.hidden), #global-modal:not(.hidden), #detail-eskul-modal:not(.hidden), #modalDetailProduk:not(.hidden), #modalProgramProduk:not(.hidden)');
             if (anyOpen.length === 0) {
                 document.body.classList.remove('overflow-hidden');
             }
@@ -199,7 +200,7 @@
         // ESC key handler for all modals
         document.addEventListener('keydown', function(event) {
             if (event.key === 'Escape') {
-                const openModals = document.querySelectorAll('.fixed:not(.hidden)[role="dialog"], .fixed.z-\\[100\\]:not(.hidden), #global-modal:not(.hidden), #detail-eskul-modal:not(.hidden), #modalLogout:not(.hidden)');
+                const openModals = document.querySelectorAll('.fixed:not(.hidden)[role="dialog"], .fixed.z-\\[100\\]:not(.hidden), #global-modal:not(.hidden), #detail-eskul-modal:not(.hidden), #modalLogout:not(.hidden), #modalDetailProduk:not(.hidden), #modalProgramProduk:not(.hidden)');
                 openModals.forEach(m => {
                     closeModalElement(m);
                 });

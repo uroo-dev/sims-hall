@@ -554,8 +554,8 @@
                 <div class="lg:col-span-6">
                     <div class="rounded-2xl overflow-hidden shadow-xl border border-slate-100 bg-slate-100">
                         @php
-                            $bannerPpdbSrc = $ppdbMaster?->banner_img 
-                                ? asset('storage/' . $ppdbMaster->banner_img) 
+                            $bannerPpdbSrc = $ppdbMaster?->banner_img
+                                ? asset('storage/' . $ppdbMaster->banner_img)
                                 : (!empty($ppdb?->dokumentasi) ? asset('assets/' . $ppdb->dokumentasi) : asset('assets/ppdb.png'));
                         @endphp
                         <img src="{{ $bannerPpdbSrc }}" alt="Banner PPDB" class="w-full h-56 sm:h-64 md:h-80 object-cover">
@@ -597,7 +597,7 @@
                     @endphp
                     @forelse($listDayaTampung as $index => $item)
                         @php
-                            $namaJurusan = $item->nama_jurusan ?? ($item->nama_agenda ?? 'Kompetensi Keahlian');
+                            $namaJurusan = $item->jurusan?->nama ?? ($item->nama_jurusan ?? ($item->nama_agenda ?? 'Kompetensi Keahlian'));
                             $dayaTampung = $item->daya_tampung ?? 0;
                         @endphp
                         <div class="{{ $colorConfig[$index % 4] }} text-white rounded-2xl p-5 hover:scale-105 transition-transform">

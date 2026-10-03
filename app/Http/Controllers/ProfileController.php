@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -27,7 +28,7 @@ class ProfileController extends Controller
      */
     public function update(Request $request): RedirectResponse
     {
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = Auth::user();
 
         $validated = $request->validate([
@@ -68,7 +69,7 @@ class ProfileController extends Controller
         $user->email = $validated['email'];
 
         // Update password jika diisi
-        if (!empty($validated['password'])) {
+        if (! empty($validated['password'])) {
             $user->password = Hash::make($validated['password']);
         }
 
@@ -100,7 +101,7 @@ class ProfileController extends Controller
      */
     public function destroyPhoto(): RedirectResponse
     {
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = Auth::user();
 
         if ($user->foto_profil && Storage::disk('public')->exists($user->foto_profil)) {

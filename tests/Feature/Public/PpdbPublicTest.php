@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Public;
 
+use App\Models\Jurusan;
 use App\Models\Ppdb_informasi;
 use App\Models\Ppdb_jalur;
 use App\Models\Ppdb_jurusan;
@@ -54,13 +55,22 @@ class PpdbPublicTest extends TestCase
             'keterangan' => 'Pengenalan teknis pendaftaran',
         ]);
 
+        $rpl = Jurusan::create([
+            'nama' => 'Rekayasa Perangkat Lunak',
+            'deskripsi' => 'RPL',
+        ]);
+        $oto = Jurusan::create([
+            'nama' => 'Teknik Ototronik',
+            'deskripsi' => 'Oto',
+        ]);
+
         Ppdb_jurusan::create([
-            'nama_jurusan' => 'Rekayasa Perangkat Lunak',
+            'jurusan_id' => $rpl->jurusanID,
             'daya_tampung' => 108,
             'img' => 'ppdb/jurusan/rpl.jpg',
         ]);
         Ppdb_jurusan::create([
-            'nama_jurusan' => 'Teknik Ototronik',
+            'jurusan_id' => $oto->jurusanID,
             'daya_tampung' => 72,
             'img' => null,
         ]);

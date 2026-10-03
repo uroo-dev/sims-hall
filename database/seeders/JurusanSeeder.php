@@ -29,6 +29,10 @@ class JurusanSeeder extends Seeder
             'nama' => 'Teknik Pembuatan Kain',
             'deskripsi' => 'Karya tekstil, jahit, dan desain motif lokal.',
         ],
+        [
+            'nama' => 'Desain Komunikasi Visual',
+            'deskripsi' => 'Karya grafis, animasi, fotografi, dan komunikasi visual.',
+        ],
     ];
 
     /**

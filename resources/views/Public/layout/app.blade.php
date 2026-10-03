@@ -216,18 +216,6 @@
             mobileMenu.classList.toggle('hidden');
         });
 
-        // Global Modal Function Proxies
-        function openModal(arg1, arg2) {
-            if (window.openModal) {
-                window.openModal.apply(window, arguments);
-            }
-        }
-
-        function closeModal(modalId) {
-            if (window.closeModal) {
-                window.closeModal(modalId);
-            }
-        }
 
         // News Carousel Interactions
         const prevNews = document.getElementById('prev-news');

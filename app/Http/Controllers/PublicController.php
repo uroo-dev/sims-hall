@@ -50,7 +50,7 @@ class PublicController extends Controller
             ->latest('id')
             ->first();
 
-        if (!$paketUnggulan) {
+        if (! $paketUnggulan) {
             $paketUnggulan = PaketPeminjaman::with('facilities')->latest('id')->first();
         }
 
@@ -58,7 +58,7 @@ class PublicController extends Controller
 
         // Data PPDB (Gunakan master & jurusan dari modul PPDB baru, dengan fallback model lama)
         $ppdbMaster = Ppdb_master::first();
-        $ppdbJurusans = Ppdb_jurusan::orderBy('id')->get();
+        $ppdbJurusans = Ppdb_jurusan::with('jurusan')->orderBy('id')->get();
         $ppdb = $ppdbMaster ?: Ppdb::first();
         $informasiPpdbs = InformasiPpdb::all();
 

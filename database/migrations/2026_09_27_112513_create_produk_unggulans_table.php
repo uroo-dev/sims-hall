@@ -13,7 +13,7 @@ return new class extends Migration
             $table->string('judul', 250);
             $table->text('deskripsi')->nullable();
             $table->string('dokumentasi')->nullable();
-            $table->foreignId('jurusan_id')->nullable()->constrained('jurusans')->onDelete('set null');
+            $table->foreignId('jurusan_id')->nullable()->constrained('jurusan', 'jurusanID')->onDelete('set null');
             $table->timestamps();
         });
     }

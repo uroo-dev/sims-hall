@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Jurusan;
 use App\Models\Ppdb_informasi;
 use App\Models\Ppdb_jalur;
 use App\Models\Ppdb_jurusan;
@@ -41,39 +42,47 @@ class PpdbSeeder extends Seeder
             ]
         );
 
-        // 3. PPDB Jurusan (4 slot kompetensi keahlian unggulan)
+        // 3. PPDB Jurusan
         $jurusanList = [
             [
-                'nama_jurusan' => 'Teknik Pemesinan',
+                'nama' => 'Teknik Pemesinan',
                 'daya_tampung' => 108,
                 'img' => $dummyImage,
             ],
             [
-                'nama_jurusan' => 'Teknik Pembuatan Kain',
+                'nama' => 'Teknik Pembuatan Kain',
                 'daya_tampung' => 72,
                 'img' => $dummyImage,
             ],
             [
-                'nama_jurusan' => 'Teknik Ototronik',
+                'nama' => 'Teknik Ototronik',
                 'daya_tampung' => 72,
                 'img' => $dummyImage,
             ],
             [
-                'nama_jurusan' => 'Rekayasa Perangkat Lunak',
+                'nama' => 'Rekayasa Perangkat Lunak',
                 'daya_tampung' => 72,
                 'img' => $dummyImage,
             ],
             [
-                'nama_jurusan' => 'Desain Komunikasi Visual',
+                'nama' => 'Desain Komunikasi Visual',
                 'daya_tampung' => 36,
                 'img' => $dummyImage,
             ],
         ];
 
         foreach ($jurusanList as $jur) {
+            $jurusan = Jurusan::firstOrCreate(
+                ['nama' => $jur['nama']],
+                ['deskripsi' => 'Kompetensi keahlian '.$jur['nama'].' di SMK Negeri 2 Karanganyar.']
+            );
+
             Ppdb_jurusan::updateOrCreate(
-                ['nama_jurusan' => $jur['nama_jurusan']],
-                $jur
+                ['jurusan_id' => $jurusan->jurusanID],
+                [
+                    'daya_tampung' => $jur['daya_tampung'],
+                    'img' => $jur['img'],
+                ]
             );
         }
 

@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
 
 #[Fillable(['name', 'email', 'password', 'username', 'role', 'foto_profil'])]
 #[Hidden(['password', 'remember_token'])]
@@ -23,11 +24,11 @@ class User extends Authenticatable
      */
     public function getFotoProfilUrlAttribute(): string
     {
-        if ($this->foto_profil && \Illuminate\Support\Facades\Storage::disk('public')->exists($this->foto_profil)) {
-            return asset('storage/' . $this->foto_profil);
+        if ($this->foto_profil && Storage::disk('public')->exists($this->foto_profil)) {
+            return asset('storage/'.$this->foto_profil);
         }
 
-        return 'https://ui-avatars.com/api/?name=' . urlencode($this->name ?? 'User') . '&background=0073c6&color=fff&size=128';
+        return 'https://ui-avatars.com/api/?name='.urlencode($this->name ?? 'User').'&background=0073c6&color=fff&size=128';
     }
 
     /**
