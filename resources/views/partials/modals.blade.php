@@ -52,7 +52,7 @@
     window.closeModal = function(modalId) {
         if (!modalId) {
             // Close any currently active modal
-            const activeModals = document.querySelectorAll('.fixed.z-\\[100\\]:not(.hidden), #global-modal:not(.hidden), #detail-eskul-modal:not(.hidden), #modalDetailProduk:not(.hidden), #modalProgramProduk:not(.hidden)');
+            const activeModals = document.querySelectorAll('.fixed.z-\\[100\\]:not(.hidden), #global-modal:not(.hidden)');
             activeModals.forEach(m => closeModalElement(m));
             return;
         }
@@ -103,7 +103,7 @@
             modal.classList.add('hidden');
             modal.classList.remove('flex');
             // Check if any other modal is still open
-            const anyOpen = document.querySelectorAll('.fixed.z-\\[100\\]:not(.hidden), #global-modal:not(.hidden), #detail-eskul-modal:not(.hidden), #modalDetailProduk:not(.hidden), #modalProgramProduk:not(.hidden)');
+            const anyOpen = document.querySelectorAll('.fixed.z-\\[100\\]:not(.hidden), #global-modal:not(.hidden)');
             if (anyOpen.length === 0) {
                 document.body.classList.remove('overflow-hidden');
             }
@@ -200,7 +200,7 @@
         // ESC key handler for all modals
         document.addEventListener('keydown', function(event) {
             if (event.key === 'Escape') {
-                const openModals = document.querySelectorAll('.fixed:not(.hidden)[role="dialog"], .fixed.z-\\[100\\]:not(.hidden), #global-modal:not(.hidden), #detail-eskul-modal:not(.hidden), #modalLogout:not(.hidden), #modalDetailProduk:not(.hidden), #modalProgramProduk:not(.hidden)');
+                const openModals = document.querySelectorAll('.fixed:not(.hidden)[role="dialog"], .fixed.z-\\[100\\]:not(.hidden), #global-modal:not(.hidden), #modalLogout:not(.hidden)');
                 openModals.forEach(m => {
                     closeModalElement(m);
                 });
