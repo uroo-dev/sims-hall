@@ -4,9 +4,11 @@ on:
   push:
     branches:
       - main
+      - uroo
   pull_request:
     branches:
       - main
+      - uroo
   workflow_dispatch:
 
 # Least privilege: repo ini hanya butuh baca isi repo.
@@ -73,8 +75,8 @@ jobs:
   deploy:
     name: Deploy to VPS
     needs: test
-    # Job test juga jalan untuk pull_request; deploy hanya untuk push ke main atau manual dispatch di main.
-    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
+    # Deploy otomatis untuk push ke main / uroo, atau trigger manual workflow_dispatch
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && (github.ref_name == 'main' || github.ref_name == 'uroo'))
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -107,6 +109,7 @@ jobs:
           script: |
             set -e
             APP_DIR="${{ secrets.APP_DIR || '/home/gajagohosting/apps/sims-hall' }}"
+            TARGET_BRANCH="${{ github.ref_name }}"
 
             if [ ! -d "$APP_DIR" ]; then
               echo "FATAL: Direktori aplikasi $APP_DIR tidak ditemukan di VPS." >&2
@@ -114,25 +117,28 @@ jobs:
             fi
 
             cd "$APP_DIR"
+            echo "Deploying branch: $TARGET_BRANCH ke $APP_DIR"
 
-            # Jika file deploy.sh tersedia di VPS, eksekusi file tersebut
+            # Jika file deploy.sh tersedia di VPS, eksekusi file tersebut dengan argumen branch
             if [ -f "$APP_DIR/deploy.sh" ]; then
               echo "Menjalankan deploy.sh..."
               chmod +x "$APP_DIR/deploy.sh"
-              "$APP_DIR/deploy.sh"
+              export DEPLOY_BRANCH="$TARGET_BRANCH"
+              "$APP_DIR/deploy.sh" "$TARGET_BRANCH"
             else
-              echo "Menjalankan standard Laravel deployment..."
-              git fetch origin main
-              git reset --hard origin/main
+              echo "Menjalankan standard Laravel deployment untuk branch $TARGET_BRANCH..."
+              git fetch origin "$TARGET_BRANCH"
+              git checkout -B "$TARGET_BRANCH" "origin/$TARGET_BRANCH" || git reset --hard "origin/$TARGET_BRANCH"
               composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+              php artisan storage:link || true
               php artisan migrate --force
               php artisan optimize:clear
               php artisan optimize
               php artisan queue:restart || true
             fi
 
-      # Swap aset frontend ke public/build di VPS
-      - name: Swap frontend assets into place
+      # Swap aset frontend ke public/build di VPS dan sinkronkan ke web root jika terpisah
+      - name: Swap and sync frontend assets into place
         uses: appleboy/ssh-action@7eaf76671a0d7eec5d98ee897acda4f968735a17 # v1.2.0
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -142,6 +148,7 @@ jobs:
           script: |
             set -e
             APP_DIR="${{ secrets.APP_DIR || '/home/gajagohosting/apps/sims-hall' }}"
+            WEB_ROOT="${{ secrets.WEB_ROOT || '/home/gajagohosting/public_html' }}"
             cd "$APP_DIR"
 
             if [ ! -f /tmp/sims-hall-build/manifest.json ]; then
@@ -159,7 +166,7 @@ jobs:
               echo "OK: $entry -> $rel ($(wc -c < "/tmp/sims-hall-build/$rel") byte)"
             done
 
-            # Swapping direktori secara atomik
+            # Swapping direktori secara atomik di APP_DIR/public/build
             mkdir -p public
             rm -rf public/build.prev
             if [ -d public/build ]; then
@@ -168,6 +175,63 @@ jobs:
             mv /tmp/sims-hall-build public/build
             rm -rf public/build.prev /tmp/sims-hall-build
 
-            echo "== Aset frontend berhasil di-deploy =="
+            echo "== Aset frontend aktif di $APP_DIR/public/build =="
             ls -la public/build/manifest.json
             ls -la public/build/assets/
+
+            # Sinkronkan ke web root jika direktori web root terpisah dari repo
+            if [ -d "$WEB_ROOT" ] && [ "$WEB_ROOT" != "$APP_DIR/public" ]; then
+              echo "== Sinkronkan aset ke web root: $WEB_ROOT/build =="
+              mkdir -p "$WEB_ROOT"
+              if command -v rsync >/dev/null 2>&1; then
+                rsync -a --delete public/build/ "$WEB_ROOT/build/"
+              else
+                rm -rf "$WEB_ROOT/build"
+                cp -a public/build "$WEB_ROOT/build"
+              fi
+              ls -la "$WEB_ROOT/build/manifest.json"
+            fi
+
+      - name: Smoke test production
+        run: |
+          set -euo pipefail
+          BASE="${{ secrets.APP_URL || 'https://gajagohosting.my.id' }}"
+
+          echo "Menjalankan smoke test ke $BASE..."
+          for path in / /login /registrasi; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 30 "$BASE$path")
+            echo "$path -> HTTP $code"
+            if [ "$code" != "200" ]; then
+              echo "FATAL: $path mengembalikan HTTP $code setelah deploy" >&2
+              exit 1
+            fi
+          done
+
+          # Validasi manifest dan aset file yang dideploy
+          manifest_url="$BASE/build/manifest.json"
+          manifest_code=$(curl -s -o /tmp/manifest.json -w '%{http_code}' --max-time 30 "$manifest_url")
+          echo "$manifest_url -> HTTP $manifest_code"
+          if [ "$manifest_code" != "200" ]; then
+            echo "FATAL: $manifest_url tidak ditemukan (HTTP $manifest_code)" >&2
+            exit 1
+          fi
+
+          for entry in resources/js/app.js resources/css/app.css; do
+            rel=$(php -r '$m=json_decode(file_get_contents("/tmp/manifest.json"),true);$k=$argv[1];echo $m[$k]["file"]??"";' "$entry")
+            if [ -n "$rel" ]; then
+              asset_url="$BASE/build/$rel"
+              asset_code=$(curl -s -o /tmp/asset_file -w '%{http_code}' --max-time 30 "$asset_url")
+              size=$(wc -c < /tmp/asset_file)
+              echo "$asset_url -> HTTP $asset_code ($size bytes)"
+              if [ "$asset_code" != "200" ]; then
+                echo "FATAL: Aset $asset_url gagal diakses (HTTP $asset_code)" >&2
+                exit 1
+              fi
+              if [ "$size" -eq 0 ]; then
+                echo "FATAL: Aset $asset_url berukuran 0 byte" >&2
+                exit 1
+              fi
+            fi
+          done
+
+          echo "== Smoke test lolos! Deployment berhasil =="
