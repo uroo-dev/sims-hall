@@ -6,60 +6,6 @@
 @section('content')
 <div class="space-y-6">
 
-    <!-- FLASH MESSAGES -->
-    @if (session('success'))
-        <div id="alertSuccess" class="bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl p-4 flex items-center justify-between shadow-sm transition-all duration-300">
-            <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold flex-shrink-0">
-                    <i class="fa-solid fa-circle-check"></i>
-                </div>
-                <div class="text-xs md:text-sm font-semibold">
-                    {{ session('success') }}
-                </div>
-            </div>
-            <button type="button" onclick="document.getElementById('alertSuccess').remove()" class="text-emerald-500 hover:text-emerald-700 p-1">
-                <i class="fa-solid fa-xmark text-sm"></i>
-            </button>
-        </div>
-    @endif
-
-    @if (session('error'))
-        <div id="alertErrorSession" class="bg-red-50 border border-red-200 text-red-800 rounded-2xl p-4 flex items-center justify-between shadow-sm transition-all duration-300">
-            <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-xl bg-red-100 text-red-600 flex items-center justify-center font-bold flex-shrink-0">
-                    <i class="fa-solid fa-triangle-exclamation"></i>
-                </div>
-                <div class="text-xs md:text-sm font-semibold">
-                    {{ session('error') }}
-                </div>
-            </div>
-            <button type="button" onclick="document.getElementById('alertErrorSession').remove()" class="text-red-500 hover:text-red-700 p-1">
-                <i class="fa-solid fa-xmark text-sm"></i>
-            </button>
-        </div>
-    @endif
-
-    @if ($errors->any())
-        <div id="alertErrorValidation" class="bg-red-50 border border-red-200 text-red-800 rounded-2xl p-4 flex items-center justify-between shadow-sm transition-all duration-300">
-            <div class="flex items-start gap-3">
-                <div class="w-8 h-8 rounded-xl bg-red-100 text-red-600 flex items-center justify-center font-bold flex-shrink-0 mt-0.5">
-                    <i class="fa-solid fa-triangle-exclamation"></i>
-                </div>
-                <div class="text-xs md:text-sm">
-                    <div class="font-bold">Terjadi kesalahan pada input data:</div>
-                    <ul class="list-disc list-inside mt-1 text-red-700 space-y-0.5">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            </div>
-            <button type="button" onclick="document.getElementById('alertErrorValidation').remove()" class="text-red-500 hover:text-red-700 p-1">
-                <i class="fa-solid fa-xmark text-sm"></i>
-            </button>
-        </div>
-    @endif
-
     <!-- ACTION, STAT & SEARCH CONTROLS -->
     <div class="bg-white rounded-2xl p-4 md:p-5 figma-card-shadow border border-slate-100 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
         <!-- 1. BTN TAMBAH PAKET & 2. TOTAL PAKET -->
@@ -656,35 +602,21 @@
 
     // Modal Create Handlers
     function openCreateModal() {
-        const modal = document.getElementById('modalCreate');
-        const box = document.getElementById('modalCreateBox');
-        document.body.classList.add('overflow-hidden');
-        modal.classList.remove('hidden');
+        window.openModal('modalCreate');
         setTimeout(() => {
-            box.classList.remove('scale-95');
-            box.classList.add('scale-100');
-            document.getElementById('create_kategori').focus();
-        }, 10);
+            const el = document.getElementById('create_kategori');
+            if (el) el.focus();
+        }, 50);
     }
 
     function closeCreateModal() {
-        const modal = document.getElementById('modalCreate');
-        const box = document.getElementById('modalCreateBox');
-        box.classList.remove('scale-100');
-        box.classList.add('scale-95');
-        setTimeout(() => {
-            modal.classList.add('hidden');
-            document.body.classList.remove('overflow-hidden');
-        }, 150);
+        window.closeModal('modalCreate');
     }
 
     // Modal Edit Handlers
     function openEditModal(id, namaPaket, kategori, harga, hargaDp, deskripsi, facilityIds, updateUrl) {
-        const modal = document.getElementById('modalEdit');
-        const box = document.getElementById('modalEditBox');
         const form = document.getElementById('formEdit');
-
-        form.action = updateUrl;
+        if (form) form.action = updateUrl;
         document.getElementById('edit_nama_paket').value = namaPaket || '';
         document.getElementById('edit_kategori').value = kategori;
         document.getElementById('edit_harga').value = harga;
@@ -699,92 +631,28 @@
 
         updateFacilitySelection('edit');
 
-        document.body.classList.add('overflow-hidden');
-        modal.classList.remove('hidden');
+        window.openModal('modalEdit');
         setTimeout(() => {
-            box.classList.remove('scale-95');
-            box.classList.add('scale-100');
-            document.getElementById('edit_kategori').focus();
-        }, 10);
+            const el = document.getElementById('edit_kategori');
+            if (el) el.focus();
+        }, 50);
     }
 
     function closeEditModal() {
-        const modal = document.getElementById('modalEdit');
-        const box = document.getElementById('modalEditBox');
-        box.classList.remove('scale-100');
-        box.classList.add('scale-95');
-        setTimeout(() => {
-            modal.classList.add('hidden');
-            document.body.classList.remove('overflow-hidden');
-        }, 150);
+        window.closeModal('modalEdit');
     }
 
     // Modal Delete Handlers
     function openDeleteModal(id, nama, deleteUrl) {
-        const modal = document.getElementById('modalDelete');
-        const box = document.getElementById('modalDeleteBox');
         const form = document.getElementById('formDelete');
-
-        form.action = deleteUrl;
-        document.getElementById('delete_paket_title').innerText = nama;
-
-        document.body.classList.add('overflow-hidden');
-        modal.classList.remove('hidden');
-        setTimeout(() => {
-            box.classList.remove('scale-95');
-            box.classList.add('scale-100');
-        }, 10);
+        if (form) form.action = deleteUrl;
+        const titleEl = document.getElementById('delete_paket_title');
+        if (titleEl) titleEl.innerText = nama;
+        window.openModal('modalDelete');
     }
 
     function closeDeleteModal() {
-        const modal = document.getElementById('modalDelete');
-        const box = document.getElementById('modalDeleteBox');
-        box.classList.remove('scale-100');
-        box.classList.add('scale-95');
-        setTimeout(() => {
-            modal.classList.add('hidden');
-            document.body.classList.remove('overflow-hidden');
-        }, 150);
+        window.closeModal('modalDelete');
     }
-
-    // Close modal on Escape key
-    document.addEventListener('keydown', function(event) {
-        if (event.key === 'Escape') {
-            closeCreateModal();
-            closeEditModal();
-            closeDeleteModal();
-            document.querySelectorAll('#create_dropdown_box, #edit_dropdown_box').forEach(el => el.classList.add('hidden'));
-        }
-    });
-
-    // Close dropdown on click outside
-    document.addEventListener('click', function(event) {
-        ['create', 'edit'].forEach(mode => {
-            const wrapper = document.getElementById(`${mode}_dropdown_wrapper`);
-            const box = document.getElementById(`${mode}_dropdown_box`);
-            if (wrapper && box && !wrapper.contains(event.target)) {
-                box.classList.add('hidden');
-            }
-        });
-    });
-
-    // Close modal on click outside box
-    ['modalCreate', 'modalEdit', 'modalDelete'].forEach(modalId => {
-        const modal = document.getElementById(modalId);
-        if (modal) {
-            modal.addEventListener('click', function(event) {
-                if (event.target === modal) {
-                    if (modalId === 'modalCreate') closeCreateModal();
-                    if (modalId === 'modalEdit') closeEditModal();
-                    if (modalId === 'modalDelete') closeDeleteModal();
-                }
-            });
-        }
-    });
-
-    // Initialize selections on load
-    document.addEventListener('DOMContentLoaded', function() {
-        updateFacilitySelection('create');
-    });
 </script>
 @endpush

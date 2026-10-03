@@ -591,7 +591,7 @@
                         @endphp
                         <div class="{{ $colorConfig[$index % 4] }} text-white rounded-2xl p-5 hover:scale-105 transition-transform">
                             <div class="text-xs font-extrabold uppercase mb-4 tracking-wider">{{ $namaJurusan }}</div>
-                            <div class="text-4xl font-black mb-1">{{ $dayaTampung }}</div>
+                            <div class="text-4xl font-black mb-1" data-counter-target="{{ $dayaTampung }}">{{ $dayaTampung }}</div>
                             <div class="text-xs font-medium">Siswa</div>
                         </div>
                     @empty

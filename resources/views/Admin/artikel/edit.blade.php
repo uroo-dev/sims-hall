@@ -16,21 +16,6 @@
         </div>
     </div>
 
-    @if($errors->any())
-        <div class="mb-5 p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs md:text-sm font-medium shadow-xs">
-            <div class="flex items-center gap-3 mb-2 font-bold text-rose-900">
-                <div class="w-8 h-8 rounded-xl bg-rose-500 text-white flex items-center justify-center flex-shrink-0">
-                    <i class="fa-solid fa-triangle-exclamation text-sm"></i>
-                </div>
-                <span>Terdapat kesalahan pada formulir:</span>
-            </div>
-            <ul class="list-disc list-inside space-y-1 pl-11 text-xs">
-                @foreach($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
 
     <!-- FORM CARD -->
     <div class="bg-white rounded-2xl p-6 sm:p-8 card-shadow border border-gray-100/80">

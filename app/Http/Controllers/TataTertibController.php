@@ -23,7 +23,6 @@ class TataTertibController extends Controller
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('judul', 'like', "%{$search}%")
-                        ->orWhere('aturan', 'like', "%{$search}%")
                         ->orWhere('deskripsi', 'like', "%{$search}%");
                 });
             })
@@ -50,7 +49,6 @@ class TataTertibController extends Controller
 
         $data = [
             'judul' => $validated['judul'],
-            'aturan' => $validated['judul'],
             'deskripsi' => $validated['deskripsi'] ?? null,
         ];
 
@@ -80,7 +78,6 @@ class TataTertibController extends Controller
 
         $data = [
             'judul' => $validated['judul'],
-            'aturan' => $validated['judul'],
             'deskripsi' => $validated['deskripsi'] ?? null,
         ];
 

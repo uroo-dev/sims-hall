@@ -6,44 +6,6 @@
 @section('content')
 <div class="space-y-6">
 
-    <!-- FLASH MESSAGES -->
-    @if (session('success'))
-        <div id="alertSuccess" class="bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl p-4 flex items-center justify-between shadow-sm transition-all duration-300">
-            <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold flex-shrink-0">
-                    <i class="fa-solid fa-circle-check"></i>
-                </div>
-                <div class="text-xs md:text-sm font-semibold">
-                    {{ session('success') }}
-                </div>
-            </div>
-            <button type="button" onclick="document.getElementById('alertSuccess').remove()" class="text-emerald-500 hover:text-emerald-700 p-1">
-                <i class="fa-solid fa-xmark text-sm"></i>
-            </button>
-        </div>
-    @endif
-
-    @if ($errors->any())
-        <div id="alertError" class="bg-red-50 border border-red-200 text-red-800 rounded-2xl p-4 flex items-center justify-between shadow-sm transition-all duration-300">
-            <div class="flex items-start gap-3">
-                <div class="w-8 h-8 rounded-xl bg-red-100 text-red-600 flex items-center justify-center font-bold flex-shrink-0 mt-0.5">
-                    <i class="fa-solid fa-triangle-exclamation"></i>
-                </div>
-                <div class="text-xs md:text-sm">
-                    <div class="font-bold">Terjadi kesalahan pada input data:</div>
-                    <ul class="list-disc list-inside mt-1 text-red-700 space-y-0.5">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            </div>
-            <button type="button" onclick="document.getElementById('alertError').remove()" class="text-red-500 hover:text-red-700 p-1">
-                <i class="fa-solid fa-xmark text-sm"></i>
-            </button>
-        </div>
-    @endif
-
     <!-- ACTION, STAT & SEARCH CONTROLS -->
     <div class="bg-white rounded-2xl p-4 md:p-5 figma-card-shadow border border-slate-100 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
         <!-- 1. BTN TAMBAH FASILITAS & 2. TOTAL FASILITAS -->
@@ -352,107 +314,46 @@
 <script>
     // Modal Create Handlers
     function openCreateModal() {
-        const modal = document.getElementById('modalCreate');
-        const box = document.getElementById('modalCreateBox');
-        document.body.classList.add('overflow-hidden');
-        modal.classList.remove('hidden');
+        window.openModal('modalCreate');
         setTimeout(() => {
-            box.classList.remove('scale-95');
-            box.classList.add('scale-100');
-            document.getElementById('create_judul').focus();
-        }, 10);
+            const el = document.getElementById('create_judul');
+            if (el) el.focus();
+        }, 50);
     }
 
     function closeCreateModal() {
-        const modal = document.getElementById('modalCreate');
-        const box = document.getElementById('modalCreateBox');
-        box.classList.remove('scale-100');
-        box.classList.add('scale-95');
-        setTimeout(() => {
-            modal.classList.add('hidden');
-            document.body.classList.remove('overflow-hidden');
-        }, 150);
+        window.closeModal('modalCreate');
     }
 
     // Modal Edit Handlers
     function openEditModal(id, judul, deskripsi, updateUrl) {
-        const modal = document.getElementById('modalEdit');
-        const box = document.getElementById('modalEditBox');
         const form = document.getElementById('formEdit');
-
-        form.action = updateUrl;
+        if (form) form.action = updateUrl;
         document.getElementById('edit_judul').value = judul;
         document.getElementById('edit_deskripsi').value = deskripsi || '';
 
-        document.body.classList.add('overflow-hidden');
-        modal.classList.remove('hidden');
+        window.openModal('modalEdit');
         setTimeout(() => {
-            box.classList.remove('scale-95');
-            box.classList.add('scale-100');
-            document.getElementById('edit_judul').focus();
-        }, 10);
+            const el = document.getElementById('edit_judul');
+            if (el) el.focus();
+        }, 50);
     }
 
     function closeEditModal() {
-        const modal = document.getElementById('modalEdit');
-        const box = document.getElementById('modalEditBox');
-        box.classList.remove('scale-100');
-        box.classList.add('scale-95');
-        setTimeout(() => {
-            modal.classList.add('hidden');
-            document.body.classList.remove('overflow-hidden');
-        }, 150);
+        window.closeModal('modalEdit');
     }
 
     // Modal Delete Handlers
     function openDeleteModal(id, judul, deleteUrl) {
-        const modal = document.getElementById('modalDelete');
-        const box = document.getElementById('modalDeleteBox');
         const form = document.getElementById('formDelete');
-
-        form.action = deleteUrl;
-        document.getElementById('delete_facility_title').innerText = judul;
-
-        document.body.classList.add('overflow-hidden');
-        modal.classList.remove('hidden');
-        setTimeout(() => {
-            box.classList.remove('scale-95');
-            box.classList.add('scale-100');
-        }, 10);
+        if (form) form.action = deleteUrl;
+        const titleEl = document.getElementById('delete_facility_title');
+        if (titleEl) titleEl.innerText = judul;
+        window.openModal('modalDelete');
     }
 
     function closeDeleteModal() {
-        const modal = document.getElementById('modalDelete');
-        const box = document.getElementById('modalDeleteBox');
-        box.classList.remove('scale-100');
-        box.classList.add('scale-95');
-        setTimeout(() => {
-            modal.classList.add('hidden');
-            document.body.classList.remove('overflow-hidden');
-        }, 150);
+        window.closeModal('modalDelete');
     }
-
-    // Close modal on escape key
-    document.addEventListener('keydown', function(event) {
-        if (event.key === 'Escape') {
-            closeCreateModal();
-            closeEditModal();
-            closeDeleteModal();
-        }
-    });
-
-    // Close modal on click outside box
-    ['modalCreate', 'modalEdit', 'modalDelete'].forEach(modalId => {
-        const modal = document.getElementById(modalId);
-        if (modal) {
-            modal.addEventListener('click', function(event) {
-                if (event.target === modal) {
-                    if (modalId === 'modalCreate') closeCreateModal();
-                    if (modalId === 'modalEdit') closeEditModal();
-                    if (modalId === 'modalDelete') closeDeleteModal();
-                }
-            });
-        }
-    });
 </script>
 @endpush

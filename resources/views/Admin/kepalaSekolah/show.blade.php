@@ -6,34 +6,6 @@
 @section('content')
 <div class="space-y-6">
 
-    <!-- ALERT FLASH NOTIFIKASI -->
-    @if (session('success'))
-        <div class="bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl p-4 flex items-center justify-between shadow-xs">
-            <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold text-sm">
-                    <i class="fa-solid fa-check"></i>
-                </div>
-                <span class="text-xs md:text-sm font-medium">{{ session('success') }}</span>
-            </div>
-            <button type="button" onclick="this.parentElement.remove()" class="text-emerald-500 hover:text-emerald-700">
-                <i class="fa-solid fa-xmark text-sm"></i>
-            </button>
-        </div>
-    @endif
-
-    @if (session('error'))
-        <div class="bg-red-50 border border-red-200 text-red-800 rounded-2xl p-4 flex items-center justify-between shadow-xs">
-            <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-full bg-red-500 text-white flex items-center justify-center font-bold text-sm">
-                    <i class="fa-solid fa-triangle-exclamation"></i>
-                </div>
-                <span class="text-xs md:text-sm font-medium">{{ session('error') }}</span>
-            </div>
-            <button type="button" onclick="this.parentElement.remove()" class="text-red-500 hover:text-red-700">
-                <i class="fa-solid fa-xmark text-sm"></i>
-            </button>
-        </div>
-    @endif
 
     <!-- NAVIGASI KEMBALI & HEADER -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -612,78 +584,33 @@
 <script>
     // Modal Approve Final
     function openModalApproveFinal() {
-        const modal = document.getElementById('modalApproveFinal');
-        const box = document.getElementById('modalApproveFinalBox');
-        if (!modal || !box) return;
-        document.body.classList.add('overflow-hidden');
-        modal.classList.remove('hidden');
-        setTimeout(() => {
-            box.classList.remove('scale-95');
-            box.classList.add('scale-100');
-            const input = document.getElementById('catatan_approval');
-            if (input) input.focus();
-        }, 10);
+        if (window.openModal) {
+            window.openModal('modalApproveFinal');
+            setTimeout(() => document.getElementById('catatan_approval')?.focus(), 50);
+        } else {
+            document.getElementById('modalApproveFinal')?.classList.remove('hidden');
+        }
     }
 
     function closeModalApproveFinal() {
-        const modal = document.getElementById('modalApproveFinal');
-        const box = document.getElementById('modalApproveFinalBox');
-        if (!modal || !box) return;
-        box.classList.remove('scale-100');
-        box.classList.add('scale-95');
-        setTimeout(() => {
-            modal.classList.add('hidden');
-            document.body.classList.remove('overflow-hidden');
-        }, 150);
+        if (window.closeModal) window.closeModal('modalApproveFinal');
+        else document.getElementById('modalApproveFinal')?.classList.add('hidden');
     }
 
     // Modal Reject Final
     function openModalRejectFinal() {
-        const modal = document.getElementById('modalRejectFinal');
-        const box = document.getElementById('modalRejectFinalBox');
-        if (!modal || !box) return;
-        document.body.classList.add('overflow-hidden');
-        modal.classList.remove('hidden');
-        setTimeout(() => {
-            box.classList.remove('scale-95');
-            box.classList.add('scale-100');
-            const input = document.getElementById('alasan_penolakan');
-            if (input) input.focus();
-        }, 10);
+        if (window.openModal) {
+            window.openModal('modalRejectFinal');
+            setTimeout(() => document.getElementById('alasan_penolakan')?.focus(), 50);
+        } else {
+            document.getElementById('modalRejectFinal')?.classList.remove('hidden');
+        }
     }
 
     function closeModalRejectFinal() {
-        const modal = document.getElementById('modalRejectFinal');
-        const box = document.getElementById('modalRejectFinalBox');
-        if (!modal || !box) return;
-        box.classList.remove('scale-100');
-        box.classList.add('scale-95');
-        setTimeout(() => {
-            modal.classList.add('hidden');
-            document.body.classList.remove('overflow-hidden');
-        }, 150);
+        if (window.closeModal) window.closeModal('modalRejectFinal');
+        else document.getElementById('modalRejectFinal')?.classList.add('hidden');
     }
-
-    // Keydown ESC listener
-    document.addEventListener('keydown', function(event) {
-        if (event.key === 'Escape') {
-            closeModalApproveFinal();
-            closeModalRejectFinal();
-        }
-    });
-
-    // Backdrop click listener
-    ['modalApproveFinal', 'modalRejectFinal'].forEach(modalId => {
-        const modal = document.getElementById(modalId);
-        if (modal) {
-            modal.addEventListener('click', function(event) {
-                if (event.target === modal) {
-                    if (modalId === 'modalApproveFinal') closeModalApproveFinal();
-                    if (modalId === 'modalRejectFinal') closeModalRejectFinal();
-                }
-            });
-        }
-    });
 </script>
 @endif
 @endpush

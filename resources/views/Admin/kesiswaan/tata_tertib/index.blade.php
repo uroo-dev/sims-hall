@@ -8,19 +8,6 @@
 @section('content')
     <div class="space-y-6">
 
-        @if (session('success'))
-            <div class="rounded-2xl border border-emerald-100 bg-emerald-50 px-5 py-3 text-sm font-semibold text-emerald-700 flex items-center gap-2.5" role="status">
-                <i class="fa-solid fa-circle-check"></i>
-                <span>{{ session('success') }}</span>
-            </div>
-        @endif
-
-        @if ($errors->any())
-            <div class="rounded-2xl border border-red-100 bg-red-50 px-5 py-3 text-sm font-semibold text-red-700 flex items-center gap-2.5" role="alert">
-                <i class="fa-solid fa-circle-exclamation"></i>
-                <span>{{ $errors->first() }}</span>
-            </div>
-        @endif
 
         <!-- FORM TAMBAH TATA TERTIB -->
         <section class="bg-white rounded-2xl p-6 figma-card-shadow border border-slate-100 max-w-2xl">
@@ -170,18 +157,18 @@
     </div>
 
     <!-- MODAL DETAIL -->
-    <div id="detailModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-2xl max-w-lg w-full overflow-hidden shadow-2xl relative">
-            <div class="p-4 border-b border-slate-100 flex items-center justify-between">
-                <h4 class="text-xs font-bold text-slate-800">Detail Tata Tertib</h4>
-                <button onclick="closeDetailModal()" class="text-slate-400 hover:text-slate-600">
-                    <i class="fa-solid fa-xmark"></i>
+    <div id="detailModal" class="fixed inset-0 !m-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-slate-100 relative">
+            <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+                <h4 class="text-sm font-bold text-slate-800">Detail Tata Tertib</h4>
+                <button onclick="closeDetailModal()" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition cursor-pointer">
+                    <i class="fa-solid fa-xmark text-sm"></i>
                 </button>
             </div>
             <div class="p-6 space-y-4">
                 <div>
                     <h3 id="detailJudul" class="text-base font-extrabold text-slate-800 mb-2"></h3>
-                    <div id="detailDeskripsi" class="text-xs text-slate-600 leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-100 whitespace-pre-line"></div>
+                    <div id="detailDeskripsi" class="text-xs text-slate-600 leading-relaxed bg-slate-50 p-4 rounded-2xl border border-slate-100 whitespace-pre-line"></div>
                 </div>
 
                 <div class="pt-2 space-y-2">
@@ -201,12 +188,12 @@
     </div>
 
     <!-- MODAL EDIT -->
-    <div id="editModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-2xl max-w-xl w-full overflow-hidden shadow-2xl relative max-h-[90vh] flex flex-col">
-            <div class="p-4 border-b border-slate-100 flex items-center justify-between">
-                <h4 class="text-xs font-bold text-slate-800">Edit Tata Tertib</h4>
-                <button onclick="closeEditModal()" class="text-slate-400 hover:text-slate-600">
-                    <i class="fa-solid fa-xmark"></i>
+    <div id="editModal" class="fixed inset-0 !m-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-xl w-full overflow-hidden shadow-2xl border border-slate-100 relative max-h-[90vh] flex flex-col">
+            <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+                <h4 class="text-sm font-bold text-slate-800">Edit Tata Tertib</h4>
+                <button onclick="closeEditModal()" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition cursor-pointer">
+                    <i class="fa-solid fa-xmark text-sm"></i>
                 </button>
             </div>
             <form id="editForm" method="POST" enctype="multipart/form-data" class="p-6 space-y-4 overflow-y-auto">
@@ -228,11 +215,11 @@
                     <input type="file" name="file_pdf" accept="application/pdf" class="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-[#0066C4] hover:file:bg-blue-100">
                 </div>
 
-                <div class="pt-4 flex justify-end gap-2">
-                    <button type="button" onclick="closeEditModal()" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200">
+                <div class="pt-4 flex justify-end gap-2.5 border-t border-slate-100">
+                    <button type="button" onclick="closeEditModal()" class="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 text-xs md:text-sm font-semibold transition cursor-pointer">
                         Batal
                     </button>
-                    <button type="submit" class="px-5 py-2 rounded-xl text-xs font-bold text-white bg-[#0066C4] hover:bg-blue-700 shadow-md">
+                    <button type="submit" class="px-5 py-2.5 rounded-xl bg-[#0060ac] hover:bg-[#004f8f] active:scale-95 text-white text-xs md:text-sm font-bold shadow-md shadow-blue-500/20 transition flex items-center gap-2 cursor-pointer">
                         Simpan Perubahan
                     </button>
                 </div>
@@ -241,20 +228,20 @@
     </div>
 
     <!-- MODAL DELETE CONFIRMATION -->
-    <div id="deleteModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-2xl max-w-sm w-full p-6 text-center shadow-2xl relative">
-            <div class="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i class="fa-solid fa-triangle-exclamation text-xl"></i>
+    <div id="deleteModal" class="fixed inset-0 !m-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl border border-slate-100 relative">
+            <div class="w-14 h-14 bg-rose-50 text-rose-600 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-rose-100 text-2xl shadow-xs">
+                <i class="fa-regular fa-trash-can"></i>
             </div>
-            <h4 class="text-sm font-bold text-slate-900 mb-1">Konfirmasi Hapus</h4>
+            <h4 class="text-base font-extrabold text-slate-900 mb-1">Konfirmasi Hapus</h4>
             <p class="text-xs text-slate-500 mb-6">Apakah Anda yakin ingin menghapus tata tertib <span id="deleteItemName" class="font-bold text-slate-700"></span>?</p>
-            <form id="deleteForm" method="POST" class="flex justify-center gap-2">
+            <form id="deleteForm" method="POST" class="flex justify-center gap-2.5">
                 @csrf
                 @method('DELETE')
-                <button type="button" onclick="closeDeleteModal()" class="px-4 py-2 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-xl text-xs font-bold">
+                <button type="button" onclick="closeDeleteModal()" class="w-full py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 text-xs md:text-sm font-semibold transition cursor-pointer">
                     Batal
                 </button>
-                <button type="submit" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold shadow-md shadow-red-500/20">
+                <button type="submit" class="w-full py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 active:scale-95 text-white text-xs md:text-sm font-bold shadow-sm transition cursor-pointer">
                     Ya, Hapus
                 </button>
             </form>
@@ -276,11 +263,13 @@
                 fileContainer.classList.add('hidden');
             }
 
-            document.getElementById('detailModal').classList.remove('hidden');
+            if (window.openModal) window.openModal('detailModal');
+            else document.getElementById('detailModal').classList.remove('hidden');
         }
 
         function closeDetailModal() {
-            document.getElementById('detailModal').classList.add('hidden');
+            if (window.closeModal) window.closeModal('detailModal');
+            else document.getElementById('detailModal').classList.add('hidden');
         }
 
         function openEditModal(item) {
@@ -288,21 +277,25 @@
             form.action = `/admin/kesiswaan/tata-tertib/${item.tata_tertibID}`;
             document.getElementById('editJudul').value = item.judul;
             document.getElementById('editDeskripsi').value = item.deskripsi || '';
-            document.getElementById('editModal').classList.remove('hidden');
+            if (window.openModal) window.openModal('editModal');
+            else document.getElementById('editModal').classList.remove('hidden');
         }
 
         function closeEditModal() {
-            document.getElementById('editModal').classList.add('hidden');
+            if (window.closeModal) window.closeModal('editModal');
+            else document.getElementById('editModal').classList.add('hidden');
         }
 
         function openDeleteModal(actionUrl, name) {
             document.getElementById('deleteForm').action = actionUrl;
             document.getElementById('deleteItemName').textContent = name;
-            document.getElementById('deleteModal').classList.remove('hidden');
+            if (window.openModal) window.openModal('deleteModal');
+            else document.getElementById('deleteModal').classList.remove('hidden');
         }
 
         function closeDeleteModal() {
-            document.getElementById('deleteModal').classList.add('hidden');
+            if (window.closeModal) window.closeModal('deleteModal');
+            else document.getElementById('deleteModal').classList.add('hidden');
         }
     </script>
 @endsection

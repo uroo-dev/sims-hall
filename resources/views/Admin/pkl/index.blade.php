@@ -5,22 +5,6 @@
 
 @section('content')
 
-    @if (session('success'))
-        <div
-            class="rounded-xl border border-green-200 bg-green-50 text-green-800 px-4 py-3 text-sm flex items-start gap-2">
-            <i class="fa-solid fa-circle-check mt-0.5"></i>
-            <span>{{ session('success') }}</span>
-        </div>
-    @endif
-
-    @if (session('error'))
-        <div
-            class="rounded-xl border border-red-200 bg-red-50 text-red-800 px-4 py-3 text-sm flex items-start gap-2">
-            <i class="fa-solid fa-circle-exclamation mt-0.5"></i>
-            <span>{{ session('error') }}</span>
-        </div>
-    @endif
-
     <div class="flex items-center justify-between flex-wrap gap-3">
         <div>
             {{-- Breadcrumb Navigation --}}
@@ -688,36 +672,11 @@
             btnSubmit.innerHTML = '<span>Ya, Tolak</span>';
         }
 
-        document.body.classList.add('overflow-hidden');
-        modal.classList.remove('hidden');
-        setTimeout(() => {
-            box.classList.remove('scale-95');
-            box.classList.add('scale-100');
-        }, 10);
+        window.openModal('modalConfirmStatus');
     }
 
     function closeStatusModal() {
-        const modal = document.getElementById('modalConfirmStatus');
-        const box = document.getElementById('modalConfirmStatusBox');
-        if (!modal || !box) return;
-
-        box.classList.remove('scale-100');
-        box.classList.add('scale-95');
-        setTimeout(() => {
-            modal.classList.add('hidden');
-            document.body.classList.remove('overflow-hidden');
-        }, 150);
-    }
-
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') closeStatusModal();
-    });
-
-    const modalConfirmStatusEl = document.getElementById('modalConfirmStatus');
-    if (modalConfirmStatusEl) {
-        modalConfirmStatusEl.addEventListener('click', function(e) {
-            if (e.target === this) closeStatusModal();
-        });
+        window.closeModal('modalConfirmStatus');
     }
 </script>
 @endpush

@@ -6,42 +6,6 @@
 @section('content')
 <div class="space-y-6 max-w-5xl mx-auto">
 
-    {{-- FLASH MESSAGES --}}
-    @if (session('success'))
-        <div class="rounded-2xl border border-emerald-200 bg-emerald-50/90 text-emerald-800 px-5 py-4 text-sm flex items-center justify-between shadow-sm">
-            <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 flex-shrink-0">
-                    <i class="fa-solid fa-circle-check text-base"></i>
-                </div>
-                <div>
-                    <h4 class="font-bold text-emerald-900">Berhasil!</h4>
-                    <p class="text-xs text-emerald-700">{{ session('success') }}</p>
-                </div>
-            </div>
-            <button type="button" onclick="this.parentElement.remove()" class="text-emerald-500 hover:text-emerald-700 text-sm">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-        </div>
-    @endif
-
-    @if ($errors->any())
-        <div class="rounded-2xl border border-rose-200 bg-rose-50/90 text-rose-800 px-5 py-4 text-sm shadow-sm space-y-2">
-            <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-full bg-rose-100 flex items-center justify-center text-rose-600 flex-shrink-0">
-                    <i class="fa-solid fa-triangle-exclamation text-base"></i>
-                </div>
-                <div>
-                    <h4 class="font-bold text-rose-900">Terjadi Kesalahan Pengisian Form</h4>
-                    <p class="text-xs text-rose-700">Mohon periksa kembali kolom-kolom berikut:</p>
-                </div>
-            </div>
-            <ul class="list-disc list-inside text-xs text-rose-700 pl-11 space-y-0.5">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
 
     {{-- PROFILE HEADER CARD --}}
     <div class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100 relative overflow-hidden">

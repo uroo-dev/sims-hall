@@ -29,34 +29,6 @@
         </div>
     </div>
 
-    <!-- NOTIFIKASI SUCCESS / ERROR -->
-    @if (session('success'))
-        <div class="bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl p-4 flex items-center justify-between shadow-sm animate-fade-in">
-            <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold text-sm">
-                    <i class="fa-solid fa-check"></i>
-                </div>
-                <span class="text-xs md:text-sm font-medium">{{ session('success') }}</span>
-            </div>
-            <button type="button" onclick="this.parentElement.remove()" class="text-emerald-500 hover:text-emerald-700">
-                <i class="fa-solid fa-xmark text-sm"></i>
-            </button>
-        </div>
-    @endif
-
-    @if ($errors->any())
-        <div class="bg-red-50 border border-red-200 text-red-800 rounded-2xl p-4 space-y-2 shadow-sm">
-            <div class="flex items-center gap-2 font-bold text-xs md:text-sm text-red-700">
-                <i class="fa-solid fa-triangle-exclamation"></i>
-                <span>Mohon periksa kesalahan input berikut:</span>
-            </div>
-            <ul class="list-disc list-inside text-xs text-red-600 space-y-1">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
 
     <!-- FORM KONFIGURASI -->
     <form action="{{ route('admin.payment-configuration.update') }}" method="POST" enctype="multipart/form-data" class="space-y-6">

@@ -8,19 +8,6 @@
 @section('content')
     <div class="space-y-6">
 
-        @if (session('success'))
-            <div class="rounded-2xl border border-emerald-100 bg-emerald-50 px-5 py-3 text-sm font-semibold text-emerald-700 flex items-center gap-2.5" role="status">
-                <i class="fa-solid fa-circle-check"></i>
-                <span>{{ session('success') }}</span>
-            </div>
-        @endif
-
-        @if ($errors->any())
-            <div class="rounded-2xl border border-red-100 bg-red-50 px-5 py-3 text-sm font-semibold text-red-700 flex items-center gap-2.5" role="alert">
-                <i class="fa-solid fa-circle-exclamation"></i>
-                <span>{{ $errors->first() }}</span>
-            </div>
-        @endif
 
         <!-- FORM TAMBAH PRODUK -->
         <section class="bg-white rounded-2xl p-6 figma-card-shadow border border-slate-100">
@@ -102,12 +89,11 @@
                                             <i class="fa-solid fa-pen text-[10px]"></i>
                                         </a>
 
-                                        <form method="POST" action="{{ route('produk.destroy', $item) }}"
-                                            onsubmit="return confirm('Hapus produk {{ $item->kode_produk }}?')">
+                                        <form id="form-delete-{{ $item->produkID }}" method="POST" action="{{ route('produk.destroy', $item) }}">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" title="Hapus produk"
-                                                class="w-7 h-7 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 flex items-center justify-center transition-colors">
+                                            <button type="button" onclick="confirmDeleteProduk('{{ $item->produkID }}', '{{ $item->kode_produk }}')" title="Hapus produk"
+                                                class="w-7 h-7 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 flex items-center justify-center transition-colors cursor-pointer">
                                                 <i class="fa-solid fa-trash text-[10px]"></i>
                                             </button>
                                         </form>
@@ -136,4 +122,24 @@
         </section>
 
     </div>
+
+@push('scripts')
+<script>
+    function confirmDeleteProduk(id, kode) {
+        if (window.showConfirmDialog) {
+            window.showConfirmDialog({
+                title: 'Hapus Produk?',
+                message: `Apakah Anda yakin ingin menghapus produk <strong>${kode}</strong>? Tindakan ini tidak dapat dibatalkan.`,
+                type: 'danger',
+                confirmText: 'Ya, Hapus',
+                onConfirm: function() {
+                    document.getElementById('form-delete-' + id)?.submit();
+                }
+            });
+        } else if (confirm(`Hapus produk ${kode}?`)) {
+            document.getElementById('form-delete-' + id)?.submit();
+        }
+    }
+</script>
+@endpush
 @endsection

@@ -368,37 +368,17 @@
 <script>
     // ========== MODAL TAMBAH USER ==========
     function openAddModal() {
-        const modal = document.getElementById('addUserModal');
-        const box = document.getElementById('addUserModalBox');
-        if (!modal || !box) return;
-
-        document.body.classList.add('overflow-hidden');
-        modal.classList.remove('hidden');
-        setTimeout(() => {
-            box.classList.remove('scale-95');
-            box.classList.add('scale-100');
-        }, 10);
+        if (window.openModal) window.openModal('addUserModal');
+        else document.getElementById('addUserModal')?.classList.remove('hidden');
     }
 
     function closeAddModal() {
-        const modal = document.getElementById('addUserModal');
-        const box = document.getElementById('addUserModalBox');
-        if (!modal || !box) return;
-
-        box.classList.remove('scale-100');
-        box.classList.add('scale-95');
-        setTimeout(() => {
-            modal.classList.add('hidden');
-            document.body.classList.remove('overflow-hidden');
-        }, 150);
+        if (window.closeModal) window.closeModal('addUserModal');
+        else document.getElementById('addUserModal')?.classList.add('hidden');
     }
 
     // ========== MODAL EDIT USER ==========
     function openEditModal(user) {
-        const modal = document.getElementById('editUserModal');
-        const box = document.getElementById('editUserModalBox');
-        if (!modal || !box) return;
-
         document.getElementById('edit_username').value = user.username;
         document.getElementById('edit_name').value = user.name;
         document.getElementById('edit_email').value = user.email;
@@ -407,56 +387,28 @@
         const updateRoute = "{{ route('datamaster.users.update', ':id') }}";
         document.getElementById('editUserForm').action = updateRoute.replace(':id', user.id);
 
-        document.body.classList.add('overflow-hidden');
-        modal.classList.remove('hidden');
-        setTimeout(() => {
-            box.classList.remove('scale-95');
-            box.classList.add('scale-100');
-        }, 10);
+        if (window.openModal) window.openModal('editUserModal');
+        else document.getElementById('editUserModal')?.classList.remove('hidden');
     }
 
     function closeEditModal() {
-        const modal = document.getElementById('editUserModal');
-        const box = document.getElementById('editUserModalBox');
-        if (!modal || !box) return;
-
-        box.classList.remove('scale-100');
-        box.classList.add('scale-95');
-        setTimeout(() => {
-            modal.classList.add('hidden');
-            document.body.classList.remove('overflow-hidden');
-        }, 150);
+        if (window.closeModal) window.closeModal('editUserModal');
+        else document.getElementById('editUserModal')?.classList.add('hidden');
     }
 
     // ========== MODAL HAPUS USER ==========
     function openDeleteUserModal(id, username, deleteUrl) {
-        const modal = document.getElementById('modalDeleteUser');
-        const box = document.getElementById('modalDeleteUserBox');
         const form = document.getElementById('formDeleteUser');
-        if (!modal || !box || !form) return;
-
-        form.action = deleteUrl;
+        if (form) form.action = deleteUrl;
         document.getElementById('delete_username_text').innerText = username;
 
-        document.body.classList.add('overflow-hidden');
-        modal.classList.remove('hidden');
-        setTimeout(() => {
-            box.classList.remove('scale-95');
-            box.classList.add('scale-100');
-        }, 10);
+        if (window.openModal) window.openModal('modalDeleteUser');
+        else document.getElementById('modalDeleteUser')?.classList.remove('hidden');
     }
 
     function closeDeleteUserModal() {
-        const modal = document.getElementById('modalDeleteUser');
-        const box = document.getElementById('modalDeleteUserBox');
-        if (!modal || !box) return;
-
-        box.classList.remove('scale-100');
-        box.classList.add('scale-95');
-        setTimeout(() => {
-            modal.classList.add('hidden');
-            document.body.classList.remove('overflow-hidden');
-        }, 150);
+        if (window.closeModal) window.closeModal('modalDeleteUser');
+        else document.getElementById('modalDeleteUser')?.classList.add('hidden');
     }
 
     // ========== FITUR FILTER OTOMATIS ==========

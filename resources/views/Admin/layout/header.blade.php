@@ -38,9 +38,14 @@
             <i class="fa-solid fa-gear text-sm"></i>
         </a>
 
-        <div class="relative group">
+        <div class="relative" id="adminProfileDropdown">
             <button
-                class="flex items-center gap-2.5 bg-gray-50 border border-gray-200 rounded-full py-1 px-3 hover:bg-gray-100 transition">
+                type="button"
+                id="adminProfileBtn"
+                onclick="toggleAdminProfileMenu(event)"
+                aria-expanded="false"
+                aria-haspopup="true"
+                class="flex items-center gap-2.5 bg-gray-50 border border-gray-200 rounded-full py-1 px-3 hover:bg-gray-100 transition cursor-pointer">
                 <div class="w-6 h-6 rounded-full overflow-hidden bg-blue-100 border border-gray-200 flex items-center justify-center flex-shrink-0">
                     <img src="{{ auth()->user()->foto_profil_url }}"
                         alt="{{ auth()->user()->name ?? 'User' }}"
@@ -50,12 +55,13 @@
                     <div class="font-bold text-gray-800">{{ auth()->user()->name ?? 'Admin' }}</div>
                     <div class="text-[10px] text-gray-500 mt-0.5">{{ $roleDisplay }}</div>
                 </div>
-                <i class="fa-solid fa-chevron-down text-[10px] text-gray-400 ml-1"></i>
+                <i id="adminProfileChevron" class="fa-solid fa-chevron-down text-[10px] text-gray-400 ml-1 transition-transform duration-200"></i>
             </button>
 
             <!-- DROPDOWN MENU -->
             <div
-                class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 hidden group-hover:block z-50 py-1">
+                id="adminProfileMenu"
+                class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 hidden z-50 py-1 transition-all">
                 <a href="{{ route('profile.edit') }}" class="block px-4 py-2 text-xs text-gray-700 hover:bg-gray-50 flex items-center gap-2">
                     <i class="fa-regular fa-user text-gray-500"></i> Profil Saya
                 </a>
@@ -71,4 +77,52 @@
             </div>
         </div>
     </div>
+
+    <script>
+        function toggleAdminProfileMenu(e) {
+            if (e) e.stopPropagation();
+            const menu = document.getElementById('adminProfileMenu');
+            const chevron = document.getElementById('adminProfileChevron');
+            const btn = document.getElementById('adminProfileBtn');
+            if (!menu) return;
+
+            const isHidden = menu.classList.contains('hidden');
+            if (isHidden) {
+                menu.classList.remove('hidden');
+                if (chevron) chevron.classList.add('rotate-180');
+                if (btn) btn.setAttribute('aria-expanded', 'true');
+            } else {
+                menu.classList.add('hidden');
+                if (chevron) chevron.classList.remove('rotate-180');
+                if (btn) btn.setAttribute('aria-expanded', 'false');
+            }
+        }
+
+        // Tutup dropdown saat klik di luar
+        document.addEventListener('click', function(e) {
+            const dropdown = document.getElementById('adminProfileDropdown');
+            const menu = document.getElementById('adminProfileMenu');
+            const chevron = document.getElementById('adminProfileChevron');
+            const btn = document.getElementById('adminProfileBtn');
+            if (dropdown && menu && !dropdown.contains(e.target)) {
+                menu.classList.add('hidden');
+                if (chevron) chevron.classList.remove('rotate-180');
+                if (btn) btn.setAttribute('aria-expanded', 'false');
+            }
+        });
+
+        // Tutup dropdown saat menekan tombol Escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const menu = document.getElementById('adminProfileMenu');
+                const chevron = document.getElementById('adminProfileChevron');
+                const btn = document.getElementById('adminProfileBtn');
+                if (menu && !menu.classList.contains('hidden')) {
+                    menu.classList.add('hidden');
+                    if (chevron) chevron.classList.remove('rotate-180');
+                    if (btn) btn.setAttribute('aria-expanded', 'false');
+                }
+            }
+        });
+    </script>
 </header>

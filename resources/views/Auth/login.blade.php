@@ -160,9 +160,30 @@
                     <div class="w-16 h-1 bg-sky-600 rounded-full mx-auto mt-2"></div>
                 </div>
 
+                @if (session('status'))
+                    <div class="mb-5 p-3.5 rounded-2xl text-xs font-medium bg-blue-50 text-blue-800 border border-blue-200 flex items-center gap-2.5">
+                        <i class="fa-solid fa-circle-info text-blue-600 text-sm shrink-0"></i>
+                        <span>{{ session('status') }}</span>
+                    </div>
+                @endif
+
+                @if (session('success'))
+                    <div class="mb-5 p-3.5 rounded-2xl text-xs font-medium bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center gap-2.5">
+                        <i class="fa-solid fa-circle-check text-emerald-600 text-sm shrink-0"></i>
+                        <span>{{ session('success') }}</span>
+                    </div>
+                @endif
+
+                @if (session('error'))
+                    <div class="mb-5 p-3.5 rounded-2xl text-xs font-medium bg-rose-50 text-rose-800 border border-rose-200 flex items-center gap-2.5">
+                        <i class="fa-solid fa-circle-exclamation text-rose-600 text-sm shrink-0"></i>
+                        <span>{{ session('error') }}</span>
+                    </div>
+                @endif
+
                 @if ($errors->any())
-                    <div class="mb-5 p-3 rounded-xl text-xs font-medium bg-red-50 text-red-700 border border-red-200 flex items-center gap-2">
-                        <i class="fa-solid fa-circle-exclamation text-sm shrink-0"></i>
+                    <div class="mb-5 p-3.5 rounded-2xl text-xs font-medium bg-rose-50 text-rose-800 border border-rose-200 flex items-center gap-2.5">
+                        <i class="fa-solid fa-circle-exclamation text-rose-600 text-sm shrink-0"></i>
                         <span>{{ $errors->first() }}</span>
                     </div>
                 @endif

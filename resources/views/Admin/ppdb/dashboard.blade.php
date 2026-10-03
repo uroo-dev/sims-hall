@@ -32,27 +32,6 @@
         </div>
     </div>
 
-    <!-- NOTIFIKASI ALERT -->
-    @if (session('success'))
-        <div class="rounded-2xl border border-emerald-100 bg-emerald-50 px-5 py-3.5 text-sm font-semibold text-emerald-800 flex items-center gap-3 shadow-xs" role="status">
-            <div class="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
-                <i class="fa-solid fa-circle-check"></i>
-            </div>
-            <span>{{ session('success') }}</span>
-        </div>
-    @endif
-
-    @if ($errors->any())
-        <div class="rounded-2xl border border-red-100 bg-red-50 px-5 py-3.5 text-sm font-semibold text-red-800 flex items-center gap-3 shadow-xs" role="alert">
-            <div class="w-8 h-8 rounded-xl bg-red-100 text-red-700 flex items-center justify-center shrink-0">
-                <i class="fa-solid fa-circle-exclamation"></i>
-            </div>
-            <div>
-                <div class="font-bold">Gagal Menyimpan Perubahan:</div>
-                <span class="text-xs font-normal text-red-700">{{ $errors->first() }}</span>
-            </div>
-        </div>
-    @endif
 
     <!-- FORM UTAMA -->
     <form id="formMasterPpdb" action="{{ route('update.master.ppdb') }}" method="POST" enctype="multipart/form-data">

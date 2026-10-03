@@ -425,16 +425,20 @@
             </button>
         </div>
     </div>
-<!-- MODAL PEMBATALAN PENGAJUAN -->
-<div id="modalCancel" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 hidden">
-    <div id="modalCancelBox" class="bg-white rounded-3xl max-w-lg w-full p-6 md:p-7 figma-card-shadow transform transition-all duration-200 scale-95 space-y-5">
+</div>
+
+<!-- ============================================================== -->
+<!-- MODAL: PEMBATALAN PENGAJUAN -->
+<!-- ============================================================== -->
+<div id="modalCancel" class="fixed inset-0 !m-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 hidden" role="dialog" aria-modal="true">
+    <div id="modalCancelBox" class="bg-white rounded-3xl max-w-lg w-full p-6 md:p-7 shadow-2xl border border-slate-100 transform transition-all duration-200 scale-95 space-y-5">
         <div class="flex items-center gap-3 pb-3 border-b border-slate-100">
-            <div class="w-10 h-10 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center text-lg font-bold flex-shrink-0">
+            <div class="w-11 h-11 rounded-2xl bg-red-50 text-red-600 border border-red-100/80 flex items-center justify-center text-lg font-bold flex-shrink-0 shadow-xs">
                 <i class="fa-solid fa-ban"></i>
             </div>
             <div>
-                <h3 class="font-black text-slate-900 text-base md:text-lg">Konfirmasi Pembatalan Pengajuan</h3>
-                <p class="text-xs text-slate-500">Peminjaman Aula SMKN 2 Karanganyar</p>
+                <h3 class="font-extrabold text-slate-900 text-base md:text-lg tracking-tight">Konfirmasi Pembatalan Pengajuan</h3>
+                <p class="text-xs text-slate-500 mt-0.5">Peminjaman Aula SMKN 2 Karanganyar</p>
             </div>
         </div>
 
@@ -494,7 +498,7 @@
                     Batal
                 </button>
                 <button type="submit"
-                        class="px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs md:text-sm font-bold shadow-xs transition flex items-center gap-2 cursor-pointer">
+                        class="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 active:scale-95 text-white text-xs md:text-sm font-bold shadow-md shadow-red-500/20 transition flex items-center gap-2 cursor-pointer">
                     <i class="fa-solid fa-ban text-xs"></i>
                     <span>Ya, Batalkan Pengajuan</span>
                 </button>
@@ -523,25 +527,11 @@
             icon.className = 'fa-solid fa-clock text-[10px]';
         }
 
-        const modal = document.getElementById('modalNota');
-        const box = document.getElementById('modalNotaBox');
-        document.body.classList.add('overflow-hidden');
-        modal.classList.remove('hidden');
-        setTimeout(() => {
-            box.classList.remove('scale-95');
-            box.classList.add('scale-100');
-        }, 10);
+        window.openModal('modalNota');
     }
 
     function closeNotaModal() {
-        const modal = document.getElementById('modalNota');
-        const box = document.getElementById('modalNotaBox');
-        box.classList.remove('scale-100');
-        box.classList.add('scale-95');
-        setTimeout(() => {
-            modal.classList.add('hidden');
-            document.body.classList.remove('overflow-hidden');
-        }, 150);
+        window.closeModal('modalNota');
     }
 
     function openCancelModal(id, invoice, paket, hMin, deadline, routeUrl, terbayar, isEligible) {
@@ -570,53 +560,11 @@
             document.getElementById('cancelHMinTextExpired').innerText = hMin;
         }
 
-        const modal = document.getElementById('modalCancel');
-        const box = document.getElementById('modalCancelBox');
-        document.body.classList.add('overflow-hidden');
-        modal.classList.remove('hidden');
-        setTimeout(() => {
-            box.classList.remove('scale-95');
-            box.classList.add('scale-100');
-        }, 10);
+        window.openModal('modalCancel');
     }
 
     function closeCancelModal() {
-        const modal = document.getElementById('modalCancel');
-        const box = document.getElementById('modalCancelBox');
-        if (!modal) return;
-        box.classList.remove('scale-100');
-        box.classList.add('scale-95');
-        setTimeout(() => {
-            modal.classList.add('hidden');
-            document.body.classList.remove('overflow-hidden');
-        }, 150);
-    }
-
-    // Close on Escape key
-    document.addEventListener('keydown', function(event) {
-        if (event.key === 'Escape') {
-            closeNotaModal();
-            closeCancelModal();
-        }
-    });
-
-    // Close on click outside box
-    const modalNota = document.getElementById('modalNota');
-    if (modalNota) {
-        modalNota.addEventListener('click', function(event) {
-            if (event.target === modalNota) {
-                closeNotaModal();
-            }
-        });
-    }
-
-    const modalCancel = document.getElementById('modalCancel');
-    if (modalCancel) {
-        modalCancel.addEventListener('click', function(event) {
-            if (event.target === modalCancel) {
-                closeCancelModal();
-            }
-        });
+        window.closeModal('modalCancel');
     }
 </script>
 @endpush

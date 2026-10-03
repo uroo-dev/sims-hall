@@ -51,5 +51,5 @@ class PaketPeminjaman extends Model
         return $this->nama_paket ?: 'Paket '.ucwords($this->kategori);
     }
 
-    protected $fillable = ['nama_paket', 'harga', 'harga_dp', 'kategori', 'durasi', 'fasilitas', 'deskripsi'];
+    protected $fillable = ['nama_paket', 'harga', 'harga_dp', 'kategori', 'durasi', 'deskripsi'];
 }

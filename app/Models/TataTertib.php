@@ -16,17 +16,9 @@ class TataTertib extends Model
 
     protected $fillable = [
         'judul',
-        'aturan',
         'deskripsi',
         'file_pdf',
-        'demerit_pok',
-        'skor',
     ];
-
-    public function getJudulAttribute($value)
-    {
-        return $value ?: $this->aturan;
-    }
 
     public function filePdfUrl(): ?string
     {

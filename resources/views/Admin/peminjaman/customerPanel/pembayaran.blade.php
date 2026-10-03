@@ -58,34 +58,6 @@
         </div>
     </div>
 
-    <!-- NOTIFIKASI SUCCESS / ERROR -->
-    @if (session('success'))
-        <div class="bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl p-4 flex items-center justify-between shadow-sm animate-fade-in">
-            <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold text-sm">
-                    <i class="fa-solid fa-check"></i>
-                </div>
-                <span class="text-xs md:text-sm font-medium">{{ session('success') }}</span>
-            </div>
-            <button type="button" onclick="this.parentElement.remove()" class="text-emerald-500 hover:text-emerald-700">
-                <i class="fa-solid fa-xmark text-sm"></i>
-            </button>
-        </div>
-    @endif
-
-    @if ($errors->any())
-        <div class="bg-red-50 border border-red-200 text-red-800 rounded-2xl p-4 space-y-2 shadow-sm animate-fade-in">
-            <div class="flex items-center gap-2 font-bold text-xs md:text-sm text-red-700">
-                <i class="fa-solid fa-triangle-exclamation"></i>
-                <span>Terdapat kesalahan pengiriman bukti pembayaran:</span>
-            </div>
-            <ul class="list-disc list-inside text-xs text-red-600 space-y-1">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
 
     <!-- CARD TENGGAT WAKTU & STATUS (PUTIH SOLID, COMPACT/TIPIS, HIGHLIGHT COUNTDOWN SAJA) -->
     @php
@@ -1010,7 +982,7 @@
 
 <!-- MODAL BATALKAN PENGAJUAN -->
 @if ($pembayaran->peminjaman?->canBeCancelled())
-<div id="modalCancel" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+<div id="modalCancel" class="fixed inset-0 !m-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
     <div id="modalCancelBox" class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 transform transition-all duration-200 scale-95 space-y-4">
         <div class="flex items-center justify-between pb-3 border-b border-slate-100">
             <div class="flex items-center gap-3">
@@ -1162,72 +1134,36 @@
 
     // MODAL KONFIRMASI REFUND DANA DITERIMA
     function openModalKonfirmasiRefund() {
-        const modal = document.getElementById('modalKonfirmasiRefund');
-        const box = document.getElementById('modalKonfirmasiRefundBox');
-        if (!modal || !box) return;
-        document.body.classList.add('overflow-hidden');
-        modal.classList.remove('hidden');
-        setTimeout(() => {
-            box.classList.remove('scale-95');
-            box.classList.add('scale-100');
-        }, 10);
+        if (window.openModal) {
+            window.openModal('modalKonfirmasiRefund');
+        } else {
+            document.getElementById('modalKonfirmasiRefund')?.classList.remove('hidden');
+        }
     }
 
     function closeModalKonfirmasiRefund() {
-        const modal = document.getElementById('modalKonfirmasiRefund');
-        const box = document.getElementById('modalKonfirmasiRefundBox');
-        if (!modal || !box) return;
-        box.classList.remove('scale-100');
-        box.classList.add('scale-95');
-        setTimeout(() => {
-            modal.classList.add('hidden');
-            document.body.classList.remove('overflow-hidden');
-        }, 150);
+        if (window.closeModal) {
+            window.closeModal('modalKonfirmasiRefund');
+        } else {
+            document.getElementById('modalKonfirmasiRefund')?.classList.add('hidden');
+        }
     }
 
     // MODAL BATALKAN PENGAJUAN
     function openCancelModal() {
-        const modal = document.getElementById('modalCancel');
-        const box = document.getElementById('modalCancelBox');
-        if (!modal || !box) return;
-        document.body.classList.add('overflow-hidden');
-        modal.classList.remove('hidden');
-        setTimeout(() => {
-            box.classList.remove('scale-95');
-            box.classList.add('scale-100');
-        }, 10);
+        if (window.openModal) {
+            window.openModal('modalCancel');
+        } else {
+            document.getElementById('modalCancel')?.classList.remove('hidden');
+        }
     }
 
     function closeCancelModal() {
-        const modal = document.getElementById('modalCancel');
-        const box = document.getElementById('modalCancelBox');
-        if (!modal || !box) return;
-        box.classList.remove('scale-100');
-        box.classList.add('scale-95');
-        setTimeout(() => {
-            modal.classList.add('hidden');
-            document.body.classList.remove('overflow-hidden');
-        }, 150);
-    }
-
-    // Tutup modal jika klik di luar box (backdrop) atau tekan tombol ESC
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-            closeModalKonfirmasiRefund();
-            closeCancelModal();
+        if (window.closeModal) {
+            window.closeModal('modalCancel');
+        } else {
+            document.getElementById('modalCancel')?.classList.add('hidden');
         }
-    });
-    const modalRefundEl = document.getElementById('modalKonfirmasiRefund');
-    if (modalRefundEl) {
-        modalRefundEl.addEventListener('click', (e) => {
-            if (e.target === modalRefundEl) closeModalKonfirmasiRefund();
-        });
-    }
-    const modalCancelEl = document.getElementById('modalCancel');
-    if (modalCancelEl) {
-        modalCancelEl.addEventListener('click', (e) => {
-            if (e.target === modalCancelEl) closeCancelModal();
-        });
     }
 
     @if (!$isPeminjamanClosed)

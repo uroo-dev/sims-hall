@@ -151,49 +151,6 @@
         </div>
     @endif
 
-    <!-- FLASH MESSAGES -->
-    @if (session('success'))
-        <div class="bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl p-4 flex items-center justify-between shadow-xs">
-            <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold text-sm">
-                    <i class="fa-solid fa-check"></i>
-                </div>
-                <span class="text-xs md:text-sm font-medium">{{ session('success') }}</span>
-            </div>
-            <button type="button" onclick="this.parentElement.remove()" class="text-emerald-500 hover:text-emerald-700">
-                <i class="fa-solid fa-xmark text-sm"></i>
-            </button>
-        </div>
-    @endif
-
-    @if (session('error'))
-        <div class="bg-red-50 border border-red-200 text-red-800 rounded-2xl p-4 flex items-center justify-between shadow-xs">
-            <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-full bg-red-500 text-white flex items-center justify-center font-bold text-sm">
-                    <i class="fa-solid fa-triangle-exclamation"></i>
-                </div>
-                <span class="text-xs md:text-sm font-medium">{{ session('error') }}</span>
-            </div>
-            <button type="button" onclick="this.parentElement.remove()" class="text-red-500 hover:text-red-700">
-                <i class="fa-solid fa-xmark text-sm"></i>
-            </button>
-        </div>
-    @endif
-
-    @if ($errors->any())
-        <div class="bg-red-50 border border-red-200 text-red-800 rounded-2xl p-4 space-y-1 shadow-xs">
-            <div class="font-bold text-xs md:text-sm flex items-center gap-2">
-                <i class="fa-solid fa-circle-exclamation"></i>
-                <span>Terdapat kesalahan pengisian data:</span>
-            </div>
-            <ul class="list-disc list-inside text-xs space-y-0.5">
-                @foreach ($errors->all() as $err)
-                    <li>{{ $err }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
-
     <!-- MAIN TWO-COLUMN CONTENT GRID -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
@@ -1049,56 +1006,28 @@
 <script>
     // Modal Approve Handlers
     function openModalApprove() {
-        const modal = document.getElementById('modalApprove');
-        const box = document.getElementById('modalApproveBox');
-        if (!modal || !box) return;
-        document.body.classList.add('overflow-hidden');
-        modal.classList.remove('hidden');
+        window.openModal('modalApprove');
         setTimeout(() => {
-            box.classList.remove('scale-95');
-            box.classList.add('scale-100');
             const input = document.getElementById('catatan_approval');
             if (input) input.focus();
-        }, 10);
+        }, 50);
     }
 
     function closeModalApprove() {
-        const modal = document.getElementById('modalApprove');
-        const box = document.getElementById('modalApproveBox');
-        if (!modal || !box) return;
-        box.classList.remove('scale-100');
-        box.classList.add('scale-95');
-        setTimeout(() => {
-            modal.classList.add('hidden');
-            document.body.classList.remove('overflow-hidden');
-        }, 150);
+        window.closeModal('modalApprove');
     }
 
     // Modal Reject Handlers
     function openModalReject() {
-        const modal = document.getElementById('modalReject');
-        const box = document.getElementById('modalRejectBox');
-        if (!modal || !box) return;
-        document.body.classList.add('overflow-hidden');
-        modal.classList.remove('hidden');
+        window.openModal('modalReject');
         setTimeout(() => {
-            box.classList.remove('scale-95');
-            box.classList.add('scale-100');
             const input = document.getElementById('alasan_penolakan');
             if (input) input.focus();
-        }, 10);
+        }, 50);
     }
 
     function closeModalReject() {
-        const modal = document.getElementById('modalReject');
-        const box = document.getElementById('modalRejectBox');
-        if (!modal || !box) return;
-        box.classList.remove('scale-100');
-        box.classList.add('scale-95');
-        setTimeout(() => {
-            modal.classList.add('hidden');
-            document.body.classList.remove('overflow-hidden');
-        }, 150);
+        window.closeModal('modalReject');
     }
 
     // Modal Reject Payment Handlers
@@ -1107,52 +1036,15 @@
         if (inputDetail) {
             inputDetail.value = detailId || '';
         }
-        const modal = document.getElementById('modalRejectPayment');
-        const box = document.getElementById('modalRejectPaymentBox');
-        if (!modal || !box) return;
-        document.body.classList.add('overflow-hidden');
-        modal.classList.remove('hidden');
+        window.openModal('modalRejectPayment');
         setTimeout(() => {
-            box.classList.remove('scale-95');
-            box.classList.add('scale-100');
             const input = document.getElementById('alasan_penolakan_pembayaran');
             if (input) input.focus();
-        }, 10);
+        }, 50);
     }
 
     function closeModalRejectPayment() {
-        const modal = document.getElementById('modalRejectPayment');
-        const box = document.getElementById('modalRejectPaymentBox');
-        if (!modal || !box) return;
-        box.classList.remove('scale-100');
-        box.classList.add('scale-95');
-        setTimeout(() => {
-            modal.classList.add('hidden');
-            document.body.classList.remove('overflow-hidden');
-        }, 150);
+        window.closeModal('modalRejectPayment');
     }
-
-    // Close modal on escape key
-    document.addEventListener('keydown', function(event) {
-        if (event.key === 'Escape') {
-            closeModalApprove();
-            closeModalReject();
-            closeModalRejectPayment();
-        }
-    });
-
-    // Close modal on click outside box
-    ['modalApprove', 'modalReject', 'modalRejectPayment'].forEach(modalId => {
-        const modal = document.getElementById(modalId);
-        if (modal) {
-            modal.addEventListener('click', function(event) {
-                if (event.target === modal) {
-                    if (modalId === 'modalApprove') closeModalApprove();
-                    if (modalId === 'modalReject') closeModalReject();
-                    if (modalId === 'modalRejectPayment') closeModalRejectPayment();
-                }
-            });
-        }
-    });
 </script>
 @endpush

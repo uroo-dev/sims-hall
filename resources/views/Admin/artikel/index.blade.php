@@ -4,21 +4,6 @@
 
 @section('content')
 
-    <!-- ALERT NOTIFIKASI -->
-    @if(session('success'))
-        <div class="mb-5 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs md:text-sm font-semibold flex items-center justify-between shadow-xs">
-            <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-xl bg-emerald-500 text-white flex items-center justify-center flex-shrink-0">
-                    <i class="fa-solid fa-circle-check text-sm"></i>
-                </div>
-                <span>{{ session('success') }}</span>
-            </div>
-            <button type="button" onclick="this.parentElement.remove()" class="text-emerald-500 hover:text-emerald-800 transition cursor-pointer">
-                <i class="fa-solid fa-xmark text-base"></i>
-            </button>
-        </div>
-    @endif
-
     <!-- STATS OVERVIEW CARDS -->
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-6">
         @php
@@ -225,25 +210,27 @@
     </div>
 
     <!-- MODAL KONFIRMASI HAPUS -->
-    <div id="deleteModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl relative text-center border border-gray-100">
-            <div class="w-12 h-12 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center mx-auto mb-4 text-xl">
+    <div id="deleteModal" class="hidden fixed inset-0 !m-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 transition-opacity" role="dialog" aria-modal="true">
+        <div id="deleteModalBox" class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-100 text-center transform transition-all scale-95 duration-200 space-y-4">
+            <div class="w-14 h-14 rounded-2xl bg-red-50 text-red-600 border border-red-100/80 flex items-center justify-center mx-auto text-2xl shadow-xs">
                 <i class="fa-solid fa-triangle-exclamation"></i>
             </div>
-            <h4 class="font-bold text-gray-900 text-base mb-1">Hapus Artikel?</h4>
-            <p class="text-xs text-gray-500 mb-4" id="deleteModalDesc">
-                Artikel ini akan dihapus permanen.
-            </p>
+            <div>
+                <h4 class="font-extrabold text-slate-900 text-lg tracking-tight">Hapus Artikel?</h4>
+                <p class="text-xs md:text-sm text-slate-500 mt-1 leading-relaxed" id="deleteModalDesc">
+                    Artikel ini akan dihapus permanen.
+                </p>
+            </div>
 
-            <form id="deleteForm" method="POST" class="flex gap-2 justify-center">
+            <form id="deleteForm" method="POST" class="pt-2 flex items-center justify-center gap-3">
                 @csrf
                 @method('DELETE')
                 <button type="button" onclick="closeDeleteModal()"
-                    class="px-4 py-2.5 text-xs font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl transition cursor-pointer">
+                    class="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 text-xs md:text-sm font-semibold transition cursor-pointer">
                     Batal
                 </button>
                 <button type="submit"
-                    class="px-5 py-2.5 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-xl transition shadow-xs cursor-pointer active:scale-95">
+                    class="flex-1 px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 active:scale-95 text-white text-xs md:text-sm font-bold shadow-md shadow-red-500/20 transition flex items-center justify-center gap-2 cursor-pointer">
                     Ya, Hapus
                 </button>
             </form>
@@ -257,10 +244,10 @@
     function openDeleteModal(id, judul) {
         document.getElementById('deleteForm').action = "{{ url('admin/artikel') }}/" + id;
         document.getElementById('deleteModalDesc').textContent = `Artikel "${judul}" akan dihapus secara permanen beserta lampiran gambar.`;
-        document.getElementById('deleteModal').classList.remove('hidden');
+        window.openModal('deleteModal');
     }
     function closeDeleteModal() {
-        document.getElementById('deleteModal').classList.add('hidden');
+        window.closeModal('deleteModal');
     }
 </script>
 @endpush

@@ -212,14 +212,16 @@
                                 </p>
 
                                 <button type="button"
-                                    class="mt-4 px-4 py-2 rounded-lg text-xs font-bold text-white text-left w-fit card-shadow hover:brightness-110 transition-all"
+                                    class="mt-4 px-4 py-2 rounded-lg text-xs font-bold text-white text-left w-fit card-shadow hover:brightness-110 active:scale-95 transition-all cursor-pointer flex items-center gap-1.5"
                                     style="background-color: {{ $jurusan->warna }}"
                                     data-modal-open
                                     data-modal-title="{{ $produk->nama }}"
                                     data-modal-meta="{{ $produk->kode_produk }} · {{ $jurusan->nama }}"
                                     data-modal-body="{{ $produk->deskripsi }}"
-                                    data-modal-image="{{ $produk->dokumentasiUrl() }}">
-                                    Selengkapnya
+                                    data-modal-image="{{ $produk->dokumentasiUrl() }}"
+                                    onclick="openProdukModal(this)">
+                                    <span>Selengkapnya</span>
+                                    <i class="fa-solid fa-arrow-right text-[10px]"></i>
                                 </button>
                             </article>
                         @endforeach
@@ -238,4 +240,95 @@
         </section>
     @endforelse
 
+@push('modals')
+<div id="modalDetailProduk" class="fixed inset-0 !m-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden" role="dialog" aria-modal="true">
+    <div id="modalDetailProdukBox" class="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-slate-100 relative transform transition-all scale-95 opacity-0 duration-200">
+        <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+            <div>
+                <span id="modalProdukMeta" class="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-[#0060ac] uppercase tracking-wider mb-1"></span>
+                <h4 id="modalProdukTitle" class="text-base md:text-lg font-black text-slate-800 leading-tight">Detail Produk</h4>
+            </div>
+            <button onclick="closeModal('modalDetailProduk')" type="button" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition cursor-pointer">
+                <i class="fa-solid fa-xmark text-sm"></i>
+            </button>
+        </div>
+        <div class="p-6 space-y-4 max-h-[75vh] overflow-y-auto">
+            <div id="modalProdukImageWrap" class="hidden">
+                <img id="modalProdukImage" src="" alt="Produk" class="w-full h-56 object-cover rounded-2xl border border-slate-200 shadow-sm">
+            </div>
+            <div>
+                <h5 class="text-xs font-bold text-slate-700 uppercase tracking-wide mb-1.5 flex items-center gap-1.5">
+                    <i class="fa-solid fa-circle-info text-[#0060ac]"></i>
+                    <span>Deskripsi Produk</span>
+                </h5>
+                <p id="modalProdukBody" class="text-xs md:text-sm text-slate-600 leading-relaxed bg-slate-50 p-4 rounded-2xl border border-slate-100 whitespace-pre-line"></p>
+            </div>
+        </div>
+        <div class="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between gap-3">
+            <a id="modalProdukWaBtn" href="https://wa.me/{{ preg_replace('/[^0-9]/', '', config('sekolah.telepon', '6281234567890')) }}?text=Halo%20SMKN%202%20Karanganyar,%20saya%20tertarik%20dengan%20produk%20unggulan" target="_blank" rel="noopener noreferrer"
+                class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold text-xs md:text-sm shadow-md shadow-emerald-500/20 transition flex items-center gap-2 cursor-pointer">
+                <i class="fa-brands fa-whatsapp text-sm"></i>
+                <span>Tanya Produk</span>
+            </a>
+            <button type="button" onclick="closeModal('modalDetailProduk')" class="px-5 py-2.5 rounded-xl bg-[#0060ac] hover:bg-[#004f8f] active:scale-95 text-white font-bold text-xs md:text-sm shadow-md shadow-blue-500/20 transition cursor-pointer">
+                Tutup
+            </button>
+        </div>
+    </div>
+</div>
+@endpush
+
+@push('scripts')
+<script>
+    function openProdukModal(btn) {
+        if (!btn) return;
+        const title = btn.getAttribute('data-modal-title') || 'Detail Produk';
+        const meta = btn.getAttribute('data-modal-meta') || '';
+        const body = btn.getAttribute('data-modal-body') || '';
+        const image = btn.getAttribute('data-modal-image');
+
+        const titleEl = document.getElementById('modalProdukTitle');
+        const metaEl = document.getElementById('modalProdukMeta');
+        const bodyEl = document.getElementById('modalProdukBody');
+        if (titleEl) titleEl.innerText = title;
+        if (metaEl) metaEl.innerText = meta;
+        if (bodyEl) bodyEl.innerText = body;
+
+        const imgEl = document.getElementById('modalProdukImage');
+        const imgWrap = document.getElementById('modalProdukImageWrap');
+        if (imgWrap && imgEl) {
+            if (image && image.trim() !== '') {
+                imgEl.src = image;
+                imgEl.alt = title;
+                imgWrap.classList.remove('hidden');
+            } else {
+                imgEl.removeAttribute('src');
+                imgWrap.classList.add('hidden');
+            }
+        }
+
+        const waBtn = document.getElementById('modalProdukWaBtn');
+        if (waBtn) {
+            const text = encodeURIComponent('Halo SMKN 2 Karanganyar, saya tertarik dan ingin menanyakan informasi tentang produk unggulan: ' + title + ' (' + meta + ').');
+            const phone = '{{ preg_replace("/[^0-9]/", "", config("sekolah.telepon", "6281234567890")) }}';
+            waBtn.href = 'https://wa.me/' + phone + '?text=' + text;
+        }
+
+        if (window.openModal) {
+            window.openModal('modalDetailProduk');
+        }
+    }
+
+    // Attach event listeners for any dynamic or existing buttons
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('[data-modal-open]').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                openProdukModal(this);
+            });
+        });
+    });
+</script>
+@endpush
 @endsection
+

@@ -5,22 +5,6 @@
 
 @section('content')
 
-    @if (session('success'))
-        <div
-            class="rounded-xl border border-green-200 bg-green-50 text-green-800 px-4 py-3 text-sm flex items-start gap-2">
-            <i class="fa-solid fa-circle-check mt-0.5"></i>
-            <span>{{ session('success') }}</span>
-        </div>
-    @endif
-
-    @if (session('error'))
-        <div
-            class="rounded-xl border border-red-200 bg-red-50 text-red-800 px-4 py-3 text-sm flex items-start gap-2">
-            <i class="fa-solid fa-circle-exclamation mt-0.5"></i>
-            <span>{{ session('error') }}</span>
-        </div>
-    @endif
-
     <div class="flex items-center justify-between flex-wrap gap-3">
         <div>
             <h2 class="font-bold text-gray-900 text-base">Surat Pengajuan PKL</h2>
@@ -380,55 +364,19 @@
 @push('scripts')
 <script>
     function openEditSuratModal() {
-        const modal = document.getElementById('modalEditSurat');
-        const box = document.getElementById('modalEditSuratBox');
-        if (!modal || !box) return;
-
-        document.body.classList.add('overflow-hidden');
-        modal.classList.remove('hidden');
-        setTimeout(() => {
-            box.classList.remove('scale-95');
-            box.classList.add('scale-100');
-        }, 10);
+        window.openModal('modalEditSurat');
     }
 
     function closeEditSuratModal() {
-        const modal = document.getElementById('modalEditSurat');
-        const box = document.getElementById('modalEditSuratBox');
-        if (!modal || !box) return;
-
-        box.classList.remove('scale-100');
-        box.classList.add('scale-95');
-        setTimeout(() => {
-            modal.classList.add('hidden');
-            document.body.classList.remove('overflow-hidden');
-        }, 150);
+        window.closeModal('modalEditSurat');
     }
 
     function openRegenerateModal() {
-        const modal = document.getElementById('modalRegeneratePdf');
-        const box = document.getElementById('modalRegeneratePdfBox');
-        if (!modal || !box) return;
-
-        document.body.classList.add('overflow-hidden');
-        modal.classList.remove('hidden');
-        setTimeout(() => {
-            box.classList.remove('scale-95');
-            box.classList.add('scale-100');
-        }, 10);
+        window.openModal('modalRegeneratePdf');
     }
 
     function closeRegenerateModal() {
-        const modal = document.getElementById('modalRegeneratePdf');
-        const box = document.getElementById('modalRegeneratePdfBox');
-        if (!modal || !box) return;
-
-        box.classList.remove('scale-100');
-        box.classList.add('scale-95');
-        setTimeout(() => {
-            modal.classList.add('hidden');
-            document.body.classList.remove('overflow-hidden');
-        }, 150);
+        window.closeModal('modalRegeneratePdf');
     }
 
     document.addEventListener('DOMContentLoaded', function() {
@@ -469,16 +417,13 @@
                 const checked = checkboxes.filter(function(cb) { return cb.checked; });
                 if (checked.length === 0) {
                     e.preventDefault();
-                    alert('Pilih minimal satu siswa dalam surat ini.');
+                    if (typeof window.showAlert === 'function') {
+                        window.showAlert('warning', 'Pilih minimal satu siswa dalam surat ini.');
+                    } else {
+                        alert('Pilih minimal satu siswa dalam surat ini.');
+                    }
                 }
             });
-        }
-    });
-
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            closeEditSuratModal();
-            closeRegenerateModal();
         }
     });
 </script>
