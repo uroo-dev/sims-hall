@@ -7,11 +7,7 @@ use App\Models\KategoriArtikel;
 use Illuminate\Database\Seeder;
 
 /**
- * Kategori artikel dasar untuk halaman publik.
- *
- * Daftar ini sengaja hanya berisi kategori yang dipakai kode publik
- * (Artikel::scopePrestasi()). Kategori lain — berita, pengumuman, dan
- * sejenisnya — dibuat dari dashboard admin.
+ * Kategori artikel dasar untuk halaman publik dan admin.
  */
 class KategoriArtikelSeeder extends Seeder
 {
@@ -22,7 +18,27 @@ class KategoriArtikelSeeder extends Seeder
         [
             'nama' => 'Prestasi',
             'slug' => Artikel::KATEGORI_PRESTASI,
-            'deskripsi' => 'Pencapaian dan penghargaan siswa SMK Negeri 2 Karanganyar.',
+            'deskripsi' => 'Pencapaian dan penghargaan membanggakan siswa SMK Negeri 2 Karanganyar.',
+        ],
+        [
+            'nama' => 'Berita Sekolah',
+            'slug' => 'berita-sekolah',
+            'deskripsi' => 'Kabar berita terkini dan dinamika seputar kegiatan civitas akademika sekolah.',
+        ],
+        [
+            'nama' => 'Pengumuman Resmi',
+            'slug' => 'pengumuman',
+            'deskripsi' => 'Pemberitahuan kedinasan, agenda akademik, serta informasi penting bagi siswa dan wali.',
+        ],
+        [
+            'nama' => 'Inovasi & TEFA',
+            'slug' => 'inovasi-tefa',
+            'deskripsi' => 'Hasil karya riset terapan, produk Teaching Factory (TEFA), dan inovasi kejuruan.',
+        ],
+        [
+            'nama' => 'Agenda & Kegiatan',
+            'slug' => 'agenda-kegiatan',
+            'deskripsi' => 'Jadwal workshop industri, seminar nasional, pameran karya, serta kunjungan kejuruan.',
         ],
     ];
 
@@ -32,12 +48,12 @@ class KategoriArtikelSeeder extends Seeder
     public function run(): void
     {
         foreach ($this->kategori as $kategori) {
-            // Dicocokkan lewat `nama` supaya aman terhadap variations kapitalisasi
-            // dari dashboard admin, lalu slug-nya selalu ditulis ulang ke nilai
-            // kanonik yang dipakai scope prestasi.
             KategoriArtikel::updateOrCreate(
-                ['nama' => $kategori['nama']],
-                ['slug' => $kategori['slug'], 'deskripsi' => $kategori['deskripsi']],
+                ['slug' => $kategori['slug']],
+                [
+                    'nama' => $kategori['nama'],
+                    'deskripsi' => $kategori['deskripsi'],
+                ]
             );
         }
     }
