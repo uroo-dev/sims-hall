@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     {{-- Default-nya judul utama sekolah supaya halaman yang tidak menentukan
          `@section('title')` tetap tampil seperti sebelumnya. --}}
     <title>@yield('title', 'SMK Negeri 2 Karanganyar - Sekolah Pusat Keunggulan')</title>

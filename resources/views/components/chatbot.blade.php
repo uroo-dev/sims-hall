@@ -829,7 +829,11 @@
 
         function csrfToken() {
             var meta = document.querySelector('meta[name="csrf-token"]');
-            return meta ? meta.getAttribute('content') : '';
+            if (meta && meta.getAttribute('content')) {
+                return meta.getAttribute('content');
+            }
+            var m = document.cookie.match(/(?:^|;\s*)XSRF-TOKEN=([^;]+)/);
+            return m ? decodeURIComponent(m[1]) : '{{ csrf_token() }}';
         }
 
         function sendMessage(text) {

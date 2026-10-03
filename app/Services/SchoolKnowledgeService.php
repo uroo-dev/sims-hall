@@ -203,7 +203,7 @@ class SchoolKnowledgeService
                 $block .= "\nDeskripsi: {$product->deskripsi}";
             }
             if (filled($product->harga)) {
-                $harga = Number::format((float) $product->harga, locale: 'id');
+                $harga = number_format((float) $product->harga, 0, ',', '.');
                 $block .= "\nHarga: Rp {$harga}".(filled($product->unit) ? " / {$product->unit}" : '');
             }
             $blocks[] = $block;
@@ -283,7 +283,7 @@ class SchoolKnowledgeService
         foreach ($dokumen['products'] ?? [] as $product) {
             $line = "{$product->nama_produk}";
             if (filled($product->harga)) {
-                $harga = Number::format((float) $product->harga, locale: 'id');
+                $harga = number_format((float) $product->harga, 0, ',', '.');
                 $line .= " - Rp {$harga}".(filled($product->unit) ? " / {$product->unit}" : '');
             }
             $sections[] = $line;

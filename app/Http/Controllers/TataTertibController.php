@@ -50,7 +50,6 @@ class TataTertibController extends Controller
 
         $data = [
             'judul' => $validated['judul'],
-            'aturan' => $validated['judul'],
             'deskripsi' => $validated['deskripsi'] ?? null,
         ];
 
@@ -80,7 +79,6 @@ class TataTertibController extends Controller
 
         $data = [
             'judul' => $validated['judul'],
-            'aturan' => $validated['judul'],
             'deskripsi' => $validated['deskripsi'] ?? null,
         ];
 
