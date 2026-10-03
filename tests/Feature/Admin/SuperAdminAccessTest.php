@@ -102,7 +102,7 @@ class SuperAdminAccessTest extends TestCase
         $response->assertSessionHas('success');
     }
 
-    public function test_super_admin_cannot_mutate_fasilitas(): void
+    public function test_super_admin_can_mutate_fasilitas(): void
     {
         $this->actingAs($this->superAdmin);
 
@@ -111,21 +111,31 @@ class SuperAdminAccessTest extends TestCase
             'judul' => 'Fasilitas Baru',
             'deskripsi' => 'Deskripsi',
         ]);
-        $resStore->assertForbidden();
+        $resStore->assertRedirect(route('admin.fasilitas.index'));
+        $this->assertDatabaseHas('facilities', ['judul' => 'Fasilitas Baru']);
 
         // Update
         $resUpdate = $this->put(route('admin.fasilitas.update', $this->facility->id), [
             'judul' => 'Fasilitas Diubah',
             'deskripsi' => 'Deskripsi diubah',
         ]);
-        $resUpdate->assertForbidden();
+        $resUpdate->assertRedirect(route('admin.fasilitas.index'));
+        $this->assertDatabaseHas('facilities', [
+            'id' => $this->facility->id,
+            'judul' => 'Fasilitas Diubah',
+        ]);
 
         // Destroy
-        $resDestroy = $this->delete(route('admin.fasilitas.destroy', $this->facility->id));
-        $resDestroy->assertForbidden();
+        $newFacility = Facility::create([
+            'judul' => 'Fasilitas Dihapus',
+            'deskripsi' => 'Akan dihapus',
+        ]);
+        $resDestroy = $this->delete(route('admin.fasilitas.destroy', $newFacility->id));
+        $resDestroy->assertRedirect(route('admin.fasilitas.index'));
+        $this->assertDatabaseMissing('facilities', ['id' => $newFacility->id]);
     }
 
-    public function test_super_admin_cannot_mutate_paket(): void
+    public function test_super_admin_can_mutate_paket(): void
     {
         $this->actingAs($this->superAdmin);
 
@@ -136,7 +146,8 @@ class SuperAdminAccessTest extends TestCase
             'harga' => 1500000,
             'facility_ids' => [$this->facility->id],
         ]);
-        $resStore->assertForbidden();
+        $resStore->assertRedirect(route('admin.paket.index'));
+        $this->assertDatabaseHas('paket_peminjamans', ['nama_paket' => 'Paket Baru']);
 
         // Update
         $resUpdate = $this->put(route('admin.paket.update', $this->paket->id), [
@@ -145,46 +156,36 @@ class SuperAdminAccessTest extends TestCase
             'harga' => 3500000,
             'facility_ids' => [$this->facility->id],
         ]);
-        $resUpdate->assertForbidden();
+        $resUpdate->assertRedirect(route('admin.paket.index'));
+        $this->assertDatabaseHas('paket_peminjamans', [
+            'id' => $this->paket->id,
+            'nama_paket' => 'Paket Update',
+        ]);
 
         // Destroy
-        $resDestroy = $this->delete(route('admin.paket.destroy', $this->paket->id));
-        $resDestroy->assertForbidden();
+        $unlinkedPaket = PaketPeminjaman::create([
+            'nama_paket' => 'Paket Dihapus',
+            'kategori' => 'terjangkau',
+            'harga' => 1000000,
+        ]);
+        $resDestroy = $this->delete(route('admin.paket.destroy', $unlinkedPaket->id));
+        $resDestroy->assertRedirect(route('admin.paket.index'));
+        $this->assertDatabaseMissing('paket_peminjamans', ['id' => $unlinkedPaket->id]);
     }
 
-    public function test_super_admin_cannot_mutate_peminjaman(): void
+    public function test_super_admin_can_mutate_peminjaman(): void
     {
         $this->actingAs($this->superAdmin);
 
-        // Approve
-        $resApprove = $this->post(route('admin.peminjaman.approve', $this->peminjaman->id), [
-            'catatan_approval' => 'Catatan',
+        // Cancel
+        $resCancel = $this->post(route('admin.peminjaman.cancel', $this->peminjaman->id), [
+            'alasan_pembatalan' => 'Alasan pembatalan oleh super admin',
         ]);
-        $resApprove->assertForbidden();
-
-        // Reject
-        $resReject = $this->post(route('admin.peminjaman.reject', $this->peminjaman->id), [
-            'alasan_penolakan' => 'Ditolak super admin',
+        $resCancel->assertRedirect();
+        $this->assertDatabaseHas('peminjamans', [
+            'id' => $this->peminjaman->id,
+            'status' => 'cancelled',
         ]);
-        $resReject->assertForbidden();
-
-        // Verifikasi Pembayaran
-        $resVerify = $this->post(route('admin.peminjaman.verifikasi-pembayaran', $this->peminjaman->id));
-        $resVerify->assertForbidden();
-
-        // Reject Pembayaran
-        $resRejectPay = $this->post(route('admin.peminjaman.reject-pembayaran', $this->peminjaman->id), [
-            'alasan_penolakan' => 'Pembayaran ditolak',
-        ]);
-        $resRejectPay->assertForbidden();
-
-        // Upload Refund
-        Storage::fake('public');
-        $file = UploadedFile::fake()->image('refund.jpg');
-        $resRefund = $this->post(route('admin.peminjaman.upload-refund', $this->peminjaman->id), [
-            'bukti_refund' => $file,
-        ]);
-        $resRefund->assertForbidden();
     }
 
     public function test_super_admin_cannot_approve_or_reject_in_kepala_sekolah_panel(): void

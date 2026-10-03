@@ -64,18 +64,11 @@
     <div class="bg-white rounded-2xl p-4 md:p-5 figma-card-shadow border border-slate-100 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
         <!-- 1. BTN TAMBAH PAKET & 2. TOTAL PAKET -->
         <div class="flex flex-wrap items-center gap-3">
-            @if(!auth()->user()->isSuperAdmin())
-                <button type="button" onclick="openCreateModal()"
-                    class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-brand-600 hover:bg-brand-700 active:scale-95 text-white text-xs md:text-sm font-bold rounded-xl shadow-sm transition transform">
-                    <i class="fa-solid fa-plus text-xs"></i>
-                    <span>Tambah Paket</span>
-                </button>
-            @else
-                <span class="inline-flex items-center gap-1.5 px-3.5 py-2.5 bg-amber-50 text-amber-800 border border-amber-200 text-xs md:text-sm font-semibold rounded-xl">
-                    <i class="fa-solid fa-lock text-amber-600 text-xs"></i>
-                    <span>Mode Baca (Super Admin)</span>
-                </span>
-            @endif
+            <button type="button" onclick="openCreateModal()"
+                class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-brand-600 hover:bg-brand-700 active:scale-95 text-white text-xs md:text-sm font-bold rounded-xl shadow-sm transition transform cursor-pointer">
+                <i class="fa-solid fa-plus text-xs"></i>
+                <span>Tambah Paket</span>
+            </button>
 
             <div class="flex items-center gap-2 text-xs md:text-sm text-slate-600 font-medium bg-slate-50 px-3.5 py-2.5 rounded-xl border border-slate-200">
                 <i class="fa-solid fa-boxes-packing text-brand-600 text-xs"></i>
@@ -118,9 +111,7 @@
                         <th class="py-4 px-4">Harga Sewa</th>
                         <th class="py-4 px-4">Fasilitas Termasuk</th>
                         <th class="py-4 px-4">Deskripsi</th>
-                        @if(!auth()->user()->isSuperAdmin())
-                            <th class="py-4 px-4 text-center w-28">Aksi</th>
-                        @endif
+                        <th class="py-4 px-4 text-center w-28">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 text-slate-700 font-medium">
@@ -174,28 +165,26 @@
                                     {{ $paket->deskripsi ?: '-' }}
                                 </div>
                             </td>
-                            @if(!auth()->user()->isSuperAdmin())
                                 <td class="py-3.5 px-4 text-center">
                                     <div class="flex items-center justify-center gap-2">
                                         <button type="button"
                                             onclick="openEditModal({{ $paket->id }}, @js($paket->nama_paket), @js($paket->kategori), {{ $paket->harga }}, @js($paket->harga_dp), @js($paket->deskripsi), @js($paket->facilities->pluck('id')), '{{ route('admin.paket.update', $paket->id) }}')"
-                                            class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 hover:bg-amber-100 flex items-center justify-center transition shadow-sm"
+                                            class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 hover:bg-amber-100 flex items-center justify-center transition shadow-sm cursor-pointer"
                                             title="Edit Paket Peminjaman">
                                             <i class="fa-regular fa-pen-to-square text-xs"></i>
                                         </button>
                                         <button type="button"
                                             onclick="openDeleteModal({{ $paket->id }}, @js($paket->nama_paket ?: 'Paket ' . ucwords($paket->kategori)), '{{ route('admin.paket.destroy', $paket->id) }}')"
-                                            class="w-8 h-8 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 flex items-center justify-center transition shadow-sm"
+                                            class="w-8 h-8 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 flex items-center justify-center transition shadow-sm cursor-pointer"
                                             title="Hapus Paket Peminjaman">
                                             <i class="fa-regular fa-trash-can text-xs"></i>
                                         </button>
                                     </div>
                                 </td>
-                            @endif
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="{{ auth()->user()->isSuperAdmin() ? 5 : 6 }}" class="py-12 text-center text-slate-400">
+                            <td colspan="6" class="py-12 text-center text-slate-400">
                                 <div class="flex flex-col items-center justify-center gap-3">
                                     <div class="w-14 h-14 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 text-2xl">
                                         <i class="fa-solid fa-boxes-packing"></i>
@@ -208,9 +197,9 @@
                                             Belum ada paket peminjaman aula yang tersimpan. Klik tombol di bawah untuk menambahkan paket pertama.
                                         @endif
                                     </p>
-                                    @if (empty($search) && !auth()->user()->isSuperAdmin())
+                                    @if (empty($search))
                                         <button type="button" onclick="openCreateModal()"
-                                            class="mt-2 inline-flex items-center gap-2 px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-xl shadow-sm transition">
+                                            class="mt-2 inline-flex items-center gap-2 px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-xl shadow-sm transition cursor-pointer">
                                             <i class="fa-solid fa-plus text-xs"></i>
                                             <span>Tambah Paket Baru</span>
                                         </button>
@@ -242,7 +231,6 @@
 @endsection
 
 @push('modals')
-@if(!auth()->user()->isSuperAdmin())
 <!-- ============================================================== -->
 <!-- MODAL: TAMBAH PAKET PEMINJAMAN -->
 <!-- ============================================================== -->
@@ -799,5 +787,4 @@
         updateFacilitySelection('create');
     });
 </script>
-@endif
 @endpush
