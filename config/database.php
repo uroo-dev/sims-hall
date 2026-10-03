@@ -60,7 +60,10 @@ return [
             'strict' => true,
             'engine' => null,
             'options' => extension_loaded('pdo_mysql') ? array_filter([
-                Mysql::ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+                (defined('Pdo\\Mysql::ATTR_SSL_CA') ? Mysql::ATTR_SSL_CA : (defined('PDO::MYSQL_ATTR_SSL_CA') ? PDO::MYSQL_ATTR_SSL_CA : null)) => env('MYSQL_ATTR_SSL_CA'),
+                PDO::ATTR_EMULATE_PREPARES => false,
+                (defined('Pdo\\Mysql::ATTR_USE_BUFFERED_QUERY') ? Mysql::ATTR_USE_BUFFERED_QUERY : (defined('PDO::MYSQL_ATTR_USE_BUFFERED_QUERY') ? PDO::MYSQL_ATTR_USE_BUFFERED_QUERY : null)) => true,
+                PDO::ATTR_TIMEOUT => (int) env('DB_TIMEOUT', 5),
             ]) : [],
         ],
 
@@ -80,7 +83,10 @@ return [
             'strict' => true,
             'engine' => null,
             'options' => extension_loaded('pdo_mysql') ? array_filter([
-                Mysql::ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+                (defined('Pdo\\Mysql::ATTR_SSL_CA') ? Mysql::ATTR_SSL_CA : (defined('PDO::MYSQL_ATTR_SSL_CA') ? PDO::MYSQL_ATTR_SSL_CA : null)) => env('MYSQL_ATTR_SSL_CA'),
+                PDO::ATTR_EMULATE_PREPARES => false,
+                (defined('Pdo\\Mysql::ATTR_USE_BUFFERED_QUERY') ? Mysql::ATTR_USE_BUFFERED_QUERY : (defined('PDO::MYSQL_ATTR_USE_BUFFERED_QUERY') ? PDO::MYSQL_ATTR_USE_BUFFERED_QUERY : null)) => true,
+                PDO::ATTR_TIMEOUT => (int) env('DB_TIMEOUT', 5),
             ]) : [],
         ],
 

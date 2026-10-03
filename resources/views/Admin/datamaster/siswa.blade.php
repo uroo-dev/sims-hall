@@ -171,8 +171,11 @@
             </table>
         </div>
 
-        <div class="mt-4 text-xs text-gray-500 flex items-center justify-between">
-            <span>Total: <strong class="text-gray-800">{{ count($siswas) }}</strong> siswa</span>
+        <div class="mt-4 text-xs text-gray-500 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <span>Total: <strong class="text-gray-800">{{ method_exists($siswas, 'total') ? $siswas->total() : count($siswas) }}</strong> siswa</span>
+            @if(method_exists($siswas, 'hasPages') && $siswas->hasPages())
+                <div>{{ $siswas->links() }}</div>
+            @endif
             <span id="filteredCount" class="hidden text-brand-600 font-semibold"></span>
         </div>
     </div>

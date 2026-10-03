@@ -348,54 +348,67 @@ class LaporanPemasukanController extends Controller
     }
 
     /**
-     * Siapkan data analitik bulanan dan proporsi paket untuk Chart.js.
+     * Siapkan data analitik bulanan dan proporsi paket untuk Chart.js (Optimasi 2 query bebas loop).
      */
     private function prepareChartData(): array
     {
-        // 1. Data Pemasukan 6 Bulan Terakhir
+        // 1. Data Pemasukan 6 Bulan Terakhir (1 Query tunggal cepat bebas multi-loop)
         $months = [];
         $incomeData = [];
         $refundData = [];
+        $buckets = [];
 
         for ($i = 5; $i >= 0; $i--) {
             $monthDate = Carbon::now()->subMonths($i);
-            $year = $monthDate->year;
-            $month = $monthDate->month;
-            $monthLabel = $monthDate->locale('id')->isoFormat('MMM Y');
-
-            $months[] = $monthLabel;
-
-            // Hitung pemasukan terverifikasi non-refund pada bulan tersebut
-            $inflow = (float) DetailPembayaran::where('status', 'verified')
-                ->whereIn('tipe_pembayaran', ['dp', 'pelunasan', 'lunas_langsung'])
-                ->whereYear(DB::raw('COALESCE(tanggal_bayar, diverifikasi_pada, created_at)'), $year)
-                ->whereMonth(DB::raw('COALESCE(tanggal_bayar, diverifikasi_pada, created_at)'), $month)
-                ->sum('jumlah_bayar');
-
-            // Hitung refund pada bulan tersebut
-            $outflow = (float) DetailPembayaran::where('status', 'verified')
-                ->where('tipe_pembayaran', 'refund')
-                ->whereYear(DB::raw('COALESCE(tanggal_bayar, diverifikasi_pada, created_at)'), $year)
-                ->whereMonth(DB::raw('COALESCE(tanggal_bayar, diverifikasi_pada, created_at)'), $month)
-                ->sum('jumlah_bayar');
-
-            $incomeData[] = $inflow;
-            $refundData[] = $outflow;
+            $ymKey = $monthDate->format('Y-m');
+            $months[] = $monthDate->locale('id')->isoFormat('MMM Y');
+            $buckets[$ymKey] = ['income' => 0.0, 'refund' => 0.0];
         }
 
-        // 2. Proporsi Pemasukan per Paket Peminjaman
-        $paketStats = PaketPeminjaman::with(['peminjamans.pembayaran' => function ($q) {
-            $q->where('total_terbayar', '>', 0);
-        }])->get();
+        $startDate = Carbon::now()->subMonths(5)->startOfMonth();
+        $details = DetailPembayaran::query()
+            ->where('status', 'verified')
+            ->where(function ($q) use ($startDate) {
+                $q->where('tanggal_bayar', '>=', $startDate)
+                    ->orWhere(function ($sub) use ($startDate) {
+                        $sub->whereNull('tanggal_bayar')
+                            ->where('created_at', '>=', $startDate);
+                    });
+            })
+            ->get(['tipe_pembayaran', 'jumlah_bayar', 'tanggal_bayar', 'diverifikasi_pada', 'created_at']);
 
-        $paketLabels = [];
-        $paketRevenues = [];
-
-        foreach ($paketStats as $paket) {
-            $paketLabels[] = $paket->nama_paket;
-            $revenue = (float) $paket->peminjamans->sum(fn ($p) => (float) ($p->pembayaran?->total_terbayar ?? 0));
-            $paketRevenues[] = $revenue;
+        foreach ($details as $detail) {
+            $date = $detail->tanggal_bayar ?? $detail->diverifikasi_pada ?? $detail->created_at;
+            if (! $date) {
+                continue;
+            }
+            $ym = Carbon::parse($date)->format('Y-m');
+            if (isset($buckets[$ym])) {
+                $val = (float) $detail->jumlah_bayar;
+                if ($detail->tipe_pembayaran === 'refund') {
+                    $buckets[$ym]['refund'] += $val;
+                } elseif (in_array($detail->tipe_pembayaran, ['dp', 'pelunasan', 'lunas_langsung'], true)) {
+                    $buckets[$ym]['income'] += $val;
+                }
+            }
         }
+
+        foreach ($buckets as $b) {
+            $incomeData[] = $b['income'];
+            $refundData[] = $b['refund'];
+        }
+
+        // 2. Proporsi Pemasukan per Paket Peminjaman (1 Query agregat database)
+        $paketStats = DB::table('paket_peminjamans')
+            ->leftJoin('peminjamans', 'paket_peminjamans.id', '=', 'peminjamans.paket_peminjaman_id')
+            ->leftJoin('pembayarans', 'peminjamans.id', '=', 'pembayarans.peminjaman_id')
+            ->select('paket_peminjamans.nama_paket', DB::raw('COALESCE(SUM(pembayarans.total_terbayar), 0) as total_revenue'))
+            ->groupBy('paket_peminjamans.id', 'paket_peminjamans.nama_paket')
+            ->orderBy('paket_peminjamans.nama_paket')
+            ->get();
+
+        $paketLabels = $paketStats->pluck('nama_paket')->all();
+        $paketRevenues = $paketStats->pluck('total_revenue')->map(fn ($v) => (float) $v)->all();
 
         return [
             'monthly' => [

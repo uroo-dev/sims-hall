@@ -11,6 +11,7 @@ use App\Models\Major;
 use App\Models\SchoolSetting;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Number;
 
@@ -65,7 +66,7 @@ class SchoolKnowledgeService
         $keywords = $this->extractKeywords($question);
 
         $dokumen = [
-            'settings' => SchoolSetting::query()->orderBy('kunci')->get(),
+            'settings' => Cache::remember('school_settings_all', 300, fn () => SchoolSetting::query()->orderBy('kunci')->get()),
             'faqs' => new Collection,
             'majors' => new Collection,
             'achievements' => new Collection,

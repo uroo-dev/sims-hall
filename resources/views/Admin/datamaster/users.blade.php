@@ -130,6 +130,17 @@
                 </tbody>
             </table>
         </div>
+
+        @if($users->hasPages())
+        <div class="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
+            <div class="text-xs text-gray-500">
+                Menampilkan <span class="font-medium text-gray-700">{{ $users->firstItem() ?? 0 }}</span> - <span class="font-medium text-gray-700">{{ $users->lastItem() ?? 0 }}</span> dari <span class="font-medium text-gray-700">{{ $users->total() }}</span> user
+            </div>
+            <div>
+                {{ $users->links() }}
+            </div>
+        </div>
+        @endif
     </div>
 @endsection
 

@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 
 #[Fillable([
@@ -212,8 +213,14 @@ class Peminjaman extends Model
      * Memeriksa dan membatalkan otomatis peminjaman yang melewati batas waktu jatuh tempo
      * (misalnya transfer ulang pembayaran yang ditolak atau tagihan yang kedaluwarsa).
      */
-    public static function syncExpiredDeadlines(): void
+    public static function syncExpiredDeadlines(bool $force = false): void
     {
+        // Hindari query berulang di setiap request HTTP saat traffic tinggi / stress test.
+        // Hanya jalankan sinkronisasi paling sering 1 kali per 30 detik kecuali dipaksa atau saat unit test.
+        if (! app()->runningUnitTests() && ! $force && ! Cache::add('peminjaman_sync_expired_deadlines_lock', 1, 30)) {
+            return;
+        }
+
         $expiredPembayarans = Pembayaran::with('peminjaman')
             ->whereIn('status_pembayaran', ['rejected', 'pending'])
             ->whereNotNull('jatuh_tempo_dp')

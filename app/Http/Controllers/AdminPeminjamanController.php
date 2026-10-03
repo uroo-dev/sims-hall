@@ -71,16 +71,26 @@ class AdminPeminjamanController extends Controller
 
         $peminjamans = $query->paginate(10)->withQueryString();
 
-        // Ringkasan metrik statistik peminjaman aula
+        // Ringkasan metrik statistik peminjaman aula (1 query agregat cepat bebas multi-count)
+        $rawStats = DB::table('peminjamans')
+            ->leftJoin('pembayarans', 'peminjamans.id', '=', 'pembayarans.peminjaman_id')
+            ->selectRaw("
+                COUNT(peminjamans.id) as total,
+                SUM(CASE WHEN peminjamans.status = 'pending' THEN 1 ELSE 0 END) as pending,
+                SUM(CASE WHEN peminjamans.status IN ('approved_1', 'approved_final') THEN 1 ELSE 0 END) as approved,
+                SUM(CASE WHEN peminjamans.status IN ('rejected', 'cancelled') THEN 1 ELSE 0 END) as rejected,
+                SUM(CASE WHEN peminjamans.status = 'cancelled' THEN 1 ELSE 0 END) as cancelled,
+                SUM(CASE WHEN pembayarans.status_pembayaran = 'refund_pending' THEN 1 ELSE 0 END) as refund_pending
+            ")
+            ->first();
+
         $stats = [
-            'total' => Peminjaman::count(),
-            'pending' => Peminjaman::where('status', 'pending')->count(),
-            'approved' => Peminjaman::whereIn('status', ['approved_1', 'approved_final'])->count(),
-            'rejected' => Peminjaman::whereIn('status', ['rejected', 'cancelled'])->count(),
-            'cancelled' => Peminjaman::where('status', 'cancelled')->count(),
-            'refund_pending' => Peminjaman::whereHas('pembayaran', function ($q) {
-                $q->where('status_pembayaran', 'refund_pending');
-            })->count(),
+            'total' => (int) ($rawStats->total ?? 0),
+            'pending' => (int) ($rawStats->pending ?? 0),
+            'approved' => (int) ($rawStats->approved ?? 0),
+            'rejected' => (int) ($rawStats->rejected ?? 0),
+            'cancelled' => (int) ($rawStats->cancelled ?? 0),
+            'refund_pending' => (int) ($rawStats->refund_pending ?? 0),
         ];
 
         return view('Admin.peminjaman.index', compact('peminjamans', 'stats'));

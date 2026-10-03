@@ -149,11 +149,28 @@ class DataMasterDashboardController extends Controller
     // ==========================================
     // BAGIAN USERS (CRUD)
     // ==========================================
-    public function users()
+    public function users(Request $request)
     {
-        $users = User::orderBy('created_at', 'desc')->get();
+        $search = trim((string) $request->query('search', ''));
+        $role = trim((string) $request->query('role', ''));
 
-        return view('Admin.datamaster.users', compact('users'));
+        $query = User::query()->orderBy('created_at', 'desc');
+
+        if ($search !== '') {
+            $query->where(function ($q) use ($search) {
+                $q->where('username', 'like', "%{$search}%")
+                    ->orWhere('name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        if ($role !== '') {
+            $query->where('role', $role);
+        }
+
+        $users = $query->paginate(15)->withQueryString();
+
+        return view('Admin.datamaster.users', compact('users', 'search', 'role'));
     }
 
     public function storeUser(Request $request)
@@ -208,9 +225,27 @@ class DataMasterDashboardController extends Controller
     // ==========================================
     // BAGIAN DATA GURU (CRUD)
     // ==========================================
-    public function guru()
+    public function guru(Request $request)
     {
-        $gurus = Guru::orderBy('nama', 'asc')->get();
+        $search = trim((string) $request->query('search', ''));
+        $jurusanFilter = trim((string) $request->query('jurusan', ''));
+
+        $query = Guru::query()->orderBy('nama', 'asc');
+
+        if ($search !== '') {
+            $query->where(function ($q) use ($search) {
+                $q->where('nama', 'like', "%{$search}%")
+                    ->orWhere('nip', 'like', "%{$search}%")
+                    ->orWhere('no_hp', 'like', "%{$search}%");
+            });
+        }
+
+        if ($jurusanFilter !== '') {
+            $query->where('jurusan', $jurusanFilter);
+        }
+
+        $gurus = $query->paginate(15)->withQueryString();
+
         $jurusans = Jurusan::pluck('nama')->all();
         if (empty($jurusans)) {
             $jurusans = [
@@ -222,7 +257,7 @@ class DataMasterDashboardController extends Controller
             ];
         }
 
-        return view('Admin.datamaster.guru', compact('gurus', 'jurusans'));
+        return view('Admin.datamaster.guru', compact('gurus', 'jurusans', 'search', 'jurusanFilter'));
     }
 
     public function storeGuru(Request $request)
@@ -284,9 +319,32 @@ class DataMasterDashboardController extends Controller
     // ==========================================
     // BAGIAN DATA SISWA (CRUD)
     // ==========================================
-    public function siswa()
+    public function siswa(Request $request)
     {
-        $siswas = Siswa::orderBy('nama', 'asc')->get();
+        $search = trim((string) $request->query('search', ''));
+        $jurusanFilter = trim((string) $request->query('jurusan', ''));
+        $kelasFilter = trim((string) $request->query('kelas', ''));
+
+        $query = Siswa::query()->orderBy('nama', 'asc');
+
+        if ($search !== '') {
+            $query->where(function ($q) use ($search) {
+                $q->where('nama', 'like', "%{$search}%")
+                    ->orWhere('nis', 'like', "%{$search}%")
+                    ->orWhere('no_hp', 'like', "%{$search}%");
+            });
+        }
+
+        if ($jurusanFilter !== '') {
+            $query->where('jurusan', $jurusanFilter);
+        }
+
+        if ($kelasFilter !== '') {
+            $query->where('kelas', $kelasFilter);
+        }
+
+        $siswas = $query->paginate(15)->withQueryString();
+
         $jurusans = Jurusan::pluck('nama')->all();
         if (empty($jurusans)) {
             $jurusans = [
@@ -299,7 +357,7 @@ class DataMasterDashboardController extends Controller
         }
         $kelas = Siswa::select('kelas')->distinct()->pluck('kelas')->all();
 
-        return view('Admin.datamaster.siswa', compact('siswas', 'jurusans', 'kelas'));
+        return view('Admin.datamaster.siswa', compact('siswas', 'jurusans', 'kelas', 'search', 'jurusanFilter', 'kelasFilter'));
     }
 
     public function storeSiswa(Request $request)

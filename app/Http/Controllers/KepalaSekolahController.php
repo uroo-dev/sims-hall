@@ -23,11 +23,20 @@ class KepalaSekolahController extends Controller
     {
         Peminjaman::syncExpiredDeadlines();
 
+        $rawStats = DB::table('peminjamans')
+            ->selectRaw("
+                COUNT(id) as total,
+                SUM(CASE WHEN status = 'approved_1' THEN 1 ELSE 0 END) as pending_final,
+                SUM(CASE WHEN status = 'approved_final' THEN 1 ELSE 0 END) as approved_final,
+                SUM(CASE WHEN status = 'rejected' THEN 1 ELSE 0 END) as rejected
+            ")
+            ->first();
+
         $stats = [
-            'pending_final' => Peminjaman::where('status', 'approved_1')->count(),
-            'approved_final' => Peminjaman::where('status', 'approved_final')->count(),
-            'rejected' => Peminjaman::where('status', 'rejected')->count(),
-            'total' => Peminjaman::count(),
+            'pending_final' => (int) ($rawStats->pending_final ?? 0),
+            'approved_final' => (int) ($rawStats->approved_final ?? 0),
+            'rejected' => (int) ($rawStats->rejected ?? 0),
+            'total' => (int) ($rawStats->total ?? 0),
         ];
 
         // Daftar peminjaman yang paling mendesak butuh persetujuan final
