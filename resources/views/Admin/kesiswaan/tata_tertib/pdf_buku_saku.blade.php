@@ -127,15 +127,25 @@
             color: #0f172a;
             font-size: 10pt;
             border-bottom: 1px solid #e2e8f0;
+            text-align: left;
         }
 
         .rule-body {
             padding: 10px 14px;
             font-size: 9.5pt;
             color: #334155;
-            white-space: pre-line;
+            line-height: 1.6;
+            text-align: left;
+        }
+
+        .rule-item {
+            margin-bottom: 7px;
+            text-align: left;
             line-height: 1.5;
-            text-align: justify;
+        }
+
+        .rule-item:last-child {
+            margin-bottom: 0;
         }
 
         .signature-table {
@@ -214,13 +224,22 @@
     </div>
 
     <!-- DAFTAR SEMUA TATA TERTIB -->
-    @foreach ($tataTertibs as $index => $item)
+    @php
+        $groupedTartib = $tataTertibs->groupBy('judul');
+        $pasal = 1;
+    @endphp
+
+    @foreach ($groupedTartib as $judul => $items)
         <div class="rule-card">
             <div class="rule-header">
-                PASAL {{ $index + 1 }}: {{ strtoupper($item->judul) }}
+                PASAL {{ $pasal++ }}: {{ strtoupper($judul) }}
             </div>
             <div class="rule-body">
-{{ $item->deskripsi ?: 'Peraturan kedisiplinan dan norma perilaku siswa di lingkungan SMK Negeri 2 Karanganyar.' }}
+                @foreach ($items as $item)
+                    <div class="rule-item">
+                        {!! nl2br(e($item->deskripsi ?: 'Peraturan kedisiplinan dan norma perilaku siswa di lingkungan SMK Negeri 2 Karanganyar.')) !!}
+                    </div>
+                @endforeach
             </div>
         </div>
     @endforeach
@@ -232,14 +251,14 @@
                 Mengetahui,<br>
                 <strong>Kepala SMK Negeri 2 Karanganyar</strong>
                 <div class="signature-space"></div>
-                <div class="signature-name">Drs. Sugiyarso, M.Pd.</div>
+                <div class="signature-name">{{ $namaKepsek ?? 'Drs. Sugiyarso, M.Pd.' }}</div>
                 <div class="signature-nip">NIP. 19680512 199403 1 008</div>
             </td>
             <td class="signature-cell">
                 Karanganyar, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}<br>
                 <strong>Waka Kesiswaan</strong>
                 <div class="signature-space"></div>
-                <div class="signature-name">Waka Bidang Kesiswaan</div>
+                <div class="signature-name">{{ $namaWaka ?? 'Waka Bidang Kesiswaan' }}</div>
                 <div class="signature-nip">SMK Negeri 2 Karanganyar</div>
             </td>
         </tr>

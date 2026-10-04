@@ -149,7 +149,7 @@
         if (!modal) return;
 
         titleEl.textContent = title;
-        messageEl.textContent = message;
+        messageEl.innerHTML = message;
         submitBtn.querySelector('span').textContent = confirmText;
         cancelBtn.textContent = cancelText;
 
@@ -178,9 +178,10 @@
         currentConfirmCallback = onConfirm;
 
         submitBtn.onclick = function() {
+            const callback = currentConfirmCallback;
             closeUnifiedConfirmModal();
-            if (typeof currentConfirmCallback === 'function') {
-                currentConfirmCallback();
+            if (typeof callback === 'function') {
+                callback();
             }
         };
 

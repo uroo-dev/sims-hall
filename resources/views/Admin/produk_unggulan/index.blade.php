@@ -101,7 +101,7 @@
 
                 <div class="flex flex-wrap items-center justify-end gap-3">
                     @if ($produkUnggulan->exists)
-                        <button type="button" onclick="document.getElementById('reset-produk-unggulan').submit()" class="px-5 py-2 bg-white hover:bg-red-50 text-red-600 border border-red-100 rounded-full text-xs font-bold transition-colors">
+                        <button type="button" onclick="confirmResetProdukUnggulan()" class="px-5 py-2 bg-white hover:bg-red-50 text-red-600 border border-red-100 rounded-full text-xs font-bold transition-colors">
                             Reset Data
                         </button>
                     @endif
@@ -113,8 +113,7 @@
             </form>
 
             @if ($produkUnggulan->exists)
-                <form id="reset-produk-unggulan" method="POST" action="{{ route('produk-unggulan.destroy') }}" class="hidden"
-                    onsubmit="return confirm('Hapus data produk unggulan beserta dokumentasinya?')">
+                <form id="reset-produk-unggulan" method="POST" action="{{ route('produk-unggulan.destroy') }}" class="hidden">
                     @csrf
                     @method('DELETE')
                 </form>
@@ -191,7 +190,8 @@
                             <th class="pb-3 pr-4 font-semibold">Produk</th>
                             <th class="pb-3 pr-4 font-semibold">Jurusan</th>
                             <th class="pb-3 pr-4 font-semibold">Deskripsi</th>
-                            <th class="pb-3 font-semibold">Dokumentasi</th>
+                            <th class="pb-3 pr-4 font-semibold">Dokumentasi</th>
+                            <th class="pb-3 font-semibold text-center">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-50">
@@ -201,17 +201,34 @@
                                 <td class="py-3 pr-4 font-semibold text-slate-800 whitespace-nowrap">{{ $produk->nama }}</td>
                                 <td class="py-3 pr-4 text-xs whitespace-nowrap">{{ $produk->jurusan->nama ?? '-' }}</td>
                                 <td class="py-3 pr-4 text-xs max-w-xs truncate" title="{{ $produk->deskripsi }}">{{ $produk->deskripsi }}</td>
-                                <td class="py-3">
+                                <td class="py-3 pr-4">
                                     @if ($produk->dokumentasi)
                                         <img src="{{ $produk->dokumentasiUrl() }}" alt="Dokumentasi {{ $produk->nama }}" class="w-12 h-12 rounded-lg object-cover border border-slate-100">
                                     @else
                                         <span class="text-xs text-slate-400">-</span>
                                     @endif
                                 </td>
+                                <td class="py-3">
+                                    <div class="flex items-center justify-center gap-2">
+                                        <a href="{{ route('produk.edit', $produk) }}" title="Edit produk"
+                                            class="w-7 h-7 rounded-lg bg-blue-50 text-brand-600 hover:bg-blue-100 flex items-center justify-center transition-colors">
+                                            <i class="fa-solid fa-pen text-[10px]"></i>
+                                        </a>
+
+                                        <form id="form-delete-{{ $produk->produkID }}" method="POST" action="{{ route('produk.destroy', $produk) }}">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="button" onclick="confirmDeleteProduk('{{ $produk->produkID }}', '{{ $produk->kode_produk }}')" title="Hapus produk"
+                                                class="w-7 h-7 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 flex items-center justify-center transition-colors cursor-pointer">
+                                                <i class="fa-solid fa-trash text-[10px]"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="py-8 text-center text-xs font-medium text-slate-400">Belum ada produk unggulan.</td>
+                                <td colspan="6" class="py-8 text-center text-xs font-medium text-slate-400">Belum ada produk unggulan.</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -230,30 +247,67 @@
 
     </div>
 
+@push('scripts')
     <script>
-        document.getElementById('dokumentasi').addEventListener('change', function (e) {
-            const files = Array.from(e.target.files);
-            if (files.length === 0) return;
+        function confirmResetProdukUnggulan() {
+            if (window.showConfirmDialog) {
+                window.showConfirmDialog({
+                    title: 'Reset Pengaturan?',
+                    message: 'Apakah Anda yakin ingin mereset data produk unggulan landing page beserta seluruh dokumentasinya?',
+                    type: 'danger',
+                    confirmText: 'Ya, Reset',
+                    onConfirm: function() {
+                        document.getElementById('reset-produk-unggulan')?.submit();
+                    }
+                });
+            } else if (confirm('Hapus data produk unggulan beserta dokumentasinya?')) {
+                document.getElementById('reset-produk-unggulan')?.submit();
+            }
+        }
 
-            const grid = document.getElementById('dokumentasi-preview-grid');
-            grid.innerHTML = '';
+        function confirmDeleteProduk(id, kode) {
+            if (window.showConfirmDialog) {
+                window.showConfirmDialog({
+                    title: 'Hapus Produk?',
+                    message: `Apakah Anda yakin ingin menghapus produk <strong>${kode}</strong>? Tindakan ini tidak dapat dibatalkan.`,
+                    type: 'danger',
+                    confirmText: 'Ya, Hapus',
+                    onConfirm: function() {
+                        document.getElementById('form-delete-' + id)?.submit();
+                    }
+                });
+            } else if (confirm(`Hapus produk ${kode}?`)) {
+                document.getElementById('form-delete-' + id)?.submit();
+            }
+        }
 
-            files.forEach(function (file) {
-                const reader = new FileReader();
-                reader.onload = function (event) {
-                    const wrapper = document.createElement('div');
-                    wrapper.className = 'relative';
-                    const img = document.createElement('img');
-                    img.src = event.target.result;
-                    img.alt = 'Preview dokumentasi';
-                    img.className = 'w-full h-20 object-cover rounded-xl border border-slate-200';
-                    wrapper.appendChild(img);
-                    grid.appendChild(wrapper);
-                };
-                reader.readAsDataURL(file);
+        const dokumentasiInput = document.getElementById('dokumentasi');
+        if (dokumentasiInput) {
+            dokumentasiInput.addEventListener('change', function (e) {
+                const files = Array.from(e.target.files);
+                if (files.length === 0) return;
+
+                const grid = document.getElementById('dokumentasi-preview-grid');
+                grid.innerHTML = '';
+
+                files.forEach(function (file) {
+                    const reader = new FileReader();
+                    reader.onload = function (event) {
+                        const wrapper = document.createElement('div');
+                        wrapper.className = 'relative';
+                        const img = document.createElement('img');
+                        img.src = event.target.result;
+                        img.alt = 'Preview dokumentasi';
+                        img.className = 'w-full h-20 object-cover rounded-xl border border-slate-200';
+                        wrapper.appendChild(img);
+                        grid.appendChild(wrapper);
+                    };
+                    reader.readAsDataURL(file);
+                });
+
+                document.getElementById('dokumentasi-preview')?.classList.remove('hidden');
             });
-
-            document.getElementById('dokumentasi-preview').classList.remove('hidden');
-        });
+        }
     </script>
+@endpush
 @endsection

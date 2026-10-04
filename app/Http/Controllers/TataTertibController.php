@@ -147,8 +147,13 @@ class TataTertibController extends Controller
     {
         $tataTertibs = TataTertib::query()->orderBy('tata_tertibID')->get();
 
+        $sekolah = \App\Models\Sekolah::first();
+        $kesiswaanUser = \App\Models\User::where('role', 'admin_kesiswaan')->first();
+
         $pdf = Pdf::loadView('Admin.kesiswaan.tata_tertib.pdf_buku_saku', [
             'tataTertibs' => $tataTertibs,
+            'namaKepsek' => $sekolah?->nama_kepsek ?? 'Drs. Sugiyarso, M.Pd.',
+            'namaWaka' => $kesiswaanUser?->name ?? 'Waka Bidang Kesiswaan',
         ]);
         $pdf->setPaper('a4', 'portrait');
         $pdf->setOption('isRemoteEnabled', true);
